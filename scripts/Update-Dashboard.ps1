@@ -26,7 +26,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '1.2'
+$ScriptVersion = '1.3'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -170,7 +170,7 @@ $reports | Sort-Object -Property @{ Expression = {
 } } -Descending | ForEach-Object { $sortedList.Add($_) | Out-Null }
 
 $payload = [pscustomobject]@{
-    generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:ss')
+    generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = $reportFolder
     reports      = $sortedList.ToArray()
 }
