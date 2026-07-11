@@ -21,12 +21,17 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ConfigPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'config.json'),
+    # Resolved below; $PSScriptRoot is empty in param() defaults on Windows
+    # PowerShell 5.1 when launched via 'powershell.exe -File'.
+    [string]$ConfigPath = '',
     [string]$DeployPath = ''
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = Split-Path -Parent $PSScriptRoot
+$scriptDir = $PSScriptRoot
+if (-not $scriptDir) { $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path }
+$repoRoot = Split-Path -Parent $scriptDir
+if (-not $ConfigPath) { $ConfigPath = Join-Path $repoRoot 'config.json' }
 
 if (-not $DeployPath) {
     if (-not (Test-Path -Path $ConfigPath)) { throw "Config file not found: $ConfigPath" }

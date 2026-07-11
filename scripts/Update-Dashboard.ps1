@@ -22,11 +22,14 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$ConfigPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'config.json')
+    # Resolved below; do NOT default this from $PSScriptRoot - that variable is
+    # empty inside param() defaults on Windows PowerShell 5.1 when the script
+    # is launched via 'powershell.exe -File' (which is how Task Scheduler runs it).
+    [string]$ConfigPath = ''
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '1.3'
+$ScriptVersion = '1.4'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -35,11 +38,15 @@ trap {
     exit 1
 }
 
+$scriptDir = $PSScriptRoot
+if (-not $scriptDir) { $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path }
+$repoRoot = Split-Path -Parent $scriptDir
+if (-not $ConfigPath) { $ConfigPath = Join-Path $repoRoot 'config.json' }
+
 if (-not (Test-Path -Path $ConfigPath)) {
     throw "Config file not found: $ConfigPath"
 }
 $config = Get-Content -Path $ConfigPath -Raw | ConvertFrom-Json
-$repoRoot = Split-Path -Parent $PSScriptRoot
 
 # The folder may be written with environment variables, e.g. "%OneDrive%\TSC REPORTS"
 $reportFolder = [Environment]::ExpandEnvironmentVariables($config.reportFolder)
