@@ -4,7 +4,7 @@
 
 .DESCRIPTION
     Copies dashboard/dashboard.html (and the current reports-data.js) to the
-    folder configured as 'deployPath' in config.json — the physical folder
+    folder configured as 'deployPath' in config.json - the physical folder
     behind your intranet URL, e.g. the folder IIS serves as
     http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/
 
@@ -53,7 +53,7 @@ if (Test-Path -Path $dataFile) {
     Write-Host "Published reports-data.js to $DeployPath" -ForegroundColor Green
 }
 else {
-    Write-Warning "No reports-data.js yet — run scripts\Update-Dashboard.ps1 to generate it."
+    Write-Warning "No reports-data.js yet - run scripts\Update-Dashboard.ps1 to generate it."
 }
 
 Write-Host ''

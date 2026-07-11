@@ -71,7 +71,7 @@ foreach ($f in $files) {
 
     $meta = Get-Prop $json 'meta'
     if ($null -eq $meta) {
-        Write-Warning "Skipping $($f.Name): no 'meta' block — not a TSC Rig Reporting Tool export?"
+        Write-Warning "Skipping $($f.Name): no 'meta' block - not a TSC Rig Reporting Tool export?"
         $skipped++
         continue
     }
@@ -183,7 +183,7 @@ if ($deployPath) {
         Write-Host "Deployed data file to $deployPath" -ForegroundColor Green
     }
     catch {
-        # Don't fail the scheduled task over a transient network issue —
+        # Don't fail the scheduled task over a transient network issue -
         # the next run will catch the server up.
         Write-Warning "Could not copy data file to '$deployPath': $($_.Exception.Message)"
     }
