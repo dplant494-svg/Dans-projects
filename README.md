@@ -31,9 +31,13 @@ logo, and brand palette) and shows:
 - **Visits per day/week** and **visits by rig** charts
 - **Report table** — rig, visit classification, dates, WCE Technical
   Superintendent, well/location, daily report count, critical items
-  (open/total), action items, and a pass/monitor/fail status per visit
-- **Filters** — date range (30/90 days, 12 months, all), rig, and free-text
-  search, all scoping every number on the page
+  (open/total), action items, and a pass/monitor/fail status per visit.
+  **Click a visit row to drill down** into its critical equipment items
+  (status, SFI, issue, mitigation) and action items (responsible, deadline,
+  left-with-rig)
+- **Filters** — date range (30/90/180 days — the default view is 180 days —
+  12 months, all), rig, and free-text search, all scoping every number on
+  the page
 
 Visit status uses the tool's own semantics: open critical equipment rows →
 **fail** (red), open follow-up actions → **monitor** (orange), otherwise
@@ -96,12 +100,12 @@ The scanner reads the tool's version-3 export payload:
 | Well name / location | `meta.location` |
 | Discipline | `meta.discipline` |
 | Daily reports | number of entries in `tiles` |
-| Critical items (open / total) | `criticalRows` (`done` flag = closed) |
-| Action items | `actionRows` (incl. how many are left with the rig) |
+| Critical items (open / total) | `criticalRows` (`done` flag = closed) — full rows kept for the drill-down |
+| Action items | `actionRows` (incl. how many are left with the rig) — full rows kept for the drill-down |
 
-Photos, checklists, and archives in the export are ignored — only summary
-counts reach the dashboard, so `reports-data.js` stays tiny no matter how
-large the reports are.
+Photos, checklists, and archives in the export are ignored — only the visit
+summary and the critical/action row text reach the dashboard, so
+`reports-data.js` stays tiny no matter how large the reports are.
 
 ## Troubleshooting
 

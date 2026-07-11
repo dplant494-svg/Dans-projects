@@ -76,29 +76,48 @@ foreach ($f in $files) {
         continue
     }
 
-    # Critical equipment rows: open = not yet marked done in the tool
-    $criticalTotal = 0; $criticalOpen = 0
+    # Critical equipment rows: open = not yet marked done in the tool.
+    # Full rows are kept (they're small text) so the dashboard can drill down.
+    $criticalOpen = 0
+    $criticalItems = New-Object System.Collections.Generic.List[object]
     $critRows = Get-Prop $json 'criticalRows'
     if ($critRows) {
         foreach ($row in @($critRows)) {
-            $criticalTotal++
-            if (-not (Get-Prop $row 'done')) { $criticalOpen++ }
+            $done = [bool](Get-Prop $row 'done')
+            if (-not $done) { $criticalOpen++ }
+            $criticalItems.Add([pscustomobject]@{
+                done  = $done
+                equip = [string](Get-Prop $row 'equip')
+                sfi   = [string](Get-Prop $row 'sfi')
+                date  = [string](Get-Prop $row 'date')
+                issue = [string](Get-Prop $row 'issue')
+                mit   = [string](Get-Prop $row 'mit')
+            }) | Out-Null
         }
     }
 
     # Action items; "left with rig" ones are owned by the rig, the rest travel home
-    $actionsTotal = 0; $actionsLeftWithRig = 0
+    $actionsLeftWithRig = 0
+    $actionItems = New-Object System.Collections.Generic.List[object]
     $actRows = Get-Prop $json 'actionRows'
     if ($actRows) {
         foreach ($row in @($actRows)) {
-            $actionsTotal++
-            if (Get-Prop $row 'leftWithRig') { $actionsLeftWithRig++ }
+            $left = [bool](Get-Prop $row 'leftWithRig')
+            if ($left) { $actionsLeftWithRig++ }
+            $actionItems.Add([pscustomobject]@{
+                desc        = [string](Get-Prop $row 'desc')
+                sys         = [string](Get-Prop $row 'sys')
+                resp        = [string](Get-Prop $row 'resp')
+                target      = [string](Get-Prop $row 'target')
+                deadline    = [string](Get-Prop $row 'deadline')
+                leftWithRig = $left
+            }) | Out-Null
         }
     }
 
-    $tiles = Get-Prop $json 'tiles'
+    $tilesRaw = Get-Prop $json 'tiles'
     $tileCount = 0
-    if ($tiles) { $tileCount = @($tiles).Count }
+    if ($tilesRaw) { $tileCount = @($tilesRaw).Count }
 
     $rig = Get-Prop $meta 'asset'
     if (-not $rig) { $rig = $f.BaseName }
@@ -115,10 +134,12 @@ foreach ($f in $files) {
         exportedAt    = [string](Get-Prop $json 'exportedAt')
         modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
         tileCount     = $tileCount
-        criticalTotal = $criticalTotal
+        criticalTotal = $criticalItems.Count
         criticalOpen  = $criticalOpen
-        actionsTotal  = $actionsTotal
+        actionsTotal  = $actionItems.Count
         actionsLeftWithRig = $actionsLeftWithRig
+        criticalItems = @($criticalItems)
+        actionItems   = @($actionItems)
     }) | Out-Null
 }
 

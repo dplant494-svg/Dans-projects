@@ -17,7 +17,18 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 0,
       "criticalOpen": 0,
       "actionsTotal": 1,
-      "actionsLeftWithRig": 1
+      "actionsLeftWithRig": 1,
+      "criticalItems": [],
+      "actionItems": [
+        {
+          "desc": "Close out BWM checklist items 4 & 7",
+          "sys": "BOP",
+          "resp": "SSS",
+          "target": "",
+          "deadline": "2026-07-18",
+          "leftWithRig": true
+        }
+      ]
     },
     {
       "file": "seadrill-report_West-Neptune_2026-07-06.json",
@@ -34,7 +45,9 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 0,
       "criticalOpen": 0,
       "actionsTotal": 0,
-      "actionsLeftWithRig": 0
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": []
     },
     {
       "file": "seadrill-report_West-Tellus_2026-07-03.json",
@@ -51,7 +64,27 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 1,
       "criticalOpen": 1,
       "actionsTotal": 1,
-      "actionsLeftWithRig": 1
+      "actionsLeftWithRig": 1,
+      "criticalItems": [
+        {
+          "done": false,
+          "equip": "Diverter Packer",
+          "sfi": "312.02",
+          "date": "2026-07-03",
+          "issue": "Pressure test failed at 500 psi",
+          "mit": "Packer replacement scheduled next trip out"
+        }
+      ],
+      "actionItems": [
+        {
+          "desc": "Expedite diverter packer to rig",
+          "sys": "Diverter",
+          "resp": "Rig Mgr",
+          "target": "",
+          "deadline": "2026-07-12",
+          "leftWithRig": true
+        }
+      ]
     },
     {
       "file": "seadrill-report_West-Saturn_2026-06-30.json",
@@ -68,7 +101,18 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 0,
       "criticalOpen": 0,
       "actionsTotal": 1,
-      "actionsLeftWithRig": 0
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": [
+        {
+          "desc": "Verify vendor torque records for wellhead connector",
+          "sys": "Wellhead",
+          "resp": "TSL",
+          "target": "",
+          "deadline": "2026-07-08",
+          "leftWithRig": false
+        }
+      ]
     },
     {
       "file": "seadrill-report_West-Auriga_2026-06-25.json",
@@ -85,7 +129,51 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 3,
       "criticalOpen": 2,
       "actionsTotal": 2,
-      "actionsLeftWithRig": 1
+      "actionsLeftWithRig": 1,
+      "criticalItems": [
+        {
+          "done": false,
+          "equip": "Blue Pod SEM B",
+          "sfi": "333.20",
+          "date": "2026-06-25",
+          "issue": "Intermittent comms fault",
+          "mit": "Troubleshooting ongoing — pod on surface"
+        },
+        {
+          "done": false,
+          "equip": "LMRP Connector",
+          "sfi": "333.15",
+          "date": "2026-06-25",
+          "issue": "Secondary unlock function failed test",
+          "mit": "Function isolated, OEM engaged"
+        },
+        {
+          "done": true,
+          "equip": "Shear Ram Bonnet",
+          "sfi": "333.05",
+          "date": "2026-06-25",
+          "issue": "Seal seep on function test",
+          "mit": "Bonnet reseal complete"
+        }
+      ],
+      "actionItems": [
+        {
+          "desc": "OEM RCA for SEM B comms fault",
+          "sys": "MUX Controls",
+          "resp": "WCE",
+          "target": "",
+          "deadline": "2026-07-20",
+          "leftWithRig": false
+        },
+        {
+          "desc": "Re-test LMRP secondary unlock after seal kit",
+          "sys": "LMRP",
+          "resp": "SSS",
+          "target": "",
+          "deadline": "2026-07-10",
+          "leftWithRig": true
+        }
+      ]
     },
     {
       "file": "seadrill-report_Sevan-Louisiana_2026-06-22.json",
@@ -102,7 +190,9 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 0,
       "criticalOpen": 0,
       "actionsTotal": 0,
-      "actionsLeftWithRig": 0
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": []
     },
     {
       "file": "seadrill-report_West-Vela_2026-06-18.json",
@@ -119,7 +209,18 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 0,
       "criticalOpen": 0,
       "actionsTotal": 1,
-      "actionsLeftWithRig": 0
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": [
+        {
+          "desc": "Recalibrate riser tensioner sensors",
+          "sys": "Tensioners",
+          "resp": "Elec Supv",
+          "target": "",
+          "deadline": "2026-07-01",
+          "leftWithRig": false
+        }
+      ]
     },
     {
       "file": "seadrill-report_West-Neptune_2026-06-15.json",
@@ -136,7 +237,27 @@ window.DASHBOARD_DATA = {
       "criticalTotal": 1,
       "criticalOpen": 0,
       "actionsTotal": 1,
-      "actionsLeftWithRig": 1
+      "actionsLeftWithRig": 1,
+      "criticalItems": [
+        {
+          "done": true,
+          "equip": "Upper Annular",
+          "sfi": "333.01",
+          "date": "2026-06-15",
+          "issue": "Element wear at limit",
+          "mit": "Replaced on deck"
+        }
+      ],
+      "actionItems": [
+        {
+          "desc": "Update annular PM interval",
+          "sys": "BOP",
+          "resp": "SSS",
+          "target": "",
+          "deadline": "2026-07-15",
+          "leftWithRig": true
+        }
+      ]
     }
   ]
 };
