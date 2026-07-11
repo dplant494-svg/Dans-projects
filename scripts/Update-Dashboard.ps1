@@ -26,6 +26,14 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$ScriptVersion = '1.2'
+Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
+
+# Any unexpected failure: report the exact line so it can be diagnosed remotely.
+trap {
+    Write-Host ("SCRIPT FAILED at line {0}: {1}" -f $_.InvocationInfo.ScriptLineNumber, $_.Exception.Message) -ForegroundColor Red
+    exit 1
+}
 
 if (-not (Test-Path -Path $ConfigPath)) {
     throw "Config file not found: $ConfigPath"
@@ -83,7 +91,7 @@ foreach ($f in $files) {
     $criticalItems = New-Object System.Collections.Generic.List[object]
     $critRows = Get-Prop $json 'criticalRows'
     if ($critRows) {
-        foreach ($row in @($critRows)) {
+        foreach ($row in $critRows) {
             $done = [bool](Get-Prop $row 'done')
             if (-not $done) { $criticalOpen++ }
             $criticalItems.Add([pscustomobject]@{
@@ -102,7 +110,7 @@ foreach ($f in $files) {
     $actionItems = New-Object System.Collections.Generic.List[object]
     $actRows = Get-Prop $json 'actionRows'
     if ($actRows) {
-        foreach ($row in @($actRows)) {
+        foreach ($row in $actRows) {
             $left = [bool](Get-Prop $row 'leftWithRig')
             if ($left) { $actionsLeftWithRig++ }
             $actionItems.Add([pscustomobject]@{
@@ -118,7 +126,8 @@ foreach ($f in $files) {
 
     $tilesRaw = Get-Prop $json 'tiles'
     $tileCount = 0
-    if ($tilesRaw) { $tileCount = @($tilesRaw).Count }
+    if ($tilesRaw -is [System.Array]) { $tileCount = $tilesRaw.Length }
+    elseif ($null -ne $tilesRaw) { $tileCount = 1 }
 
     $rig = Get-Prop $meta 'asset'
     if (-not $rig) { $rig = $f.BaseName }
@@ -153,14 +162,17 @@ foreach ($f in $files) {
 }
 
 # Newest first; fall back to file modified time when the report has no visit date.
-$sorted = @($reports | Sort-Object -Property @{ Expression = {
+# Collected into a List and emitted via ToArray() - the @() operator can throw
+# 'Argument types do not match' on JSON-derived object graphs.
+$sortedList = New-Object System.Collections.Generic.List[object]
+$reports | Sort-Object -Property @{ Expression = {
     if ($_.date) { [string]$_.date } else { $_.modified }
-} } -Descending)
+} } -Descending | ForEach-Object { $sortedList.Add($_) | Out-Null }
 
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:ss')
     reportFolder = $reportFolder
-    reports      = $sorted
+    reports      = $sortedList.ToArray()
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10
