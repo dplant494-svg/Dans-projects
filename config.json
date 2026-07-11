@@ -2,5 +2,6 @@
   "reportFolder": "%OneDrive%\\TSC REPORTS",
   "filePattern": "seadrill-report_*.json",
   "recurse": false,
-  "outputFile": "dashboard\\reports-data.js"
+  "outputFile": "dashboard\\reports-data.js",
+  "deployPath": ""
 }

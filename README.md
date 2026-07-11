@@ -122,6 +122,45 @@ summary and the critical/action row text reach the dashboard, so
   has no `meta` block. Only exports from the TSC Rig Reporting Tool are
   picked up (`filePattern` in config.json is `seadrill-report_*.json`).
 
+## Publishing to the intranet (IIS / network share)
+
+The dashboard is two static files — `dashboard.html` and `reports-data.js` —
+so any IIS site or file share can host it; no server-side code runs.
+
+1. Find the **physical folder** behind the URL. For an IIS site like
+   `http://<server>:8080/sacred/dashboard/dashboard.html`, open IIS Manager
+   on the server → expand the site → right-click the `dashboard` folder →
+   *Explore* shows the path (often under `C:\inetpub\wwwroot\...`). From your
+   PC that folder is reachable as a UNC path, e.g.
+   `\\<server>\<share>\sacred\dashboard`.
+2. Put that UNC path in `config.json` as `deployPath` (double the
+   backslashes):
+
+   ```json
+   "deployPath": "\\\\sdrlazneuiis01d\\wwwroot$\\sacred\\dashboard"
+   ```
+
+3. Publish the dashboard once:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File .\scripts\Deploy-Dashboard.ps1
+   ```
+
+4. That's it — every run of `Update-Dashboard.ps1` (including the scheduled
+   task) now copies a fresh `reports-data.js` to the deploy path, so anyone
+   with the URL sees new reports within one scan interval. Open dashboard
+   tabs refresh themselves every minute.
+
+Notes:
+
+- Viewers only need access to the URL; **write** access to the folder is only
+  needed by the account running the scheduled task.
+- Your PC must be on for the data to refresh. For an always-on setup, put
+  this whole folder on the server, point `reportFolder` at a location the
+  server can read, and register the scheduled task there instead.
+- Re-run `Deploy-Dashboard.ps1` only when `dashboard.html` itself changes
+  (e.g. after pulling an update from GitHub).
+
 ## If the folder can't be synced (cloud-only SharePoint)
 
 The synced-folder approach is by far the simplest. If IT policy prevents

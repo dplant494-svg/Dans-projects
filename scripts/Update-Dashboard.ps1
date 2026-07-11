@@ -167,3 +167,24 @@ if (-not (Test-Path -Path $outDir)) {
 
 Write-Host "Wrote $($reports.Count) report(s) to $outputFile" -ForegroundColor Green
 if ($skipped -gt 0) { Write-Host "Skipped $skipped file(s)." -ForegroundColor Yellow }
+
+# If a deploy path is configured (the IIS/network folder the dashboard is
+# served from), push the fresh data file there too so viewers stay current.
+$deployPath = ''
+if ($config.PSObject.Properties['deployPath'] -and $config.deployPath) {
+    $deployPath = [Environment]::ExpandEnvironmentVariables($config.deployPath)
+}
+if ($deployPath) {
+    try {
+        if (-not (Test-Path -Path $deployPath)) {
+            throw "deploy folder not reachable"
+        }
+        Copy-Item -Path $outputFile -Destination (Join-Path $deployPath 'reports-data.js') -Force
+        Write-Host "Deployed data file to $deployPath" -ForegroundColor Green
+    }
+    catch {
+        # Don't fail the scheduled task over a transient network issue —
+        # the next run will catch the server up.
+        Write-Warning "Could not copy data file to '$deployPath': $($_.Exception.Message)"
+    }
+}
