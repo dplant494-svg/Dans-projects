@@ -1,0 +1,84 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-02T17:30:00.000Z",
+  "meta": {
+    "asset": "West Saturn",
+    "date": "2026-06-30",
+    "dateend": "2026-07-02",
+    "wce": "D. Plant",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "mpd": "",
+    "other": [],
+    "location": "Angola Block 15",
+    "wo": "",
+    "type": "Vendor Surveillance",
+    "discipline": "Well Control (WCEG)",
+    "next24": "",
+    "summary24": "",
+    "complianceShown": false,
+    "bopSlots": []
+  },
+  "tiles": [
+    {
+      "title": "Daily Report — Day 1",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-30",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 2",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-30",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 3",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-30",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    }
+  ],
+  "criticalRows": [],
+  "actionRows": [
+    {
+      "desc": "Verify vendor torque records for wellhead connector",
+      "sys": "Wellhead",
+      "resp": "TSL",
+      "target": "",
+      "deadline": "2026-07-08",
+      "leftWithRig": false
+    }
+  ],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

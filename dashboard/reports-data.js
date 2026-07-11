@@ -1,110 +1,142 @@
 window.DASHBOARD_DATA = {
-  "generatedAt": "2026-07-11T05:30:00",
-  "reportFolder": "sample-reports (demo data — run scripts\\Update-Dashboard.ps1 to use your real folder)",
+  "generatedAt": "2026-07-11T06:00:00",
+  "reportFolder": "sample-reports (demo data — run scripts\\Update-Dashboard.ps1 to use your real TSC REPORTS folder)",
   "reports": [
     {
-      "file": "report-2026-07-10-site-d.json",
-      "title": "Network Infrastructure Assessment - Site D",
-      "date": "2026-07-10T13:10:00",
-      "author": "D. Plant",
-      "status": "Passed",
-      "modified": "2026-07-10T13:10:00",
-      "metrics": {
-        "Items checked": 147,
-        "Issues found": 3,
-        "Critical": 0
-      }
+      "file": "seadrill-report_West-Gemini_2026-07-09.json",
+      "rig": "West Gemini",
+      "type": "BWM Compliance",
+      "discipline": "Well Control (WCEG)",
+      "wce": "M. Reyes",
+      "location": "Angola Block 17",
+      "date": "2026-07-09",
+      "dateEnd": "2026-07-10",
+      "exportedAt": "2026-07-10T17:30:00.000Z",
+      "modified": "2026-07-10T17:30:00",
+      "tileCount": 2,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 1,
+      "actionsLeftWithRig": 1
     },
     {
-      "file": "report-2026-07-08-backup-verification.json",
-      "title": "Backup & Restore Verification (re-run)",
-      "date": "2026-07-08T15:30:00",
-      "author": "M. Reyes",
-      "status": "Passed",
-      "modified": "2026-07-08T15:30:00",
-      "metrics": {
-        "Items checked": 58,
-        "Issues found": 2,
-        "Critical": 0
-      }
+      "file": "seadrill-report_West-Neptune_2026-07-06.json",
+      "rig": "West Neptune",
+      "type": "Operations Support",
+      "discipline": "Well Control (WCEG)",
+      "wce": "D. Plant",
+      "location": "GoM — Shenandoah",
+      "date": "2026-07-06",
+      "dateEnd": "2026-07-08",
+      "exportedAt": "2026-07-08T17:30:00.000Z",
+      "modified": "2026-07-08T17:30:00",
+      "tileCount": 3,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 0,
+      "actionsLeftWithRig": 0
     },
     {
-      "file": "report-2026-07-06-patch-compliance.json",
-      "title": "Monthly Patch Compliance Review",
-      "date": "2026-07-06T08:45:00",
-      "author": "M. Reyes",
-      "status": "Warning",
-      "modified": "2026-07-06T08:45:00",
-      "metrics": {
-        "Items checked": 204,
-        "Issues found": 17,
-        "Critical": 1
-      }
+      "file": "seadrill-report_West-Tellus_2026-07-03.json",
+      "rig": "West Tellus",
+      "type": "NPT Support",
+      "discipline": "Well Control (WCEG)",
+      "wce": "M. Reyes",
+      "location": "GoM — Kaskida",
+      "date": "2026-07-03",
+      "dateEnd": "2026-07-05",
+      "exportedAt": "2026-07-05T17:30:00.000Z",
+      "modified": "2026-07-05T17:30:00",
+      "tileCount": 3,
+      "criticalTotal": 1,
+      "criticalOpen": 1,
+      "actionsTotal": 1,
+      "actionsLeftWithRig": 1
     },
     {
-      "file": "report-2026-07-02-site-c.json",
-      "title": "Network Infrastructure Assessment - Site C",
-      "date": "2026-07-02T10:00:00",
-      "author": "D. Plant",
-      "status": "Passed",
-      "modified": "2026-07-02T10:00:00",
-      "metrics": {
-        "Items checked": 151,
-        "Issues found": 1,
-        "Critical": 0
-      }
+      "file": "seadrill-report_West-Saturn_2026-06-30.json",
+      "rig": "West Saturn",
+      "type": "Vendor Surveillance",
+      "discipline": "Well Control (WCEG)",
+      "wce": "D. Plant",
+      "location": "Angola Block 15",
+      "date": "2026-06-30",
+      "dateEnd": "2026-07-02",
+      "exportedAt": "2026-07-02T17:30:00.000Z",
+      "modified": "2026-07-02T17:30:00",
+      "tileCount": 3,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 1,
+      "actionsLeftWithRig": 0
     },
     {
-      "file": "report-2026-06-30-backup-verification.json",
-      "title": "Backup & Restore Verification",
-      "date": "2026-06-30T16:20:00",
-      "author": "M. Reyes",
-      "status": "Failed",
-      "modified": "2026-06-30T16:20:00",
-      "metrics": {
-        "Items checked": 58,
-        "Issues found": 12,
-        "Critical": 3
-      }
+      "file": "seadrill-report_West-Auriga_2026-06-25.json",
+      "rig": "West Auriga",
+      "type": "Investigation",
+      "discipline": "Well Control (WCEG)",
+      "wce": "M. Reyes",
+      "location": "GoM — Tiber",
+      "date": "2026-06-25",
+      "dateEnd": "2026-06-29",
+      "exportedAt": "2026-06-29T17:30:00.000Z",
+      "modified": "2026-06-29T17:30:00",
+      "tileCount": 5,
+      "criticalTotal": 3,
+      "criticalOpen": 2,
+      "actionsTotal": 2,
+      "actionsLeftWithRig": 1
     },
     {
-      "file": "report-2026-06-26-firewall-audit.json",
-      "title": "Quarterly Firewall Rule Audit",
-      "date": "2026-06-26T11:05:00",
-      "author": "D. Plant",
-      "status": "Passed",
-      "modified": "2026-06-26T11:05:00",
-      "metrics": {
-        "Items checked": 310,
-        "Issues found": 4,
-        "Critical": 0
-      }
+      "file": "seadrill-report_Sevan-Louisiana_2026-06-22.json",
+      "rig": "Sevan Louisiana",
+      "type": "Operations Support",
+      "discipline": "Well Control (WCEG)",
+      "wce": "D. Plant",
+      "location": "GoM — Salamanca",
+      "date": "2026-06-22",
+      "dateEnd": "2026-06-24",
+      "exportedAt": "2026-06-24T17:30:00.000Z",
+      "modified": "2026-06-24T17:30:00",
+      "tileCount": 3,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 0,
+      "actionsLeftWithRig": 0
     },
     {
-      "file": "report-2026-06-23-site-b.json",
-      "title": "Network Infrastructure Assessment - Site B",
-      "date": "2026-06-23T14:40:00",
-      "author": "D. Plant",
-      "status": "Warning",
-      "modified": "2026-06-23T14:40:00",
-      "metrics": {
-        "Items checked": 138,
-        "Issues found": 9,
-        "Critical": 0
-      }
+      "file": "seadrill-report_West-Vela_2026-06-18.json",
+      "rig": "West Vela",
+      "type": "Technical Inspection",
+      "discipline": "Well Control (WCEG)",
+      "wce": "M. Reyes",
+      "location": "GoM — Whale",
+      "date": "2026-06-18",
+      "dateEnd": "2026-06-21",
+      "exportedAt": "2026-06-21T17:30:00.000Z",
+      "modified": "2026-06-21T17:30:00",
+      "tileCount": 4,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 1,
+      "actionsLeftWithRig": 0
     },
     {
-      "file": "report-2026-06-20-site-a.json",
-      "title": "Network Infrastructure Assessment - Site A",
-      "date": "2026-06-20T09:15:00",
-      "author": "D. Plant",
-      "status": "Passed",
-      "modified": "2026-06-20T09:15:00",
-      "metrics": {
-        "Items checked": 142,
-        "Issues found": 2,
-        "Critical": 0
-      }
+      "file": "seadrill-report_West-Neptune_2026-06-15.json",
+      "rig": "West Neptune",
+      "type": "BWM Compliance",
+      "discipline": "Well Control (WCEG)",
+      "wce": "D. Plant",
+      "location": "GoM — Shenandoah",
+      "date": "2026-06-15",
+      "dateEnd": "2026-06-19",
+      "exportedAt": "2026-06-19T17:30:00.000Z",
+      "modified": "2026-06-19T17:30:00",
+      "tileCount": 5,
+      "criticalTotal": 1,
+      "criticalOpen": 0,
+      "actionsTotal": 1,
+      "actionsLeftWithRig": 1
     }
   ]
 };

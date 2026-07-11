@@ -1,0 +1,93 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-05T17:30:00.000Z",
+  "meta": {
+    "asset": "West Tellus",
+    "date": "2026-07-03",
+    "dateend": "2026-07-05",
+    "wce": "M. Reyes",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "mpd": "",
+    "other": [],
+    "location": "GoM — Kaskida",
+    "wo": "",
+    "type": "NPT Support",
+    "discipline": "Well Control (WCEG)",
+    "next24": "",
+    "summary24": "",
+    "complianceShown": false,
+    "bopSlots": []
+  },
+  "tiles": [
+    {
+      "title": "Daily Report — Day 1",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-07-03",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 2",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-07-03",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 3",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-07-03",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    }
+  ],
+  "criticalRows": [
+    {
+      "done": false,
+      "equip": "Diverter Packer",
+      "sfi": "312.02",
+      "date": "2026-07-03",
+      "issue": "Pressure test failed at 500 psi",
+      "mit": "Packer replacement scheduled next trip out"
+    }
+  ],
+  "actionRows": [
+    {
+      "desc": "Expedite diverter packer to rig",
+      "sys": "Diverter",
+      "resp": "Rig Mgr",
+      "target": "",
+      "deadline": "2026-07-12",
+      "leftWithRig": true
+    }
+  ],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

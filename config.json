@@ -1,17 +1,6 @@
 {
-  "reportFolder": "%OneDrive%\\Reports",
-  "filePattern": "*.json",
+  "reportFolder": "%OneDrive%\\TSC REPORTS",
+  "filePattern": "seadrill-report_*.json",
   "recurse": false,
-  "outputFile": "dashboard\\reports-data.js",
-  "fields": {
-    "title": "reportTitle",
-    "date": "generatedDate",
-    "author": "author",
-    "status": "summary.status",
-    "metrics": {
-      "Items checked": "summary.itemsChecked",
-      "Issues found": "summary.issuesFound",
-      "Critical": "summary.critical"
-    }
-  }
+  "outputFile": "dashboard\\reports-data.js"
 }

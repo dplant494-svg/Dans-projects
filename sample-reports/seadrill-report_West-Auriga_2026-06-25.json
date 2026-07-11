@@ -1,0 +1,141 @@
+{
+  "version": 3,
+  "exportedAt": "2026-06-29T17:30:00.000Z",
+  "meta": {
+    "asset": "West Auriga",
+    "date": "2026-06-25",
+    "dateend": "2026-06-29",
+    "wce": "M. Reyes",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "mpd": "",
+    "other": [],
+    "location": "GoM — Tiber",
+    "wo": "",
+    "type": "Investigation",
+    "discipline": "Well Control (WCEG)",
+    "next24": "",
+    "summary24": "",
+    "complianceShown": false,
+    "bopSlots": []
+  },
+  "tiles": [
+    {
+      "title": "Daily Report — Day 1",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-25",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 2",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-25",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 3",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-25",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 4",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-25",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 5",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-25",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    }
+  ],
+  "criticalRows": [
+    {
+      "done": false,
+      "equip": "Blue Pod SEM B",
+      "sfi": "333.20",
+      "date": "2026-06-25",
+      "issue": "Intermittent comms fault",
+      "mit": "Troubleshooting ongoing — pod on surface"
+    },
+    {
+      "done": false,
+      "equip": "LMRP Connector",
+      "sfi": "333.15",
+      "date": "2026-06-25",
+      "issue": "Secondary unlock function failed test",
+      "mit": "Function isolated, OEM engaged"
+    },
+    {
+      "done": true,
+      "equip": "Shear Ram Bonnet",
+      "sfi": "333.05",
+      "date": "2026-06-25",
+      "issue": "Seal seep on function test",
+      "mit": "Bonnet reseal complete"
+    }
+  ],
+  "actionRows": [
+    {
+      "desc": "OEM RCA for SEM B comms fault",
+      "sys": "MUX Controls",
+      "resp": "WCE",
+      "target": "",
+      "deadline": "2026-07-20",
+      "leftWithRig": false
+    },
+    {
+      "desc": "Re-test LMRP secondary unlock after seal kit",
+      "sys": "LMRP",
+      "resp": "SSS",
+      "target": "",
+      "deadline": "2026-07-10",
+      "leftWithRig": true
+    }
+  ],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

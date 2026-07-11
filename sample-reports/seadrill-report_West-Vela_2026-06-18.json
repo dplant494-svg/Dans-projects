@@ -1,0 +1,96 @@
+{
+  "version": 3,
+  "exportedAt": "2026-06-21T17:30:00.000Z",
+  "meta": {
+    "asset": "West Vela",
+    "date": "2026-06-18",
+    "dateend": "2026-06-21",
+    "wce": "M. Reyes",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "mpd": "",
+    "other": [],
+    "location": "GoM — Whale",
+    "wo": "",
+    "type": "Technical Inspection",
+    "discipline": "Well Control (WCEG)",
+    "next24": "",
+    "summary24": "",
+    "complianceShown": false,
+    "bopSlots": []
+  },
+  "tiles": [
+    {
+      "title": "Daily Report — Day 1",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-18",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 2",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-18",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 3",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-18",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 4",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-18",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    }
+  ],
+  "criticalRows": [],
+  "actionRows": [
+    {
+      "desc": "Recalibrate riser tensioner sensors",
+      "sys": "Tensioners",
+      "resp": "Elec Supv",
+      "target": "",
+      "deadline": "2026-07-01",
+      "leftWithRig": false
+    }
+  ],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

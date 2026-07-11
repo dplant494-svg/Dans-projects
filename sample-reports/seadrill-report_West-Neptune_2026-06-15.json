@@ -1,0 +1,117 @@
+{
+  "version": 3,
+  "exportedAt": "2026-06-19T17:30:00.000Z",
+  "meta": {
+    "asset": "West Neptune",
+    "date": "2026-06-15",
+    "dateend": "2026-06-19",
+    "wce": "D. Plant",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "mpd": "",
+    "other": [],
+    "location": "GoM — Shenandoah",
+    "wo": "",
+    "type": "BWM Compliance",
+    "discipline": "Well Control (WCEG)",
+    "next24": "",
+    "summary24": "",
+    "complianceShown": false,
+    "bopSlots": []
+  },
+  "tiles": [
+    {
+      "title": "Daily Report — Day 1",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-15",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 2",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-15",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 3",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-15",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 4",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-15",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 5",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-06-15",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    }
+  ],
+  "criticalRows": [
+    {
+      "done": true,
+      "equip": "Upper Annular",
+      "sfi": "333.01",
+      "date": "2026-06-15",
+      "issue": "Element wear at limit",
+      "mit": "Replaced on deck"
+    }
+  ],
+  "actionRows": [
+    {
+      "desc": "Update annular PM interval",
+      "sys": "BOP",
+      "resp": "SSS",
+      "target": "",
+      "deadline": "2026-07-15",
+      "leftWithRig": true
+    }
+  ],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

@@ -1,0 +1,72 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-10T17:30:00.000Z",
+  "meta": {
+    "asset": "West Gemini",
+    "date": "2026-07-09",
+    "dateend": "2026-07-10",
+    "wce": "M. Reyes",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "mpd": "",
+    "other": [],
+    "location": "Angola Block 17",
+    "wo": "",
+    "type": "BWM Compliance",
+    "discipline": "Well Control (WCEG)",
+    "next24": "",
+    "summary24": "",
+    "complianceShown": false,
+    "bopSlots": []
+  },
+  "tiles": [
+    {
+      "title": "Daily Report — Day 1",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-07-09",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    },
+    {
+      "title": "Daily Report — Day 2",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-07-09",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null
+    }
+  ],
+  "criticalRows": [],
+  "actionRows": [
+    {
+      "desc": "Close out BWM checklist items 4 & 7",
+      "sys": "BOP",
+      "resp": "SSS",
+      "target": "",
+      "deadline": "2026-07-18",
+      "leftWithRig": true
+    }
+  ],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}
