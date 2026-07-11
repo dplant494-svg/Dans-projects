@@ -76,6 +76,7 @@ foreach ($f in $files) {
         continue
     }
 
+    try {
     # Critical equipment rows: open = not yet marked done in the tool.
     # Full rows are kept (they're small text) so the dashboard can drill down.
     $criticalOpen = 0
@@ -138,9 +139,17 @@ foreach ($f in $files) {
         criticalOpen  = $criticalOpen
         actionsTotal  = $actionItems.Count
         actionsLeftWithRig = $actionsLeftWithRig
-        criticalItems = @($criticalItems)
-        actionItems   = @($actionItems)
+        # .ToArray() rather than @(...): the array subexpression operator can
+        # throw 'Argument types do not match' on List[object] contents here.
+        criticalItems = $criticalItems.ToArray()
+        actionItems   = $actionItems.ToArray()
     }) | Out-Null
+    }
+    catch {
+        # One malformed report must not stop the whole scan.
+        Write-Warning "Skipping $($f.Name): could not extract summary ($($_.Exception.Message))"
+        $skipped++
+    }
 }
 
 # Newest first; fall back to file modified time when the report has no visit date.
