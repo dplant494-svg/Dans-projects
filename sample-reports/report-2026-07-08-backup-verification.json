@@ -1,0 +1,11 @@
+{
+  "reportTitle": "Backup & Restore Verification (re-run)",
+  "generatedDate": "2026-07-08T15:30:00",
+  "author": "M. Reyes",
+  "summary": {
+    "status": "Passed",
+    "itemsChecked": 58,
+    "issuesFound": 2,
+    "critical": 0
+  }
+}

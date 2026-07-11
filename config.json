@@ -1,0 +1,17 @@
+{
+  "reportFolder": "%OneDrive%\\Reports",
+  "filePattern": "*.json",
+  "recurse": false,
+  "outputFile": "dashboard\\reports-data.js",
+  "fields": {
+    "title": "reportTitle",
+    "date": "generatedDate",
+    "author": "author",
+    "status": "summary.status",
+    "metrics": {
+      "Items checked": "summary.itemsChecked",
+      "Issues found": "summary.issuesFound",
+      "Critical": "summary.critical"
+    }
+  }
+}

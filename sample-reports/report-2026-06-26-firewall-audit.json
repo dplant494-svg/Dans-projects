@@ -1,0 +1,11 @@
+{
+  "reportTitle": "Quarterly Firewall Rule Audit",
+  "generatedDate": "2026-06-26T11:05:00",
+  "author": "D. Plant",
+  "summary": {
+    "status": "Passed",
+    "itemsChecked": 310,
+    "issuesFound": 4,
+    "critical": 0
+  }
+}

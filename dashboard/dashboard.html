@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Technical Reports Dashboard</title>
+<style>
+  :root {
+    --page:           #f9f9f7;
+    --surface-1:      #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11, 11, 11, 0.10);
+    --series-1:       #2a78d6;  /* sequential blue, step 450 */
+    --series-1-hover: #256abf;  /* step 500 */
+    --status-good:     #0ca30c;
+    --status-warning:  #fab219;
+    --status-critical: #d03b3b;
+    --tooltip-bg:     #0b0b0b;
+    --tooltip-ink:    #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page:           #0d0d0d;
+      --surface-1:      #1a1a19;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --gridline:       #2c2c2a;
+      --baseline:       #383835;
+      --border:         rgba(255, 255, 255, 0.10);
+      --series-1:       #3987e5;  /* dark-surface step 400 */
+      --series-1-hover: #5598e7;  /* step 350 */
+      --tooltip-bg:     #fcfcfb;
+      --tooltip-ink:    #0b0b0b;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 24px 20px 48px; }
+
+  .app-header {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    align-items: baseline; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .app-header h1 { font-size: 20px; font-weight: 650; margin: 0; }
+  .app-header .subtitle { margin: 2px 0 0; color: var(--text-secondary); font-size: 13px; }
+  .freshness { color: var(--text-muted); font-size: 12px; text-align: right; }
+  .freshness .stale { color: var(--status-critical); }
+
+  .card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .card h2 {
+    font-size: 13px; font-weight: 600; margin: 0 0 12px;
+    color: var(--text-secondary); letter-spacing: 0.01em;
+  }
+
+  /* Filter row — one row, above everything it scopes */
+  .filter-row {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center; margin-bottom: 16px;
+  }
+  .segmented { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-1); }
+  .segmented button {
+    appearance: none; border: 0; background: transparent;
+    color: var(--text-secondary); font: inherit; font-size: 13px;
+    padding: 6px 12px; cursor: pointer;
+  }
+  .segmented button + button { border-left: 1px solid var(--border); }
+  .segmented button:hover { color: var(--text-primary); }
+  .segmented button[aria-pressed="true"] {
+    background: var(--series-1); color: #ffffff; font-weight: 600;
+  }
+  .filter-row input[type="search"] {
+    flex: 1; min-width: 180px; max-width: 320px; margin-left: auto;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 10px; font: inherit; font-size: 13px;
+  }
+  .filter-row input[type="search"]::placeholder { color: var(--text-muted); }
+
+  /* KPI row of stat tiles */
+  .kpi-row {
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    margin-bottom: 16px;
+  }
+  .tile .label { color: var(--text-secondary); font-size: 12px; }
+  .tile .value { font-size: 28px; font-weight: 600; line-height: 1.2; margin-top: 2px; }
+  .tile .sub { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+
+  .chart-card { margin-bottom: 16px; }
+  #chart svg { display: block; width: 100%; height: auto; }
+  #chart .bar { fill: var(--series-1); }
+  #chart .band:hover .bar, #chart .band:focus .bar { fill: var(--series-1-hover); }
+  #chart .band { outline: none; }
+  #chart .grid { stroke: var(--gridline); stroke-width: 1; }
+  #chart .axis-base { stroke: var(--baseline); stroke-width: 1; }
+  #chart text { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .chart-empty { color: var(--text-muted); padding: 32px 0; text-align: center; }
+
+  /* Reports table — the always-available data view */
+  .table-scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--gridline); }
+  th { color: var(--text-muted); font-weight: 500; font-size: 12px; white-space: nowrap; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td .title { font-weight: 550; }
+  td .file { color: var(--text-muted); font-size: 12px; }
+  tr:last-child td { border-bottom: 0; }
+  .table-empty { color: var(--text-muted); padding: 24px 0; text-align: center; }
+
+  .status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .status-ico {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    font-size: 10px; font-weight: 700; color: #ffffff;
+  }
+  .status-ico.good     { background: var(--status-good); }
+  .status-ico.warning  { background: var(--status-warning); color: #0b0b0b; }
+  .status-ico.critical { background: var(--status-critical); }
+
+  .tooltip {
+    position: fixed; z-index: 10; pointer-events: none;
+    background: var(--tooltip-bg); color: var(--tooltip-ink);
+    border-radius: 6px; padding: 6px 10px; font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  }
+  .tooltip .tt-value { font-weight: 650; font-size: 13px; }
+  .tooltip .tt-label { opacity: 0.75; }
+
+  #setup-notice { margin-top: 24px; }
+  #setup-notice h2 { color: var(--text-primary); font-size: 15px; }
+  #setup-notice code {
+    background: var(--page); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 5px; font-size: 12px;
+  }
+  #setup-notice ol { margin: 8px 0 0; padding-left: 20px; color: var(--text-secondary); }
+  #setup-notice li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app-header">
+    <div>
+      <h1>Technical Reports Dashboard</h1>
+      <p class="subtitle" id="folder-line">Reports overview</p>
+    </div>
+    <div class="freshness" id="freshness"></div>
+  </header>
+
+  <div id="setup-notice" class="card" hidden>
+    <h2>No data yet — one-time setup</h2>
+    <ol>
+      <li>Edit <code>config.json</code> so <code>reportFolder</code> points at your OneDrive/SharePoint report folder.</li>
+      <li>Run <code>scripts\Update-Dashboard.ps1</code> once — it creates <code>reports-data.js</code> next to this file.</li>
+      <li>Run <code>scripts\Register-DashboardTask.ps1</code> once so it keeps refreshing automatically.</li>
+      <li>Reopen (or just leave open) this page — it re-checks for data every minute.</li>
+    </ol>
+  </div>
+
+  <main id="app" hidden>
+    <div class="filter-row">
+      <div class="segmented" role="group" aria-label="Date range" id="range-group">
+        <button type="button" data-days="7">7 days</button>
+        <button type="button" data-days="30" aria-pressed="true">30 days</button>
+        <button type="button" data-days="90">90 days</button>
+        <button type="button" data-days="0">All</button>
+      </div>
+      <input type="search" id="search" placeholder="Search title, author, file…" aria-label="Search reports">
+    </div>
+
+    <section class="kpi-row" id="kpi-row"></section>
+
+    <section class="card chart-card">
+      <h2 id="chart-title">Reports generated</h2>
+      <div id="chart"></div>
+    </section>
+
+    <section class="card table-card">
+      <h2>Reports</h2>
+      <div class="table-scroll">
+        <table id="reports-table">
+          <thead><tr id="table-head"></tr></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div class="table-empty" id="table-empty" hidden>No reports match the current filters.</div>
+    </section>
+  </main>
+</div>
+
+<div class="tooltip" id="tooltip" hidden>
+  <div class="tt-value" id="tt-value"></div>
+  <div class="tt-label" id="tt-label"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var POLL_MS = 60 * 1000;       // how often to re-check reports-data.js
+  var state = { days: 30, search: '', lastStamp: null };
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- data access ----------
+
+  function reportDate(r) {
+    var d = new Date(r.date || r.modified);
+    return isNaN(d) ? new Date(r.modified) : d;
+  }
+
+  function statusKind(s) {
+    s = String(s || '').toLowerCase();
+    if (!s) return null;
+    if (/pass|ok|success|complete|good|green/.test(s)) return 'good';
+    if (/warn|partial|amber|attention/.test(s)) return 'warning';
+    if (/fail|error|crit|red/.test(s)) return 'critical';
+    return null;
+  }
+
+  function filteredReports() {
+    var data = window.DASHBOARD_DATA;
+    if (!data || !data.reports) return [];
+    var cutoff = null;
+    if (state.days > 0) {
+      cutoff = new Date();
+      cutoff.setHours(0, 0, 0, 0);
+      cutoff.setDate(cutoff.getDate() - (state.days - 1));
+    }
+    var q = state.search.trim().toLowerCase();
+    return data.reports.filter(function (r) {
+      if (cutoff && reportDate(r) < cutoff) return false;
+      if (q) {
+        var hay = [r.title, r.author, r.file, r.status].join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    }).sort(function (a, b) { return reportDate(b) - reportDate(a); });
+  }
+
+  function metricNames() {
+    var names = [];
+    (window.DASHBOARD_DATA.reports || []).forEach(function (r) {
+      Object.keys(r.metrics || {}).forEach(function (k) {
+        if (names.indexOf(k) === -1) names.push(k);
+      });
+    });
+    return names;
+  }
+
+  // ---------- formatting ----------
+
+  function fmtDate(d) {
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+  function fmtDateTime(d) {
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) +
+      ', ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+  function relTime(d) {
+    var mins = Math.round((Date.now() - d.getTime()) / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + ' min ago';
+    var hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+    var days = Math.round(hrs / 24);
+    return days + (days === 1 ? ' day ago' : ' days ago');
+  }
+
+  // ---------- KPI tiles ----------
+
+  function tile(label, value, sub) {
+    var t = document.createElement('div');
+    t.className = 'card tile';
+    var l = document.createElement('div'); l.className = 'label'; l.textContent = label;
+    var v = document.createElement('div'); v.className = 'value'; v.textContent = value;
+    t.appendChild(l); t.appendChild(v);
+    if (sub) { var s = document.createElement('div'); s.className = 'sub'; s.textContent = sub; t.appendChild(s); }
+    return t;
+  }
+
+  function renderKpis(reports) {
+    var row = $('kpi-row');
+    row.textContent = '';
+    var rangeLabel = state.days > 0 ? 'last ' + state.days + ' days' : 'all time';
+
+    row.appendChild(tile('Reports', String(reports.length), rangeLabel));
+
+    var latest = reports[0];
+    row.appendChild(tile('Latest report',
+      latest ? relTime(reportDate(latest)) : '—',
+      latest ? latest.title : 'no reports in range'));
+
+    var counts = { good: 0, warning: 0, critical: 0, none: 0 };
+    reports.forEach(function (r) {
+      var k = statusKind(r.status);
+      counts[k || 'none']++;
+    });
+    var hasStatus = counts.good + counts.warning + counts.critical > 0;
+    row.appendChild(tile('Passed', hasStatus ? String(counts.good) : '—', rangeLabel));
+    row.appendChild(tile('Needs attention',
+      hasStatus ? String(counts.warning + counts.critical) : '—',
+      hasStatus ? (counts.critical + ' failed, ' + counts.warning + ' warnings') : 'no status field mapped'));
+  }
+
+  // ---------- chart ----------
+
+  var NS = 'http://www.w3.org/2000/svg';
+  function svgEl(name, attrs) {
+    var el = document.createElementNS(NS, name);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  function niceStep(target) {
+    var pow = Math.pow(10, Math.floor(Math.log(target) / Math.LN10));
+    var candidates = [1, 2, 5, 10];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i] * pow >= target) return candidates[i] * pow;
+    }
+    return 10 * pow;
+  }
+
+  function buckets(reports) {
+    // Day buckets for short ranges, ISO-week buckets for long ones.
+    var dates = reports.map(reportDate);
+    var end = new Date(); end.setHours(0, 0, 0, 0);
+    var start;
+    if (state.days > 0) {
+      start = new Date(end); start.setDate(start.getDate() - (state.days - 1));
+    } else {
+      start = dates.length ? new Date(Math.min.apply(null, dates)) : new Date(end);
+      start.setHours(0, 0, 0, 0);
+    }
+    var spanDays = Math.round((end - start) / 86400000) + 1;
+    var byWeek = spanDays > 35;
+    if (byWeek) {
+      var dow = (start.getDay() + 6) % 7; // Monday-start weeks
+      start.setDate(start.getDate() - dow);
+    }
+    var step = byWeek ? 7 : 1;
+    var list = [];
+    for (var d = new Date(start); d <= end; d.setDate(d.getDate() + step)) {
+      list.push({ start: new Date(d), count: 0 });
+    }
+    dates.forEach(function (dt) {
+      var idx = Math.floor((dt - start) / (86400000 * step));
+      if (idx >= 0 && idx < list.length) list[idx].count++;
+    });
+    return { list: list, byWeek: byWeek };
+  }
+
+  function renderChart(reports) {
+    var host = $('chart');
+    host.textContent = '';
+    var b = buckets(reports);
+    $('chart-title').textContent = b.byWeek ? 'Reports generated per week' : 'Reports generated per day';
+
+    if (!reports.length) {
+      var empty = document.createElement('div');
+      empty.className = 'chart-empty';
+      empty.textContent = 'No reports in the selected range.';
+      host.appendChild(empty);
+      return;
+    }
+
+    var W = Math.max(host.clientWidth || 640, 320);
+    var H = 240, mL = 32, mR = 8, mT = 10, mB = 28;
+    var iw = W - mL - mR, ih = H - mT - mB;
+
+    var maxCount = Math.max.apply(null, b.list.map(function (x) { return x.count; }).concat([1]));
+    var tickStep = Math.max(1, niceStep(maxCount / 4));  // counts are integers — never fractional ticks
+    var yMax = Math.ceil(maxCount / tickStep) * tickStep;
+
+    var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img',
+      'aria-label': 'Column chart of reports generated over time' });
+
+    var y = function (v) { return mT + ih - (v / yMax) * ih; };
+
+    // hairline gridlines + clean y ticks
+    for (var v = 0; v <= yMax; v += tickStep) {
+      if (v > 0) svg.appendChild(svgEl('line', { x1: mL, x2: W - mR, y1: y(v), y2: y(v), 'class': 'grid' }));
+      var lbl = svgEl('text', { x: mL - 6, y: y(v) + 3, 'text-anchor': 'end' });
+      lbl.textContent = String(v);
+      svg.appendChild(lbl);
+    }
+    svg.appendChild(svgEl('line', { x1: mL, x2: W - mR, y1: y(0), y2: y(0), 'class': 'axis-base' }));
+
+    var n = b.list.length;
+    var band = iw / n;
+    var barW = Math.min(24, Math.max(3, band - 2));  // ≤24px thick, 2px surface gap minimum
+    var labelEvery = Math.ceil(n / Math.floor(iw / 64));
+
+    b.list.forEach(function (bucket, i) {
+      var cx = mL + band * i + band / 2;
+      var g = svgEl('g', { 'class': 'band', tabindex: '0' });
+
+      // transparent full-height hit target — bigger than the mark
+      g.appendChild(svgEl('rect', { x: mL + band * i, y: mT, width: band, height: ih, fill: 'transparent' }));
+
+      if (bucket.count > 0) {
+        var top = y(bucket.count), x0 = cx - barW / 2, r = Math.min(4, barW / 2);
+        // rounded data-end at the top, square at the baseline
+        var path = 'M' + x0 + ',' + y(0) +
+          ' L' + x0 + ',' + (top + r) +
+          ' Q' + x0 + ',' + top + ' ' + (x0 + r) + ',' + top +
+          ' L' + (x0 + barW - r) + ',' + top +
+          ' Q' + (x0 + barW) + ',' + top + ' ' + (x0 + barW) + ',' + (top + r) +
+          ' L' + (x0 + barW) + ',' + y(0) + ' Z';
+        g.appendChild(svgEl('path', { d: path, 'class': 'bar' }));
+      }
+
+      if (i % labelEvery === 0) {
+        var t = svgEl('text', { x: cx, y: H - 8, 'text-anchor': 'middle' });
+        t.textContent = fmtDate(bucket.start);
+        g.appendChild(t);
+      }
+
+      var label = b.byWeek ? 'Week of ' + fmtDate(bucket.start) : bucket.start.toLocaleDateString(
+        undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      var value = bucket.count + (bucket.count === 1 ? ' report' : ' reports');
+      g.addEventListener('pointermove', function (e) { showTooltip(e.clientX, e.clientY, value, label); });
+      g.addEventListener('pointerleave', hideTooltip);
+      g.addEventListener('focus', function () {
+        var rect = g.getBoundingClientRect();
+        showTooltip(rect.left + rect.width / 2, rect.top, value, label);
+      });
+      g.addEventListener('blur', hideTooltip);
+      svg.appendChild(g);
+    });
+
+    host.appendChild(svg);
+  }
+
+  // ---------- tooltip (textContent only — labels are untrusted data) ----------
+
+  function showTooltip(cx, cy, value, label) {
+    var tt = $('tooltip');
+    $('tt-value').textContent = value;
+    $('tt-label').textContent = label;
+    tt.hidden = false;
+    var pad = 12;
+    var w = tt.offsetWidth, h = tt.offsetHeight;
+    var x = Math.min(cx + pad, window.innerWidth - w - 4);
+    var yy = cy - h - pad; if (yy < 4) yy = cy + pad;
+    tt.style.left = x + 'px';
+    tt.style.top = yy + 'px';
+  }
+  function hideTooltip() { $('tooltip').hidden = true; }
+
+  // ---------- table ----------
+
+  function statusCell(r) {
+    var td = document.createElement('td');
+    var kind = statusKind(r.status);
+    if (!r.status) { td.textContent = '—'; return td; }
+    var span = document.createElement('span');
+    span.className = 'status';
+    if (kind) {
+      var ico = document.createElement('span');
+      ico.className = 'status-ico ' + kind;
+      ico.textContent = kind === 'good' ? '✓' : (kind === 'warning' ? '!' : '✕');
+      ico.setAttribute('aria-hidden', 'true');
+      span.appendChild(ico);
+    }
+    span.appendChild(document.createTextNode(String(r.status)));
+    td.appendChild(span);
+    return td;
+  }
+
+  function renderTable(reports) {
+    var metrics = metricNames();
+    var head = $('table-head');
+    head.textContent = '';
+    ['Report', 'Date', 'Author', 'Status'].forEach(function (h) {
+      var th = document.createElement('th'); th.textContent = h; head.appendChild(th);
+    });
+    metrics.forEach(function (m) {
+      var th = document.createElement('th'); th.className = 'num'; th.textContent = m; head.appendChild(th);
+    });
+
+    var body = $('table-body');
+    body.textContent = '';
+    reports.forEach(function (r) {
+      var tr = document.createElement('tr');
+
+      var tdTitle = document.createElement('td');
+      var title = document.createElement('div'); title.className = 'title'; title.textContent = r.title || r.file;
+      var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file;
+      tdTitle.appendChild(title); tdTitle.appendChild(file);
+      tr.appendChild(tdTitle);
+
+      var tdDate = document.createElement('td');
+      tdDate.textContent = fmtDateTime(reportDate(r));
+      tr.appendChild(tdDate);
+
+      var tdAuthor = document.createElement('td');
+      tdAuthor.textContent = r.author || '—';
+      tr.appendChild(tdAuthor);
+
+      tr.appendChild(statusCell(r));
+
+      metrics.forEach(function (m) {
+        var td = document.createElement('td'); td.className = 'num';
+        var val = r.metrics ? r.metrics[m] : null;
+        td.textContent = (val === null || val === undefined) ? '—' : String(val);
+        tr.appendChild(td);
+      });
+
+      body.appendChild(tr);
+    });
+    $('table-empty').hidden = reports.length > 0;
+  }
+
+  // ---------- freshness line ----------
+
+  function renderFreshness() {
+    var data = window.DASHBOARD_DATA;
+    var el = $('freshness');
+    el.textContent = '';
+    if (!data || !data.generatedAt) return;
+    var gen = new Date(data.generatedAt);
+    el.appendChild(document.createTextNode('Data updated ' + relTime(gen)));
+    var ageMin = (Date.now() - gen.getTime()) / 60000;
+    if (ageMin > 60) {
+      el.appendChild(document.createElement('br'));
+      var warn = document.createElement('span');
+      warn.className = 'stale';
+      warn.textContent = 'Stale — is the scheduled task running?';
+      el.appendChild(warn);
+    }
+  }
+
+  // ---------- render root ----------
+
+  function render() {
+    var data = window.DASHBOARD_DATA;
+    var hasData = data && Array.isArray(data.reports);
+    $('setup-notice').hidden = hasData;
+    $('app').hidden = !hasData;
+    if (!hasData) return;
+
+    $('folder-line').textContent = data.reportFolder ? ('Source: ' + data.reportFolder) : 'Reports overview';
+    renderFreshness();
+
+    var reports = filteredReports();
+    renderKpis(reports);
+    renderChart(reports);
+    renderTable(reports);
+  }
+
+  // ---------- auto-refresh: re-load reports-data.js and re-render on change ----------
+
+  function dataStamp() {
+    var d = window.DASHBOARD_DATA;
+    return d ? d.generatedAt + ':' + (d.reports || []).length : null;
+  }
+
+  function reloadData() {
+    var s = document.createElement('script');
+    s.src = 'reports-data.js?v=' + Date.now();  // cache-bust; works from file:// too
+    s.onload = function () {
+      var stamp = dataStamp();
+      if (stamp !== state.lastStamp) {
+        state.lastStamp = stamp;
+        render();
+      } else {
+        renderFreshness();  // keep the "x min ago" line honest
+      }
+      s.remove();
+    };
+    s.onerror = function () { s.remove(); };
+    document.body.appendChild(s);
+  }
+
+  // ---------- wiring ----------
+
+  $('range-group').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    this.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+    btn.setAttribute('aria-pressed', 'true');
+    state.days = Number(btn.dataset.days);
+    render();
+  });
+
+  $('search').addEventListener('input', function () {
+    state.search = this.value;
+    render();
+  });
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () { renderChart(filteredReports()); }, 150);
+  });
+
+  window.addEventListener('DOMContentLoaded', function () {
+    state.lastStamp = dataStamp();
+    render();
+    setInterval(reloadData, POLL_MS);
+  });
+})();
+</script>
+<script src="reports-data.js"></script>
+</body>
+</html>

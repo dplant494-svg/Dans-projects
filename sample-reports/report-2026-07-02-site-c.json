@@ -1,0 +1,11 @@
+{
+  "reportTitle": "Network Infrastructure Assessment - Site C",
+  "generatedDate": "2026-07-02T10:00:00",
+  "author": "D. Plant",
+  "summary": {
+    "status": "Passed",
+    "itemsChecked": 151,
+    "issuesFound": 1,
+    "critical": 0
+  }
+}
