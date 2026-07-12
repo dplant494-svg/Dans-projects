@@ -375,9 +375,17 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   // ---------- data access ----------
 
+  // Date-only strings (2026-03-14) must parse as LOCAL midnight - new Date()
+  // treats them as UTC, which shows the previous day west of UTC.
+  function parseDate(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || '').trim());
+    if (m) return new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    return new Date(s);
+  }
+
   function reportDate(r) {
-    var d = new Date(r.date || r.modified);
-    return isNaN(d) ? new Date(r.modified) : d;
+    var d = parseDate(r.date || r.modified);
+    return isNaN(d) ? parseDate(r.modified) : d;
   }
 
   // Visit health, same semantics as the reporting tool's pass/monitor/fail:
@@ -422,7 +430,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var start = reportDate(r);
     var startTxt = start.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
     if (!r.dateEnd) return startTxt;
-    var end = new Date(r.dateEnd);
+    var end = parseDate(r.dateEnd);
     if (isNaN(end)) return startTxt;
     var endTxt = end.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
     return startTxt === endTxt ? startTxt : startTxt + ' – ' + endTxt;
@@ -1113,11 +1121,14 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
 
-    fetch('reports/' + encodeURIComponent(rec.file) + '?v=' + Date.now())
+    // Report copies are published with a .js extension: IIS serves .js by
+    // default, while raw .json is often blocked or unmapped (observed HTTP 500).
+    fetch('reports/' + encodeURIComponent(rec.file) + '.js?v=' + Date.now())
       .then(function (resp) {
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        return resp.json();
+        return resp.text();
       })
+      .then(function (text) { return JSON.parse(text); })
       .then(function (full) {
         body.textContent = '';
         renderFullReport(body, full, rec);
