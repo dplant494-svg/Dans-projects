@@ -190,6 +190,83 @@
   .item-state.open   { color: var(--sd-fail); }
   .item-state.closed { color: var(--sd-pass); }
 
+  /* ── Full report viewer ── */
+  .detail-actions { margin-bottom: 10px; }
+  .rv-open-btn {
+    appearance: none; border: 0; cursor: pointer; font: inherit;
+    background: var(--sd-blue); color: #fff; font-weight: 700; font-size: 12px;
+    padding: 7px 14px; border-radius: 4px;
+  }
+  .rv-open-btn:hover { background: var(--sd-light-blue); }
+  .no-scroll { overflow: hidden; }
+  .report-overlay {
+    position: fixed; inset: 0; z-index: 20;
+    background: rgba(10,21,48,0.55); overflow-y: auto;
+  }
+  .report-frame {
+    max-width: 920px; margin: 24px auto; background: var(--sd-white);
+    border-radius: 4px; box-shadow: 0 6px 32px rgba(0,0,0,0.35);
+  }
+  .report-head {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--sd-blue); color: #fff;
+    border-bottom: 3px solid var(--sd-yellow); border-radius: 4px 4px 0 0;
+    padding: 14px 22px; display: flex; align-items: center; gap: 14px;
+  }
+  .report-head .rh-title { flex: 1; }
+  .report-head .rh-rig { font-size: 16px; font-weight: 700; }
+  .report-head .rh-sub { font-size: 11px; color: rgba(255,255,255,0.75); }
+  .report-close {
+    appearance: none; border: 0; cursor: pointer; flex-shrink: 0;
+    background: rgba(255,255,255,0.12); color: #fff;
+    width: 30px; height: 30px; border-radius: 4px; font-size: 16px; line-height: 1;
+  }
+  .report-close:hover { background: rgba(255,255,255,0.25); }
+  .report-body { padding: 20px 24px 32px; }
+  .rv-loading, .rv-error { color: var(--sd-text-light); padding: 32px 0; text-align: center; }
+  .rv-error { color: var(--sd-fail); }
+  .rv-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--sd-blue); margin: 18px 0 8px;
+  }
+  .rv-section-label:first-child { margin-top: 0; }
+  .rv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px 18px; }
+  .rv-field .lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sd-text-light); }
+  .rv-field .val { font-size: 13px; }
+  .rv-tile { border: 1px solid var(--sd-border); border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
+  .rv-tile-head {
+    background: var(--sd-bg); border-bottom: 1px solid var(--sd-border);
+    padding: 8px 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline;
+  }
+  .rv-tile-head .t-title { font-weight: 700; color: var(--sd-blue); flex: 1; }
+  .rv-tile-head .t-date, .rv-tile-head .t-fodb { font-size: 11px; color: var(--sd-text-light); }
+  .rv-tile-body { padding: 12px 14px; }
+  .rv-notes { white-space: pre-wrap; font-size: 13px; margin-bottom: 10px; }
+  .rv-notes:last-child { margin-bottom: 0; }
+  .rv-equip { border-top: 1px solid var(--sd-grid); padding-top: 10px; margin-top: 10px; }
+  .rv-equip:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+  .rv-equip-head { font-weight: 700; margin-bottom: 4px; }
+  .rv-equip-head .tag {
+    font-size: 10px; font-weight: 700; border-radius: 3px; padding: 1px 6px; margin-left: 6px;
+    background: var(--sd-blue-20); color: var(--sd-blue); vertical-align: 1px;
+  }
+  .rv-equip-head .tag.crit { background: var(--sd-fail); color: #fff; }
+  .rv-photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .rv-photos figure { margin: 0; width: 150px; }
+  .rv-photos img {
+    width: 100%; display: block; border: 1px solid var(--sd-border);
+    border-radius: 3px; cursor: zoom-in;
+  }
+  .rv-photos figcaption { font-size: 11px; color: var(--sd-text-light); margin-top: 2px; }
+  .rv-check { font-size: 13px; margin: 2px 0; }
+  .rv-check .box { color: var(--sd-blue); font-weight: 700; margin-right: 6px; }
+  .rv-check.sub { margin-left: 18px; }
+  .lightbox {
+    position: fixed; inset: 0; z-index: 30; cursor: zoom-out;
+    background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center;
+  }
+  .lightbox img { max-width: 95vw; max-height: 95vh; }
+
   .tooltip {
     position: fixed; z-index: 10; pointer-events: none;
     background: var(--sd-blue); color: var(--sd-white);
@@ -649,6 +726,19 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var td = document.createElement('td');
     td.colSpan = COLUMNS.length;
 
+    var actions = document.createElement('div');
+    actions.className = 'detail-actions';
+    var openBtn = document.createElement('button');
+    openBtn.type = 'button';
+    openBtn.className = 'rv-open-btn';
+    openBtn.textContent = 'View full report';
+    openBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      openReportViewer(r);
+    });
+    actions.appendChild(openBtn);
+    td.appendChild(actions);
+
     var crit = r.criticalItems || [];
     var acts = r.actionItems || [];
 
@@ -771,6 +861,274 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       });
     });
     $('table-empty').hidden = reports.length > 0;
+  }
+
+  // ---------- full report viewer ----------
+
+  var PERSONNEL_FIELDS = [
+    ['wce', 'WCE Technical Superintendent'], ['sss', 'Subsea Supervisor (SSS)'],
+    ['rigmgr', 'Rig Manager'], ['oim', 'OIM'], ['arigmgr', 'Asst. Rig Manager'],
+    ['tsl', 'TSL'], ['elec', 'Electrical Supervisor'], ['dsl', 'DSL'],
+    ['tech', 'Subsea Engineer(s)'], ['mpd', 'MPD Supervisor']
+  ];
+  var VSR_FIELDS = [
+    ['vendor', 'Vendor'], ['surveyDate', 'Survey date'], ['surveyType', 'Survey type'],
+    ['contactName', 'Contact'], ['contactEmail', 'Contact email'], ['preparedBy', 'Prepared by'],
+    ['location', 'Location'], ['oem', 'OEM'], ['eqDesc', 'Equipment'], ['partNum', 'Part #'],
+    ['serialNum', 'Serial #'], ['vsrSfi', 'SFI'], ['reportDate', 'Report date'],
+    ['acceptComments', 'Acceptance comments'], ['concerns', 'Concerns'],
+    ['actions', 'Actions'], ['forecast', 'Forecast']
+  ];
+
+  // Report notes are HTML authored in the reporting tool; strip anything
+  // executable before inserting.
+  function sanitizeHtml(html) {
+    var doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    var bad = doc.querySelectorAll('script,style,iframe,object,embed,link,meta,form,base');
+    for (var i = 0; i < bad.length; i++) bad[i].parentNode.removeChild(bad[i]);
+    var all = doc.body.querySelectorAll('*');
+    for (var j = 0; j < all.length; j++) {
+      var attrs = Array.prototype.slice.call(all[j].attributes);
+      for (var k = 0; k < attrs.length; k++) {
+        var n = attrs[k].name.toLowerCase();
+        var v = String(attrs[k].value || '');
+        if (n.indexOf('on') === 0 || ((n === 'href' || n === 'src') && /^\s*javascript:/i.test(v))) {
+          all[j].removeAttribute(attrs[k].name);
+        }
+      }
+    }
+    var frag = document.createDocumentFragment();
+    while (doc.body.firstChild) frag.appendChild(doc.body.firstChild);
+    return frag;
+  }
+
+  function mk(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null && text !== '') node.textContent = text;
+    return node;
+  }
+
+  function rvField(label, value) {
+    var f = mk('div', 'rv-field');
+    f.appendChild(mk('div', 'lbl', label));
+    f.appendChild(mk('div', 'val', value));
+    return f;
+  }
+
+  function rvNotes(html) {
+    var d = mk('div', 'rv-notes');
+    d.appendChild(sanitizeHtml(html));
+    return d;
+  }
+
+  function openLightbox(src) {
+    var lb = mk('div', 'lightbox');
+    var img = document.createElement('img');
+    img.src = src;
+    lb.appendChild(img);
+    lb.addEventListener('click', function () { lb.remove(); });
+    document.body.appendChild(lb);
+  }
+
+  function rvPhotos(srcs, captions) {
+    var wrap = mk('div', 'rv-photos');
+    var count = 0;
+    (srcs || []).forEach(function (src, i) {
+      if (!src || src.indexOf('data:image') !== 0) return;
+      var fig = document.createElement('figure');
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = (captions && captions[i]) || 'Report photo';
+      img.addEventListener('click', function () { openLightbox(src); });
+      fig.appendChild(img);
+      if (captions && captions[i]) fig.appendChild(mk('figcaption', '', captions[i]));
+      wrap.appendChild(fig);
+      count++;
+    });
+    return count ? wrap : null;
+  }
+
+  function rvStatusChip(statusText) {
+    if (!statusText) return null;
+    var s = String(statusText).toLowerCase();
+    var kind = null, icon = '';
+    if (/pass|operational|ok|good|complete/.test(s)) { kind = 'pass'; icon = '✓'; }
+    else if (/monitor|watch|partial|degrad/.test(s)) { kind = 'monitor'; icon = '!'; }
+    else if (/fail|critical|down/.test(s)) { kind = 'fail'; icon = '✕'; }
+    var span = mk('span', 'status');
+    if (kind) {
+      var ico = mk('span', 'status-ico ' + kind, icon);
+      ico.setAttribute('aria-hidden', 'true');
+      span.appendChild(ico);
+    }
+    span.appendChild(document.createTextNode(statusText));
+    return span;
+  }
+
+  function rvVsr(vsr, body) {
+    body.appendChild(mk('div', 'rv-section-label', 'Vendor surveillance details'));
+    var grid = mk('div', 'rv-grid');
+    VSR_FIELDS.forEach(function (pair) {
+      var v = vsr[pair[0]];
+      if (v && String(v).trim()) grid.appendChild(rvField(pair[1], String(v)));
+    });
+    if (grid.childNodes.length) body.appendChild(grid);
+    (vsr.sections || []).forEach(function (sec) {
+      var checked = (sec.items || []).filter(function (it) { return it.checked; });
+      if (!checked.length) return;
+      body.appendChild(mk('div', 'rv-section-label', sec.title || 'Checklist'));
+      checked.forEach(function (it) {
+        var row = mk('div', 'rv-check' + (it.sub ? ' sub' : ''));
+        row.appendChild(mk('span', 'box', '✓'));
+        row.appendChild(document.createTextNode(it.label || ''));
+        body.appendChild(row);
+      });
+    });
+  }
+
+  function renderFullReport(body, full, rec) {
+    var meta = full.meta || {};
+
+    body.appendChild(mk('div', 'rv-section-label', 'Visit information'));
+    var info = mk('div', 'rv-grid');
+    info.appendChild(rvField('Rig / Vessel', meta.asset || rec.rig));
+    info.appendChild(rvField('Visit dates', fmtVisitSpan(rec)));
+    if (meta.type) info.appendChild(rvField('Classification', meta.type));
+    if (meta.discipline) info.appendChild(rvField('Discipline', meta.discipline));
+    if (meta.location) info.appendChild(rvField('Well / Location', meta.location));
+    if (meta.wo) info.appendChild(rvField('Synergi Case #', meta.wo));
+    body.appendChild(info);
+
+    var people = mk('div', 'rv-grid');
+    PERSONNEL_FIELDS.forEach(function (pair) {
+      var v = meta[pair[0]];
+      if (v && String(v).trim()) people.appendChild(rvField(pair[1], String(v)));
+    });
+    (meta.other || []).forEach(function (p) {
+      if (p && p.name) people.appendChild(rvField(p.title || 'Other personnel', p.name));
+    });
+    if (people.childNodes.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Personnel'));
+      body.appendChild(people);
+    }
+
+    if (meta.summary24 && meta.summary24.replace(/<[^>]*>/g, '').trim()) {
+      body.appendChild(mk('div', 'rv-section-label', '24 hour summary'));
+      body.appendChild(rvNotes(meta.summary24));
+    }
+    if (meta.next24 && meta.next24.replace(/<[^>]*>/g, '').trim()) {
+      body.appendChild(mk('div', 'rv-section-label', 'Next 24 hours'));
+      body.appendChild(rvNotes(meta.next24));
+    }
+
+    var tiles = full.tiles || [];
+    if (tiles.length) body.appendChild(mk('div', 'rv-section-label', 'Report entries'));
+    tiles.forEach(function (tile) {
+      var t = mk('div', 'rv-tile');
+      var head = mk('div', 'rv-tile-head');
+      head.appendChild(mk('span', 't-title', tile.title || 'Entry'));
+      var chip = rvStatusChip(tile.status);
+      if (chip) head.appendChild(chip);
+      if (tile.fodb) head.appendChild(mk('span', 't-fodb', 'FODB: ' + tile.fodb));
+      if (tile.tileDate) head.appendChild(mk('span', 't-date', tile.tileDate));
+      t.appendChild(head);
+
+      var tb = mk('div', 'rv-tile-body');
+      if (tile.notes && tile.notes.replace(/<[^>]*>/g, '').trim()) tb.appendChild(rvNotes(tile.notes));
+      var tileImg = rvPhotos([tile.imgData], []);
+      if (tileImg) tb.appendChild(tileImg);
+
+      (tile.equipEntries || []).forEach(function (e) {
+        var eq = mk('div', 'rv-equip');
+        var eh = mk('div', 'rv-equip-head');
+        var name = e.manual ? (e.manualName || 'Manual entry') : (e.type || 'Equipment');
+        eh.appendChild(document.createTextNode(name));
+        if (e.manual && e.manualSfi) eh.appendChild(mk('span', 'tag', 'SFI ' + e.manualSfi));
+        if (e.ramSize) eh.appendChild(mk('span', 'tag', 'Ram: ' + e.ramSize));
+        if (e.surfaceTest) eh.appendChild(mk('span', 'tag', 'Surface test: ' + e.surfaceTest));
+        if (e.flagCrit) eh.appendChild(mk('span', 'tag crit', 'Critical'));
+        if (e.flagEot) eh.appendChild(mk('span', 'tag', 'EOT'));
+        eq.appendChild(eh);
+        if (e.notes && e.notes.replace(/<[^>]*>/g, '').trim()) eq.appendChild(rvNotes(e.notes));
+        var ph = rvPhotos(e.photos, e.captions);
+        if (ph) eq.appendChild(ph);
+        tb.appendChild(eq);
+      });
+
+      if (tile.vsrData) rvVsr(tile.vsrData, tb);
+
+      if (!tb.childNodes.length) tb.appendChild(mk('div', 'rv-notes', 'No content recorded for this entry.'));
+      t.appendChild(tb);
+      body.appendChild(t);
+    });
+
+    var critRows = full.criticalRows || [];
+    if (critRows.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Critical equipment items'));
+      body.appendChild(detailKeyTable('', ['Status', 'Equipment', 'SFI', 'Date', 'Issue', 'Mitigation'],
+        critRows.map(function (c) { return [itemState(!c.done), c.equip, c.sfi, c.date, c.issue, c.mit]; })));
+    }
+    var actRows = full.actionRows || [];
+    if (actRows.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Action items'));
+      body.appendChild(detailKeyTable('', ['Action', 'System', 'Responsible', 'Target', 'Deadline', 'Left with rig'],
+        actRows.map(function (a) { return [a.desc, a.sys, a.resp, a.target, a.deadline, a.leftWithRig ? 'Yes' : '—']; })));
+    }
+  }
+
+  function openReportViewer(rec) {
+    var overlay = mk('div', 'report-overlay');
+    var frame = mk('div', 'report-frame');
+    var head = mk('div', 'report-head');
+    var title = mk('div', 'rh-title');
+    title.appendChild(mk('div', 'rh-rig', rec.rig));
+    title.appendChild(mk('div', 'rh-sub',
+      (rec.type || 'Rig visit') + ' · ' + fmtVisitSpan(rec) + (rec.wce ? ' · ' + rec.wce : '')));
+    head.appendChild(title);
+    var closeBtn = mk('button', 'report-close', '✕');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Close report');
+    head.appendChild(closeBtn);
+    var body = mk('div', 'report-body');
+    body.appendChild(mk('div', 'rv-loading', 'Loading full report…'));
+    frame.appendChild(head);
+    frame.appendChild(body);
+    overlay.appendChild(frame);
+    document.body.appendChild(overlay);
+    document.body.classList.add('no-scroll');
+
+    function close() {
+      overlay.remove();
+      document.body.classList.remove('no-scroll');
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key !== 'Escape') return;
+      var lb = document.querySelector('.lightbox');
+      if (lb) { lb.remove(); return; }
+      close();
+    }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+
+    fetch('reports/' + encodeURIComponent(rec.file) + '?v=' + Date.now())
+      .then(function (resp) {
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        return resp.json();
+      })
+      .then(function (full) {
+        body.textContent = '';
+        renderFullReport(body, full, rec);
+      })
+      .catch(function (err) {
+        body.textContent = '';
+        var msg = (location.protocol === 'file:')
+          ? 'Full reports open only when the dashboard is viewed from the server (http://…), not as a local file.'
+          : 'Full report not available on the server yet (' + err.message + '). It is published by the scanner (v1.5+) on its next run.';
+        body.appendChild(mk('div', 'rv-error', msg));
+      });
   }
 
   // ---------- freshness line ----------

@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '1.4'
+$ScriptVersion = '1.5'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -209,6 +209,31 @@ if ($deployPath) {
         }
         Copy-Item -Path $outputFile -Destination (Join-Path $deployPath 'reports-data.js') -Force
         Write-Host "Deployed data file to $deployPath" -ForegroundColor Green
+
+        # Full report files for the dashboard's 'View full report' feature:
+        # copy each scanned .json into <deployPath>\reports (only new/changed
+        # ones), and remove any that no longer exist in the source folder.
+        $reportsDir = Join-Path $deployPath 'reports'
+        if (-not (Test-Path -Path $reportsDir)) {
+            New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
+        }
+        $copied = 0
+        foreach ($f in $files) {
+            $dest = Join-Path $reportsDir $f.Name
+            if (-not (Test-Path -Path $dest) -or ($f.LastWriteTime -gt (Get-Item -Path $dest).LastWriteTime)) {
+                Copy-Item -Path $f.FullName -Destination $dest -Force
+                $copied++
+            }
+        }
+        $sourceNames = @{}
+        foreach ($f in $files) { $sourceNames[$f.Name] = $true }
+        foreach ($old in Get-ChildItem -Path $reportsDir -Filter '*.json' -File) {
+            if (-not $sourceNames.ContainsKey($old.Name)) {
+                Remove-Item -Path $old.FullName -Force
+                Write-Host "Removed stale report copy: $($old.Name)"
+            }
+        }
+        if ($copied -gt 0) { Write-Host "Copied $copied full report(s) to $reportsDir" -ForegroundColor Green }
     }
     catch {
         # Don't fail the scheduled task over a transient network issue -

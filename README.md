@@ -35,6 +35,13 @@ logo, and brand palette) and shows:
   **Click a visit row to drill down** into its critical equipment items
   (status, SFI, issue, mitigation) and action items (responsible, deadline,
   left-with-rig)
+- **Full report viewer** — the drill-down's "View full report" button opens
+  the complete report in an overlay: visit info, personnel, 24-hour
+  summaries, every report entry with notes and photos, and the critical/
+  action tables. The scanner (v1.5+) publishes each report .json into a
+  `reports/` folder next to the deployed dashboard; the viewer fetches them
+  on demand, so this works when the dashboard is served over http (IIS),
+  not when opened as a local file
 - **Filters** — date range (30/90/180 days — the default view is 180 days —
   12 months, all), rig, and free-text search, all scoping every number on
   the page
