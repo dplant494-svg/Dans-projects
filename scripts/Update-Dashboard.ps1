@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '1.6'
+$ScriptVersion = '2.0'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -62,21 +62,79 @@ if (-not [System.IO.Path]::IsPathRooted($outputFile)) {
 function Get-Prop {
     param($Object, [string]$Name)
     if ($null -eq $Object) { return $null }
+    # Big-file parsing (JavaScriptSerializer) returns dictionaries, not PSObjects
+    if ($Object -is [System.Collections.IDictionary]) {
+        if ($Object.Contains($Name)) { return $Object[$Name] }
+        return $null
+    }
     $prop = $Object.PSObject.Properties[$Name]
     if ($null -eq $prop) { return $null }
     return $prop.Value
 }
 
+# Windows PowerShell 5.1's ConvertFrom-Json rejects files over ~2 MB; report
+# exports with photos routinely exceed that (CBM exports reach 15 MB+). Use
+# JavaScriptSerializer with a raised limit there; PowerShell 7+ has no limit.
+$script:BigJsonSerializer = $null
+function Read-ReportJson {
+    param([string]$Path)
+    $raw = [System.IO.File]::ReadAllText($Path)
+    if ($PSVersionTable.PSEdition -eq 'Core') {
+        return ($raw | ConvertFrom-Json)
+    }
+    if ($null -eq $script:BigJsonSerializer) {
+        Add-Type -AssemblyName System.Web.Extensions
+        $script:BigJsonSerializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+        $script:BigJsonSerializer.MaxJsonLength = [int]::MaxValue
+        $script:BigJsonSerializer.RecursionLimit = 1000
+    }
+    return $script:BigJsonSerializer.DeserializeObject($raw)
+}
+
+# Report type: SSORT exports carry meta.reporttype; older exports are
+# recognised by which structured block their tiles carry; rig-visit exports
+# from the TSC Rig Reporting Tool have neither and are labelled 'Rig Visit'.
+function Get-ReportType {
+    param($Meta, $Tiles)
+    $rt = [string](Get-Prop $Meta 'reporttype')
+    if ($rt) { return $rt }
+    if ($Tiles) {
+        foreach ($tile in $Tiles) {
+            if (Get-Prop $tile 'cbmData')  { return 'CBM Inspection' }
+            if (Get-Prop $tile 'sbopData') { return 'Surface BOP Testing' }
+            if (Get-Prop $tile 'pdcData')  { return 'Pre-Deployment Checklist' }
+            if (Get-Prop $tile 'caData')   { return 'Conditional Assessment' }
+            if (Get-Prop $tile 'inspData') { return 'Technical Inspection' }
+        }
+    }
+    return 'Rig Visit'
+}
+
 $recurse = $false
 if ($config.PSObject.Properties['recurse'] -and $config.recurse) { $recurse = $true }
 
-$files = Get-ChildItem -Path $reportFolder -Filter $config.filePattern -File -Recurse:$recurse
+# Folders that hold this project's own files, never reports.
+$excludeFolders = @('dashboard', 'scripts', 'sample-reports', 'node_modules', '.git')
+if ($config.PSObject.Properties['excludeFolders'] -and $config.excludeFolders) {
+    $excludeFolders = @($config.excludeFolders)
+}
+
+$files = @(Get-ChildItem -Path $reportFolder -Filter $config.filePattern -File -Recurse:$recurse |
+    Where-Object {
+        $rel = $_.FullName.Substring($reportFolder.Length).Trim('\', '/')
+        $parts = $rel -split '[\\/]'
+        $dirParts = @()
+        if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
+        $excluded = $false
+        foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
+        (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json')
+    })
 
 $reports = New-Object System.Collections.Generic.List[object]
 $skipped = 0
 foreach ($f in $files) {
     try {
-        $json = Get-Content -Path $f.FullName -Raw | ConvertFrom-Json
+        $json = Read-ReportJson -Path $f.FullName
     }
     catch {
         Write-Warning "Skipping $($f.Name): not valid JSON ($($_.Exception.Message))"
@@ -142,6 +200,7 @@ foreach ($f in $files) {
     $reports.Add([pscustomobject]@{
         file          = $f.Name
         rig           = [string]$rig
+        reporttype    = [string](Get-ReportType -Meta $meta -Tiles $tilesRaw)
         type          = [string](Get-Prop $meta 'type')        # visit classification
         discipline    = [string](Get-Prop $meta 'discipline')
         wce           = [string](Get-Prop $meta 'wce')          # WCE Technical Superintendent

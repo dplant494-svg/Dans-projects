@@ -1,10 +1,20 @@
 # TSC Rig Visit Dashboard
 
 An automated, Seadrill-branded dashboard for reports exported by the **TSC Rig
-Reporting Tool**. The tool saves each trip as a
-`seadrill-report_<rig>_<date>.json` file into the TSC REPORTS folder
-(SharePoint/OneDrive); a scheduled script picks the files up and the dashboard
-displays the general visit info — no manual steps after the one-time setup.
+Reporting Tool (WCGRRT)** and the **Seadrill Subsea Onboard Reporting Tool
+(SSORT)** — rig visits, CBM inspections, surface BOP testing, pre-deployment
+checklists, and the rest. The tools save each report as a `.json` file into
+the shared TSC REPORTING folder (SharePoint/OneDrive); a scheduled script
+picks the files up and the dashboard displays them — no manual steps after
+the one-time setup.
+
+The scanner accepts **any `.json` with a valid report payload regardless of
+filename** (v2.0+), scans subfolders, parses exports of any size (photo-heavy
+CBM files exceed PowerShell's default 2 MB JSON limit), and tags every report
+with a type (`meta.reporttype`, or derived from the tile data for older
+exports). The dashboard has a report-type filter, and the full-report viewer
+renders CBM inspections with per-item grades, comments, photos, and section
+summaries.
 
 ## How it works
 

@@ -5,6 +5,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_West-Gemini_2026-07-09.json",
       "rig": "West Gemini",
+      "reporttype": "Rig Visit",
       "type": "BWM Compliance",
       "discipline": "Well Control (WCEG)",
       "wce": "M. Reyes",
@@ -33,6 +34,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_West-Neptune_2026-07-06.json",
       "rig": "West Neptune",
+      "reporttype": "Rig Visit",
       "type": "Operations Support",
       "discipline": "Well Control (WCEG)",
       "wce": "D. Plant",
@@ -50,8 +52,29 @@ window.DASHBOARD_DATA = {
       "actionItems": []
     },
     {
+      "file": "seadrill-report_West-Capella_2026-07-05_cbm-inspection.json",
+      "rig": "West Capella",
+      "reporttype": "CBM Inspection",
+      "type": "",
+      "discipline": "",
+      "wce": "D. Plant",
+      "location": "PTTEP Malaysia",
+      "date": "2026-07-05",
+      "dateEnd": "",
+      "exportedAt": "T17:30:00.000Z",
+      "modified": "2026-07-10T17:30:00",
+      "tileCount": 1,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 0,
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": []
+    },
+    {
       "file": "seadrill-report_West-Tellus_2026-07-03.json",
       "rig": "West Tellus",
+      "reporttype": "Rig Visit",
       "type": "NPT Support",
       "discipline": "Well Control (WCEG)",
       "wce": "M. Reyes",
@@ -89,6 +112,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_West-Saturn_2026-06-30.json",
       "rig": "West Saturn",
+      "reporttype": "Rig Visit",
       "type": "Vendor Surveillance",
       "discipline": "Well Control (WCEG)",
       "wce": "D. Plant",
@@ -117,6 +141,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_West-Auriga_2026-06-25.json",
       "rig": "West Auriga",
+      "reporttype": "Rig Visit",
       "type": "Investigation",
       "discipline": "Well Control (WCEG)",
       "wce": "M. Reyes",
@@ -178,6 +203,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_Sevan-Louisiana_2026-06-22.json",
       "rig": "Sevan Louisiana",
+      "reporttype": "Rig Visit",
       "type": "Operations Support",
       "discipline": "Well Control (WCEG)",
       "wce": "D. Plant",
@@ -197,6 +223,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_West-Vela_2026-06-18.json",
       "rig": "West Vela",
+      "reporttype": "Rig Visit",
       "type": "Technical Inspection",
       "discipline": "Well Control (WCEG)",
       "wce": "M. Reyes",
@@ -225,6 +252,7 @@ window.DASHBOARD_DATA = {
     {
       "file": "seadrill-report_West-Neptune_2026-06-15.json",
       "rig": "West Neptune",
+      "reporttype": "Rig Visit",
       "type": "BWM Compliance",
       "discipline": "Well Control (WCEG)",
       "wce": "D. Plant",

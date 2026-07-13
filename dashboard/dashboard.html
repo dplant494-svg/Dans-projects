@@ -261,6 +261,17 @@
   .rv-check { font-size: 13px; margin: 2px 0; }
   .rv-check .box { color: var(--sd-blue); font-weight: 700; margin-right: 6px; }
   .rv-check.sub { margin-left: 18px; }
+  .cbm-grade {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 1px 8px; border-radius: 3px; margin-left: 6px;
+    background: var(--sd-border); color: var(--sd-text);
+  }
+  .cbm-grade.g1  { background: var(--sd-blue); color: #fff; }
+  .cbm-grade.g2  { background: var(--sd-orange); color: #fff; }
+  .cbm-grade.g34 { background: var(--sd-fail); color: #fff; }
+  .cbm-tally { margin: 10px 0 4px; font-size: 12px; }
+  .cbm-tally .lbl { color: var(--sd-text-light); font-weight: 700; }
+  .cbm-tally .cbm-grade { margin-left: 4px; margin-right: 2px; }
   .lightbox {
     position: fixed; inset: 0; z-index: 30; cursor: zoom-out;
     background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center;
@@ -326,7 +337,8 @@
           <button type="button" data-days="0">All</button>
         </div>
         <select id="rig-filter" aria-label="Filter by rig"><option value="">All rigs</option></select>
-        <input type="search" id="search" placeholder="Search rig, WCE, location…" aria-label="Search reports">
+        <select id="type-filter" aria-label="Filter by report type"><option value="">All types</option></select>
+        <input type="search" id="search" placeholder="Search rig, WCE, location, type…" aria-label="Search reports">
       </div>
 
       <section class="kpi-row" id="kpi-row"></section>
@@ -337,13 +349,13 @@
           <div class="chart-host" id="time-chart"></div>
         </section>
         <section class="card">
-          <h2>Visits by rig</h2>
+          <h2>Reports by rig</h2>
           <div class="chart-host" id="rig-chart"></div>
         </section>
       </div>
 
       <section class="card">
-        <h2>Rig visit reports</h2>
+        <h2>Reports</h2>
         <div class="table-scroll">
           <table>
             <thead><tr id="table-head"></tr></thead>
@@ -369,7 +381,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   'use strict';
 
   var POLL_MS = 60 * 1000;       // how often to re-check reports-data.js
-  var state = { days: 180, rig: '', search: '', lastStamp: null, expanded: {} };
+  var state = { days: 180, rig: '', rtype: '', search: '', lastStamp: null, expanded: {} };
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -413,8 +425,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     return data.reports.filter(function (r) {
       if (cutoff && reportDate(r) < cutoff) return false;
       if (state.rig && r.rig !== state.rig) return false;
+      if (state.rtype && (r.reporttype || '') !== state.rtype) return false;
       if (q) {
-        var hay = [r.rig, r.wce, r.location, r.type, r.discipline, r.file].join(' ').toLowerCase();
+        var hay = [r.rig, r.wce, r.location, r.type, r.reporttype, r.discipline, r.file].join(' ').toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -462,12 +475,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     row.textContent = '';
     var rangeLabel = state.days > 0 ? 'last ' + state.days + ' days' : 'all time';
 
-    row.appendChild(tile('Rig visits', String(reports.length), rangeLabel));
+    row.appendChild(tile('Reports', String(reports.length), rangeLabel));
 
     var latest = reports[0];
-    row.appendChild(tile('Latest visit',
+    row.appendChild(tile('Latest report',
       latest ? latest.rig : '—',
-      latest ? (latest.type || 'Visit') + ' · ' + relTime(reportDate(latest)) : 'no visits in range'));
+      latest ? (latest.type || latest.reporttype || 'Report') + ' · ' + relTime(reportDate(latest)) : 'no reports in range'));
 
     var critOpen = 0, actions = 0;
     reports.forEach(function (r) {
@@ -550,12 +563,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var host = $('time-chart');
     host.textContent = '';
     var b = buckets(reports);
-    $('time-chart-title').textContent = b.byWeek ? 'Visits per week' : 'Visits per day';
+    $('time-chart-title').textContent = b.byWeek ? 'Reports per week' : 'Reports per day';
 
     if (!reports.length) {
       var empty = document.createElement('div');
       empty.className = 'chart-empty';
-      empty.textContent = 'No visits in the selected range.';
+      empty.textContent = 'No reports in the selected range.';
       host.appendChild(empty);
       return;
     }
@@ -569,7 +582,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var yMax = Math.ceil(maxCount / tickStep) * tickStep;
 
     var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-      'aria-label': 'Column chart of rig visits over time' });
+      'aria-label': 'Column chart of reports over time' });
 
     var y = function (v) { return mT + ih - (v / yMax) * ih; };
 
@@ -601,7 +614,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       }
       var label = b.byWeek ? 'Week of ' + fmtDate(bucket.start) : bucket.start.toLocaleDateString(
         undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-      attachHover(g, bucket.count + (bucket.count === 1 ? ' visit' : ' visits'), label);
+      attachHover(g, bucket.count + (bucket.count === 1 ? ' report' : ' reports'), label);
       svg.appendChild(g);
     });
 
@@ -615,7 +628,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (!reports.length) {
       var empty = document.createElement('div');
       empty.className = 'chart-empty';
-      empty.textContent = 'No visits in the selected range.';
+      empty.textContent = 'No reports in the selected range.';
       host.appendChild(empty);
       return;
     }
@@ -632,7 +645,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var maxCount = Math.max.apply(null, rigs.map(function (r) { return counts[r]; }));
 
     var svg = svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, role: 'img',
-      'aria-label': 'Bar chart of visits per rig' });
+      'aria-label': 'Bar chart of reports per rig' });
 
     rigs.forEach(function (rig, i) {
       var yMid = mT + rowH * i + rowH / 2;
@@ -659,7 +672,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       val.textContent = String(counts[rig]);
       g.appendChild(val);
 
-      attachHover(g, counts[rig] + (counts[rig] === 1 ? ' visit' : ' visits'), rig);
+      attachHover(g, counts[rig] + (counts[rig] === 1 ? ' report' : ' reports'), rig);
       svg.appendChild(g);
     });
 
@@ -684,7 +697,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   // ---------- table ----------
 
-  var COLUMNS = ['', 'Rig / Visit', 'Visit dates', 'WCE Supt', 'Location', 'Daily reports', 'Critical', 'Actions', 'Status'];
+  var COLUMNS = ['', 'Rig / Report', 'Dates', 'WCE Supt', 'Location', 'Entries', 'Critical', 'Actions', 'Status'];
 
   function detailKeyTable(titleText, headers, rows) {
     var section = document.createDocumentFragment();
@@ -808,7 +821,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var tdRig = document.createElement('td');
       var rig = document.createElement('div'); rig.className = 'rig'; rig.textContent = r.rig;
       var typ = document.createElement('div'); typ.className = 'visit-type';
-      typ.textContent = r.type || 'Rig visit';
+      typ.textContent = r.type || r.reporttype || 'Report';
       var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file;
       tdRig.appendChild(rig); tdRig.appendChild(typ); tdRig.appendChild(file);
       tr.appendChild(tdRig);
@@ -939,18 +952,21 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     document.body.appendChild(lb);
   }
 
-  function rvPhotos(srcs, captions) {
+  // Accepts plain data-URI strings or { src, caption } objects (SSORT uses both).
+  function rvPhotos(items, captions) {
     var wrap = mk('div', 'rv-photos');
     var count = 0;
-    (srcs || []).forEach(function (src, i) {
+    (items || []).forEach(function (item, i) {
+      var src = (typeof item === 'string') ? item : ((item && item.src) || '');
       if (!src || src.indexOf('data:image') !== 0) return;
+      var cap = (captions && captions[i]) || (item && typeof item === 'object' && item.caption) || '';
       var fig = document.createElement('figure');
       var img = document.createElement('img');
       img.src = src;
-      img.alt = (captions && captions[i]) || 'Report photo';
+      img.alt = cap || 'Report photo';
       img.addEventListener('click', function () { openLightbox(src); });
       fig.appendChild(img);
-      if (captions && captions[i]) fig.appendChild(mk('figcaption', '', captions[i]));
+      if (cap) fig.appendChild(mk('figcaption', '', cap));
       wrap.appendChild(fig);
       count++;
     });
@@ -995,6 +1011,94 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     });
   }
 
+  // CBM data is a flat key/value map: <prefix>_g<section>_<item>_gr/_cm/_ph
+  // hold each task's grade, comment, and photos; <prefix>_g<n>_summary holds
+  // the section write-up; rcpt_* fields describe the equipment/recipient.
+  var CBM_INFO_FIELDS = [
+    ['equip', 'Equipment'], ['date', 'Inspection date'],
+    ['rcpt_inspdate', 'Received date'], ['rcpt_company', 'Company'],
+    ['rcpt_po', 'PO #'], ['rcpt_job', 'Job #'], ['rcpt_rig', 'Rig'],
+    ['rcpt_model', 'Model / PN'], ['rcpt_config', 'Configuration'],
+    ['rcpt_serial', 'Serial #'], ['rcpt_tpa', 'Third party'],
+    ['rcpt_nseng', 'NOV service engineer'], ['rcpt_cwn', 'Customer witness'],
+    ['rcpt_nwn', 'NOV witness']
+  ];
+
+  function cbmGradeChip(grade) {
+    var g = String(grade || '').trim();
+    var cls = 'cbm-grade';
+    if (g === '1') cls += ' g1';
+    else if (g === '2') cls += ' g2';
+    else if (g === '3' || g === '4') cls += ' g34';
+    return mk('span', cls, g ? 'Grade ' + g : 'Ungraded');
+  }
+
+  function rvCbm(cbm, body) {
+    body.appendChild(mk('div', 'rv-section-label', 'CBM inspection details'));
+    var grid = mk('div', 'rv-grid');
+    CBM_INFO_FIELDS.forEach(function (pair) {
+      var v = cbm[pair[0]];
+      if (v && String(v).trim()) grid.appendChild(rvField(pair[1], String(v)));
+    });
+    if (grid.childNodes.length) body.appendChild(grid);
+
+    // Collect graded tasks and the overall grade tally
+    var tasks = [], tally = {};
+    Object.keys(cbm).forEach(function (k) {
+      var m = /^(.+_g(\d+)_(\d+))_gr$/.exec(k);
+      if (!m) return;
+      var grade = String(cbm[k] || '').trim();
+      if (grade) tally[grade] = (tally[grade] || 0) + 1;
+      tasks.push({
+        section: Number(m[2]), item: Number(m[3]), grade: grade,
+        comment: cbm[m[1] + '_cm'] || '', photos: cbm[m[1] + '_ph'] || []
+      });
+    });
+    tasks.sort(function (a, b) { return a.section - b.section || a.item - b.item; });
+
+    var gradeKeys = Object.keys(tally).sort();
+    if (gradeKeys.length) {
+      var tallyRow = mk('div', 'cbm-tally');
+      tallyRow.appendChild(mk('span', 'lbl', 'Grades: '));
+      gradeKeys.forEach(function (g) {
+        var chip = cbmGradeChip(g);
+        chip.textContent = g + ' × ' + tally[g];
+        tallyRow.appendChild(chip);
+      });
+      body.appendChild(tallyRow);
+    }
+
+    var findings = tasks.filter(function (t) {
+      return t.grade || String(t.comment).trim() || (t.photos && t.photos.length);
+    });
+    if (findings.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Graded items'));
+      findings.forEach(function (t) {
+        var row = mk('div', 'rv-equip');
+        var head = mk('div', 'rv-equip-head');
+        head.appendChild(document.createTextNode('Section ' + (t.section + 1) + ' · Item ' + (t.item + 1) + ' '));
+        head.appendChild(cbmGradeChip(t.grade));
+        row.appendChild(head);
+        if (String(t.comment).trim()) row.appendChild(rvNotes(t.comment));
+        var ph = rvPhotos(t.photos);
+        if (ph) row.appendChild(ph);
+        body.appendChild(row);
+      });
+    }
+
+    var summaries = Object.keys(cbm).filter(function (k) { return /_g\d+_summary$/.test(k) && String(cbm[k]).trim(); });
+    if (summaries.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Section summaries'));
+      summaries.sort().forEach(function (k) {
+        var n = Number((/_g(\d+)_summary$/.exec(k))[1]) + 1;
+        var row = mk('div', 'rv-equip');
+        row.appendChild(mk('div', 'rv-equip-head', 'Section ' + n));
+        row.appendChild(rvNotes(cbm[k]));
+        body.appendChild(row);
+      });
+    }
+  }
+
   function renderFullReport(body, full, rec) {
     var meta = full.meta || {};
 
@@ -1002,6 +1106,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var info = mk('div', 'rv-grid');
     info.appendChild(rvField('Rig / Vessel', meta.asset || rec.rig));
     info.appendChild(rvField('Visit dates', fmtVisitSpan(rec)));
+    if (rec.reporttype) info.appendChild(rvField('Report type', rec.reporttype));
     if (meta.type) info.appendChild(rvField('Classification', meta.type));
     if (meta.discipline) info.appendChild(rvField('Discipline', meta.discipline));
     if (meta.location) info.appendChild(rvField('Well / Location', meta.location));
@@ -1028,6 +1133,25 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (meta.next24 && meta.next24.replace(/<[^>]*>/g, '').trim()) {
       body.appendChild(mk('div', 'rv-section-label', 'Next 24 hours'));
       body.appendChild(rvNotes(meta.next24));
+    }
+
+    // SSORT daily log entries: [{ date, note (HTML), photos }]
+    var dayLog = meta.dayLog || [];
+    if (dayLog.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Daily log'));
+      dayLog.forEach(function (d) {
+        var t = mk('div', 'rv-tile');
+        var head = mk('div', 'rv-tile-head');
+        head.appendChild(mk('span', 't-title', d.date || 'Log entry'));
+        t.appendChild(head);
+        var tb = mk('div', 'rv-tile-body');
+        if (d.note && String(d.note).replace(/<[^>]*>/g, '').trim()) tb.appendChild(rvNotes(d.note));
+        var ph = rvPhotos(d.photos);
+        if (ph) tb.appendChild(ph);
+        if (!tb.childNodes.length) tb.appendChild(mk('div', 'rv-notes', 'No content recorded.'));
+        t.appendChild(tb);
+        body.appendChild(t);
+      });
     }
 
     var tiles = full.tiles || [];
@@ -1065,6 +1189,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       });
 
       if (tile.vsrData) rvVsr(tile.vsrData, tb);
+      if (tile.cbmData) rvCbm(tile.cbmData, tb);
 
       if (!tb.childNodes.length) tb.appendChild(mk('div', 'rv-notes', 'No content recorded for this entry.'));
       t.appendChild(tb);
@@ -1092,7 +1217,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var title = mk('div', 'rh-title');
     title.appendChild(mk('div', 'rh-rig', rec.rig));
     title.appendChild(mk('div', 'rh-sub',
-      (rec.type || 'Rig visit') + ' · ' + fmtVisitSpan(rec) + (rec.wce ? ' · ' + rec.wce : '')));
+      (rec.type || rec.reporttype || 'Report') + ' · ' + fmtVisitSpan(rec) + (rec.wce ? ' · ' + rec.wce : '')));
     head.appendChild(title);
     var closeBtn = mk('button', 'report-close', '✕');
     closeBtn.type = 'button';
@@ -1161,27 +1286,32 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
-  // ---------- rig filter options ----------
+  // ---------- rig & type filter options ----------
 
-  function renderRigOptions() {
-    var sel = $('rig-filter');
-    var current = state.rig;
-    var rigs = [];
-    (window.DASHBOARD_DATA.reports || []).forEach(function (r) {
-      if (r.rig && rigs.indexOf(r.rig) === -1) rigs.push(r.rig);
-    });
-    rigs.sort();
+  function renderSelectOptions(sel, values, current, allLabel) {
     sel.textContent = '';
     var all = document.createElement('option');
-    all.value = ''; all.textContent = 'All rigs';
+    all.value = ''; all.textContent = allLabel;
     sel.appendChild(all);
-    rigs.forEach(function (rig) {
+    values.forEach(function (v) {
       var o = document.createElement('option');
-      o.value = rig; o.textContent = rig;
+      o.value = v; o.textContent = v;
       sel.appendChild(o);
     });
-    sel.value = rigs.indexOf(current) !== -1 ? current : '';
-    state.rig = sel.value;
+    sel.value = values.indexOf(current) !== -1 ? current : '';
+    return sel.value;
+  }
+
+  function renderFilterOptions() {
+    var rigs = [], types = [];
+    (window.DASHBOARD_DATA.reports || []).forEach(function (r) {
+      if (r.rig && rigs.indexOf(r.rig) === -1) rigs.push(r.rig);
+      if (r.reporttype && types.indexOf(r.reporttype) === -1) types.push(r.reporttype);
+    });
+    rigs.sort();
+    types.sort();
+    state.rig = renderSelectOptions($('rig-filter'), rigs, state.rig, 'All rigs');
+    state.rtype = renderSelectOptions($('type-filter'), types, state.rtype, 'All types');
   }
 
   // ---------- render root ----------
@@ -1195,7 +1325,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (!hasData) return;
 
     $('folder-line').textContent = data.reportFolder ? ('Source: ' + data.reportFolder) : '';
-    renderRigOptions();
+    renderFilterOptions();
 
     var reports = filteredReports();
     renderKpis(reports);
@@ -1241,6 +1371,11 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   $('rig-filter').addEventListener('change', function () {
     state.rig = this.value;
+    render();
+  });
+
+  $('type-filter').addEventListener('change', function () {
+    state.rtype = this.value;
     render();
   });
 

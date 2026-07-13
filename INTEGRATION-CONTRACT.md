@@ -11,12 +11,24 @@ summaries and renders the full reports. **If you change what the tool
 exports, you can silently break that dashboard.** This file is the contract:
 what must not change, and what is safe.
 
+> **Scope note (v2.0):** this contract now covers BOTH report tools — the TSC
+> Rig Reporting Tool (WCGRRT) and the Seadrill Subsea Onboard Reporting Tool
+> (SSORT). The scanner accepts **any `.json` file with a valid payload
+> regardless of filename** and scans subfolders, so filename drift no longer
+> breaks discovery — but the naming convention below is still the standard.
+> SSORT's `meta.reporttype` is ingested and drives the dashboard's type
+> filter; when absent, the type is derived from which tile data block is
+> present (`cbmData` → CBM Inspection, `sbopData` → Surface BOP Testing,
+> `pdcData` → Pre-Deployment Checklist, `caData` → Conditional Assessment,
+> `inspData` → Technical Inspection; none → Rig Visit).
+
 ## Never change these (hard dependencies)
 
-1. **Export filename pattern**
-   `seadrill-report_<rig>_<YYYY-MM-DD>.json`
-   The scanner discovers files with the wildcard `seadrill-report_*.json`.
-   Keep the `seadrill-report_` prefix and the `.json` extension exactly.
+1. **Export filename convention** (naming is no longer load-bearing for
+   discovery, but keep it for consistency and collision-avoidance)
+   WCGRRT: `seadrill-report_<rig>_<YYYY-MM-DD>.json`
+   SSORT: `seadrill-report_<rig>_<YYYY-MM-DD>_<reporttype>.json`
+   The `.json` extension IS required.
 
 2. **Top-level payload shape** (currently `version: 3`)
    ```
