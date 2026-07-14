@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.0'
+$ScriptVersion = '2.1'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -62,9 +62,18 @@ if (-not [System.IO.Path]::IsPathRooted($outputFile)) {
 function Get-Prop {
     param($Object, [string]$Name)
     if ($null -eq $Object) { return $null }
-    # Big-file parsing (JavaScriptSerializer) returns dictionaries, not PSObjects
+    # Big-file parsing (JavaScriptSerializer) returns dictionaries, not
+    # PSObjects. Use ContainsKey (public on Dictionary/Hashtable, binds on
+    # Windows PowerShell 5.1 where .Contains(string) does not), with a key
+    # scan as the fallback for any other IDictionary implementation.
     if ($Object -is [System.Collections.IDictionary]) {
-        if ($Object.Contains($Name)) { return $Object[$Name] }
+        try {
+            if ($Object.ContainsKey($Name)) { return $Object[$Name] }
+            return $null
+        } catch { }
+        foreach ($k in $Object.Keys) {
+            if ([string]$k -eq $Name) { return $Object[$k] }
+        }
         return $null
     }
     $prop = $Object.PSObject.Properties[$Name]
