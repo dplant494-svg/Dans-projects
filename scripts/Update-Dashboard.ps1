@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.1'
+$ScriptVersion = '2.2'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -206,13 +206,19 @@ foreach ($f in $files) {
     $rig = Get-Prop $meta 'asset'
     if (-not $rig) { $rig = $f.BaseName }
 
+    # Report lead: WCE superintendent for rig-visit exports; SSORT has no WCE
+    # field, so fall back to the Subsea Supervisor, then the engineers.
+    $lead = [string](Get-Prop $meta 'wce')
+    if (-not $lead) { $lead = [string](Get-Prop $meta 'sss') }
+    if (-not $lead) { $lead = [string](Get-Prop $meta 'tech') }
+
     $reports.Add([pscustomobject]@{
         file          = $f.Name
         rig           = [string]$rig
         reporttype    = [string](Get-ReportType -Meta $meta -Tiles $tilesRaw)
         type          = [string](Get-Prop $meta 'type')        # visit classification
         discipline    = [string](Get-Prop $meta 'discipline')
-        wce           = [string](Get-Prop $meta 'wce')          # WCE Technical Superintendent
+        wce           = $lead                                    # WCE Supt, or SSS/engineers for SSORT
         location      = [string](Get-Prop $meta 'location')     # well name / location
         date          = [string](Get-Prop $meta 'date')         # visit start
         dateEnd       = [string](Get-Prop $meta 'dateend')      # visit end
