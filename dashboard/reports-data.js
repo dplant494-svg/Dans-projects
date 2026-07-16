@@ -1,7 +1,27 @@
 window.DASHBOARD_DATA = {
-  "generatedAt": "2026-07-11T06:00:00",
-  "reportFolder": "sample-reports (demo data — run scripts\\Update-Dashboard.ps1 to use your real TSC REPORTS folder)",
+  "generatedAt": "2026-07-16T08:00:00+00:00",
+  "reportFolder": "sample-reports (demo data - run scripts\\Update-Dashboard.ps1 to use your real folder)",
   "reports": [
+    {
+      "file": "seadrill-report_Fleet_2026-07-13.json",
+      "rig": "Fleet",
+      "reporttype": "BWM Weekly Planning",
+      "type": "N/A",
+      "discipline": "Planning",
+      "wce": "Bo Sherman",
+      "location": "Fleet-wide",
+      "date": "2026-07-13",
+      "dateEnd": "",
+      "exportedAt": "2026-07-13T12:00:00.000Z",
+      "modified": "2026-07-13T17:30:00",
+      "tileCount": 1,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 0,
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": []
+    },
     {
       "file": "seadrill-report_West-Gemini_2026-07-09.json",
       "rig": "West Gemini",
@@ -30,6 +50,26 @@ window.DASHBOARD_DATA = {
           "leftWithRig": true
         }
       ]
+    },
+    {
+      "file": "seadrill-report_Fleet_2026-07-06.json",
+      "rig": "Fleet",
+      "reporttype": "BWM Weekly Planning",
+      "type": "N/A",
+      "discipline": "Planning",
+      "wce": "Bo Sherman",
+      "location": "Fleet-wide",
+      "date": "2026-07-06",
+      "dateEnd": "",
+      "exportedAt": "2026-07-06T12:00:00.000Z",
+      "modified": "2026-07-06T17:30:00",
+      "tileCount": 1,
+      "criticalTotal": 0,
+      "criticalOpen": 0,
+      "actionsTotal": 0,
+      "actionsLeftWithRig": 0,
+      "criticalItems": [],
+      "actionItems": []
     },
     {
       "file": "seadrill-report_West-Neptune_2026-07-06.json",
@@ -62,7 +102,7 @@ window.DASHBOARD_DATA = {
       "date": "2026-07-05",
       "dateEnd": "",
       "exportedAt": "T17:30:00.000Z",
-      "modified": "2026-07-10T17:30:00",
+      "modified": "2026-07-05T17:30:00",
       "tileCount": 1,
       "criticalTotal": 0,
       "criticalOpen": 0,

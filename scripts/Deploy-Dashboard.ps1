@@ -61,5 +61,20 @@ else {
     Write-Warning "No reports-data.js yet - run scripts\Update-Dashboard.ps1 to generate it."
 }
 
+# BOP Fleet Planning Dashboard: page + vendored SheetJS + current data file,
+# published to the bop/ subfolder (URL: <site>/bop/dashboard.html).
+$bopDir = Join-Path $repoRoot 'bop-dashboard'
+if (Test-Path -Path (Join-Path $bopDir 'dashboard.html')) {
+    $bopDeployDir = Join-Path $DeployPath 'bop'
+    if (-not (Test-Path -Path $bopDeployDir)) { New-Item -ItemType Directory -Path $bopDeployDir -Force | Out-Null }
+    foreach ($name in @('dashboard.html', 'xlsx.full.min.js', 'bop-planning-data.js')) {
+        $src = Join-Path $bopDir $name
+        if (Test-Path -Path $src) {
+            Copy-Item -Path $src -Destination (Join-Path $bopDeployDir $name) -Force
+            Write-Host "Published bop/$name" -ForegroundColor Green
+        }
+    }
+}
+
 Write-Host ''
 Write-Host 'Done. The scheduled Update-Dashboard task will keep reports-data.js on the server current from now on.'

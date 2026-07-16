@@ -64,12 +64,39 @@ Visit status uses the tool's own semantics: open critical equipment rows →
 
 | Path | What it is |
 |---|---|
-| `dashboard/dashboard.html` | The dashboard — open this in a browser |
+| `dashboard/dashboard.html` | The reports dashboard — open this in a browser |
 | `dashboard/reports-data.js` | Generated data file (sample data committed for demo) |
+| `bop-dashboard/dashboard.html` | BOP Fleet Planning Dashboard (TV kiosk, 1920×1080) |
+| `bop-dashboard/bop-planning-data.js` | Generated BWM weekly snapshots (demo committed) |
+| `bop-dashboard/xlsx.full.min.js` | Vendored SheetJS (legacy Excel upload path, offline) |
 | `config.json` | Where the report .json files live |
-| `scripts/Update-Dashboard.ps1` | Scans the report folder, regenerates the data file |
+| `scripts/Update-Dashboard.ps1` | Scans the report folder, regenerates both data files |
 | `scripts/Register-DashboardTask.ps1` | One-time: schedules the scan every 10 minutes |
+| `scripts/Deploy-Dashboard.ps1` | Publishes both dashboards to the IIS deploy path |
+| `tools/build_world.js` | Regenerates the BOP map's embedded world geometry |
 | `sample-reports/` | Example tool exports (trimmed, no photos) for testing |
+
+## BOP Fleet Planning Dashboard
+
+A second dashboard sharing the same pipeline: a fixed 1920×1080 TV kiosk view
+(map + tile pages) of BOP status across the fleet, fed by the WCGRRT "BWM
+Weekly Planning" export (a fleet-level tile inside the standard
+`seadrill-report_*.json`, per the BWM planning handoff).
+
+- The scanner (v2.3+) collects every export containing a `bwmData` tile and
+  publishes all weekly snapshots to `bop-planning-data.js`, deployed to the
+  `bop/` subfolder of the deploy path — URL:
+  `http://<server>/…/dashboard/bop/dashboard.html`.
+- The dashboard auto-loads the newest week, re-checks every 5 minutes (kiosk
+  stays current unattended), and a week selector in the footer switches to
+  older snapshots when more than one exists.
+- With no pipeline data present it falls back to the embedded demo snapshot
+  and shows a "DEMO DATA" note in the footer. Embedded demo ERT project data
+  is dropped as soon as real pipeline data loads.
+- Manual upload zones (planner JSON/Excel, ERT P6 workbooks) still exist in
+  the hidden admin section of the page.
+- Planning exports also appear on the reports dashboard, typed
+  `BWM Weekly Planning` / `Planning Report` in the type filter.
 
 ## One-time setup (Windows)
 

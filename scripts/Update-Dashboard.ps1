@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.2'
+$ScriptVersion = '2.3'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -109,6 +109,8 @@ function Get-ReportType {
     if ($rt) { return $rt }
     if ($Tiles) {
         foreach ($tile in $Tiles) {
+            if (Get-Prop $tile 'bwmData')      { return 'BWM Weekly Planning' }
+            if (Get-Prop $tile 'planningData') { return 'Planning Report' }
             if (Get-Prop $tile 'cbmData')  { return 'CBM Inspection' }
             if (Get-Prop $tile 'sbopData') { return 'Surface BOP Testing' }
             if (Get-Prop $tile 'pdcData')  { return 'Pre-Deployment Checklist' }
@@ -117,6 +119,23 @@ function Get-ReportType {
         }
     }
     return 'Rig Visit'
+}
+
+# JSON writer matching Read-ReportJson: ConvertTo-Json on PowerShell 7+, the
+# JavaScriptSerializer on Windows PowerShell 5.1 (it serialises the dictionary
+# graphs that Read-ReportJson produced there, which ConvertTo-Json cannot).
+function ConvertTo-ReportJson {
+    param($Object)
+    if ($PSVersionTable.PSEdition -eq 'Core') {
+        return ($Object | ConvertTo-Json -Depth 24 -Compress)
+    }
+    if ($null -eq $script:BigJsonSerializer) {
+        Add-Type -AssemblyName System.Web.Extensions
+        $script:BigJsonSerializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+        $script:BigJsonSerializer.MaxJsonLength = [int]::MaxValue
+        $script:BigJsonSerializer.RecursionLimit = 1000
+    }
+    return $script:BigJsonSerializer.Serialize($Object)
 }
 
 $recurse = $false
@@ -140,6 +159,7 @@ $files = @(Get-ChildItem -Path $reportFolder -Filter $config.filePattern -File -
     })
 
 $reports = New-Object System.Collections.Generic.List[object]
+$bwmSnapshots = New-Object System.Collections.Generic.List[object]
 $skipped = 0
 foreach ($f in $files) {
     try {
@@ -206,6 +226,22 @@ foreach ($f in $files) {
     $rig = Get-Prop $meta 'asset'
     if (-not $rig) { $rig = $f.BaseName }
 
+    # BWM Weekly Planning tiles are fleet-level snapshots that feed the BOP
+    # Fleet Planning Dashboard; collect them raw for bop-planning-data.js.
+    if ($tilesRaw) {
+        foreach ($tile in $tilesRaw) {
+            $bwm = Get-Prop $tile 'bwmData'
+            if ($bwm) {
+                $bwmSnapshots.Add(@{
+                    file       = $f.Name
+                    week       = [string](Get-Prop $bwm 'week')
+                    reportDate = [string](Get-Prop $bwm 'reportDate')
+                    bwm        = $bwm
+                }) | Out-Null
+            }
+        }
+    }
+
     # Report lead: WCE superintendent for rig-visit exports; SSORT has no WCE
     # field, so fall back to the Subsea Supervisor, then the engineers.
     $lead = [string](Get-Prop $meta 'wce')
@@ -270,6 +306,25 @@ if (-not (Test-Path -Path $outDir)) {
 Write-Host "Wrote $($reports.Count) report(s) to $outputFile" -ForegroundColor Green
 if ($skipped -gt 0) { Write-Host "Skipped $skipped file(s)." -ForegroundColor Yellow }
 
+# BOP Fleet Planning Dashboard data: every BWM weekly snapshot, newest first.
+$bopOutputFile = Join-Path $repoRoot 'bop-dashboard\bop-planning-data.js'
+if ($config.PSObject.Properties['bopOutputFile'] -and $config.bopOutputFile) {
+    $bopOutputFile = [Environment]::ExpandEnvironmentVariables($config.bopOutputFile)
+    if (-not [System.IO.Path]::IsPathRooted($bopOutputFile)) { $bopOutputFile = Join-Path $repoRoot $bopOutputFile }
+}
+$bwmSortedList = New-Object System.Collections.Generic.List[object]
+$bwmSnapshots | Sort-Object -Property @{ Expression = { [string]$_['reportDate'] } } -Descending |
+    ForEach-Object { $bwmSortedList.Add($_) | Out-Null }
+$bopPayload = @{
+    generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+    snapshots   = $bwmSortedList.ToArray()
+}
+$bopContent = 'window.BWM_DATA = ' + (ConvertTo-ReportJson $bopPayload) + ";`n"
+$bopDir = Split-Path -Parent $bopOutputFile
+if (-not (Test-Path -Path $bopDir)) { New-Item -ItemType Directory -Path $bopDir -Force | Out-Null }
+[System.IO.File]::WriteAllText($bopOutputFile, $bopContent, (New-Object System.Text.UTF8Encoding($false)))
+Write-Host "Wrote $($bwmSortedList.Count) BWM snapshot(s) to $bopOutputFile" -ForegroundColor Green
+
 # If a deploy path is configured (the IIS/network folder the dashboard is
 # served from), push the fresh data file there too so viewers stay current.
 $deployPath = ''
@@ -310,6 +365,13 @@ if ($deployPath) {
             }
         }
         if ($copied -gt 0) { Write-Host "Copied $copied full report(s) to $reportsDir" -ForegroundColor Green }
+
+        # BOP dashboard data goes to the bop/ subfolder of the deploy path
+        # (Deploy-Dashboard.ps1 publishes the page itself there).
+        $bopDeployDir = Join-Path $deployPath 'bop'
+        if (-not (Test-Path -Path $bopDeployDir)) { New-Item -ItemType Directory -Path $bopDeployDir -Force | Out-Null }
+        Copy-Item -Path $bopOutputFile -Destination (Join-Path $bopDeployDir 'bop-planning-data.js') -Force
+        Write-Host "Deployed BWM snapshot data to $bopDeployDir" -ForegroundColor Green
     }
     catch {
         # Don't fail the scheduled task over a transient network issue -
