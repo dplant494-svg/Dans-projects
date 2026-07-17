@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.4'
+$ScriptVersion = '2.5'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -48,11 +48,26 @@ if (-not (Test-Path -Path $ConfigPath)) {
 }
 $config = Get-Content -Path $ConfigPath -Raw | ConvertFrom-Json
 
-# The folder may be written with environment variables, e.g. "%OneDrive%\TSC REPORTS"
-$reportFolder = [Environment]::ExpandEnvironmentVariables($config.reportFolder)
-if (-not (Test-Path -Path $reportFolder)) {
-    throw "Report folder not found: $reportFolder  (check 'reportFolder' in config.json and that OneDrive sync is set up)"
+# One or more report folders: 'reportFolders' (array) takes precedence over
+# the single 'reportFolder'. Paths may use environment variables.
+$reportFolders = @()
+if ($config.PSObject.Properties['reportFolders'] -and $config.reportFolders) {
+    foreach ($rf in @($config.reportFolders)) {
+        $reportFolders += [Environment]::ExpandEnvironmentVariables([string]$rf)
+    }
 }
+elseif ($config.PSObject.Properties['reportFolder'] -and $config.reportFolder) {
+    $reportFolders += [Environment]::ExpandEnvironmentVariables($config.reportFolder)
+}
+$existingFolders = @()
+foreach ($rf in $reportFolders) {
+    if (Test-Path -Path $rf) { $existingFolders += $rf }
+    else { Write-Warning "Report folder not found (skipping this run): $rf" }
+}
+if (-not $existingFolders.Count) {
+    throw "No report folder reachable  (check 'reportFolder'/'reportFolders' in config.json and that OneDrive sync is set up)"
+}
+$reportFolder = $existingFolders[0]   # kept for messages/back-compat
 
 $outputFile = [Environment]::ExpandEnvironmentVariables($config.outputFile)
 if (-not [System.IO.Path]::IsPathRooted($outputFile)) {
@@ -147,16 +162,20 @@ if ($config.PSObject.Properties['excludeFolders'] -and $config.excludeFolders) {
     $excludeFolders = @($config.excludeFolders)
 }
 
-$files = @(Get-ChildItem -Path $reportFolder -Filter $config.filePattern -File -Recurse:$recurse |
-    Where-Object {
-        $rel = $_.FullName.Substring($reportFolder.Length).Trim('\', '/')
-        $parts = $rel -split '[\\/]'
-        $dirParts = @()
-        if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
-        $excluded = $false
-        foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
-        (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json')
-    })
+$filesList = New-Object System.Collections.Generic.List[object]
+foreach ($baseFolder in $existingFolders) {
+    Get-ChildItem -Path $baseFolder -Filter $config.filePattern -File -Recurse:$recurse |
+        Where-Object {
+            $rel = $_.FullName.Substring($baseFolder.Length).Trim('\', '/')
+            $parts = $rel -split '[\\/]'
+            $dirParts = @()
+            if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
+            $excluded = $false
+            foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
+            (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json')
+        } | ForEach-Object { $filesList.Add($_) | Out-Null }
+}
+$files = $filesList.ToArray()
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
@@ -288,7 +307,7 @@ $reports | Sort-Object -Property @{ Expression = {
 
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
-    reportFolder = $reportFolder
+    reportFolder = ($existingFolders -join '  |  ')
     reports      = $sortedList.ToArray()
 }
 
