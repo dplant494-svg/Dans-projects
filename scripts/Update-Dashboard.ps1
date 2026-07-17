@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.3'
+$ScriptVersion = '2.4'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -366,9 +366,14 @@ if ($deployPath) {
         }
         if ($copied -gt 0) { Write-Host "Copied $copied full report(s) to $reportsDir" -ForegroundColor Green }
 
-        # BOP dashboard data goes to the bop/ subfolder of the deploy path
-        # (Deploy-Dashboard.ps1 publishes the page itself there).
+        # BOP dashboard data must land in the folder the BOP page is served
+        # from (the page loads bop-planning-data.js relative to itself).
+        # Set 'bopDeployPath' in config.json to that folder; defaults to a
+        # bop/ subfolder of the main deploy path.
         $bopDeployDir = Join-Path $deployPath 'bop'
+        if ($config.PSObject.Properties['bopDeployPath'] -and $config.bopDeployPath) {
+            $bopDeployDir = [Environment]::ExpandEnvironmentVariables($config.bopDeployPath)
+        }
         if (-not (Test-Path -Path $bopDeployDir)) { New-Item -ItemType Directory -Path $bopDeployDir -Force | Out-Null }
         Copy-Item -Path $bopOutputFile -Destination (Join-Path $bopDeployDir 'bop-planning-data.js') -Force
         Write-Host "Deployed BWM snapshot data to $bopDeployDir" -ForegroundColor Green

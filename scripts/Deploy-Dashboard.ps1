@@ -33,9 +33,12 @@ if (-not $scriptDir) { $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.P
 $repoRoot = Split-Path -Parent $scriptDir
 if (-not $ConfigPath) { $ConfigPath = Join-Path $repoRoot 'config.json' }
 
-if (-not $DeployPath) {
-    if (-not (Test-Path -Path $ConfigPath)) { throw "Config file not found: $ConfigPath" }
+$config = $null
+if (Test-Path -Path $ConfigPath) {
     $config = Get-Content -Path $ConfigPath -Raw | ConvertFrom-Json
+}
+if (-not $DeployPath) {
+    if ($null -eq $config) { throw "Config file not found: $ConfigPath" }
     if ($config.PSObject.Properties['deployPath'] -and $config.deployPath) {
         $DeployPath = [Environment]::ExpandEnvironmentVariables($config.deployPath)
     }
@@ -61,17 +64,30 @@ else {
     Write-Warning "No reports-data.js yet - run scripts\Update-Dashboard.ps1 to generate it."
 }
 
-# BOP Fleet Planning Dashboard: page + vendored SheetJS + current data file,
-# published to the bop/ subfolder (URL: <site>/bop/dashboard.html).
+# BOP Fleet Planning Dashboard: page + vendored SheetJS + current data file.
+# 'bopDeployPath' in config.json names the folder the page is served from
+# (default: bop/ under the main deploy path); 'bopPageName' names the
+# published page file (default dashboard.html) - e.g.
+#   "bopDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred",
+#   "bopPageName":   "BOP Fleet Planning Dashboard.html"
 $bopDir = Join-Path $repoRoot 'bop-dashboard'
 if (Test-Path -Path (Join-Path $bopDir 'dashboard.html')) {
     $bopDeployDir = Join-Path $DeployPath 'bop'
+    if ($config -and $config.PSObject.Properties['bopDeployPath'] -and $config.bopDeployPath) {
+        $bopDeployDir = [Environment]::ExpandEnvironmentVariables($config.bopDeployPath)
+    }
+    $bopPageName = 'dashboard.html'
+    if ($config -and $config.PSObject.Properties['bopPageName'] -and $config.bopPageName) {
+        $bopPageName = $config.bopPageName
+    }
     if (-not (Test-Path -Path $bopDeployDir)) { New-Item -ItemType Directory -Path $bopDeployDir -Force | Out-Null }
-    foreach ($name in @('dashboard.html', 'xlsx.full.min.js', 'bop-planning-data.js')) {
+    Copy-Item -Path (Join-Path $bopDir 'dashboard.html') -Destination (Join-Path $bopDeployDir $bopPageName) -Force
+    Write-Host "Published BOP page as '$bopPageName' to $bopDeployDir" -ForegroundColor Green
+    foreach ($name in @('xlsx.full.min.js', 'bop-planning-data.js')) {
         $src = Join-Path $bopDir $name
         if (Test-Path -Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $bopDeployDir $name) -Force
-            Write-Host "Published bop/$name" -ForegroundColor Green
+            Write-Host "Published $name alongside it" -ForegroundColor Green
         }
     }
 }
