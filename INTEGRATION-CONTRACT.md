@@ -80,6 +80,24 @@ what must not change, and what is safe.
    POST format: JSON body, `Content-Type: application/json`, filename in the
    `X-Filename` header).
 
+## Now load-bearing: keys the dashboard actively consumes (do not rename)
+
+These started as "unknown keys, safely ignored" but the dashboard pipeline now
+reads them. Renaming, retyping, or restructuring any of these breaks a live
+dashboard feature — treat them exactly like the core fields above:
+
+| Key | Consumed by |
+|---|---|
+| `meta.reporttype` | report-type filter/labels on the reports dashboard |
+| `meta.logMonth` + `meta.dayLog[]` (`date`, `equip`, `failure`/`lesson` **booleans**, `note` HTML, `photos[]`) | Daily Logs & Lessons Learned index (monthly upsert per rig+logMonth) |
+| `tiles[].bwmData` (`week`, `reportDate`, `compiledBy`, `rows[]` incl. `m.*` booleans) | BOP Fleet Planning Dashboard (weekly snapshots + history) |
+| `tiles[].planningData` | report-type detection ('Planning Report') |
+| `tiles[].r53Data.fields` / `tiles[].caData.fields` with `s53_*` keys (esp. `s53_isfailure`, `s53_component`, `s53_item`, `s53_compmfr`, `s53_model`, `s53_obsfailure`, `s53_malfunction`, `s53_rootcause`, `s53_findings`, `s53_lessons`, `reportDate`) | R53 events in the lessons/failures index + S53 viewer |
+| `tiles[].cbmData` (`equip`, `date`, `rcpt_*`, `<prefix>_g<n>_<m>_gr/_cm/_ph`, `<prefix>_g<n>_summary`) | CBM rendering in the full-report viewer |
+| `tiles[].sbopData` / `tiles[].pdcData` / `tiles[].inspData` / `tiles[].vsrData` | report-type detection (and VSR rendering) |
+
+Adding NEW keys anywhere remains safe and is still the right way to extend.
+
 ## Safe changes (no dashboard impact)
 
 - **Adding new fields anywhere** — the scanner and dashboard ignore unknown
