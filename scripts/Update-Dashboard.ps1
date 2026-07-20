@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.6'
+$ScriptVersion = '2.7'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -449,7 +449,13 @@ $deployPath = ''
 if ($config.PSObject.Properties['deployPath'] -and $config.deployPath) {
     $deployPath = [Environment]::ExpandEnvironmentVariables($config.deployPath)
 }
-if ($deployPath) {
+if ($deployPath -and $reports.Count -eq 0) {
+    # Safety: an empty scan usually means the config points at the wrong
+    # folder or a sync glitch emptied it - never blank the live dashboard
+    # or purge the server's report copies over that.
+    Write-Warning "Scan found 0 reports - leaving the server data untouched. Check 'reportFolders' in config.json points at the folder(s) that actually contain the report .json files."
+}
+elseif ($deployPath) {
     try {
         if (-not (Test-Path -Path $deployPath)) {
             throw "deploy folder not reachable"
