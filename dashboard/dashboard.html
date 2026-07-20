@@ -272,6 +272,23 @@
   .cbm-tally { margin: 10px 0 4px; font-size: 12px; }
   .cbm-tally .lbl { color: var(--sd-text-light); font-weight: 700; }
   .cbm-tally .cbm-grade { margin-left: 4px; margin-right: 2px; }
+
+  /* ── Daily log & lessons section ── */
+  .log-flag {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 1px 7px; border-radius: 3px; margin-right: 4px; white-space: nowrap;
+  }
+  .log-flag.failure { background: var(--sd-fail); color: #fff; }
+  .log-flag.lesson  { background: var(--sd-yellow); color: var(--sd-blue); }
+  .log-flag.r53     { background: var(--sd-blue); color: #fff; }
+  #log-body td.log-note { max-width: 480px; }
+  #log-body .log-note-text {
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  #log-body .log-photos { color: var(--sd-text-light); font-size: 11px; white-space: nowrap; }
+  #log-body tr { cursor: pointer; }
+  #log-body tr:hover td { background: var(--sd-bg); }
   .lightbox {
     position: fixed; inset: 0; z-index: 30; cursor: zoom-out;
     background: rgba(0,0,0,0.88); display: flex; align-items: center; justify-content: center;
@@ -363,6 +380,31 @@
           </table>
         </div>
         <div class="table-empty" id="table-empty" hidden>No reports match the current filters.</div>
+      </section>
+
+      <section class="card" id="log-section" style="margin-top: 16px" hidden>
+        <h2>Daily logs &amp; lessons learned</h2>
+        <div class="filter-row" style="margin-bottom: 12px">
+          <div class="segmented" role="group" aria-label="Entry kind" id="log-kind">
+            <button type="button" data-kind="all" aria-pressed="true">All</button>
+            <button type="button" data-kind="failure">Failures</button>
+            <button type="button" data-kind="lesson">Lessons learned</button>
+            <button type="button" data-kind="r53">R53 events</button>
+          </div>
+          <select id="log-rig" aria-label="Filter log by rig"><option value="">All rigs</option></select>
+          <select id="log-equip" aria-label="Filter log by equipment"><option value="">All equipment</option></select>
+          <input type="search" id="log-search" placeholder="Search notes, equipment…" aria-label="Search log entries">
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>Date</th><th>Rig</th><th>Equipment</th><th>Flags</th><th>Entry</th>
+            </tr></thead>
+            <tbody id="log-body"></tbody>
+          </table>
+        </div>
+        <div class="table-empty" id="log-empty" hidden>No log entries match the current filters.</div>
+        <div class="source-line" id="log-truncated" style="margin: 8px 0 0" hidden></div>
       </section>
     </main>
   </div>
@@ -1099,6 +1141,59 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
+  // RAPID-S53 / Conditional Assessment fields (r53Data and caData share this
+  // shape). Labeled key facts first, narrative blocks after, then any other
+  // non-empty s53_* fields generically.
+  var R53_FACTS = [
+    ['s53_component', 'Component'], ['s53_item', 'Item'], ['s53_compmfr', 'Manufacturer'],
+    ['s53_model', 'Model'], ['pn', 'Part #'], ['sn', 'Serial #'],
+    ['s53_obsfailure', 'Observed failure'], ['s53_eventdate', 'Event date'],
+    ['s53_sysstatus', 'System status'], ['s53_operator', 'Operator'],
+    ['s53_bopuse', 'BOP use'], ['createdby', 'Created by'], ['assetid', 'Asset ID']
+  ];
+  var R53_NARRATIVES = [
+    ['s53_malfunction', 'Malfunction'], ['s53_assumedcause', 'Assumed cause'],
+    ['s53_remedy', 'Remedy'], ['s53_findings', 'Findings'],
+    ['s53_rootcause', 'Root cause'], ['s53_lessons', 'Lessons learned']
+  ];
+
+  function rvR53(data, body) {
+    var fields = data.fields || {};
+    body.appendChild(mk('div', 'rv-section-label', 'S53 event details'));
+    var grid = mk('div', 'rv-grid');
+    var shown = {};
+    R53_FACTS.forEach(function (pair) {
+      var v = fields[pair[0]];
+      if (v && String(v).trim()) { grid.appendChild(rvField(pair[1], String(v))); shown[pair[0]] = true; }
+    });
+    if (data.reportDate) grid.appendChild(rvField('Report date', String(data.reportDate)));
+    if (grid.childNodes.length) body.appendChild(grid);
+
+    R53_NARRATIVES.forEach(function (pair) {
+      var v = fields[pair[0]];
+      shown[pair[0]] = true;
+      if (!v || !String(v).replace(/<[^>]*>/g, '').trim()) return;
+      var row = mk('div', 'rv-equip');
+      row.appendChild(mk('div', 'rv-equip-head', pair[1]));
+      row.appendChild(rvNotes(String(v)));
+      body.appendChild(row);
+    });
+
+    var rest = Object.keys(fields).filter(function (k) {
+      return !shown[k] && fields[k] && String(fields[k]).trim();
+    }).sort();
+    if (rest.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Other report fields'));
+      var grid2 = mk('div', 'rv-grid');
+      rest.forEach(function (k) {
+        var label = k.replace(/^s53_/, '').replace(/_/g, ' ');
+        label = label.charAt(0).toUpperCase() + label.slice(1);
+        grid2.appendChild(rvField(label, String(fields[k])));
+      });
+      body.appendChild(grid2);
+    }
+  }
+
   function renderFullReport(body, full, rec) {
     var meta = full.meta || {};
 
@@ -1190,6 +1285,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
       if (tile.vsrData) rvVsr(tile.vsrData, tb);
       if (tile.cbmData) rvCbm(tile.cbmData, tb);
+      if (tile.r53Data) rvR53(tile.r53Data, tb);
+      else if (tile.caData && tile.caData.fields) rvR53(tile.caData, tb);
 
       if (!tb.childNodes.length) tb.appendChild(mk('div', 'rv-notes', 'No content recorded for this entry.'));
       t.appendChild(tb);
@@ -1267,6 +1364,117 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       });
   }
 
+  // ---------- daily log & lessons section ----------
+
+  var logState = { kind: 'all', rig: '', equip: '', q: '' };
+  var LOG_ROW_CAP = 300;
+
+  // Unify daily-log entries and R53 events into one row model.
+  function logRows() {
+    var dl = (window.DASHBOARD_DATA && window.DASHBOARD_DATA.dailyLog) || {};
+    var rows = [];
+    (dl.entries || []).forEach(function (e) {
+      rows.push({ kind: 'log', date: e.date, rig: e.rig, equip: e.equip || '',
+        failure: !!e.failure, lesson: !!e.lesson, note: e.note || '',
+        photos: e.photos || 0, file: e.file });
+    });
+    (dl.r53Events || []).forEach(function (e) {
+      var parts = [];
+      if (e.obsfailure) parts.push(e.obsfailure);
+      if (e.malfunction) parts.push(e.malfunction);
+      if (e.rootcause) parts.push('Root cause: ' + e.rootcause);
+      if (e.lessons) parts.push('Lessons: ' + e.lessons);
+      rows.push({ kind: 'r53', date: e.date, rig: e.rig,
+        equip: e.equip || e.item || '', failure: true, lesson: !!(e.lessons && e.lessons.trim()),
+        note: parts.join(' — '), photos: 0, file: e.file });
+    });
+    rows.sort(function (a, b) { return String(b.date || '').localeCompare(String(a.date || '')); });
+    return rows;
+  }
+
+  function filteredLogRows() {
+    var q = logState.q.trim().toLowerCase();
+    return logRows().filter(function (r) {
+      if (logState.kind === 'failure' && !r.failure) return false;
+      if (logState.kind === 'lesson' && !r.lesson) return false;
+      if (logState.kind === 'r53' && r.kind !== 'r53') return false;
+      if (logState.rig && r.rig !== logState.rig) return false;
+      if (logState.equip && r.equip !== logState.equip) return false;
+      if (q) {
+        var hay = [r.rig, r.equip, r.note].join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
+      return true;
+    });
+  }
+
+  function logFlagCell(r) {
+    var td = document.createElement('td');
+    if (r.kind === 'r53') td.appendChild(mk('span', 'log-flag r53', 'R53'));
+    if (r.failure && r.kind !== 'r53') td.appendChild(mk('span', 'log-flag failure', 'FAILURE'));
+    if (r.lesson) td.appendChild(mk('span', 'log-flag lesson', 'LESSON'));
+    if (!td.childNodes.length) td.textContent = '—';
+    return td;
+  }
+
+  function renderLogSection() {
+    var section = $('log-section');
+    var all = logRows();
+    section.hidden = !all.length;
+    if (!all.length) return;
+
+    // facet options from the full set (not the filtered one)
+    var rigs = [], equips = [];
+    all.forEach(function (r) {
+      if (r.rig && rigs.indexOf(r.rig) === -1) rigs.push(r.rig);
+      if (r.equip && equips.indexOf(r.equip) === -1) equips.push(r.equip);
+    });
+    rigs.sort(); equips.sort();
+    logState.rig = renderSelectOptions($('log-rig'), rigs, logState.rig, 'All rigs');
+    logState.equip = renderSelectOptions($('log-equip'), equips, logState.equip, 'All equipment');
+
+    var rows = filteredLogRows();
+    var body = $('log-body');
+    body.textContent = '';
+    rows.slice(0, LOG_ROW_CAP).forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.tabIndex = 0;
+
+      var tdDate = document.createElement('td');
+      tdDate.textContent = r.date ? fmtDate(parseDate(r.date)) + ', ' + parseDate(r.date).getFullYear() : '—';
+      tr.appendChild(tdDate);
+
+      var tdRig = document.createElement('td');
+      tdRig.textContent = r.rig;
+      tr.appendChild(tdRig);
+
+      var tdEquip = document.createElement('td');
+      tdEquip.textContent = r.equip || '—';
+      tr.appendChild(tdEquip);
+
+      tr.appendChild(logFlagCell(r));
+
+      var tdNote = document.createElement('td');
+      tdNote.className = 'log-note';
+      var noteDiv = mk('div', 'log-note-text', r.note || '—');
+      tdNote.appendChild(noteDiv);
+      if (r.photos > 0) tdNote.appendChild(mk('div', 'log-photos', '📷 ' + r.photos + ' photo' + (r.photos === 1 ? '' : 's') + ' — open full report to view'));
+      tr.appendChild(tdNote);
+
+      function open() {
+        var rec = ((window.DASHBOARD_DATA || {}).reports || []).find(function (x) { return x.file === r.file; });
+        if (rec) openReportViewer(rec);
+      }
+      tr.addEventListener('click', open);
+      tr.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); open(); } });
+      body.appendChild(tr);
+    });
+    $('log-empty').hidden = rows.length > 0;
+    var trunc = $('log-truncated');
+    trunc.hidden = rows.length <= LOG_ROW_CAP;
+    if (rows.length > LOG_ROW_CAP) trunc.textContent = 'Showing the ' + LOG_ROW_CAP + ' most recent of ' + rows.length + ' matching entries - narrow the filters to see older ones.';
+  }
+
   // ---------- freshness line ----------
 
   function renderFreshness() {
@@ -1332,6 +1540,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     renderTimeChart(reports);
     renderRigChart(reports);
     renderTable(reports);
+    renderLogSection();
   }
 
   // ---------- auto-refresh: re-load reports-data.js and re-render on change ----------
@@ -1378,6 +1587,18 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     state.rtype = this.value;
     render();
   });
+
+  $('log-kind').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    this.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); });
+    btn.setAttribute('aria-pressed', 'true');
+    logState.kind = btn.dataset.kind;
+    renderLogSection();
+  });
+  $('log-rig').addEventListener('change', function () { logState.rig = this.value; renderLogSection(); });
+  $('log-equip').addEventListener('change', function () { logState.equip = this.value; renderLogSection(); });
+  $('log-search').addEventListener('input', function () { logState.q = this.value; renderLogSection(); });
 
   $('search').addEventListener('input', function () {
     state.search = this.value;

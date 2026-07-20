@@ -1,0 +1,71 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-10T18:00:00.000Z",
+  "meta": {
+    "dateend": "",
+    "wce": "",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "other": [],
+    "wo": "",
+    "type": "",
+    "discipline": "",
+    "asset": "West Auriga",
+    "date": "2026-07-10",
+    "location": "GoM - Tiber",
+    "reporttype": "Rapid 53 (S53 Event Report)"
+  },
+  "tiles": [
+    {
+      "title": "R53 Report",
+      "status": "",
+      "fodb": "",
+      "notes": "",
+      "tileDate": "2026-07-10",
+      "imgData": "",
+      "equipEntries": [],
+      "vsrData": null,
+      "caData": null,
+      "inspData": null,
+      "r53Data": {
+        "equip": "R53 Event Report",
+        "reportDate": "2026-07-10",
+        "fields": {
+          "createdby": "D. Plant",
+          "s53_operator": "BP",
+          "s53_component": "Shuttle Valve",
+          "s53_item": "BOP Control Pod",
+          "s53_compmfr": "NOV",
+          "s53_model": "M25",
+          "pn": "10522-88",
+          "sn": "SV-2211",
+          "s53_obsfailure": "Fails to operate on demand",
+          "s53_isfailure": "Yes",
+          "s53_eventdate": "2026-07-08",
+          "s53_sysstatus": "Stump test",
+          "s53_malfunction": "Shuttle valve on pilot circuit 14 stuck mid-travel during stump testing, blocking function on both pods.",
+          "s53_assumedcause": "Debris ingress past pilot filter.",
+          "s53_remedy": "Valve replaced from spares; pilot circuit flushed.",
+          "s53_findings": "Scoring on shuttle bore consistent with particulate contamination.",
+          "s53_rootcause": "Pilot filter element degraded beyond service limit.",
+          "s53_lessons": "Add pilot filter differential-pressure check to weekly PM; replace elements on calendar time not condition."
+        }
+      }
+    }
+  ],
+  "criticalRows": [],
+  "actionRows": [],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

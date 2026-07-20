@@ -1,0 +1,61 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-01T18:00:00.000Z",
+  "meta": {
+    "dateend": "",
+    "wce": "",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "other": [],
+    "wo": "",
+    "type": "",
+    "discipline": "",
+    "asset": "West Capella",
+    "date": "2026-07-01",
+    "location": "PTTEP Malaysia",
+    "reporttype": "Daily Log",
+    "logMonth": "2026-06",
+    "dayLog": [
+      {
+        "date": "2026-06-05",
+        "equip": "Diverter",
+        "failure": false,
+        "lesson": false,
+        "note": "<p>Diverter packer visual inspection - no findings.</p>",
+        "photos": []
+      },
+      {
+        "date": "2026-06-12",
+        "equip": "Yellow Pod",
+        "failure": true,
+        "lesson": false,
+        "note": "<p>Pod flow reading spiked during stump test; traced to partially blocked filter. Cleaned and retested OK.</p>",
+        "photos": []
+      },
+      {
+        "date": "2026-06-19",
+        "equip": "LMRP Connector",
+        "failure": false,
+        "lesson": true,
+        "note": "<p>Secondary unlock circuit slow to vent. Lesson: vent line loop traps fluid after washdown - added drain-down to post-wash checklist.</p>",
+        "photos": []
+      }
+    ]
+  },
+  "tiles": [],
+  "criticalRows": [],
+  "actionRows": [],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

@@ -1,0 +1,77 @@
+{
+  "version": 3,
+  "exportedAt": "2026-07-01T18:00:00.000Z",
+  "meta": {
+    "dateend": "",
+    "wce": "",
+    "sss": "On duty",
+    "rigmgr": "",
+    "oim": "",
+    "arigmgr": "",
+    "tsl": "",
+    "elec": "",
+    "dsl": "",
+    "tech": "",
+    "other": [],
+    "wo": "",
+    "type": "",
+    "discipline": "",
+    "asset": "West Neptune",
+    "date": "2026-07-01",
+    "location": "GoM - Shenandoah",
+    "reporttype": "Daily Log",
+    "logMonth": "2026-06",
+    "dayLog": [
+      {
+        "date": "2026-06-03",
+        "equip": "Upper Annular",
+        "failure": false,
+        "lesson": false,
+        "note": "<p>Routine function test completed, all parameters nominal.</p>",
+        "photos": []
+      },
+      {
+        "date": "2026-06-08",
+        "equip": "Blue Pod SEM A",
+        "failure": true,
+        "lesson": false,
+        "note": "<p>Intermittent solenoid readback fault on function 12B. Cycled power, fault cleared; monitoring.</p>",
+        "photos": []
+      },
+      {
+        "date": "2026-06-14",
+        "equip": "Riser Tensioners",
+        "failure": false,
+        "lesson": true,
+        "note": "<p>Found APV accumulator precharge drifting on unit 3. Lesson: check precharge weekly during heavy weather season, not monthly.</p>",
+        "photos": []
+      },
+      {
+        "date": "2026-06-21",
+        "equip": "U2B Door",
+        "failure": true,
+        "lesson": true,
+        "note": "<p>Door seal extruded during test. Failure traced to incorrect seal durometer from stores. Lesson: verify seal part number against IPL before install - two visually identical seals in stock.</p>",
+        "photos": []
+      },
+      {
+        "date": "2026-06-27",
+        "equip": "HPU",
+        "failure": false,
+        "lesson": false,
+        "note": "<p>Changed out pump 2 suction filter on schedule.</p>",
+        "photos": []
+      }
+    ]
+  },
+  "tiles": [],
+  "criticalRows": [],
+  "actionRows": [],
+  "eotArchive": [],
+  "noteArchive": [],
+  "checklist": {},
+  "photoDump": [],
+  "manualEot": {},
+  "photoDumpEot": false,
+  "failuresDb": []
+}

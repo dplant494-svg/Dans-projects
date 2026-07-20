@@ -45,6 +45,12 @@ logo, and brand palette) and shows:
   **Click a visit row to drill down** into its critical equipment items
   (status, SFI, issue, mitigation) and action items (responsible, deadline,
   left-with-rig)
+- **Daily logs & lessons learned** — a searchable index of SSORT's monthly
+  Daily Log posts and RAPID-S53 event reports: filter by Failures / Lessons
+  Learned / R53 events, facet by rig and equipment, full-text search over the
+  notes. Re-posted months upsert (newest file per rig+month wins). Clicking
+  an entry opens the full report (photos included). The index is text-only;
+  photos load on demand from the published report copy
 - **Full report viewer** — the drill-down's "View full report" button opens
   the complete report in an overlay: visit info, personnel, 24-hour
   summaries, every report entry with notes and photos, and the critical/

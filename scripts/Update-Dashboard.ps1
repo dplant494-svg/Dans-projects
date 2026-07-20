@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.5'
+$ScriptVersion = '2.6'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -122,10 +122,12 @@ function Get-ReportType {
     param($Meta, $Tiles)
     $rt = [string](Get-Prop $Meta 'reporttype')
     if ($rt) { return $rt }
+    if ([string](Get-Prop $Meta 'logMonth')) { return 'Daily Log' }
     if ($Tiles) {
         foreach ($tile in $Tiles) {
             if (Get-Prop $tile 'bwmData')      { return 'BWM Weekly Planning' }
             if (Get-Prop $tile 'planningData') { return 'Planning Report' }
+            if (Get-Prop $tile 'r53Data')  { return 'Rapid 53 (S53 Event Report)' }
             if (Get-Prop $tile 'cbmData')  { return 'CBM Inspection' }
             if (Get-Prop $tile 'sbopData') { return 'Surface BOP Testing' }
             if (Get-Prop $tile 'pdcData')  { return 'Pre-Deployment Checklist' }
@@ -134,6 +136,17 @@ function Get-ReportType {
         }
     }
     return 'Rig Visit'
+}
+
+# Plain text from report HTML for the keyword index (viewer shows the real HTML).
+function ConvertTo-PlainText {
+    param([string]$Html)
+    if (-not $Html) { return '' }
+    $t = $Html -replace '<[^>]+>', ' '
+    $t = $t -replace '&nbsp;', ' ' -replace '&amp;', '&' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&quot;', '"' -replace '&#39;', "'"
+    $t = ($t -replace '\s+', ' ').Trim()
+    if ($t.Length -gt 1200) { $t = $t.Substring(0, 1200) + '...' }
+    return $t
 }
 
 # JSON writer matching Read-ReportJson: ConvertTo-Json on PowerShell 7+, the
@@ -179,6 +192,8 @@ $files = $filesList.ToArray()
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
+$dayLogBlocks = @{}   # keyed rig|month (monthly logs upsert; newest file wins)
+$r53Events = New-Object System.Collections.Generic.List[object]
 $skipped = 0
 foreach ($f in $files) {
     try {
@@ -261,6 +276,77 @@ foreach ($f in $files) {
         }
     }
 
+    # Daily Log entries (meta.dayLog): text-only search index - photos stay in
+    # the full report copy the viewer fetches. Monthly logs (meta.logMonth)
+    # upsert per rig+month so a re-posted month replaces the old one.
+    $dayLogRaw = Get-Prop $meta 'dayLog'
+    if ($dayLogRaw) {
+        $logMonth = [string](Get-Prop $meta 'logMonth')
+        $entryList = New-Object System.Collections.Generic.List[object]
+        foreach ($entry in $dayLogRaw) {
+            $photosRaw = Get-Prop $entry 'photos'
+            $photoCount = 0
+            if ($photosRaw -is [System.Array]) { $photoCount = $photosRaw.Length }
+            $entryList.Add([pscustomobject]@{
+                rig     = [string]$rig
+                month   = $logMonth
+                date    = [string](Get-Prop $entry 'date')
+                equip   = [string](Get-Prop $entry 'equip')
+                failure = [bool](Get-Prop $entry 'failure')
+                lesson  = [bool](Get-Prop $entry 'lesson')
+                note    = ConvertTo-PlainText ([string](Get-Prop $entry 'note'))
+                photos  = $photoCount
+                file    = $f.Name
+            }) | Out-Null
+        }
+        if ($entryList.Count) {
+            $blockKey = if ($logMonth) { "$rig|$logMonth" } else { "file|$($f.Name)" }
+            $existing = $dayLogBlocks[$blockKey]
+            if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {
+                $dayLogBlocks[$blockKey] = @{ modified = $f.LastWriteTime; entries = $entryList }
+            }
+        }
+    }
+
+    # RAPID-S53 events: standalone R53 Report tiles, plus Conditional
+    # Assessments flagged as failures (same field set per the handoff).
+    if ($tilesRaw) {
+        foreach ($tile in $tilesRaw) {
+            $r53 = Get-Prop $tile 'r53Data'
+            $src = 'R53 Report'
+            if (-not $r53) {
+                $ca = Get-Prop $tile 'caData'
+                if ($ca) {
+                    $caFields = Get-Prop $ca 'fields'
+                    if ($caFields -and ([string](Get-Prop $caFields 's53_isfailure')) -eq 'Yes') {
+                        $r53 = $ca; $src = 'Conditional Assessment'
+                    }
+                }
+            }
+            if ($r53) {
+                $fields = Get-Prop $r53 'fields'
+                $equipName = [string](Get-Prop $fields 's53_component')
+                if (-not $equipName) { $equipName = [string](Get-Prop $fields 's53_item') }
+                if (-not $equipName) { $equipName = [string](Get-Prop $r53 'equip') }
+                $r53Events.Add([pscustomobject]@{
+                    rig        = [string]$rig
+                    date       = [string](Get-Prop $r53 'reportDate')
+                    equip      = $equipName
+                    item       = [string](Get-Prop $fields 's53_item')
+                    mfr        = [string](Get-Prop $fields 's53_compmfr')
+                    model      = [string](Get-Prop $fields 's53_model')
+                    obsfailure = [string](Get-Prop $fields 's53_obsfailure')
+                    malfunction = ConvertTo-PlainText ([string](Get-Prop $fields 's53_malfunction'))
+                    rootcause  = ConvertTo-PlainText ([string](Get-Prop $fields 's53_rootcause'))
+                    findings   = ConvertTo-PlainText ([string](Get-Prop $fields 's53_findings'))
+                    lessons    = ConvertTo-PlainText ([string](Get-Prop $fields 's53_lessons'))
+                    source     = $src
+                    file       = $f.Name
+                }) | Out-Null
+            }
+        }
+    }
+
     # Report lead: WCE superintendent for rig-visit exports; SSORT has no WCE
     # field, so fall back to the Subsea Supervisor, then the engineers.
     $lead = [string](Get-Prop $meta 'wce')
@@ -305,10 +391,23 @@ $reports | Sort-Object -Property @{ Expression = {
     if ($_.date) { [string]$_.date } else { $_.modified }
 } } -Descending | ForEach-Object { $sortedList.Add($_) | Out-Null }
 
+# Daily-log / lessons search index: flatten upserted month blocks + R53 events.
+$logEntries = New-Object System.Collections.Generic.List[object]
+foreach ($block in $dayLogBlocks.Values) {
+    foreach ($e in $block.entries) { $logEntries.Add($e) | Out-Null }
+}
+$logSorted = New-Object System.Collections.Generic.List[object]
+$logEntries | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
+    ForEach-Object { $logSorted.Add($_) | Out-Null }
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = ($existingFolders -join '  |  ')
     reports      = $sortedList.ToArray()
+    dailyLog     = [pscustomobject]@{
+        entries   = $logSorted.ToArray()
+        r53Events = $r53Events.ToArray()
+    }
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10
