@@ -95,6 +95,7 @@ dashboard feature — treat them exactly like the core fields above:
 | `tiles[].r53Data.fields` / `tiles[].caData.fields` with `s53_*` keys (esp. `s53_isfailure`, `s53_component`, `s53_item`, `s53_compmfr`, `s53_model`, `s53_obsfailure`, `s53_malfunction`, `s53_rootcause`, `s53_findings`, `s53_lessons`, `reportDate`) | R53 events in the lessons/failures index + S53 viewer |
 | `tiles[].cbmData` (`equip`, `date`, `rcpt_*`, `<prefix>_g<n>_<m>_gr/_cm/_ph`, `<prefix>_g<n>_summary`) | CBM rendering in the full-report viewer |
 | `tiles[].sbopData` / `tiles[].pdcData` / `tiles[].inspData` / `tiles[].vsrData` | report-type detection (and VSR rendering) |
+| `photoDump[]` (`src` data URI or `""`, `caption`, optional `note: true`) | Photo dump & findings section in the full-report viewer |
 
 Adding NEW keys anywhere remains safe and is still the right way to extend.
 

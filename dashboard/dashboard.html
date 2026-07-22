@@ -258,6 +258,12 @@
     border-radius: 3px; cursor: zoom-in;
   }
   .rv-photos figcaption { font-size: 11px; color: var(--sd-text-light); margin-top: 2px; }
+  .rv-dump figure { width: 220px; }
+  .rv-dump-note {
+    flex-basis: 100%; font-size: 12px; padding: 6px 10px;
+    background: var(--sd-bg); border-left: 3px solid var(--sd-border);
+    border-radius: 3px;
+  }
   .rv-check { font-size: 13px; margin: 2px 0; }
   .rv-check .box { color: var(--sd-blue); font-weight: 700; margin-right: 6px; }
   .rv-check.sub { margin-left: 18px; }
@@ -1004,6 +1010,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var cap = (captions && captions[i]) || (item && typeof item === 'object' && item.caption) || '';
       var fig = document.createElement('figure');
       var img = document.createElement('img');
+      img.loading = 'lazy';   // photo-heavy reports: keep the viewer responsive
       img.src = src;
       img.alt = cap || 'Report photo';
       img.addEventListener('click', function () { openLightbox(src); });
@@ -1292,6 +1299,33 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       t.appendChild(tb);
       body.appendChild(t);
     });
+
+    // Photo Dump: evidence photos not tied to a specific task, plus text-only
+    // finding rows ({src:"", note:true, caption}). Order is preserved - the
+    // task/grade context lives in each caption.
+    var dump = full.photoDump || [];
+    if (dump.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Photo dump & findings (' + dump.length + ')'));
+      var dumpWrap = mk('div', 'rv-photos rv-dump');
+      dump.forEach(function (p) {
+        var src = (p && p.src) || '';
+        var cap = (p && p.caption) || '';
+        if (src && src.indexOf('data:image') === 0) {
+          var fig = document.createElement('figure');
+          var img = document.createElement('img');
+          img.loading = 'lazy';
+          img.src = src;
+          img.alt = cap || 'Report photo';
+          img.addEventListener('click', function () { openLightbox(src); });
+          fig.appendChild(img);
+          if (cap) fig.appendChild(mk('figcaption', '', cap));
+          dumpWrap.appendChild(fig);
+        } else if (cap) {
+          dumpWrap.appendChild(mk('div', 'rv-dump-note', cap));
+        }
+      });
+      if (dumpWrap.childNodes.length) body.appendChild(dumpWrap);
+    }
 
     var critRows = full.criticalRows || [];
     if (critRows.length) {
