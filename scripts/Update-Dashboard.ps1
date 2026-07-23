@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.9'
+$ScriptVersion = '2.10'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -472,7 +472,53 @@ if ($notif -and (Get-Prop $notif 'enabled')) {
             $method = [string](Get-Prop $notif 'method')
             if (-not $method) { $method = if ($smtpServer) { 'smtp' } else { '' } }
 
-            foreach ($rule in @(Get-Prop $notif 'rules')) {
+            # Recipients: if notification-rules.csv exists (repo root, or the
+            # path in notifications.rulesFile), it REPLACES the config rules -
+            # editable in Excel, one row per recipient:
+            #   ReportType,Email
+            #   CBM Inspection,person@seadrill.com
+            #   Rapid 53*,dl-wceg@seadrill.com
+            #   *,dan.plant@seadrill.com
+            $rules = @(Get-Prop $notif 'rules')
+            $rulesFile = Join-Path $repoRoot 'notification-rules.csv'
+            if (Get-Prop $notif 'rulesFile') {
+                $rulesFile = [Environment]::ExpandEnvironmentVariables([string](Get-Prop $notif 'rulesFile'))
+                if (-not [System.IO.Path]::IsPathRooted($rulesFile)) { $rulesFile = Join-Path $repoRoot $rulesFile }
+            }
+            if (Test-Path -Path $rulesFile) {
+                try {
+                    # Excel in some regions saves CSV with semicolons - sniff the header.
+                    $headerLine = (Get-Content -Path $rulesFile -TotalCount 1)
+                    $delim = ','
+                    if ($headerLine -match ';' -and $headerLine -notmatch ',') { $delim = ';' }
+                    $csvRows = @(Import-Csv -Path $rulesFile -Delimiter $delim)
+                    $grouped = @{}
+                    $order = New-Object System.Collections.Generic.List[object]
+                    foreach ($row in $csvRows) {
+                        $rt = ([string]$row.ReportType).Trim()
+                        $em = ([string]$row.Email).Trim()
+                        if (-not $rt -or -not $em) { continue }
+                        if (-not $grouped.ContainsKey($rt)) {
+                            $grouped[$rt] = New-Object System.Collections.Generic.List[object]
+                            $order.Add($rt) | Out-Null
+                        }
+                        $grouped[$rt].Add($em) | Out-Null
+                    }
+                    $csvRules = New-Object System.Collections.Generic.List[object]
+                    foreach ($rt in $order) {
+                        $csvRules.Add([pscustomobject]@{ match = $rt; to = $grouped[$rt].ToArray() }) | Out-Null
+                    }
+                    if ($csvRules.Count) {
+                        $rules = $csvRules.ToArray()
+                        Write-Host "Notification recipients loaded from $rulesFile ($($csvRows.Count) row(s), $($rules.Count) rule(s))"
+                    }
+                }
+                catch {
+                    Write-Warning "Could not read $rulesFile - falling back to config rules: $($_.Exception.Message)"
+                }
+            }
+
+            foreach ($rule in $rules) {
                 $pattern = [string](Get-Prop $rule 'match')
                 $recipients = @(Get-Prop $rule 'to')
                 if (-not $pattern -or -not $recipients.Count) { continue }
