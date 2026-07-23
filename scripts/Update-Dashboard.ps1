@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.11'
+$ScriptVersion = '2.12'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -664,7 +664,9 @@ elseif ($deployPath) {
                 Write-Host "Removed stale report copy: $($old.Name)"
             }
         }
-        if ($copied -gt 0) { Write-Host "Copied $copied full report(s) to $reportsDir" -ForegroundColor Green }
+        # Always report the outcome - silence here previously left it unclear
+        # whether this step ran at all.
+        Write-Host "Report copies: $copied new/updated, $($files.Count) total in $reportsDir" -ForegroundColor Green
 
         # BOP dashboard data must land in the folder the BOP page is served
         # from (the page loads bop-planning-data.js relative to itself).
