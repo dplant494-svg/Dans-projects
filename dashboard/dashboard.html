@@ -1655,6 +1655,13 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     state.lastStamp = dataStamp();
     render();
     setInterval(reloadData, POLL_MS);
+
+    // Deep link from notification emails: ?report=<file> opens that report.
+    var wanted = new URLSearchParams(location.search).get('report');
+    if (wanted && window.DASHBOARD_DATA) {
+      var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === wanted; });
+      if (rec) openReportViewer(rec);
+    }
   });
 })();
 </script>

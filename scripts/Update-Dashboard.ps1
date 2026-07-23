@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.7'
+$ScriptVersion = '2.8'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -423,6 +423,96 @@ if (-not (Test-Path -Path $outDir)) {
 
 Write-Host "Wrote $($reports.Count) report(s) to $outputFile" -ForegroundColor Green
 if ($skipped -gt 0) { Write-Host "Skipped $skipped file(s)." -ForegroundColor Yellow }
+
+# ---------------------------------------------------------------------------
+# Notifications: email discipline owners when NEW reports of their type arrive.
+# Configured via config.json:
+#   "notifications": {
+#     "enabled": true,
+#     "smtpServer": "",          <- internal mail relay; empty = dry run (log only)
+#     "smtpPort": 25,
+#     "from": "dashboard@seadrill.com",
+#     "dashboardUrl": "http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html",
+#     "rules": [
+#       { "match": "CBM Inspection",       "to": ["owner@seadrill.com"] },
+#       { "match": "Daily Log",            "to": ["a@seadrill.com","b@seadrill.com"] },
+#       { "match": "Rapid 53*",            "to": ["owner@seadrill.com"] },
+#       { "match": "*",                    "to": ["catchall@seadrill.com"] }
+#     ]
+#   }
+# 'match' compares against the report type with wildcards (-like). A state
+# file remembers which reports were already announced; the very first run
+# seeds it silently so nobody gets emailed about the existing backlog.
+# ---------------------------------------------------------------------------
+$notif = $null
+if ($config.PSObject.Properties['notifications'] -and $config.notifications) { $notif = $config.notifications }
+if ($notif -and (Get-Prop $notif 'enabled')) {
+    try {
+        $stateFile = Join-Path $repoRoot 'notified-state.json'
+        $seen = @{}
+        $firstRun = -not (Test-Path -Path $stateFile)
+        if (-not $firstRun) {
+            foreach ($name in ((Get-Content -Path $stateFile -Raw | ConvertFrom-Json))) { $seen[[string]$name] = $true }
+        }
+
+        $newReports = @($reports | Where-Object { -not $seen.ContainsKey($_.file) })
+
+        if ($firstRun) {
+            Write-Host "Notifications: first run - remembering $($reports.Count) existing report(s) without notifying." -ForegroundColor Yellow
+        }
+        elseif ($newReports.Count -gt 0) {
+            $smtpServer = [string](Get-Prop $notif 'smtpServer')
+            $smtpPort = 25
+            if (Get-Prop $notif 'smtpPort') { $smtpPort = [int](Get-Prop $notif 'smtpPort') }
+            $fromAddr = [string](Get-Prop $notif 'from')
+            $dashUrl = [string](Get-Prop $notif 'dashboardUrl')
+
+            foreach ($rule in @(Get-Prop $notif 'rules')) {
+                $pattern = [string](Get-Prop $rule 'match')
+                $recipients = @(Get-Prop $rule 'to')
+                if (-not $pattern -or -not $recipients.Count) { continue }
+                $hits = @($newReports | Where-Object { $_.reporttype -like $pattern })
+                if (-not $hits.Count) { continue }
+
+                $lines = foreach ($h in $hits) {
+                    $link = ''
+                    if ($dashUrl) { $link = "`r`n   $dashUrl" + '?report=' + [uri]::EscapeDataString($h.file) }
+                    " - $($h.rig): $($h.reporttype) ($($h.date))$link"
+                }
+                $subject = "Dashboard: $($hits.Count) new $(if ($hits.Count -eq 1) { $hits[0].reporttype + ' report' } else { 'report(s)' }) awaiting review"
+                $body = "New report(s) matching your discipline have been posted to the reporting dashboard:`r`n`r`n" +
+                        ($lines -join "`r`n`r`n") +
+                        "`r`n`r`nThis is an automated notification from the TSC reporting dashboard."
+
+                if ($smtpServer) {
+                    try {
+                        Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -From $fromAddr `
+                            -To $recipients -Subject $subject -Body $body -ErrorAction Stop
+                        Write-Host "Notified $($recipients -join ', ') about $($hits.Count) report(s) [$pattern]" -ForegroundColor Green
+                    }
+                    catch {
+                        Write-Warning "Email to $($recipients -join ', ') failed: $($_.Exception.Message)"
+                    }
+                }
+                else {
+                    Write-Host "DRY RUN (no smtpServer set) - would email $($recipients -join ', '):" -ForegroundColor Yellow
+                    Write-Host "  $subject"
+                    foreach ($l in $lines) { Write-Host "  $l" }
+                }
+            }
+        }
+
+        # Remember everything scanned this run (matched or not) so nothing re-notifies.
+        $allNames = New-Object System.Collections.Generic.List[object]
+        foreach ($r in $reports) { $allNames.Add([string]$r.file) | Out-Null }
+        [System.IO.File]::WriteAllText($stateFile,
+            (ConvertTo-ReportJson $allNames.ToArray()),
+            (New-Object System.Text.UTF8Encoding($false)))
+    }
+    catch {
+        Write-Warning "Notification step failed (scan unaffected): $($_.Exception.Message)"
+    }
+}
 
 # BOP Fleet Planning Dashboard data: every BWM weekly snapshot, newest first.
 $bopOutputFile = Join-Path $repoRoot 'bop-dashboard\bop-planning-data.js'
