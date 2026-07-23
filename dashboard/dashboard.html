@@ -1164,6 +1164,65 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     ['s53_rootcause', 'Root cause'], ['s53_lessons', 'Lessons learned']
   ];
 
+  // Planning Report (per-rig project schedule). Fields are frequently blank
+  // in practice - only render sections that have real content.
+  var PLANNING_FACTS = [
+    ['reportingDay', 'Reporting day'], ['dataDate', 'Data date'],
+    ['pctComplete', '% complete'], ['planVariance', 'Variance']
+  ];
+
+  function rvPlanning(data, body) {
+    var hasFacts = PLANNING_FACTS.some(function (p) { return data[p[0]] && String(data[p[0]]).trim(); });
+    var hasNarrative = ['criticalPath', 'simops', 'comments'].some(function (k) {
+      return data[k] && String(data[k]).replace(/<[^>]*>/g, '').trim();
+    });
+    var milestones = (data.milestones || []).filter(function (m) { return m && String(m.name || '').trim(); });
+    var done = (data.done || []).filter(function (d) { return d && String(d.desc || '').trim(); });
+    var next = (data.next || []).filter(function (n) { return n && String(n.desc || '').trim(); });
+    if (!hasFacts && !hasNarrative && !milestones.length && !done.length && !next.length) return;
+
+    body.appendChild(mk('div', 'rv-section-label', 'Planning report details'));
+    if (hasFacts) {
+      var grid = mk('div', 'rv-grid');
+      PLANNING_FACTS.forEach(function (pair) {
+        var v = data[pair[0]];
+        if (v && String(v).trim()) grid.appendChild(rvField(pair[1], String(v)));
+      });
+      body.appendChild(grid);
+    }
+    if (data.criticalPath && String(data.criticalPath).trim()) {
+      var cp = mk('div', 'rv-equip');
+      cp.appendChild(mk('div', 'rv-equip-head', 'Critical path'));
+      cp.appendChild(rvNotes(data.criticalPath));
+      body.appendChild(cp);
+    }
+    if (data.simops && String(data.simops).trim()) {
+      var sm = mk('div', 'rv-equip');
+      sm.appendChild(mk('div', 'rv-equip-head', 'SIMOPS'));
+      sm.appendChild(rvNotes(data.simops));
+      body.appendChild(sm);
+    }
+    if (data.comments && String(data.comments).replace(/<[^>]*>/g, '').trim()) {
+      body.appendChild(mk('div', 'rv-section-label', 'Comments'));
+      body.appendChild(rvNotes(data.comments));
+    }
+    if (milestones.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Milestones'));
+      body.appendChild(detailKeyTable('', ['Milestone', 'Baseline', 'Estimate', 'Actual'],
+        milestones.map(function (m) { return [m.name, m.baseline, m.est, m.actual]; })));
+    }
+    if (done.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Completed this cycle'));
+      body.appendChild(detailKeyTable('', ['ID', 'Description', '% Complete'],
+        done.map(function (d) { return [d.id, d.desc, d.pct]; })));
+    }
+    if (next.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Next / lookahead'));
+      body.appendChild(detailKeyTable('', ['ID', 'Description', 'Target'],
+        next.map(function (n) { return [n.id, n.desc, n.target]; })));
+    }
+  }
+
   function rvR53(data, body) {
     var fields = data.fields || {};
     body.appendChild(mk('div', 'rv-section-label', 'S53 event details'));
@@ -1292,6 +1351,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
       if (tile.vsrData) rvVsr(tile.vsrData, tb);
       if (tile.cbmData) rvCbm(tile.cbmData, tb);
+      if (tile.planningData) rvPlanning(tile.planningData, tb);
       if (tile.r53Data) rvR53(tile.r53Data, tb);
       else if (tile.caData && tile.caData.fields) rvR53(tile.caData, tb);
 

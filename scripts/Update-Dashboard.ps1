@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.12'
+$ScriptVersion = '2.13'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -136,6 +136,21 @@ function Get-ReportType {
         }
     }
     return 'Rig Visit'
+}
+
+# A Planning Report tile is present on every Planning-discipline export even
+# when nobody filled it in - only treat it as a real report if at least one
+# field actually has content.
+function Test-PlanningHasContent {
+    param($Planning)
+    foreach ($name in @('pctComplete', 'planVariance', 'criticalPath', 'simops', 'comments', 'dataDate', 'reportingDay')) {
+        if ([string](Get-Prop $Planning $name)) { return $true }
+    }
+    foreach ($name in @('milestones', 'done', 'next')) {
+        $arr = Get-Prop $Planning $name
+        if ($arr -and @($arr).Count -gt 0) { return $true }
+    }
+    return $false
 }
 
 # Plain text from report HTML for the keyword index (viewer shows the real HTML).
@@ -258,7 +273,8 @@ foreach ($f in $files) {
     if ($tilesRaw -is [System.Array]) { $tileCount = $tilesRaw.Length }
     elseif ($null -ne $tilesRaw) { $tileCount = 1 }
 
-    $rig = Get-Prop $meta 'asset'
+    $assetRaw = [string](Get-Prop $meta 'asset')
+    $rig = $assetRaw
     if (-not $rig) { $rig = $f.BaseName }
 
     # BWM Weekly Planning tiles are fleet-level snapshots that feed the BOP
@@ -275,12 +291,17 @@ foreach ($f in $files) {
                 }) | Out-Null
             }
 
-            # Per-rig Planning Report (project schedule): one per rig, newest wins.
+            # Per-rig Planning Report (project schedule): one per rig, newest
+            # wins. Skipped when there's no real rig identity (fleet-level
+            # files carry a blank meta.asset) or when the tile is an empty
+            # placeholder - the tool always includes this tile even when
+            # none of its fields were filled in, and an empty stub must
+            # never overwrite a rig's genuinely reported data.
             $planning = Get-Prop $tile 'planningData'
-            if ($planning) {
+            if ($planning -and $assetRaw -and (Test-PlanningHasContent $planning)) {
                 $repDate = [string](Get-Prop $planning 'reportDate')
                 if (-not $repDate) { $repDate = [string](Get-Prop $meta 'date') }
-                $rigKey = [string]$rig
+                $rigKey = $assetRaw
                 $prior = $planningReports[$rigKey]
                 if (-not $prior -or ($repDate -gt [string]$prior.reportDate) -or
                     (($repDate -eq [string]$prior.reportDate) -and ($f.LastWriteTime -gt $prior.modified))) {

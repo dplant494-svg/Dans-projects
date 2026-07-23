@@ -91,7 +91,7 @@ dashboard feature — treat them exactly like the core fields above:
 | `meta.reporttype` | report-type filter/labels on the reports dashboard |
 | `meta.logMonth` + `meta.dayLog[]` (`date`, `equip`, `failure`/`lesson` **booleans**, `note` HTML, `photos[]`) | Daily Logs & Lessons Learned index (monthly upsert per rig+logMonth) |
 | `tiles[].bwmData` (`week`, `reportDate`, `compiledBy`, `rows[]` incl. `m.*` booleans) | BOP Fleet Planning Dashboard (weekly snapshots + history) |
-| `tiles[].planningData` | report-type detection ('Planning Report') |
+| `tiles[].planningData` (`reportDate`, `dataDate`, `reportingDay`, `pctComplete`, `planVariance`, `criticalPath`, `simops`, `comments`, `milestones[]`, `done[]`, `next[]`) | Report-type detection ('Planning Report'); rendered in the reports-dashboard viewer and, per rig, in the BOP dashboard's click-through panel. **Note:** in real exports observed so far this tile is present but every field is empty except `reportDate` — real per-rig reports with actual content are what populate the dashboard views; the empty stub is deliberately ignored (see `Test-PlanningHasContent` in the scanner) |
 | `tiles[].r53Data.fields` / `tiles[].caData.fields` with `s53_*` keys (esp. `s53_isfailure`, `s53_component`, `s53_item`, `s53_compmfr`, `s53_model`, `s53_obsfailure`, `s53_malfunction`, `s53_rootcause`, `s53_findings`, `s53_lessons`, `reportDate`) | R53 events in the lessons/failures index + S53 viewer |
 | `tiles[].cbmData` (`equip`, `date`, `rcpt_*`, `<prefix>_g<n>_<m>_gr/_cm/_ph`, `<prefix>_g<n>_summary`) | CBM rendering in the full-report viewer |
 | `tiles[].sbopData` / `tiles[].pdcData` / `tiles[].inspData` / `tiles[].vsrData` | report-type detection (and VSR rendering) |
