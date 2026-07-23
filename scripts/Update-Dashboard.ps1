@@ -185,7 +185,7 @@ foreach ($baseFolder in $existingFolders) {
             if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
             $excluded = $false
             foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
-            (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json')
+            (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json')
         } | ForEach-Object { $filesList.Add($_) | Out-Null }
 }
 $files = $filesList.ToArray()
