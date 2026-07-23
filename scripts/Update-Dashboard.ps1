@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.10'
+$ScriptVersion = '2.11'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -192,6 +192,7 @@ $files = $filesList.ToArray()
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
+$planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
 $dayLogBlocks = @{}   # keyed rig|month (monthly logs upsert; newest file wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $skipped = 0
@@ -272,6 +273,25 @@ foreach ($f in $files) {
                     reportDate = [string](Get-Prop $bwm 'reportDate')
                     bwm        = $bwm
                 }) | Out-Null
+            }
+
+            # Per-rig Planning Report (project schedule): one per rig, newest wins.
+            $planning = Get-Prop $tile 'planningData'
+            if ($planning) {
+                $repDate = [string](Get-Prop $planning 'reportDate')
+                if (-not $repDate) { $repDate = [string](Get-Prop $meta 'date') }
+                $rigKey = [string]$rig
+                $prior = $planningReports[$rigKey]
+                if (-not $prior -or ($repDate -gt [string]$prior.reportDate) -or
+                    (($repDate -eq [string]$prior.reportDate) -and ($f.LastWriteTime -gt $prior.modified))) {
+                    $planningReports[$rigKey] = @{
+                        file       = $f.Name
+                        rig        = $rigKey
+                        reportDate = $repDate
+                        modified   = $f.LastWriteTime
+                        planning   = $planning
+                    }
+                }
             }
         }
     }
@@ -589,8 +609,9 @@ $bwmSortedList = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots | Sort-Object -Property @{ Expression = { [string]$_['reportDate'] } } -Descending |
     ForEach-Object { $bwmSortedList.Add($_) | Out-Null }
 $bopPayload = @{
-    generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
-    snapshots   = $bwmSortedList.ToArray()
+    generatedAt      = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+    snapshots        = $bwmSortedList.ToArray()
+    planningReports  = $planningReports
 }
 $bopContent = 'window.BWM_DATA = ' + (ConvertTo-ReportJson $bopPayload) + ";`n"
 $bopDir = Split-Path -Parent $bopOutputFile

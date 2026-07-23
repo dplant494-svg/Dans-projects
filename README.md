@@ -96,6 +96,12 @@ Weekly Planning" export (a fleet-level tile inside the standard
 - The dashboard auto-loads the newest week, re-checks every 5 minutes (kiosk
   stays current unattended), and a week selector in the footer switches to
   older snapshots when more than one exists.
+- Clicking a rig's pin or tile opens its detail panel, which now also shows
+  that rig's latest **Planning Report** (the daily-cadence per-rig project
+  report: % complete, variance, critical path, milestones, completed-this-
+  cycle and next/lookahead items) above the existing weekly BWM detail —
+  the daily and weekly pictures in one place. Rigs with no Planning Report
+  yet simply show the weekly detail, unchanged.
 - With no pipeline data present it falls back to the embedded demo snapshot
   and shows a "DEMO DATA" note in the footer. Embedded demo ERT project data
   is dropped as soon as real pipeline data loads.

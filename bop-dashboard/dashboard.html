@@ -262,6 +262,18 @@
   .milestone-label { flex: 1; }
   .milestone-date { font-style: italic; }
 
+  .planning-panel { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--sd-border); }
+  .planning-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .planning-title { font-size: 11px; font-weight: 700; color: var(--sd-blue); text-transform: uppercase; letter-spacing: .03em; }
+  .planning-date { font-size: 10.5px; color: var(--sd-text-light); }
+  .planning-stats { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 6px; }
+  .planning-stat { display: flex; flex-direction: column; }
+  .planning-stat .lbl { font-size: 9.5px; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; }
+  .planning-stat .val { font-size: 12.5px; font-weight: 700; color: var(--sd-text); }
+  .planning-sublabel { font-size: 10px; font-weight: 700; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; margin: 8px 0 3px; }
+  .planning-list { margin: 0; padding-left: 16px; font-size: 10.5px; color: var(--sd-text); }
+  .planning-list li { margin-bottom: 2px; }
+
   .page-footer { padding: 14px 32px 22px; font-size: 10px; color: var(--sd-text-light); text-align: center; }
 
   @media (max-width: 680px) {
@@ -720,6 +732,59 @@ function renderWorldMap(fleet){
   svg.innerHTML = parts.join('');
 }
 
+// Per-rig "Planning Report" (project schedule) — a daily-cadence report,
+// distinct from the weekly BWM tracker rows shown by bopDetailHtml below.
+function renderPlanningReport(rigName){
+  var pr = PLANNING_REPORTS[rigName];
+  if(!pr || !pr.planning) return '';
+  var p = pr.planning;
+  var milestones = (p.milestones || []).filter(function(m){ return m && (m.name||'').trim(); });
+  var done = (p.done || []).filter(function(d){ return d && (d.desc||'').trim(); });
+  var next = (p.next || []).filter(function(n){ return n && (n.desc||'').trim(); });
+
+  var html = '<div class="planning-panel">' +
+    '<div class="planning-head"><span class="planning-title">Latest Planning Report</span>' +
+    (pr.reportDate ? '<span class="planning-date">' + fmtDate(pr.reportDate) + '</span>' : '') + '</div>';
+
+  var stats = [];
+  if(p.pctComplete) stats.push(['% Complete', p.pctComplete]);
+  if(p.planVariance) stats.push(['Variance', p.planVariance]);
+  if(p.reportingDay) stats.push(['Reporting Day', p.reportingDay]);
+  if(p.dataDate) stats.push(['Data Date', fmtDate(p.dataDate)]);
+  if(stats.length){
+    html += '<div class="planning-stats">' + stats.map(function(s){
+      return '<div class="planning-stat"><span class="lbl">'+s[0]+'</span><span class="val">'+s[1]+'</span></div>';
+    }).join('') + '</div>';
+  }
+
+  if(p.criticalPath) html += '<div class="field-line"><span class="lbl">Critical Path:</span> ' + p.criticalPath + '</div>';
+  if(p.simops) html += '<div class="field-line"><span class="lbl">SIMOPS:</span> ' + p.simops + '</div>';
+  if(p.comments) html += '<div class="notes-line">' + p.comments + '</div>';
+
+  if(milestones.length){
+    html += '<div class="planning-sublabel">Milestones</div><div class="milestone-list">' +
+      milestones.map(function(m){
+        var cls = m.actual ? 'done' : 'pending';
+        var dateLabel = m.actual ? ('actual ' + fmtDate(m.actual)) :
+          (m.est ? ('est ' + fmtDate(m.est)) : (m.baseline ? ('baseline ' + fmtDate(m.baseline)) : ''));
+        return '<div class="milestone-item '+cls+'"><span class="milestone-dot"></span>' +
+          '<span class="milestone-label">'+m.name+'</span><span class="milestone-date">'+dateLabel+'</span></div>';
+      }).join('') + '</div>';
+  }
+
+  if(done.length){
+    html += '<div class="planning-sublabel">Completed this cycle</div><ul class="planning-list">' +
+      done.map(function(d){ return '<li>' + (d.id ? '<strong>'+d.id+':</strong> ' : '') + d.desc + (d.pct ? ' ('+d.pct+')' : '') + '</li>'; }).join('') + '</ul>';
+  }
+  if(next.length){
+    html += '<div class="planning-sublabel">Next / Lookahead</div><ul class="planning-list">' +
+      next.map(function(n){ return '<li>' + (n.id ? '<strong>'+n.id+':</strong> ' : '') + n.desc + (n.target ? ' (target '+n.target+')' : '') + '</li>'; }).join('') + '</ul>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
 // ---------- Rig detail panel ----------
 var GROUPS_BY_SLUG = {};
 function openRigModal(s){
@@ -729,6 +794,7 @@ function openRigModal(s){
   var meta = [first.location, first.stackType, first.projectType, first.planner].filter(Boolean).join(' &middot; ');
   document.getElementById('rigModalBody').innerHTML =
     '<h2>' + g.rig + '</h2><div class="rm-sub">' + meta + '</div>' +
+    renderPlanningReport(g.rig) +
     g.rows.map(function(row){ return bopDetailHtml(row, g.rows.length > 1); }).join('');
   document.getElementById('rigModal').classList.add('open');
 }
@@ -1062,6 +1128,7 @@ function setupUpload(zoneId, inputId, statusId, fileRegex, handler){
 var BWM_STAGE_KEYS = ['pt','sc','sm','sf','pc','op','rr','ex','pd','aar']; // mirrors STAGE_LABELS order
 var BWM_META = null;      // {week, reportDate, compiledBy} of the currently loaded snapshot
 var BWM_SNAPSHOTS = {};   // history keyed by week label (in-memory; latest loaded wins the view)
+var PLANNING_REPORTS = {}; // per-rig latest "Planning Report" tile, keyed by rig name
 
 function parseBwmJson(payload, filename){
   if(!payload || !Array.isArray(payload.tiles)) throw new Error('"' + filename + '" is not a WCGRRT export (no tiles array).');
@@ -1240,7 +1307,8 @@ function initPipelineData(){
   var data = window.BWM_DATA;
   var parsedList = parsePipelineSnapshots();
   if(parsedList){
-    PIPELINE_STAMP = data.generatedAt + ':' + data.snapshots.length;
+    PIPELINE_STAMP = data.generatedAt + ':' + data.snapshots.length + ':' + Object.keys(data.planningReports || {}).length;
+    PLANNING_REPORTS = data.planningReports || {};
     loadSnapshot(parsedList[0]);
     populateWeekSelect(parsedList, snapshotKey(parsedList[0]));
   } else {
@@ -1256,9 +1324,10 @@ function pollPipelineData(){
     s.remove();
     var data = window.BWM_DATA;
     if(!data) return;
-    var stamp = data.generatedAt + ':' + (data.snapshots || []).length;
+    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + Object.keys(data.planningReports || {}).length;
     if(stamp === PIPELINE_STAMP) return;
     PIPELINE_STAMP = stamp;
+    PLANNING_REPORTS = data.planningReports || {};
     var sel = document.getElementById('weekSelect');
     var currentKey = (sel && sel.style.display !== 'none') ? sel.value : null;
     var parsedList = parsePipelineSnapshots();
