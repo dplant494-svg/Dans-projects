@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.8'
+$ScriptVersion = '2.9'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -466,6 +466,11 @@ if ($notif -and (Get-Prop $notif 'enabled')) {
             if (Get-Prop $notif 'smtpPort') { $smtpPort = [int](Get-Prop $notif 'smtpPort') }
             $fromAddr = [string](Get-Prop $notif 'from')
             $dashUrl = [string](Get-Prop $notif 'dashboardUrl')
+            # method: 'outlook' sends through the locally signed-in Outlook (no
+            # relay/IT needed; mails come from your own mailbox); 'smtp' uses
+            # the relay; unset with no smtpServer = dry run.
+            $method = [string](Get-Prop $notif 'method')
+            if (-not $method) { $method = if ($smtpServer) { 'smtp' } else { '' } }
 
             foreach ($rule in @(Get-Prop $notif 'rules')) {
                 $pattern = [string](Get-Prop $rule 'match')
@@ -484,7 +489,21 @@ if ($notif -and (Get-Prop $notif 'enabled')) {
                         ($lines -join "`r`n`r`n") +
                         "`r`n`r`nThis is an automated notification from the TSC reporting dashboard."
 
-                if ($smtpServer) {
+                if ($method -eq 'outlook') {
+                    try {
+                        $ol = New-Object -ComObject Outlook.Application
+                        $mail = $ol.CreateItem(0)
+                        foreach ($addr in $recipients) { $mail.Recipients.Add($addr) | Out-Null }
+                        $mail.Subject = $subject
+                        $mail.Body = $body
+                        $mail.Send()
+                        Write-Host "Notified via Outlook: $($recipients -join ', ') about $($hits.Count) report(s) [$pattern]" -ForegroundColor Green
+                    }
+                    catch {
+                        Write-Warning "Outlook send to $($recipients -join ', ') failed: $($_.Exception.Message)  (is Outlook installed/signed in on this PC?)"
+                    }
+                }
+                elseif ($method -eq 'smtp') {
                     try {
                         Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -From $fromAddr `
                             -To $recipients -Subject $subject -Body $body -ErrorAction Stop
