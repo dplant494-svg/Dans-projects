@@ -71,7 +71,10 @@ else {
 #   "bopDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred",
 #   "bopPageName":   "BOP Fleet Planning Dashboard.html"
 $bopDir = Join-Path $repoRoot 'bop-dashboard'
-if (Test-Path -Path (Join-Path $bopDir 'dashboard.html')) {
+if (-not (Test-Path -Path (Join-Path $bopDir 'dashboard.html'))) {
+    Write-Warning "No bop-dashboard\dashboard.html found next to this project - BOP page NOT published. (Looked in: $bopDir)"
+}
+else {
     $bopDeployDir = Join-Path $DeployPath 'bop'
     if ($config -and $config.PSObject.Properties['bopDeployPath'] -and $config.bopDeployPath) {
         $bopDeployDir = [Environment]::ExpandEnvironmentVariables($config.bopDeployPath)
