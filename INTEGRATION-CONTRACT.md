@@ -96,6 +96,7 @@ dashboard feature — treat them exactly like the core fields above:
 | `tiles[].cbmData` (`equip`, `date`, `rcpt_*`, `<prefix>_g<n>_<m>_gr/_cm/_ph`, `<prefix>_g<n>_summary`) | CBM rendering in the full-report viewer |
 | `tiles[].sbopData` / `tiles[].pdcData` / `tiles[].inspData` / `tiles[].vsrData` | report-type detection (and VSR rendering) |
 | `photoDump[]` (`src` data URI or `""`, `caption`, optional `note: true`) | Photo dump & findings section in the full-report viewer |
+| `meta.schedule` (P6 schedule name, free text), `meta.scheduleFile` (`data:` URL, PDF/image, optional), `meta.scheduleFileName` | Planning reports (`meta.discipline === "Planning"`): `schedule` is the row title on the reports dashboard and a "P6 Schedule" field + "View P6 Schedule" button in the full-report viewer. Only the short `schedule` name is copied into `reports-data.js`; `scheduleFile`'s base64 payload is read from the per-report copy the viewer already fetches, never the summary file |
 
 Adding NEW keys anywhere remains safe and is still the right way to extend.
 

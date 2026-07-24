@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.13'
+$ScriptVersion = '2.14'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -402,6 +402,7 @@ foreach ($f in $files) {
         discipline    = [string](Get-Prop $meta 'discipline')
         wce           = $lead                                    # WCE Supt, or SSS/engineers for SSORT
         location      = [string](Get-Prop $meta 'location')     # well name / location
+        schedule      = [string](Get-Prop $meta 'schedule')     # P6 schedule name (Planning reports; title on the dashboard)
         date          = [string](Get-Prop $meta 'date')         # visit start
         dateEnd       = [string](Get-Prop $meta 'dateend')      # visit end
         exportedAt    = [string](Get-Prop $json 'exportedAt')

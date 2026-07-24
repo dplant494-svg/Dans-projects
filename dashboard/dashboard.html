@@ -745,7 +745,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   // ---------- table ----------
 
-  var COLUMNS = ['', 'Rig / Report', 'Dates', 'WCE / SSS', 'Location', 'Entries', 'Critical', 'Actions', 'Status'];
+  var COLUMNS = ['', 'Rig / Report', 'Dates', 'Reported By', 'Location', 'Entries', 'Critical', 'Actions', 'Status'];
 
   function detailKeyTable(titleText, headers, rows) {
     var section = document.createDocumentFragment();
@@ -867,9 +867,11 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       tr.appendChild(tdChev);
 
       var tdRig = document.createElement('td');
-      var rig = document.createElement('div'); rig.className = 'rig'; rig.textContent = r.rig;
+      var _isPlan = (r.discipline === 'Planning') || /planning|weekly status/i.test(String(r.reporttype || r.type || ''));
+      var _schedName = r.schedule || r.scheduleName || '';
+      var rig = document.createElement('div'); rig.className = 'rig'; rig.textContent = (_isPlan && _schedName) ? _schedName : r.rig;
       var typ = document.createElement('div'); typ.className = 'visit-type';
-      typ.textContent = r.type || r.reporttype || 'Report';
+      typ.textContent = _isPlan ? ((r.rig ? r.rig + ' · ' : '') + 'Planning Report') : (r.type || r.reporttype || 'Report');
       var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file;
       tdRig.appendChild(rig); tdRig.appendChild(typ); tdRig.appendChild(file);
       tr.appendChild(tdRig);
@@ -1260,6 +1262,15 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
+  function openDataUrl(data, name) {
+    try {
+      var parts = String(data).split(','); var mime = ((parts[0] || '').match(/:(.*?);/) || [])[1] || 'application/octet-stream';
+      var bin = atob(parts[1] || ''); var arr = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      var blob = new Blob([arr], { type: mime }); var url = URL.createObjectURL(blob);
+      var w = window.open(url, '_blank'); if (!w) { var a = document.createElement('a'); a.href = url; a.download = name || 'schedule'; document.body.appendChild(a); a.click(); a.remove(); }
+    } catch (e) { alert('Could not open the schedule attachment.'); }
+  }
+
   function renderFullReport(body, full, rec) {
     var meta = full.meta || {};
 
@@ -1272,7 +1283,17 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (meta.discipline) info.appendChild(rvField('Discipline', meta.discipline));
     if (meta.location) info.appendChild(rvField('Well / Location', meta.location));
     if (meta.wo) info.appendChild(rvField('Synergi Case #', meta.wo));
+    if (meta.schedule) info.appendChild(rvField('P6 Schedule', meta.schedule));
     body.appendChild(info);
+
+    if (meta.scheduleFile) {
+      var schWrap = mk('div', 'rv-sched'); schWrap.style.margin = '4px 0 12px';
+      var schBtn = mk('button', 'rv-sched-btn', '📅 View P6 Schedule' + (meta.scheduleFileName ? ' — ' + meta.scheduleFileName : ''));
+      schBtn.type = 'button';
+      schBtn.style.cssText = 'font-size:12px;padding:6px 14px;border:1px solid #1a5cff;background:#1a5cff;color:#fff;border-radius:5px;cursor:pointer;';
+      schBtn.addEventListener('click', function () { openDataUrl(meta.scheduleFile, meta.scheduleFileName); });
+      schWrap.appendChild(schBtn); body.appendChild(schWrap);
+    }
 
     var people = mk('div', 'rv-grid');
     PERSONNEL_FIELDS.forEach(function (pair) {
