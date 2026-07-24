@@ -293,6 +293,7 @@
     overflow: hidden;
   }
   #log-body .log-photos { color: var(--sd-text-light); font-size: 11px; white-space: nowrap; }
+  #log-body .log-meta-line { color: var(--sd-text-light); font-size: 11px; margin-bottom: 2px; }
   #log-body tr { cursor: pointer; }
   #log-body tr:hover td { background: var(--sd-bg); }
   .lightbox {
@@ -1317,16 +1318,23 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       body.appendChild(rvNotes(meta.next24));
     }
 
-    // SSORT daily log entries: [{ date, note (HTML), photos }]
-    var dayLog = meta.dayLog || [];
+    // SSORT daily log entries: legacy meta.dayLog / current meta.dayLogMonth
+    // (both an array of { date, shift, personnel, equip, note, photos }),
+    // plus meta.dayLogEntry - the same shape as a single object - on
+    // individual Daily Log Entry / Lesson Learned posts.
+    var dayLog = (meta.dayLogMonth || meta.dayLog || []).slice();
+    if (meta.dayLogEntry) dayLog = dayLog.concat([meta.dayLogEntry]);
     if (dayLog.length) {
       body.appendChild(mk('div', 'rv-section-label', 'Daily log'));
       dayLog.forEach(function (d) {
         var t = mk('div', 'rv-tile');
         var head = mk('div', 'rv-tile-head');
         head.appendChild(mk('span', 't-title', d.date || 'Log entry'));
+        if (d.shift) head.appendChild(mk('span', 't-date', d.shift));
+        if (d.equip) head.appendChild(mk('span', 't-fodb', d.equip));
         t.appendChild(head);
         var tb = mk('div', 'rv-tile-body');
+        if (d.personnel) tb.appendChild(rvField('Personnel', d.personnel));
         if (d.note && String(d.note).replace(/<[^>]*>/g, '').trim()) tb.appendChild(rvNotes(d.note));
         var ph = rvPhotos(d.photos);
         if (ph) tb.appendChild(ph);
@@ -1490,6 +1498,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var rows = [];
     (dl.entries || []).forEach(function (e) {
       rows.push({ kind: 'log', date: e.date, rig: e.rig, equip: e.equip || '',
+        shift: e.shift || '', personnel: e.personnel || '',
         failure: !!e.failure, lesson: !!e.lesson, note: e.note || '',
         photos: e.photos || 0, file: e.file });
     });
@@ -1516,7 +1525,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (logState.rig && r.rig !== logState.rig) return false;
       if (logState.equip && r.equip !== logState.equip) return false;
       if (q) {
-        var hay = [r.rig, r.equip, r.note].join(' ').toLowerCase();
+        var hay = [r.rig, r.equip, r.note, r.shift, r.personnel].join(' ').toLowerCase();
         if (hay.indexOf(q) === -1) return false;
       }
       return true;
@@ -1571,6 +1580,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
       var tdNote = document.createElement('td');
       tdNote.className = 'log-note';
+      var metaLine = [r.shift, r.personnel].filter(Boolean).join(' · ');
+      if (metaLine) tdNote.appendChild(mk('div', 'log-meta-line', metaLine));
       var noteDiv = mk('div', 'log-note-text', r.note || '—');
       tdNote.appendChild(noteDiv);
       if (r.photos > 0) tdNote.appendChild(mk('div', 'log-photos', '📷 ' + r.photos + ' photo' + (r.photos === 1 ? '' : 's') + ' — open full report to view'));

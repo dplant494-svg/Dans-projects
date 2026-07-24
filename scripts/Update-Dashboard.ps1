@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.14'
+$ScriptVersion = '2.15'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -208,7 +208,7 @@ $files = $filesList.ToArray()
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
 $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
-$dayLogBlocks = @{}   # keyed rig|month (monthly logs upsert; newest file wins)
+$dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $skipped = 0
 foreach ($f in $files) {
@@ -317,35 +317,52 @@ foreach ($f in $files) {
         }
     }
 
-    # Daily Log entries (meta.dayLog): text-only search index - photos stay in
-    # the full report copy the viewer fetches. Monthly logs (meta.logMonth)
-    # upsert per rig+month so a re-posted month replaces the old one.
-    $dayLogRaw = Get-Prop $meta 'dayLog'
-    if ($dayLogRaw) {
-        $logMonth = [string](Get-Prop $meta 'logMonth')
-        $entryList = New-Object System.Collections.Generic.List[object]
-        foreach ($entry in $dayLogRaw) {
-            $photosRaw = Get-Prop $entry 'photos'
-            $photoCount = 0
-            if ($photosRaw -is [System.Array]) { $photoCount = $photosRaw.Length }
-            $entryList.Add([pscustomobject]@{
-                rig     = [string]$rig
-                month   = $logMonth
-                date    = [string](Get-Prop $entry 'date')
-                equip   = [string](Get-Prop $entry 'equip')
-                failure = [bool](Get-Prop $entry 'failure')
-                lesson  = [bool](Get-Prop $entry 'lesson')
-                note    = ConvertTo-PlainText ([string](Get-Prop $entry 'note'))
-                photos  = $photoCount
-                file    = $f.Name
-            }) | Out-Null
+    # Daily Log entries: text-only search index - photos stay in the full
+    # report copy the viewer fetches. SSORT posts these three ways (REV 95):
+    # meta.dayLog (legacy) / meta.dayLogMonth - both an array, the monthly
+    # roll-up; meta.dayLogEntry - a single entry, posted immediately per day
+    # or lesson-learned. Every entry, from any of the three, is deduped into
+    # one flat index keyed by rig|date|shift so the same day never double-
+    # counts whether it arrived as an individual post or inside the month's
+    # consolidated file - newest file for that key wins.
+    $logMonth = [string](Get-Prop $meta 'logMonth')
+    $logDate  = [string](Get-Prop $meta 'logDate')
+    $hasLL    = [bool](Get-Prop $meta 'hasLessonLearned')
+
+    $rawDayLogEntries = New-Object System.Collections.Generic.List[object]
+    foreach ($fieldName in @('dayLog', 'dayLogMonth')) {
+        $arr = Get-Prop $meta $fieldName
+        if ($arr) { foreach ($e in $arr) { $rawDayLogEntries.Add(@{ entry = $e; fallbackDate = $logMonth }) | Out-Null } }
+    }
+    $singleDayLogEntry = Get-Prop $meta 'dayLogEntry'
+    if ($singleDayLogEntry) { $rawDayLogEntries.Add(@{ entry = $singleDayLogEntry; fallbackDate = $logDate }) | Out-Null }
+
+    foreach ($item in $rawDayLogEntries) {
+        $entry = $item.entry
+        $entryDate = [string](Get-Prop $entry 'date')
+        if (-not $entryDate) { $entryDate = $item.fallbackDate }
+        $shift = [string](Get-Prop $entry 'shift')
+        $photosRaw = Get-Prop $entry 'photos'
+        $photoCount = 0
+        if ($photosRaw -is [System.Array]) { $photoCount = $photosRaw.Length }
+        $monthTag = if ($logMonth) { $logMonth } elseif ($entryDate -and $entryDate.Length -ge 7) { $entryDate.Substring(0, 7) } else { '' }
+        $rec = [pscustomobject]@{
+            rig       = [string]$rig
+            month     = $monthTag
+            date      = $entryDate
+            shift     = $shift
+            personnel = [string](Get-Prop $entry 'personnel')
+            equip     = [string](Get-Prop $entry 'equip')
+            failure   = [bool](Get-Prop $entry 'failure')
+            lesson    = ([bool](Get-Prop $entry 'lesson')) -or $hasLL
+            note      = ConvertTo-PlainText ([string](Get-Prop $entry 'note'))
+            photos    = $photoCount
+            file      = $f.Name
         }
-        if ($entryList.Count) {
-            $blockKey = if ($logMonth) { "$rig|$logMonth" } else { "file|$($f.Name)" }
-            $existing = $dayLogBlocks[$blockKey]
-            if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {
-                $dayLogBlocks[$blockKey] = @{ modified = $f.LastWriteTime; entries = $entryList }
-            }
+        $key = if ($entryDate) { "$rig|$entryDate|$shift" } else { "file|$($f.Name)|$($dayLogEntries.Count)" }
+        $existing = $dayLogEntries[$key]
+        if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {
+            $dayLogEntries[$key] = @{ modified = $f.LastWriteTime; entry = $rec }
         }
     }
 
@@ -433,11 +450,9 @@ $reports | Sort-Object -Property @{ Expression = {
     if ($_.date) { [string]$_.date } else { $_.modified }
 } } -Descending | ForEach-Object { $sortedList.Add($_) | Out-Null }
 
-# Daily-log / lessons search index: flatten upserted month blocks + R53 events.
+# Daily-log / lessons search index: flatten the deduped entries + R53 events.
 $logEntries = New-Object System.Collections.Generic.List[object]
-foreach ($block in $dayLogBlocks.Values) {
-    foreach ($e in $block.entries) { $logEntries.Add($e) | Out-Null }
-}
+foreach ($v in $dayLogEntries.Values) { $logEntries.Add($v.entry) | Out-Null }
 $logSorted = New-Object System.Collections.Generic.List[object]
 $logEntries | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $logSorted.Add($_) | Out-Null }
