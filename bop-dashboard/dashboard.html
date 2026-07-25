@@ -746,6 +746,9 @@ function renderPlanningReport(rigName){
     '<div class="planning-head"><span class="planning-title">Latest Planning Report</span>' +
     (pr.reportDate ? '<span class="planning-date">' + fmtDate(pr.reportDate) + '</span>' : '') + '</div>';
 
+  var lastRigUpdate = pr.lastRigUpdate || p.lastRigUpdate;
+  if(lastRigUpdate) html += '<div class="field-line"><span class="lbl">Last rig update:</span> ' + fmtDate(lastRigUpdate) + '</div>';
+
   var stats = [];
   if(p.pctComplete) stats.push(['% Complete', p.pctComplete]);
   if(p.planVariance) stats.push(['Variance', p.planVariance]);

@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.15'
+$ScriptVersion = '2.16'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -306,11 +306,14 @@ foreach ($f in $files) {
                 if (-not $prior -or ($repDate -gt [string]$prior.reportDate) -or
                     (($repDate -eq [string]$prior.reportDate) -and ($f.LastWriteTime -gt $prior.modified))) {
                     $planningReports[$rigKey] = @{
-                        file       = $f.Name
-                        rig        = $rigKey
-                        reportDate = $repDate
-                        modified   = $f.LastWriteTime
-                        planning   = $planning
+                        file           = $f.Name
+                        rig            = $rigKey
+                        reportDate     = $repDate
+                        modified       = $f.LastWriteTime
+                        planning       = $planning
+                        # Report-level accountability date (fallback: the same
+                        # value the tool also duplicates onto the tile itself).
+                        lastRigUpdate  = [string](Get-Prop $meta 'lastRigUpdate')
                     }
                 }
             }
