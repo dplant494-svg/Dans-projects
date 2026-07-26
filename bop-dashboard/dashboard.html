@@ -1011,6 +1011,15 @@ function renderAll(){
   renderTvTileCards(FLEET);
   applyFilters();
   var latest = FLEET.reduce(function(acc,r){ return (!acc || r.lastUpdated > acc) ? r.lastUpdated : acc; }, null);
+  // The weekly BWM tracker isn't the only thing that updates this dashboard
+  // any more - daily Planning Reports land far more often, so "Last Updated"
+  // needs to reflect whichever is actually newer, not just the weekly data,
+  // or it reads as stale on days a Planning Report came in but no new BWM row did.
+  var planningLatest = Object.keys(PLANNING_REPORTS || {}).reduce(function(acc, rig){
+    var d = PLANNING_REPORTS[rig].reportDate;
+    return (d && (!acc || d > acc)) ? d : acc;
+  }, null);
+  if(planningLatest && (!latest || planningLatest > latest)) latest = planningLatest;
   var footLine = 'Last Updated — ' + fmtDate(latest);
   if(typeof BWM_META !== 'undefined' && BWM_META && BWM_META.week) footLine = BWM_META.week + ' &nbsp;&middot;&nbsp; ' + footLine;
   document.getElementById('lastUpdatedLine').innerHTML = footLine;
