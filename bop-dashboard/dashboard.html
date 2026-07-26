@@ -266,6 +266,11 @@
   .planning-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
   .planning-title { font-size: 11px; font-weight: 700; color: var(--sd-blue); text-transform: uppercase; letter-spacing: .03em; }
   .planning-date { font-size: 10.5px; color: var(--sd-text-light); }
+  .planning-complete-badge {
+    display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: .03em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 10px;
+    background: var(--sd-ahead); color: #fff; margin-left: 8px;
+  }
   .planning-stats { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 6px; }
   .planning-stat { display: flex; flex-direction: column; }
   .planning-stat .lbl { font-size: 9.5px; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; }
@@ -738,17 +743,17 @@ function renderPlanningReport(rigName){
   var pr = PLANNING_REPORTS[rigName];
   if(!pr || !pr.planning) return '';
   var p = pr.planning;
-  // The BWM project this report belongs to was marked complete (BOP deployed,
-  // work done) - stop showing it so the panel reverts to just the weekly BOP
-  // status. It reappears automatically once a new project's first report
-  // comes in, since that becomes the newest report for this rig.
-  if(p.projectComplete) return '';
   var milestones = (p.milestones || []).filter(function(m){ return m && (m.name||'').trim(); });
   var done = (p.done || []).filter(function(d){ return d && (d.desc||'').trim(); });
   var next = (p.next || []).filter(function(n){ return n && (n.desc||'').trim(); });
 
+  // A project marked complete still shows its final report (so the closing
+  // numbers stay visible) but badged as complete rather than "latest" - it
+  // gets replaced the moment a newer report (the next project) comes in for
+  // this rig, same as any other update.
   var html = '<div class="planning-panel">' +
     '<div class="planning-head"><span class="planning-title">Latest Planning Report</span>' +
+    (p.projectComplete ? '<span class="planning-complete-badge">Project Complete</span>' : '') +
     (pr.reportDate ? '<span class="planning-date">' + fmtDate(pr.reportDate) + '</span>' : '') + '</div>';
 
   var lastRigUpdate = pr.lastRigUpdate || p.lastRigUpdate;
