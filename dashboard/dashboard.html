@@ -1285,6 +1285,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (meta.location) info.appendChild(rvField('Well / Location', meta.location));
     if (meta.wo) info.appendChild(rvField('Synergi Case #', meta.wo));
     if (meta.schedule) info.appendChild(rvField('P6 Schedule', meta.schedule));
+    if (meta.bopNo) info.appendChild(rvField('BOP', meta.bopNo));
     var lastRigUpdateRaw = meta.lastRigUpdate;
     if (!lastRigUpdateRaw) {
       var planningTileForUpdate = (full.tiles || []).find(function (t) { return t.planningData && t.planningData.lastRigUpdate; });

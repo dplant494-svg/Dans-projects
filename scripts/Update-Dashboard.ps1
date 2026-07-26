@@ -6,10 +6,11 @@
 .DESCRIPTION
     Reads config.json to find the report folder (typically the OneDrive/
     SharePoint-synced TSC REPORTS folder), extracts the visit summary from
-    each report exported by the TSC Rig Reporting Tool (payload version 3:
-    seadrill-report_<rig>_<date>.json), and writes dashboard/reports-data.js.
-    The dashboard HTML loads that file with a plain <script> tag, so it works
-    when opened as a local file.
+    each report exported by the TSC Rig Reporting Tool (payload version 3).
+    Accepts any .json filename regardless of naming convention - rig identity
+    comes from meta.asset, not the filename - and writes
+    dashboard/reports-data.js. The dashboard HTML loads that file with a
+    plain <script> tag, so it works when opened as a local file.
 
     Run it once by hand to test, then schedule it with Register-DashboardTask.ps1.
 
@@ -29,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.17'
+$ScriptVersion = '2.18'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -318,6 +319,8 @@ foreach ($f in $files) {
                         # Report-level accountability date (fallback: the same
                         # value the tool also duplicates onto the tile itself).
                         lastRigUpdate  = [string](Get-Prop $meta 'lastRigUpdate')
+                        # Which BOP (BOP1/BOP2) this planning project is for.
+                        bopNo          = [string](Get-Prop $meta 'bopNo')
                     }
                 }
             }

@@ -751,8 +751,10 @@ function renderPlanningReport(rigName){
   // numbers stay visible) but badged as complete rather than "latest" - it
   // gets replaced the moment a newer report (the next project) comes in for
   // this rig, same as any other update.
+  var bopNo = pr.bopNo || p.bopNo;
   var html = '<div class="planning-panel">' +
-    '<div class="planning-head"><span class="planning-title">Latest Planning Report</span>' +
+    '<div class="planning-head"><span class="planning-title">Latest Planning Report' +
+    (bopNo ? ' — ' + bopNo : '') + '</span>' +
     (p.projectComplete ? '<span class="planning-complete-badge">Project Complete</span>' : '') +
     (pr.reportDate ? '<span class="planning-date">' + fmtDate(pr.reportDate) + '</span>' : '') + '</div>';
 
