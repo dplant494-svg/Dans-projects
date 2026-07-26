@@ -98,6 +98,8 @@ dashboard feature — treat them exactly like the core fields above:
 | `tiles[].sbopData` / `tiles[].pdcData` / `tiles[].inspData` / `tiles[].vsrData` | report-type detection (and VSR rendering) |
 | `photoDump[]` (`src` data URI or `""`, `caption`, optional `note: true`) | Photo dump & findings section in the full-report viewer |
 | `meta.schedule` (P6 schedule name, free text), `meta.scheduleFile` (`data:` URL, PDF/image, optional), `meta.scheduleFileName` | Planning reports (`meta.discipline === "Planning"`): `schedule` is the row title on the reports dashboard and a "P6 Schedule" field + "View P6 Schedule" button in the full-report viewer. Only the short `schedule` name is copied into `reports-data.js`; `scheduleFile`'s base64 payload is read from the per-report copy the viewer already fetches, never the summary file |
+| `meta.bopNo` (`"BOP1"` / `"BOP2"`) | Which BOP a Planning report's project targets — shown as a "BOP" field on the reports dashboard and in the BOP dashboard panel's title (`"Latest Planning Report — BOP1"`). **Note:** the per-rig Planning Report panel is still keyed by rig only, not rig+BOP — if a rig runs two simultaneous BWM projects (one per BOP) on different schedules, only the one with the newer `reportDate` shows; this is a known limitation, not yet addressed |
+| Planning report filenames now also follow the BWM naming convention (`YYYYMMDD_<RIG>_<TYPE>_<BOPn>_Report.json`), not just the older `seadrill-report_<rig>_<date>.json` shape | No scanner impact — rig identity comes from `meta.asset`, never the filename (filename is only a last-resort fallback when `meta.asset` is blank) |
 
 Adding NEW keys anywhere remains safe and is still the right way to extend.
 
