@@ -738,6 +738,11 @@ function renderPlanningReport(rigName){
   var pr = PLANNING_REPORTS[rigName];
   if(!pr || !pr.planning) return '';
   var p = pr.planning;
+  // The BWM project this report belongs to was marked complete (BOP deployed,
+  // work done) - stop showing it so the panel reverts to just the weekly BOP
+  // status. It reappears automatically once a new project's first report
+  // comes in, since that becomes the newest report for this rig.
+  if(p.projectComplete) return '';
   var milestones = (p.milestones || []).filter(function(m){ return m && (m.name||'').trim(); });
   var done = (p.done || []).filter(function(d){ return d && (d.desc||'').trim(); });
   var next = (p.next || []).filter(function(n){ return n && (n.desc||'').trim(); });

@@ -29,7 +29,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.16'
+$ScriptVersion = '2.17'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -150,6 +150,10 @@ function Test-PlanningHasContent {
         $arr = Get-Prop $Planning $name
         if ($arr -and @($arr).Count -gt 0) { return $true }
     }
+    # A final report marking the project complete is meaningful even if every
+    # other field was left blank on that submission - don't discard it as an
+    # empty stub, or the BOP dashboard panel would never learn to close out.
+    if ([bool](Get-Prop $Planning 'projectComplete')) { return $true }
     return $false
 }
 
