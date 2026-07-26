@@ -271,6 +271,11 @@
     text-transform: uppercase; padding: 2px 8px; border-radius: 10px;
     background: var(--sd-ahead); color: #fff; margin-left: 8px;
   }
+  .planning-sched-btn {
+    font-size: 10.5px; font-weight: 600; padding: 2px 9px; margin-left: 6px;
+    border: 1px solid var(--sd-blue); background: var(--sd-blue); color: #fff;
+    border-radius: 4px; cursor: pointer;
+  }
   .planning-stats { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-bottom: 6px; }
   .planning-stat { display: flex; flex-direction: column; }
   .planning-stat .lbl { font-size: 9.5px; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; }
@@ -737,6 +742,36 @@ function renderWorldMap(fleet){
   svg.innerHTML = parts.join('');
 }
 
+// Per-report copies (needed to fetch a Planning report's attached P6
+// schedule file on demand) are published alongside the reports dashboard,
+// not this page - adjust if bopDeployPath/deployPath ever point at
+// different site roots than Dan's current \sacred\ layout.
+var REPORTS_PATH = 'dashboard/reports/';
+
+function openDataUrl(data, name){
+  try {
+    var parts = String(data).split(','); var mime = ((parts[0] || '').match(/:(.*?);/) || [])[1] || 'application/octet-stream';
+    var bin = atob(parts[1] || ''); var arr = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    var blob = new Blob([arr], { type: mime }); var url = URL.createObjectURL(blob);
+    var w = window.open(url, '_blank'); if (!w) { var a = document.createElement('a'); a.href = url; a.download = name || 'schedule'; document.body.appendChild(a); a.click(); a.remove(); }
+  } catch (e) { alert('Could not open the schedule attachment.'); }
+}
+
+function openPlanningSchedule(rigSlug){
+  var g = GROUPS_BY_SLUG[rigSlug];
+  var pr = g && PLANNING_REPORTS[g.rig];
+  if(!pr || !pr.file) return;
+  fetch(REPORTS_PATH + encodeURIComponent(pr.file) + '.js?v=' + Date.now())
+    .then(function(res){ if(!res.ok) throw new Error('not found'); return res.text(); })
+    .then(function(text){ return JSON.parse(text); })
+    .then(function(full){
+      var meta = full.meta || {};
+      if(meta.scheduleFile){ openDataUrl(meta.scheduleFile, meta.scheduleFileName); }
+      else { alert('No schedule attachment on this report.'); }
+    })
+    .catch(function(){ alert('Could not load the schedule attachment.'); });
+}
+
 // Per-rig "Planning Report" (project schedule) — a daily-cadence report,
 // distinct from the weekly BWM tracker rows shown by bopDetailHtml below.
 function renderPlanningReport(rigName){
@@ -760,6 +795,12 @@ function renderPlanningReport(rigName){
 
   var lastRigUpdate = pr.lastRigUpdate || p.lastRigUpdate;
   if(lastRigUpdate) html += '<div class="field-line"><span class="lbl">Last rig update:</span> ' + fmtDate(lastRigUpdate) + '</div>';
+
+  var scheduleName = pr.schedule || p.schedule;
+  if(scheduleName){
+    html += '<div class="field-line"><span class="lbl">P6 Schedule:</span> ' + scheduleName +
+      ' <button type="button" class="planning-sched-btn" onclick="openPlanningSchedule(\'' + slug(rigName) + '\')">View schedule</button></div>';
+  }
 
   var stats = [];
   if(p.pctComplete) stats.push(['% Complete', p.pctComplete]);

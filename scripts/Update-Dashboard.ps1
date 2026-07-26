@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.18'
+$ScriptVersion = '2.19'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -321,6 +321,11 @@ foreach ($f in $files) {
                         lastRigUpdate  = [string](Get-Prop $meta 'lastRigUpdate')
                         # Which BOP (BOP1/BOP2) this planning project is for.
                         bopNo          = [string](Get-Prop $meta 'bopNo')
+                        # P6 schedule name - not the (possibly large) attached
+                        # file itself, just enough to know whether to offer a
+                        # "View P6 Schedule" button; the BOP dashboard fetches
+                        # the full per-report copy on demand when clicked.
+                        schedule       = [string](Get-Prop $meta 'schedule')
                     }
                 }
             }
