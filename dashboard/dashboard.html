@@ -1094,9 +1094,18 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     });
     if (grid.childNodes.length) body.appendChild(grid);
 
+    // Scope key scans to this tile's own equipment (cbm_<equip-with-underscores>_...).
+    // SSORT had a bug where a tile's cbmData could retain another equipment's
+    // section-summary/graded keys after the dropdown was switched; matching
+    // only this equipment's prefix keeps a stale historical file from
+    // rendering someone else's sections under this one's header. Skipped when
+    // equip is blank so nothing regresses if that field is ever missing.
+    var equipPrefix = String(cbm.equip || '').trim() ? 'cbm_' + String(cbm.equip).trim().replace(/ /g, '_') + '_' : '';
+
     // Collect graded tasks and the overall grade tally
     var tasks = [], tally = {};
     Object.keys(cbm).forEach(function (k) {
+      if (equipPrefix && k.indexOf(equipPrefix) !== 0) return;
       var m = /^(.+_g(\d+)_(\d+))_gr$/.exec(k);
       if (!m) return;
       var grade = String(cbm[k] || '').trim();
@@ -1138,7 +1147,10 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       });
     }
 
-    var summaries = Object.keys(cbm).filter(function (k) { return /_g\d+_summary$/.test(k) && String(cbm[k]).trim(); });
+    var summaries = Object.keys(cbm).filter(function (k) {
+      if (equipPrefix && k.indexOf(equipPrefix) !== 0) return false;
+      return /_g\d+_summary$/.test(k) && String(cbm[k]).trim();
+    });
     if (summaries.length) {
       body.appendChild(mk('div', 'rv-section-label', 'Section summaries'));
       summaries.sort().forEach(function (k) {
