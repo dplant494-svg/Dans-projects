@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.19'
+$ScriptVersion = '2.20'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -426,29 +426,38 @@ foreach ($f in $files) {
     if (-not $lead) { $lead = [string](Get-Prop $meta 'sss') }
     if (-not $lead) { $lead = [string](Get-Prop $meta 'tech') }
 
-    $reports.Add([pscustomobject]@{
-        file          = $f.Name
-        rig           = [string]$rig
-        reporttype    = [string](Get-ReportType -Meta $meta -Tiles $tilesRaw)
-        type          = [string](Get-Prop $meta 'type')        # visit classification
-        discipline    = [string](Get-Prop $meta 'discipline')
-        wce           = $lead                                    # WCE Supt, or SSS/engineers for SSORT
-        location      = [string](Get-Prop $meta 'location')     # well name / location
-        schedule      = [string](Get-Prop $meta 'schedule')     # P6 schedule name (Planning reports; title on the dashboard)
-        date          = [string](Get-Prop $meta 'date')         # visit start
-        dateEnd       = [string](Get-Prop $meta 'dateend')      # visit end
-        exportedAt    = [string](Get-Prop $json 'exportedAt')
-        modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
-        tileCount     = $tileCount
-        criticalTotal = $criticalItems.Count
-        criticalOpen  = $criticalOpen
-        actionsTotal  = $actionItems.Count
-        actionsLeftWithRig = $actionsLeftWithRig
-        # .ToArray() rather than @(...): the array subexpression operator can
-        # throw 'Argument types do not match' on List[object] contents here.
-        criticalItems = $criticalItems.ToArray()
-        actionItems   = $actionItems.ToArray()
-    }) | Out-Null
+    # Planning reports (BWM Weekly Planning + daily Planning, WCGRRT REV 115+
+    # flags these with meta.planningOnly) belong only on the BOP Fleet
+    # Planning Dashboard - they're already captured above into
+    # $planningReports / $bwmSnapshots. Keep them out of the rig-visit
+    # reports list at the source rather than filtering client-side.
+    $disciplineVal = [string](Get-Prop $meta 'discipline')
+    $isPlanningOnly = ($disciplineVal -eq 'Planning') -or ([bool](Get-Prop $meta 'planningOnly'))
+    if (-not $isPlanningOnly) {
+        $reports.Add([pscustomobject]@{
+            file          = $f.Name
+            rig           = [string]$rig
+            reporttype    = [string](Get-ReportType -Meta $meta -Tiles $tilesRaw)
+            type          = [string](Get-Prop $meta 'type')        # visit classification
+            discipline    = $disciplineVal
+            wce           = $lead                                    # WCE Supt, or SSS/engineers for SSORT
+            location      = [string](Get-Prop $meta 'location')     # well name / location
+            schedule      = [string](Get-Prop $meta 'schedule')     # P6 schedule name (Planning reports; title on the dashboard)
+            date          = [string](Get-Prop $meta 'date')         # visit start
+            dateEnd       = [string](Get-Prop $meta 'dateend')      # visit end
+            exportedAt    = [string](Get-Prop $json 'exportedAt')
+            modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+            tileCount     = $tileCount
+            criticalTotal = $criticalItems.Count
+            criticalOpen  = $criticalOpen
+            actionsTotal  = $actionItems.Count
+            actionsLeftWithRig = $actionsLeftWithRig
+            # .ToArray() rather than @(...): the array subexpression operator can
+            # throw 'Argument types do not match' on List[object] contents here.
+            criticalItems = $criticalItems.ToArray()
+            actionItems   = $actionItems.ToArray()
+        }) | Out-Null
+    }
     }
     catch {
         # One malformed report must not stop the whole scan.
