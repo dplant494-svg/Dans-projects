@@ -1102,20 +1102,50 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // equip is blank so nothing regresses if that field is ever missing.
     var equipPrefix = String(cbm.equip || '').trim() ? 'cbm_' + String(cbm.equip).trim().replace(/ /g, '_') + '_' : '';
 
-    // Collect graded tasks and the overall grade tally
-    var tasks = [], tally = {};
+    // Collect graded tasks and the overall grade tally. Checklist items come
+    // in two numbering shapes depending on SSORT version:
+    //   old: cbm_<equip>_g<section>_<item>_[gr|cm|ph]   (2 numbers, "g" prefix)
+    //   new: cbm_<equip>_<major>_<minor>_<item>_[gr|cm|ph]  (3 plain numbers,
+    //        matches the tool's own on-screen reference like "9.1.5")
+    // Discover items from whichever of _gr/_cm/_ph exists - most new-format
+    // items only carry a comment with no grade at all (reference/info rows),
+    // so scanning _gr alone silently dropped the majority of them.
+    var itemBases = {};
     Object.keys(cbm).forEach(function (k) {
       if (equipPrefix && k.indexOf(equipPrefix) !== 0) return;
-      var m = /^(.+_g(\d+)_(\d+))_gr$/.exec(k);
-      if (!m) return;
-      var grade = String(cbm[k] || '').trim();
+      var mNew = /^(.+_(\d+)_(\d+)_(\d+))_(?:gr|cm|ph)$/.exec(k);
+      var mOld = !mNew && /^(.+_g(\d+)_(\d+))_(?:gr|cm|ph)$/.exec(k);
+      if (mNew) {
+        itemBases[mNew[1]] = {
+          sortKey: [Number(mNew[2]), Number(mNew[3]), Number(mNew[4])],
+          label: mNew[2] + '.' + mNew[3] + '.' + mNew[4]
+        };
+      } else if (mOld) {
+        itemBases[mOld[1]] = {
+          sortKey: [Number(mOld[2]), Number(mOld[3])],
+          label: 'Section ' + (Number(mOld[2]) + 1) + ' · Item ' + (Number(mOld[3]) + 1)
+        };
+      }
+    });
+
+    var tasks = [], tally = {};
+    Object.keys(itemBases).forEach(function (base) {
+      var info = itemBases[base];
+      var grade = String(cbm[base + '_gr'] || '').trim();
       if (grade) tally[grade] = (tally[grade] || 0) + 1;
       tasks.push({
-        section: Number(m[2]), item: Number(m[3]), grade: grade,
-        comment: cbm[m[1] + '_cm'] || '', photos: cbm[m[1] + '_ph'] || []
+        sortKey: info.sortKey, label: info.label, grade: grade,
+        comment: cbm[base + '_cm'] || '', photos: cbm[base + '_ph'] || []
       });
     });
-    tasks.sort(function (a, b) { return a.section - b.section || a.item - b.item; });
+    tasks.sort(function (a, b) {
+      var ak = a.sortKey, bk = b.sortKey;
+      for (var i = 0; i < Math.max(ak.length, bk.length); i++) {
+        var d = (ak[i] || 0) - (bk[i] || 0);
+        if (d) return d;
+      }
+      return 0;
+    });
 
     var gradeKeys = Object.keys(tally).sort();
     if (gradeKeys.length) {
@@ -1137,7 +1167,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       findings.forEach(function (t) {
         var row = mk('div', 'rv-equip');
         var head = mk('div', 'rv-equip-head');
-        head.appendChild(document.createTextNode('Section ' + (t.section + 1) + ' · Item ' + (t.item + 1) + ' '));
+        head.appendChild(document.createTextNode(t.label + ' '));
         head.appendChild(cbmGradeChip(t.grade));
         row.appendChild(head);
         if (String(t.comment).trim()) row.appendChild(rvNotes(t.comment));
