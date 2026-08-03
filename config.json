@@ -3,5 +3,6 @@
   "filePattern": "*.json",
   "recurse": true,
   "outputFile": "dashboard\\reports-data.js",
-  "deployPath": ""
+  "deployPath": "",
+  "wellRigMap": {}
 }
