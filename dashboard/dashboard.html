@@ -452,6 +452,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   // Visit health, same semantics as the reporting tool's pass/monitor/fail:
   // open critical items → fail; open follow-up actions → monitor; else pass.
   function visitStatus(r) {
+    // Precharge reports don't carry critical/action rows - they're a
+    // one-time confirmation the value was issued, not a pass/fail health
+    // check, so give them their own status wording rather than "Clear".
+    if (r.reporttype === 'Precharge') {
+      return { kind: 'pass', icon: '✓', label: 'Precharge distributed to rig' };
+    }
     if (r.criticalOpen > 0) {
       return { kind: 'fail', icon: '✕', label: r.criticalOpen + ' critical open' };
     }
