@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.22'
+$ScriptVersion = '2.23'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -341,6 +341,11 @@ foreach ($f in $files) {
                     subT          = [string](Get-FieldVal $fields 'subT')
                     surfT         = [string](Get-FieldVal $fields 'surfT')
                     tempUnit      = [string](Get-Prop $units 'temp')
+                    # shReqTop is a top-level well/stack input (not per-config
+                    # like the g*/dcb*/sat* blocks), consistently named and
+                    # present in every export seen so far - confident enough
+                    # to label, unlike the per-config computed fields above.
+                    shearReq      = [string](Get-FieldVal $fields 'shReqTop')
                     manualEntries = $manualEntries.ToArray()
                     saved         = $savedAt
                     modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')

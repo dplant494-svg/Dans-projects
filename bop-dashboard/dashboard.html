@@ -281,6 +281,9 @@
   .planning-stat .lbl { font-size: 9.5px; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; }
   .planning-stat .val { font-size: 12.5px; font-weight: 700; color: var(--sd-text); }
   .planning-sublabel { font-size: 10px; font-weight: 700; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; margin: 8px 0 3px; }
+  .precharge-toggle-btn { margin-left: 0; margin-top: 4px; }
+  .precharge-detail { margin-top: 8px; }
+  .precharge-detail .planning-sublabel:first-child { margin-top: 0; }
   .planning-list { margin: 0; padding-left: 16px; font-size: 10.5px; color: var(--sd-text); }
   .planning-list li { margin-bottom: 2px; }
 
@@ -866,6 +869,7 @@ function renderPrechargePanel(rigName){
     if(p.wd) stats.push(['Water depth', p.wd + (p.wdUnit ? ' ' + p.wdUnit : '')]);
     if(p.subT) stats.push(['Subsea temp', p.subT + (p.tempUnit ? '°' + p.tempUnit : '')]);
     if(p.surfT) stats.push(['Surface temp', p.surfT + (p.tempUnit ? '°' + p.tempUnit : '')]);
+    if(p.shearReq) stats.push(['Min. shear pressure', p.shearReq + ' psi']);
     html += '<div class="planning-stats">' + stats.map(function(s){
       return '<div class="planning-stat"><span class="lbl">'+s[0]+'</span><span class="val">'+s[1]+'</span></div>';
     }).join('') + '</div>';
@@ -878,15 +882,23 @@ function renderPrechargePanel(rigName){
     // nitrogen precharge data, so showing less beats guessing wrong.
     var active = (p.manualEntries || []).filter(function(m){ return m.active; });
     var other = (p.manualEntries || []).filter(function(m){ return !m.active; });
+    var detail = '';
     if(active.length){
-      html += '<div class="planning-sublabel">Manual nitrogen precharge (this rig’s config)</div><ul class="planning-list">' +
+      detail += '<div class="planning-sublabel">Manual nitrogen precharge (this rig’s config)</div><ul class="planning-list">' +
         active.map(function(m){ return '<li>' + m.value + ' psi</li>'; }).join('') + '</ul>';
     } else if(!p.hasKnownBlock){
-      html += '<div class="field-line">Precharge breakdown not confirmed for the “' + (p.config||'?') + '” configuration yet — check the Precharge Calculator export directly.</div>';
+      detail += '<div class="field-line">Precharge breakdown not confirmed for the “' + (p.config||'?') + '” configuration yet — check the Precharge Calculator export directly.</div>';
     }
     if(other.length){
-      html += '<div class="planning-sublabel">Other manual entries on file (not this rig’s active config)</div><ul class="planning-list">' +
+      detail += '<div class="planning-sublabel">Other manual entries on file (not this rig’s active config)</div><ul class="planning-list">' +
         other.map(function(m){ return '<li>' + m.value + ' psi — ' + (PRECHARGE_CODE_LABELS[m.code] || m.code + ' (code unconfirmed)') + '</li>'; }).join('') + '</ul>';
+    }
+    if(detail){
+      html += '<button type="button" class="planning-sched-btn precharge-toggle-btn" onclick="' +
+        'var d=this.nextElementSibling; var wasHidden=d.hidden; d.hidden=!wasHidden; ' +
+        'this.textContent = wasHidden ? \'Hide full precharge details\' : \'View full precharge details\';' +
+        '">View full precharge details</button>' +
+        '<div class="precharge-detail" hidden>' + detail + '</div>';
     }
     html += '</div>';
     return html;
