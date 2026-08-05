@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.21'
+$ScriptVersion = '2.22'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -303,7 +303,7 @@ foreach ($f in $files) {
                     $code = $Matches[1]
                     $val = [string](Get-FieldVal $fields $name)
                     if ($val) {
-                        $manualEntries.Add([pscustomobject]@{
+                        $manualEntries.Add(@{
                             code   = $code
                             value  = $val
                             active = ($script:PrechargeConfigPrefix[$cfg] -eq $code)
@@ -329,7 +329,7 @@ foreach ($f in $files) {
                 if (-not $mappedRig) {
                     Write-Warning "Precharge Calculator well '$well' has no rig mapping - it's captured but won't appear on any rig's BOP dashboard panel until you add it to config.json's 'wellRigMap'."
                 }
-                $prechargeRecords[$wellKey] = [pscustomobject]@{
+                $prechargeRecords[$wellKey] = @{
                     file          = $f.Name
                     well          = $well
                     rig           = $mappedRig
