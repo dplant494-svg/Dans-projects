@@ -281,9 +281,6 @@
   .planning-stat .lbl { font-size: 9.5px; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; }
   .planning-stat .val { font-size: 12.5px; font-weight: 700; color: var(--sd-text); }
   .planning-sublabel { font-size: 10px; font-weight: 700; color: var(--sd-text-light); text-transform: uppercase; letter-spacing: .03em; margin: 8px 0 3px; }
-  .precharge-toggle-btn { margin-left: 0; margin-top: 4px; }
-  .precharge-detail { margin-top: 8px; }
-  .precharge-detail .planning-sublabel:first-child { margin-top: 0; }
 
   .breakin-section { margin-top: 10px; }
   .breakin-badge {
@@ -1007,67 +1004,6 @@ function renderBreakinSections(rigName, pr, p){
   return html;
 }
 
-// Two lookups, two different key spaces: PRECHARGE_CONFIG_LABELS is keyed by
-// the calculator's own "config" value (fields.config, e.g. "gemini");
-// PRECHARGE_CODE_LABELS is keyed by the short field-prefix code the scanner
-// reads a manual precharge under (e.g. "g" for gManualPC). Only entries the
-// scanner can confirm (see $script:PrechargeConfigPrefix in
-// Update-Dashboard.ps1) are listed - anything else shows its raw value
-// rather than guessing at a name.
-var PRECHARGE_CONFIG_LABELS = { gemini: 'Gemini', dcb: 'DCB', sat: 'Sat', nov: 'NOV' };
-var PRECHARGE_CODE_LABELS = { g: 'Gemini', dcb: 'DCB', sat: 'Sat', nov: 'NOV' };
-
-function renderPrechargePanel(rigName){
-  var recs = prechargeRecordsForRig(rigName);
-  if(!recs.length) return '';
-  return recs.map(function(p){
-    var cfgLabel = PRECHARGE_CONFIG_LABELS[p.config] || p.config || 'Unknown config';
-    var html = '<div class="planning-panel">' +
-      '<div class="planning-head"><span class="planning-title">Nitrogen Precharge — ' + p.well + '</span>' +
-      (p.saved ? '<span class="planning-date">' + fmtDate(p.saved) + '</span>' : '') + '</div>';
-
-    var stats = [];
-    if(p.bopSel) stats.push(['BOP', p.bopSel]);
-    stats.push(['Config', cfgLabel]);
-    if(p.wd) stats.push(['Water depth', p.wd + (p.wdUnit ? ' ' + p.wdUnit : '')]);
-    if(p.subT) stats.push(['Subsea temp', p.subT + (p.tempUnit ? '°' + p.tempUnit : '')]);
-    if(p.surfT) stats.push(['Surface temp', p.surfT + (p.tempUnit ? '°' + p.tempUnit : '')]);
-    if(p.shearReq) stats.push(['Min. shear pressure', p.shearReq + ' psi']);
-    html += '<div class="planning-stats">' + stats.map(function(s){
-      return '<div class="planning-stat"><span class="lbl">'+s[0]+'</span><span class="val">'+s[1]+'</span></div>';
-    }).join('') + '</div>';
-
-    // Deliberately conservative: only the figures the user typed directly
-    // into the calculator (ManualPC fields) are shown, not the tool's
-    // intermediate calculated values (accumulator ratios, gas volumes,
-    // required pressures) - those field meanings aren't confirmed against
-    // documentation from the calculator's own build, and this is BOP
-    // nitrogen precharge data, so showing less beats guessing wrong.
-    var active = (p.manualEntries || []).filter(function(m){ return m.active; });
-    var other = (p.manualEntries || []).filter(function(m){ return !m.active; });
-    var detail = '';
-    if(active.length){
-      detail += '<div class="planning-sublabel">Manual nitrogen precharge (this rig’s config)</div><ul class="planning-list">' +
-        active.map(function(m){ return '<li>' + m.value + ' psi</li>'; }).join('') + '</ul>';
-    } else if(!p.hasKnownBlock){
-      detail += '<div class="field-line">Precharge breakdown not confirmed for the “' + (p.config||'?') + '” configuration yet — check the Precharge Calculator export directly.</div>';
-    }
-    if(other.length){
-      detail += '<div class="planning-sublabel">Other manual entries on file (not this rig’s active config)</div><ul class="planning-list">' +
-        other.map(function(m){ return '<li>' + m.value + ' psi — ' + (PRECHARGE_CODE_LABELS[m.code] || m.code + ' (code unconfirmed)') + '</li>'; }).join('') + '</ul>';
-    }
-    if(detail){
-      html += '<button type="button" class="planning-sched-btn precharge-toggle-btn" onclick="' +
-        'var d=this.nextElementSibling; var wasHidden=d.hidden; d.hidden=!wasHidden; ' +
-        'this.textContent = wasHidden ? \'Hide full precharge details\' : \'View full precharge details\';' +
-        '">View full precharge details</button>' +
-        '<div class="precharge-detail" hidden>' + detail + '</div>';
-    }
-    html += '</div>';
-    return html;
-  }).join('');
-}
-
 // ---------- Rig detail panel ----------
 var GROUPS_BY_SLUG = {};
 function openRigModal(s){
@@ -1078,7 +1014,6 @@ function openRigModal(s){
   document.getElementById('rigModalBody').innerHTML =
     '<h2>' + g.rig + '</h2><div class="rm-sub">' + meta + '</div>' +
     renderPlanningReport(g.rig) +
-    renderPrechargePanel(g.rig) +
     g.rows.map(function(row){ return bopDetailHtml(row, g.rows.length > 1); }).join('');
   document.getElementById('rigModal').classList.add('open');
 }
@@ -1422,18 +1357,6 @@ var BWM_STAGE_KEYS = ['pt','sc','sm','sf','pc','op','rr','ex','pd','aar']; // mi
 var BWM_META = null;      // {week, reportDate, compiledBy} of the currently loaded snapshot
 var BWM_SNAPSHOTS = {};   // history keyed by week label (in-memory; latest loaded wins the view)
 var PLANNING_REPORTS = {}; // per-rig latest "Planning Report" tile, keyed by rig name
-var PRECHARGE_RECORDS = {}; // BOP Precharge Calculator exports, keyed by normalised well name (not rig - see prechargeRecordsForRig)
-
-// The Precharge Calculator identifies a well, not a rig - config.json's
-// 'wellRigMap' resolves that at scan time. A well with no entry yet still
-// comes through with rig:"" (not silently dropped) but won't match any rig
-// here until config.json is updated - the scanner warns on each run when
-// that happens, so it isn't a silent gap.
-function prechargeRecordsForRig(rig){
-  return Object.keys(PRECHARGE_RECORDS)
-    .map(function(k){ return PRECHARGE_RECORDS[k]; })
-    .filter(function(r){ return r.rig === rig; });
-}
 
 function parseBwmJson(payload, filename){
   if(!payload || !Array.isArray(payload.tiles)) throw new Error('"' + filename + '" is not a WCGRRT export (no tiles array).');
@@ -1612,9 +1535,8 @@ function initPipelineData(){
   var data = window.BWM_DATA;
   var parsedList = parsePipelineSnapshots();
   if(parsedList){
-    PIPELINE_STAMP = data.generatedAt + ':' + data.snapshots.length + ':' + Object.keys(data.planningReports || {}).length + ':' + Object.keys(data.prechargeRecords || {}).length;
+    PIPELINE_STAMP = data.generatedAt + ':' + data.snapshots.length + ':' + Object.keys(data.planningReports || {}).length;
     PLANNING_REPORTS = data.planningReports || {};
-    PRECHARGE_RECORDS = data.prechargeRecords || {};
     loadSnapshot(parsedList[0]);
     populateWeekSelect(parsedList, snapshotKey(parsedList[0]));
   } else {
@@ -1630,11 +1552,10 @@ function pollPipelineData(){
     s.remove();
     var data = window.BWM_DATA;
     if(!data) return;
-    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + Object.keys(data.planningReports || {}).length + ':' + Object.keys(data.prechargeRecords || {}).length;
+    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + Object.keys(data.planningReports || {}).length;
     if(stamp === PIPELINE_STAMP) return;
     PIPELINE_STAMP = stamp;
     PLANNING_REPORTS = data.planningReports || {};
-    PRECHARGE_RECORDS = data.prechargeRecords || {};
     var sel = document.getElementById('weekSelect');
     var currentKey = (sel && sel.style.display !== 'none') ? sel.value : null;
     var parsedList = parsePipelineSnapshots();

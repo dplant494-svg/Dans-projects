@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.24'
+$ScriptVersion = '2.25'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -158,53 +158,6 @@ function Test-PlanningHasContent {
     return $false
 }
 
-# List property/key names generically - works whether $Object came back as a
-# PSCustomObject (ConvertFrom-Json) or an IDictionary (JavaScriptSerializer,
-# used for big files on Windows PowerShell 5.1).
-function Get-PropertyNames {
-    param($Object)
-    if ($null -eq $Object) { return @() }
-    if ($Object -is [System.Collections.IDictionary]) { return @($Object.Keys) }
-    return @($Object.PSObject.Properties.Name)
-}
-
-# The Precharge Calculator stores every input as { v: <value> } (text/number
-# fields) or { c: <bool> } (checkboxes) under fields.<name> - unwrap either.
-function Get-FieldVal {
-    param($Fields, [string]$Name)
-    $f = Get-Prop $Fields $Name
-    if ($null -eq $f) { return $null }
-    $v = Get-Prop $f 'v'
-    if ($null -ne $v) { return $v }
-    return (Get-Prop $f 'c')
-}
-
-# Well name -> rig name lookup for the Precharge Calculator, which identifies
-# a well (e.g. "Burututu-01"), not a rig. Maintained by hand in config.json's
-# 'wellRigMap' (well name as the tool writes it -> rig name as used in the
-# BOP dashboard's fleet list). Matched loosely (case/spacing/dashes ignored)
-# so "Burututu-01" and "Burututu 01" line up. Wells with no entry yet still
-# surface on the dashboard, just without a rig assigned.
-function Get-MappedRig {
-    param([string]$Well, $Map)
-    if (-not $Well -or $null -eq $Map) { return '' }
-    $norm = ($Well.ToLowerInvariant() -replace '[^a-z0-9]', '')
-    foreach ($name in (Get-PropertyNames $Map)) {
-        $keyNorm = ([string]$name).ToLowerInvariant() -replace '[^a-z0-9]', ''
-        if ($keyNorm -eq $norm) { return [string](Get-Prop $Map $name) }
-    }
-    return ''
-}
-
-# Field-prefix used by each Precharge Calculator config value for its own
-# calculated block (e.g. config "gemini" -> fields gShReq/gSup/.../gManualPC).
-# Only entries confirmed against a real export are listed here deliberately -
-# this is BOP nitrogen precharge data, and guessing at an unconfirmed prefix
-# risks mislabeling a safety-relevant figure. A config value not in this map
-# still surfaces the well/context fields and any manually-entered precharge
-# below, just without the per-config computed block.
-$script:PrechargeConfigPrefix = @{ 'gemini' = 'g'; 'dcb' = 'dcb'; 'sat' = 'sat' }
-
 # Plain text from report HTML for the keyword index (viewer shows the real HTML).
 function ConvertTo-PlainText {
     param([string]$Html)
@@ -288,7 +241,6 @@ $bwmSnapshots = New-Object System.Collections.Generic.List[object]
 $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
-$prechargeRecords = @{}   # keyed by normalised well name; newest 'saved' wins
 $skipped = 0
 foreach ($f in $files) {
     try {
@@ -304,84 +256,6 @@ foreach ($f in $files) {
     if ($null -eq $meta) {
         Write-Warning "Skipping $($f.Name): no 'meta' block - not a TSC Rig Reporting Tool export?"
         $skipped++
-        continue
-    }
-
-    # Seadrill BOP Precharge Calculator: a different tool entirely, with its
-    # own flat { meta, config, units, fields } shape (no meta.asset/tiles).
-    # Handled completely separately from the WCGRRT/SSORT report shape below -
-    # feeds bop-dashboard/precharge-data.js, not reports-data.js.
-    if ([string](Get-Prop $meta 'tool') -eq 'Seadrill BOP Precharge Calculator') {
-        try {
-            $fields = Get-Prop $json 'fields'
-            $well = [string](Get-FieldVal $fields 'well')
-            if (-not $well) {
-                Write-Warning "Skipping $($f.Name): Precharge Calculator export has no well name"
-                $skipped++
-                continue
-            }
-            $cfg = [string](Get-FieldVal $fields 'config')
-            $units = Get-Prop $json 'units'
-
-            $manualEntries = New-Object System.Collections.Generic.List[object]
-            foreach ($name in (Get-PropertyNames $fields)) {
-                if ($name -match '^([a-zA-Z]+)ManualPC$') {
-                    $code = $Matches[1]
-                    $val = [string](Get-FieldVal $fields $name)
-                    if ($val) {
-                        $manualEntries.Add(@{
-                            code   = $code
-                            value  = $val
-                            active = ($script:PrechargeConfigPrefix[$cfg] -eq $code)
-                        }) | Out-Null
-                    }
-                }
-            }
-
-            # ConvertFrom-Json on PowerShell 7/Core auto-parses an ISO
-            # datetime-with-time string (unlike a bare "YYYY-MM-DD" date,
-            # which stays a string) into a [datetime] - a blind [string]
-            # cast on that would reformat it to the current culture's
-            # locale format instead of ISO. Windows PowerShell 5.1 (this
-            # scanner's production environment) uses JavaScriptSerializer
-            # instead, which never does this, but normalise explicitly so
-            # behaviour doesn't depend on which PowerShell edition runs it.
-            $savedRaw = Get-Prop $meta 'saved'
-            $savedAt = if ($savedRaw -is [datetime]) { $savedRaw.ToString('yyyy-MM-ddTHH:mm:ss') } else { [string]$savedRaw }
-            $wellKey = ($well.ToLowerInvariant() -replace '[^a-z0-9]', '')
-            $prior = $prechargeRecords[$wellKey]
-            if (-not $prior -or $savedAt -gt [string]$prior.saved) {
-                $mappedRig = Get-MappedRig -Well $well -Map $config.wellRigMap
-                if (-not $mappedRig) {
-                    Write-Warning "Precharge Calculator well '$well' has no rig mapping - it's captured but won't appear on any rig's BOP dashboard panel until you add it to config.json's 'wellRigMap'."
-                }
-                $prechargeRecords[$wellKey] = @{
-                    file          = $f.Name
-                    well          = $well
-                    rig           = $mappedRig
-                    config        = $cfg
-                    hasKnownBlock = $script:PrechargeConfigPrefix.ContainsKey($cfg)
-                    bopSel        = [string](Get-FieldVal $fields 'bopSel')
-                    wd            = [string](Get-FieldVal $fields 'wd')
-                    wdUnit        = [string](Get-Prop $units 'wd')
-                    subT          = [string](Get-FieldVal $fields 'subT')
-                    surfT         = [string](Get-FieldVal $fields 'surfT')
-                    tempUnit      = [string](Get-Prop $units 'temp')
-                    # shReqTop is a top-level well/stack input (not per-config
-                    # like the g*/dcb*/sat* blocks), consistently named and
-                    # present in every export seen so far - confident enough
-                    # to label, unlike the per-config computed fields above.
-                    shearReq      = [string](Get-FieldVal $fields 'shReqTop')
-                    manualEntries = $manualEntries.ToArray()
-                    saved         = $savedAt
-                    modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
-                }
-            }
-        }
-        catch {
-            Write-Warning "Skipping $($f.Name): could not parse Precharge Calculator export ($($_.Exception.Message))"
-            $skipped++
-        }
         continue
     }
 
@@ -433,6 +307,17 @@ foreach ($f in $files) {
     $assetRaw = [string](Get-Prop $meta 'asset')
     $rig = $assetRaw
     if (-not $rig) { $rig = $f.BaseName }
+
+    # A bare 'meta' block with nothing else recognizable (no tiles, no rig
+    # identity, no critical/action rows) isn't a WCGRRT/SSORT export at all -
+    # e.g. a different tool's save file that happens to have its own 'meta'
+    # object. Skip it rather than adding an empty, meaningless report row
+    # keyed by the filename.
+    if ($tileCount -eq 0 -and -not $assetRaw -and $criticalItems.Count -eq 0 -and $actionItems.Count -eq 0) {
+        Write-Warning "Skipping $($f.Name): has a 'meta' block but no tiles, rig identity, or critical/action rows - not a recognized report export"
+        $skipped++
+        continue
+    }
 
     # BWM Weekly Planning tiles are fleet-level snapshots that feed the BOP
     # Fleet Planning Dashboard; collect them raw for bop-planning-data.js.
@@ -904,13 +789,12 @@ $bopPayload = @{
     generatedAt      = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     snapshots        = $bwmSortedList.ToArray()
     planningReports  = $planningReports
-    prechargeRecords = $prechargeRecords
 }
 $bopContent = 'window.BWM_DATA = ' + (ConvertTo-ReportJson $bopPayload) + ";`n"
 $bopDir = Split-Path -Parent $bopOutputFile
 if (-not (Test-Path -Path $bopDir)) { New-Item -ItemType Directory -Path $bopDir -Force | Out-Null }
 [System.IO.File]::WriteAllText($bopOutputFile, $bopContent, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host "Wrote $($bwmSortedList.Count) BWM snapshot(s) and $($prechargeRecords.Count) precharge record(s) to $bopOutputFile" -ForegroundColor Green
+Write-Host "Wrote $($bwmSortedList.Count) BWM snapshot(s) to $bopOutputFile" -ForegroundColor Green
 
 # If a deploy path is configured (the IIS/network folder the dashboard is
 # served from), push the fresh data file there too so viewers stay current.
