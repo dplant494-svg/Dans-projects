@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.23'
+$ScriptVersion = '2.24'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -147,7 +147,7 @@ function Test-PlanningHasContent {
     foreach ($name in @('pctComplete', 'planVariance', 'criticalPath', 'simops', 'comments', 'dataDate', 'reportingDay')) {
         if ([string](Get-Prop $Planning $name)) { return $true }
     }
-    foreach ($name in @('milestones', 'done', 'next')) {
+    foreach ($name in @('milestones', 'done', 'next', 'breakins')) {
         $arr = Get-Prop $Planning $name
         if ($arr -and @($arr).Count -gt 0) { return $true }
     }
@@ -233,6 +233,31 @@ function ConvertTo-ReportJson {
     return $script:BigJsonSerializer.Serialize($Object)
 }
 
+# For a value that must serialize as a JSON ARRAY at the top level (unlike
+# ConvertTo-ReportJson's usual callers, which always wrap everything in one
+# object). On PS7/Core, piping a single-element array into ConvertTo-Json
+# collapses it to a bare object - {"a":1} instead of [{"a":1}] - because the
+# pipeline delivers the one item on its own, indistinguishable from a lone
+# scalar; -AsArray forces array output. A genuinely empty array still needs
+# its own '[]' fallback (see call sites) since zero piped items means
+# ConvertTo-Json's process block never runs at all, output or not.
+# JavaScriptSerializer.Serialize() (Windows PowerShell 5.1) takes the object
+# as a plain method argument, not through the pipeline, so it never has
+# this ambiguity either way.
+function ConvertTo-JsonArray {
+    param($Array)
+    if ($PSVersionTable.PSEdition -eq 'Core') {
+        return ($Array | ConvertTo-Json -Depth 24 -Compress -AsArray)
+    }
+    if ($null -eq $script:BigJsonSerializer) {
+        Add-Type -AssemblyName System.Web.Extensions
+        $script:BigJsonSerializer = New-Object System.Web.Script.Serialization.JavaScriptSerializer
+        $script:BigJsonSerializer.MaxJsonLength = [int]::MaxValue
+        $script:BigJsonSerializer.RecursionLimit = 1000
+    }
+    return $script:BigJsonSerializer.Serialize($Array)
+}
+
 $recurse = $false
 if ($config.PSObject.Properties['recurse'] -and $config.recurse) { $recurse = $true }
 
@@ -252,7 +277,8 @@ foreach ($baseFolder in $existingFolders) {
             if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
             $excluded = $false
             foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
-            (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json')
+            (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json') -and
+            ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json')
         } | ForEach-Object { $filesList.Add($_) | Out-Null }
 }
 $files = $filesList.ToArray()
@@ -786,6 +812,85 @@ if ($notif -and (Get-Prop $notif 'enabled')) {
     }
 }
 
+# Break-in work (rig-raised additions to the BOP maintenance plan, WCGRRT
+# REV 131+): planningData.breakins[] rides along inside $planningReports
+# already (it's stored as the raw planningData object), so the dashboard
+# panel needs no scanner change to display it. This step is the separate
+# piece: a small feed for a Power Automate flow to email the planner about
+# NEW open break-ins. Dedup key is (schedule, id) - persisted across runs
+# in break-ins-notified-state.json so an item doesn't re-notify every cycle
+# while it stays open; closing or removing one never re-fires since it just
+# drops out of the "currently open" set.
+try {
+    $breakinStateFile = Join-Path $repoRoot 'break-ins-notified-state.json'
+    $breakinSeen = @{}
+    if (Test-Path -Path $breakinStateFile) {
+        foreach ($k in (Get-Content -Path $breakinStateFile -Raw | ConvertFrom-Json)) { $breakinSeen[[string]$k] = $true }
+    }
+
+    $dashUrlForBreakins = ''
+    if ($notif) { $dashUrlForBreakins = [string](Get-Prop $notif 'dashboardUrl') }
+
+    $pendingBreakins = New-Object System.Collections.Generic.List[object]
+    $allOpenKeys = New-Object System.Collections.Generic.List[object]
+    foreach ($rigKey in $planningReports.Keys) {
+        $pr = $planningReports[$rigKey]
+        $planning = $pr.planning
+        $breakins = Get-Prop $planning 'breakins'
+        if (-not $breakins) { continue }
+        $schedule = [string]$pr.schedule
+        $raised = [string]$pr.reportDate
+        foreach ($b in $breakins) {
+            $status = [string](Get-Prop $b 'status')
+            if ($status -eq 'closed') { continue }
+            $bid = [string](Get-Prop $b 'id')
+            if (-not $bid) { continue }
+            $dedupKey = "$schedule|$bid"
+            $allOpenKeys.Add($dedupKey) | Out-Null
+            if ($breakinSeen.ContainsKey($dedupKey)) { continue }
+            $dashLink = ''
+            if ($dashUrlForBreakins) { $dashLink = $dashUrlForBreakins + '?rig=' + [uri]::EscapeDataString($rigKey) }
+            $pendingBreakins.Add(@{
+                rig          = $rigKey
+                schedule     = $schedule
+                id           = $bid
+                type         = [string](Get-Prop $b 'type')
+                desc         = [string](Get-Prop $b 'desc')
+                after        = [string](Get-Prop $b 'after')
+                before       = [string](Get-Prop $b 'before')
+                dur          = [string](Get-Prop $b 'dur')
+                ref          = [string](Get-Prop $b 'ref')
+                raised       = $raised
+                dashboardUrl = $dashLink
+            }) | Out-Null
+        }
+    }
+
+    if ($pendingBreakins.Count -gt 0) {
+        Write-Host "Break-in work: $($pendingBreakins.Count) new open item(s) written to break-ins-pending.json" -ForegroundColor Green
+    }
+
+    # ConvertTo-ReportJson pipes into ConvertTo-Json on PS7/Core
+    # ($Object | ConvertTo-Json); PowerShell's pipeline unwraps an empty
+    # array to zero items, so that call emits $null instead of "[]" -
+    # writing a 0-byte file, not valid JSON. This file is read by an
+    # external Power Automate flow, so the "nothing new" case (the common
+    # one) must still be valid, parseable JSON.
+    $breakinJson = if ($pendingBreakins.Count -eq 0) { '[]' } else { ConvertTo-JsonArray $pendingBreakins.ToArray() }
+    $breakinOutputFile = Join-Path $repoRoot 'break-ins-pending.json'
+    [System.IO.File]::WriteAllText($breakinOutputFile, $breakinJson,
+        (New-Object System.Text.UTF8Encoding($false)))
+
+    foreach ($k in $allOpenKeys) { $breakinSeen[$k] = $true }
+    $seenKeysArr = @($breakinSeen.Keys)
+    $breakinStateJson = if ($seenKeysArr.Count -eq 0) { '[]' } else { ConvertTo-JsonArray $seenKeysArr }
+    [System.IO.File]::WriteAllText($breakinStateFile, $breakinStateJson,
+        (New-Object System.Text.UTF8Encoding($false)))
+}
+catch {
+    Write-Warning "Break-in notification feed failed (scan unaffected): $($_.Exception.Message)"
+}
+
 # BOP Fleet Planning Dashboard data: every BWM weekly snapshot, newest first.
 $bopOutputFile = Join-Path $repoRoot 'bop-dashboard\bop-planning-data.js'
 if ($config.PSObject.Properties['bopOutputFile'] -and $config.bopOutputFile) {
@@ -826,6 +931,12 @@ elseif ($deployPath) {
         }
         Copy-Item -Path $outputFile -Destination (Join-Path $deployPath 'reports-data.js') -Force
         Write-Host "Deployed data file to $deployPath" -ForegroundColor Green
+
+        # break-ins-pending.json alongside it, so a Power Automate flow
+        # watching the server share (rather than this PC) can read it too.
+        if (Test-Path -Path $breakinOutputFile) {
+            Copy-Item -Path $breakinOutputFile -Destination (Join-Path $deployPath 'break-ins-pending.json') -Force
+        }
 
         # Full report files for the dashboard's 'View full report' feature:
         # copy each scanned .json into <deployPath>\reports (only new/changed

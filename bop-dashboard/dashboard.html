@@ -106,7 +106,7 @@
   .rig-modal-backdrop.open { display: flex; }
   .rig-modal {
     background: #fff; border-radius: 10px; border-top: 6px solid var(--sd-yellow);
-    width: 540px; max-width: 92vw; max-height: 86vh; overflow-y: auto;
+    width: 540px; max-width: 92vw; max-height: 86vh; overflow-y: auto; overflow-x: hidden;
     padding: 22px 26px 24px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.45);
     font-family: "Meta Pro", Arial, sans-serif;
   }
@@ -284,6 +284,55 @@
   .precharge-toggle-btn { margin-left: 0; margin-top: 4px; }
   .precharge-detail { margin-top: 8px; }
   .precharge-detail .planning-sublabel:first-child { margin-top: 0; }
+
+  .breakin-section { margin-top: 10px; }
+  .breakin-badge {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700;
+    letter-spacing: .02em; padding: 4px 10px; border-radius: 4px; border: none;
+    background: var(--sd-behind); color: #fff; cursor: pointer;
+  }
+  .aar-toggle-btn {
+    font-size: 10.5px; font-weight: 600; padding: 2px 9px; margin-top: 4px;
+    border: 1px solid var(--sd-border); background: var(--sd-white); color: var(--sd-text-light);
+    border-radius: 4px; cursor: pointer;
+  }
+  .breakin-detail, .aar-detail { margin-top: 8px; }
+  .breakin-table-scroll { margin-top: 6px; max-width: 100%; }
+  /* table-layout: fixed + wrapping cells (not horizontal scroll) - a modal
+     this narrow can't comfortably scroll sideways, and the whole point of
+     the Copy button is that the full detail goes to Excel, not this view. */
+  .breakin-table { table-layout: fixed; border-collapse: collapse; width: 100%; font-size: 10px; }
+  .breakin-table th, .breakin-table td {
+    border: 1px solid var(--sd-border); padding: 4px 6px; text-align: left;
+    white-space: normal; overflow-wrap: break-word; word-break: break-word;
+  }
+  .breakin-table th {
+    background: var(--sd-bg); color: var(--sd-text-light); font-size: 9px; text-transform: uppercase; letter-spacing: .02em;
+  }
+  .breakin-table-open th:nth-child(1), .breakin-table-open td:nth-child(1)  { width: 6%; }  /* ID */
+  .breakin-table-open th:nth-child(2), .breakin-table-open td:nth-child(2)  { width: 8%; }  /* Type */
+  .breakin-table-open th:nth-child(3), .breakin-table-open td:nth-child(3)  { width: 24%; } /* Description */
+  .breakin-table-open th:nth-child(4), .breakin-table-open td:nth-child(4)  { width: 7%; }  /* Area */
+  .breakin-table-open th:nth-child(5), .breakin-table-open td:nth-child(5)  { width: 12%; } /* After */
+  .breakin-table-open th:nth-child(6), .breakin-table-open td:nth-child(6)  { width: 12%; } /* Before */
+  .breakin-table-open th:nth-child(7), .breakin-table-open td:nth-child(7)  { width: 6%; }  /* Dur */
+  .breakin-table-open th:nth-child(8), .breakin-table-open td:nth-child(8)  { width: 6%; }  /* Ref */
+  .breakin-table-open th:nth-child(9), .breakin-table-open td:nth-child(9)  { width: 7%; }  /* Raised */
+  .breakin-table-open th:nth-child(10), .breakin-table-open td:nth-child(10) { width: 12%; } /* Copy button */
+  .breakin-table-open td:nth-child(10) { text-align: center; padding: 3px; }
+  .breakin-copy-btn { white-space: nowrap; }
+  .breakin-table-aar th:nth-child(1), .breakin-table-aar td:nth-child(1) { width: 9%; }  /* ID */
+  .breakin-table-aar th:nth-child(2), .breakin-table-aar td:nth-child(2) { width: 12%; } /* Type */
+  .breakin-table-aar th:nth-child(3), .breakin-table-aar td:nth-child(3) { width: 28%; } /* Description */
+  .breakin-table-aar th:nth-child(4), .breakin-table-aar td:nth-child(4) { width: 12%; } /* Became (P6) */
+  .breakin-table-aar th:nth-child(5), .breakin-table-aar td:nth-child(5) { width: 8%; }  /* Dur */
+  .breakin-table-aar th:nth-child(6), .breakin-table-aar td:nth-child(6) { width: 12%; } /* Date Added */
+  .breakin-table-aar th:nth-child(7), .breakin-table-aar td:nth-child(7) { width: 19%; } /* Outcome/Lesson */
+  .breakin-copy-btn, .breakin-copyall-btn {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border: 1px solid var(--sd-blue);
+    background: var(--sd-blue); color: #fff; border-radius: 4px; cursor: pointer;
+  }
+  .breakin-copyall-btn { margin-bottom: 6px; }
   .planning-list { margin: 0; padding-left: 16px; font-size: 10.5px; color: var(--sd-text); }
   .planning-list li { margin-bottom: 2px; }
 
@@ -777,6 +826,32 @@ function openPlanningSchedule(rigSlug){
 
 // Per-rig "Planning Report" (project schedule) — a daily-cadence report,
 // distinct from the weekly BWM tracker rows shown by bopDetailHtml below.
+// Break-in work (rig-raised additions to the BOP maintenance plan, WCGRRT
+// REV 131+): rows keyed by a slugged, HTML-attribute-safe string so the
+// "Copy" buttons can look them up by key rather than embedding row data
+// (which may contain quotes/HTML) directly inside an onclick attribute.
+var BREAKIN_ROWS_BY_KEY = {};
+
+function breakinTSV(rows){
+  var cols = ['id','type','desc','dur','after','before','wbs','ref','raised','rig','schedule'];
+  var head = ['ID','Type','Description','Duration (h)','Comes After','Comes Before','Area/WBS','Ref','Raised','Rig','Schedule'];
+  var esc = function(v){ return String(v == null ? '' : v).replace(/\t/g, ' ').replace(/\r?\n/g, ' '); };
+  var lines = [head.join('\t')];
+  rows.forEach(function(r){ lines.push(cols.map(function(c){ return esc(r[c]); }).join('\t')); });
+  return lines.join('\n');
+}
+
+function copyBreakinsByKey(key, btn){
+  var rows = BREAKIN_ROWS_BY_KEY[key];
+  if(!rows || !rows.length) return;
+  navigator.clipboard.writeText(breakinTSV(rows)).then(function(){
+    if(!btn) return;
+    var original = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(function(){ btn.textContent = original; }, 1500);
+  }).catch(function(){ if(btn) btn.textContent = 'Copy failed'; });
+}
+
 function renderPlanningReport(rigName){
   var pr = PLANNING_REPORTS[rigName];
   if(!pr || !pr.planning) return '';
@@ -840,7 +915,95 @@ function renderPlanningReport(rigName){
       next.map(function(n){ return '<li>' + (n.id ? '<strong>'+n.id+':</strong> ' : '') + n.desc + (n.target ? ' (target '+n.target+')' : '') + '</li>'; }).join('') + '</ul>';
   }
 
+  html += renderBreakinSections(rigName, pr, p);
+
   html += '</div>';
+  return html;
+}
+
+// Break-in work: an open-work badge + expandable table (with per-row and
+// "copy all" TSV copy buttons so the planner can paste straight into Excel
+// or P6), plus a separate, always-visible-but-collapsed After Action Review
+// of closed break-ins. Renders from the same latest report as the rest of
+// the panel - open items persist and carry forward each cycle, so there's
+// no need to merge across historical reports.
+function renderBreakinSections(rigName, pr, p){
+  var all = (p.breakins || []).filter(function(b){ return b && b.id; });
+  if(!all.length) return '';
+
+  var rSlug = slug(rigName);
+  var schedule = pr.schedule || p.schedule || '';
+  var raised = fmtDate(pr.reportDate);
+
+  function toRow(b){
+    return {
+      id: b.id, type: b.type || '', desc: b.desc || '', dur: b.dur || '',
+      after: b.after || '', before: b.before || '', wbs: b.wbs || '',
+      ref: b.ref || '', raised: raised, rig: rigName, schedule: schedule
+    };
+  }
+
+  var open = all.filter(function(b){ return b.status !== 'closed'; });
+  var closed = all.filter(function(b){ return b.status === 'closed'; });
+  var html = '';
+
+  if(open.length){
+    var openRows = open.map(toRow);
+    var allKey = rSlug + '__' + slug(schedule) + '__open-all';
+    BREAKIN_ROWS_BY_KEY[allKey] = openRows;
+
+    var bodyRows = open.map(function(b, i){
+      var rowKey = rSlug + '__' + slug(schedule) + '__' + slug(b.id);
+      BREAKIN_ROWS_BY_KEY[rowKey] = [openRows[i]];
+      return '<tr>' +
+        '<td>' + b.id + '</td>' +
+        '<td>' + (b.type || '') + '</td>' +
+        '<td>' + (b.desc || '') + '</td>' +
+        '<td>' + (b.wbs || '') + '</td>' +
+        '<td>' + (b.after || '') + '</td>' +
+        '<td>' + (b.before || '') + '</td>' +
+        '<td>' + (b.dur || '') + '</td>' +
+        '<td>' + (b.ref || '') + '</td>' +
+        '<td>' + raised + '</td>' +
+        '<td><button type="button" class="breakin-copy-btn" onclick="copyBreakinsByKey(\'' + rowKey + '\', this)">Copy</button></td>' +
+        '</tr>';
+    }).join('');
+
+    var openId = 'brk-open-' + rSlug;
+    html += '<div class="breakin-section">' +
+      '<button type="button" class="breakin-badge" onclick="var d=document.getElementById(\'' + openId + '\'); d.hidden=!d.hidden;">⚠ Break-in Work (' + open.length + ')</button>' +
+      '<div id="' + openId + '" class="breakin-detail" hidden>' +
+        '<button type="button" class="breakin-copyall-btn" onclick="copyBreakinsByKey(\'' + allKey + '\', this)">Copy all</button>' +
+        '<div class="breakin-table-scroll"><table class="breakin-table breakin-table-open"><thead><tr>' +
+          '<th>ID</th><th>Type</th><th>Description</th><th>Area</th><th>After</th><th>Before</th><th>Dur (h)</th><th>Ref</th><th>Raised</th><th></th>' +
+        '</tr></thead><tbody>' + bodyRows + '</tbody></table></div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  if(closed.length){
+    var aarId = 'brk-aar-' + rSlug;
+    var aarRows = closed.map(function(b){
+      return '<tr>' +
+        '<td>' + b.id + '</td>' +
+        '<td>' + (b.type || '') + '</td>' +
+        '<td>' + (b.desc || '') + '</td>' +
+        '<td>' + (b.p6id || '') + '</td>' +
+        '<td>' + (b.dur || '') + '</td>' +
+        '<td>' + (b.closedDate ? fmtDate(b.closedDate) : '') + '</td>' +
+        '<td>' + (b.lesson || '') + '</td>' +
+        '</tr>';
+    }).join('');
+    html += '<div class="breakin-section">' +
+      '<button type="button" class="aar-toggle-btn" onclick="var d=document.getElementById(\'' + aarId + '\'); d.hidden=!d.hidden;">After Action Review — Break-in Work (' + closed.length + ')</button>' +
+      '<div id="' + aarId + '" class="aar-detail" hidden>' +
+        '<div class="breakin-table-scroll"><table class="breakin-table breakin-table-aar"><thead><tr>' +
+          '<th>ID</th><th>Type</th><th>Description</th><th>Became (P6)</th><th>Dur (h)</th><th>Date Added</th><th>Outcome / Lesson</th>' +
+        '</tr></thead><tbody>' + aarRows + '</tbody></table></div>' +
+      '</div>' +
+    '</div>';
+  }
+
   return html;
 }
 
@@ -1489,6 +1652,16 @@ function pollPipelineData(){
 }
 </script>
 <script src="bop-planning-data.js"></script>
-<script>initPipelineData();</script>
+<script>
+initPipelineData();
+// Deep link from notification emails (e.g. the break-in work feed):
+// ?rig=<name> opens straight to that rig's panel.
+(function(){
+  var wanted = new URLSearchParams(location.search).get('rig');
+  if(!wanted) return;
+  var s = slug(wanted);
+  if(GROUPS_BY_SLUG[s]) openRigModal(s);
+})();
+</script>
 </body>
 </html>
