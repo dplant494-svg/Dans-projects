@@ -195,8 +195,6 @@
   }
   .tile-dates { font-size: 13.5px; color: var(--sd-text); font-variant-numeric: tabular-nums; }
   .tile-dates .lbl { color: var(--sd-text-light); font-size: 10.5px; text-transform: uppercase; font-weight: 700; letter-spacing: .04em; margin-right: 5px; }
-  .tile-dates .slip { color: var(--sd-behind); font-weight: 700; }
-  .tile-dates .early { color: var(--sd-ahead); font-weight: 700; }
   .tile-progress { display: flex; align-items: center; gap: 9px; margin: 8px 0 2px; }
   .tile-progress-track { flex: 1; display: flex; gap: 2px; height: 6px; }
   .tile-progress-track span { flex: 1; border-radius: 2px; background: #e4eaf4; }
@@ -613,13 +611,18 @@ function headlineStatus(rows){
   return best;
 }
 
+// "Behind" is a maintenance-project signal, not a client-operations one - it
+// keys off the maintenance schedule (the uploaded ERT project's own revision
+// variance), never off the BOP on-surface/run date. That date is the
+// client's well operation, not our BWM project: if it slips later, the BOP
+// is simply subsea longer, which is neutral-to-good for the company, not a
+// delay to flag red.
 function isBehind(row){
   var proj = PROJECTS[row.rig + '#' + row.bop];
   if(proj && proj.revisions.length){
     var latest = proj.revisions[proj.revisions.length-1];
     if(latest.variance < 0) return true;
   }
-  if(row.originalDate && row.currentDate && new Date(row.currentDate) > new Date(row.originalDate)) return true;
   return false;
 }
 
@@ -653,11 +656,12 @@ function tileInnerHtml(pin){
   var g = pin.g;
   var rows = g.rows.map(function(row){
     var bopLabel = g.rows.length > 1 ? ('BOP ' + row.bop) : 'BOP';
-    var slipClass = '', slipLabel = '';
+    // Informational only - the client's well operation, not a maintenance-
+    // project health signal, so no slip/early red-green framing here.
+    var dateLabel = '';
     if(row.originalDate && row.currentDate){
       var d = daysBetween(row.originalDate, row.currentDate);
-      if(d > 0){ slipClass = 'slip'; slipLabel = ' (+' + d + 'd)'; }
-      else if(d < 0){ slipClass = 'early'; slipLabel = ' (' + d + 'd)'; }
+      if(d) dateLabel = ' (' + (d > 0 ? '+' : '') + d + 'd)';
     }
     var proj = PROJECTS[row.rig + '#' + row.bop];
     var projLine = proj ? ('<div class="tile-proj">Maintenance ' + proj.revisions[proj.revisions.length-1].pct.toFixed(0) + '% complete</div>') : '';
@@ -667,7 +671,7 @@ function tileInnerHtml(pin){
     return '<div class="tile-bop-row">' +
       '<div class="tile-bop-top"><span class="tile-bop-label">' + bopLabel + '</span>' +
       '<span class="tile-badge" style="--badge-c:' + c + ';--badge-bg:' + c + '14;--badge-bd:' + c + '3d">' + statusShort(row.status) + '</span></div>' +
-      '<div class="tile-dates"><span class="lbl">On surface</span>' + fmtDate(row.originalDate) + ' &rarr; <span class="' + slipClass + '">' + fmtDate(row.currentDate) + slipLabel + '</span></div>' +
+      '<div class="tile-dates"><span class="lbl">On surface</span>' + fmtDate(row.originalDate) + ' &rarr; ' + fmtDate(row.currentDate) + dateLabel + '</div>' +
       '<div class="tile-progress"><div class="tile-progress-track">' + segs + '</div><span class="tile-progress-label">' + row.stagesComplete + '/' + STAGE_LABELS.length + '</span></div>' +
       projLine +
       (row.notes ? '<div class="tile-notes">' + row.notes + '</div>' : (row.challenges ? '<div class="tile-notes">&#9888; ' + row.challenges + '</div>' : '')) +
@@ -1103,17 +1107,17 @@ function bopDetailHtml(row, multi){
   for(var i=0;i<STAGE_LABELS.length;i++){
     funnel += '<div class="stage-dot' + (i < row.stagesComplete ? ' done' : '') + '" title="'+STAGE_LABELS[i]+'"></div>';
   }
-  var slipClass = '';
-  var slipLabel = '';
+  // Informational only - see isBehind()'s comment: the client's well
+  // operation, not a maintenance-project health signal, so no red/green here.
+  var dateLabel = '';
   if(row.originalDate && row.currentDate){
     var d = daysBetween(row.originalDate, row.currentDate);
-    if(d > 0){ slipClass = 'slip'; slipLabel = ' (+' + d + 'd)'; }
-    else if(d < 0){ slipClass = 'early'; slipLabel = ' (' + d + 'd)'; }
+    if(d) dateLabel = ' (' + (d > 0 ? '+' : '') + d + 'd)';
   }
   return '<div class="bop-row">' +
     '<div class="bop-row-top"><span class="bop-label">'+bopLabel+' &middot; '+row.stackType+'</span>' +
     '<span class="status-badge" style="background:'+statusColor(row.status)+'">'+row.status+'</span></div>' +
-    '<div class="field-line"><span class="lbl">BOP on Surface:</span> ' + fmtDate(row.originalDate) + ' &rarr; <span class="'+slipClass+'">' + fmtDate(row.currentDate) + slipLabel + '</span></div>' +
+    '<div class="field-line"><span class="lbl">BOP on Surface:</span> ' + fmtDate(row.originalDate) + ' &rarr; ' + fmtDate(row.currentDate) + dateLabel + '</div>' +
     '<div class="field-line"><span class="lbl">Planner:</span> ' + row.planner + (row.synergiCase ? ('  &middot;  <span class="lbl">Synergi:</span> ' + row.synergiCase) : '') + '</div>' +
     '<div class="stage-funnel">' + funnel + '</div>' +
     (row.challenges ? '<div class="notes-line">&#9888; ' + row.challenges + '</div>' : '') +
