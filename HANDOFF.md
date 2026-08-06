@@ -19,7 +19,9 @@ steps after setup:
 
 1. **Reports dashboard** (`dashboard/dashboard.html`) — every visit/report,
    filterable, with a full-report viewer (photos, CBM grading, Daily Logs &
-   Lessons Learned index, R53/S53 events, Photo Dump section).
+   Lessons Learned index, R53/S53 events, Photo Dump section, Print/Save-as-PDF),
+   plus a **CBM Heatmap** tab: per-rig, per-equipment-class grid of latest
+   graded condition (colored cells, click for grade history over time).
 2. **BOP Fleet Planning Dashboard** (`bop-dashboard/dashboard.html`) — a
    1920×1080 TV kiosk view of BOP status fleet-wide, fed by the weekly
    `bwmData` tile, plus a per-rig **Planning Report** panel (daily-cadence
@@ -146,9 +148,9 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.13** (Planning Report capture fix —
-  `Test-PlanningHasContent` guard + correct rig-key, using `meta.asset`
-  before the filename fallback is applied).
+- `scripts/Update-Dashboard.ps1`: **v2.26** (adds the `cbmGrades` aggregate
+  behind the new CBM Heatmap tab — see `INTEGRATION-CONTRACT.md`'s `cbmData`
+  entry for the exact shape and the real-data findings behind it).
 - `scripts/Deploy-Dashboard.ps1`: warns explicitly (rather than silently
   skipping) when `bop-dashboard\dashboard.html` isn't found locally; always
   loads `config.json` for `bopDeployPath`/`bopPageName` even when
@@ -182,6 +184,20 @@ paths with credentials, but this shape is fine to document)
   unread sibling key is inert. Resume by reading
   `RAPID-S53-RELAY-HANDOFF.md`'s "How to resume" section once IADC
   responds.
+- **CBM Heatmap — built and verified against 41 real West Capella CBM
+  exports** Dan provided (`scripts/Update-Dashboard.ps1` v2.26 +
+  `dashboard/dashboard.html`'s new "CBM Heatmap" tab). See
+  `INTEGRATION-CONTRACT.md`'s `cbmData`/`cbmGrades` entries for the exact
+  data model and the real-data findings that shaped it (`equip` is always
+  the equipment class, never the instance; the `cbm_<equip>_` key prefix
+  sanitizes every non-alphanumeric character, not just spaces; some
+  equipment classes embed grade as `"Grade N - ..."` text inside the
+  comment instead of a dedicated key). **One source-data anomaly found,
+  not yet raised with Dan**: one real Upper SBOP export's `rcpt_model`
+  field contains a different component's part number (looks like a
+  copy-paste mistake in SSORT or during data entry) — worth flagging to
+  him, since the instance label the heatmap shows for that one column
+  comes directly from that field.
 - **IT request pending**: Dan sent IT a Word doc requesting an SMTP relay +
   shared mailbox address for the type-based email notification feature
   (discipline owners get notified when a report needing their review lands).

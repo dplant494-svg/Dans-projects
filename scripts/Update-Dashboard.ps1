@@ -30,7 +30,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.25'
+$ScriptVersion = '2.26'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -95,6 +95,16 @@ function Get-Prop {
     $prop = $Object.PSObject.Properties[$Name]
     if ($null -eq $prop) { return $null }
     return $prop.Value
+}
+
+# Same dictionary-vs-PSObject split as Get-Prop, for callers that need to
+# enumerate every key on a flat data block (CBM's cbm_<equip>_... keys)
+# rather than look up one known name.
+function Get-KeyNames {
+    param($Object)
+    if ($null -eq $Object) { return @() }
+    if ($Object -is [System.Collections.IDictionary]) { return @($Object.Keys) }
+    return @($Object.PSObject.Properties.Name)
 }
 
 # Windows PowerShell 5.1's ConvertFrom-Json rejects files over ~2 MB; report
@@ -169,6 +179,110 @@ function ConvertTo-PlainText {
     return $t
 }
 
+# CBM graded items are flat cbm_<equip>_..._[gr|cm|ph] keys, in one of two
+# numbering shapes depending on SSORT revision:
+#   old: cbm_<equip>_g<section>_<item>_[gr|cm|ph]           (2 numbers, "g" prefix)
+#   new: cbm_<equip>_<major>_<minor>_<item>_[gr|cm|ph]      (3 plain numbers,
+#        matching SSORT's own on-screen reference, e.g. "9.1.5")
+# An item is real if ANY of _gr/_cm/_ph is present - most new-format rows are
+# comment-only with no grade key at all - mirroring rvCbm()'s discovery rule
+# in dashboard.html so the scanner and the full-report viewer never disagree
+# about what counts as an item.
+function Get-CbmGradedItems {
+    param($Cbm)
+    $result = New-Object System.Collections.Generic.List[object]
+    if ($null -eq $Cbm) { return $result.ToArray() }
+    $equip = [string](Get-Prop $Cbm 'equip')
+    $equipPrefix = ''
+    if ($equip.Trim()) {
+        # SSORT builds each key prefix by replacing EVERY non-alphanumeric
+        # character with its own underscore, not just spaces - confirmed
+        # against real exports: "Ram Block::Shear" -> "Ram_Block__Shear"
+        # (two colons, two underscores, not collapsed) and "C&K Stabs" ->
+        # "C_K_Stabs".
+        $equipPrefix = 'cbm_' + ($equip.Trim() -replace '[^A-Za-z0-9]', '_') + '_'
+    }
+
+    $bases = @{}
+    foreach ($k in (Get-KeyNames $Cbm)) {
+        $key = [string]$k
+        if ($equipPrefix -and $key.IndexOf($equipPrefix) -ne 0) { continue }
+        if ($key -match '^(.+_(\d+)_(\d+)_(\d+))_(gr|cm|ph)$') {
+            $base = $Matches[1]
+            if (-not $bases.ContainsKey($base)) {
+                $bases[$base] = @{
+                    shape   = 'new'
+                    sortKey = @([int]$Matches[2], [int]$Matches[3], [int]$Matches[4])
+                    label   = "$($Matches[2]).$($Matches[3]).$($Matches[4])"
+                    itemKey = "n:$($Matches[2]).$($Matches[3]).$($Matches[4])"
+                }
+            }
+        }
+        elseif ($key -match '^(.+_g(\d+)_(\d+))_(gr|cm|ph)$') {
+            $base = $Matches[1]
+            if (-not $bases.ContainsKey($base)) {
+                $bases[$base] = @{
+                    shape   = 'old'
+                    sortKey = @([int]$Matches[2], [int]$Matches[3])
+                    label   = "Section $([int]$Matches[2] + 1) . Item $([int]$Matches[3] + 1)"
+                    itemKey = "o:$($Matches[2]).$($Matches[3])"
+                }
+            }
+        }
+    }
+
+    foreach ($base in $bases.Keys) {
+        $info = $bases[$base]
+        $grade = [string](Get-Prop $Cbm ($base + '_gr'))
+        $comment = ConvertTo-PlainText ([string](Get-Prop $Cbm ($base + '_cm')))
+        # Not every equipment class has a dedicated _gr key - some (confirmed
+        # on real C&K Stabs exports) record grade as a "Grade N - ..." prefix
+        # inside the comment instead, with no _gr key present at all.
+        if (-not $grade -and $comment -and ($comment -match '^Grade\s+([0-9]+|N/A)\b')) {
+            $grade = $Matches[1]
+        }
+        $photosArr = Get-Prop $Cbm ($base + '_ph')
+        $photoCount = 0
+        if ($photosArr -is [System.Array]) { $photoCount = $photosArr.Length }
+        if (-not $grade -and -not $comment -and $photoCount -eq 0) { continue }
+        $result.Add([pscustomobject]@{
+            itemKey   = $info.itemKey
+            itemLabel = $info.label
+            itemShape = $info.shape
+            sortKey   = $info.sortKey
+            grade     = $grade    # '1'/'2'/'3'/'4'/'N/A'/'' - passed through verbatim, never reinterpreted
+            comment   = $comment
+            photos    = $photoCount
+        }) | Out-Null
+    }
+    return $result.ToArray()
+}
+
+# cbmData.equip is always the equipment CLASS (a fixed inspection template,
+# e.g. "Gate Valves", "U2B Door") - confirmed against real exports where
+# several physically distinct instances (Choke Line Isolation Valve, Kill
+# Line Isolation Valve, Gas Bleed Dual Valve) all carry equip: "Gate Valves".
+# The specific physical instance only appears in rcpt_model, e.g.
+# "NOV - M991005890 - Choke Line Single Isolation Gate Valve". Strip only
+# the leading manufacturer name (the first " - "-delimited segment, e.g.
+# "NOV") - never more than that. Some real models describe a matched PAIR
+# as one compound string ("NOV - PN: 10632550-20 / Lower FWD - PN:
+# 10632550-200 / Upper AFT") - dropping a 2nd segment on the assumption it's
+# always "just a part number" would silently drop the "Lower FWD" half in
+# that case, so only the confirmed-safe-to-drop manufacturer prefix goes.
+function Get-CbmInstanceLabel {
+    param([string]$Model, [string]$Serial, [string]$FallbackClass)
+    $m = if ($Model) { $Model.Trim() } else { '' }
+    if ($m) {
+        $parts = $m -split ' - ', 2
+        if ($parts.Count -eq 2) { return $parts[1].Trim() }
+        return $m
+    }
+    $s = if ($Serial) { $Serial.Trim() } else { '' }
+    if ($s) { return $s }
+    return $FallbackClass
+}
+
 # JSON writer matching Read-ReportJson: ConvertTo-Json on PowerShell 7+, the
 # JavaScriptSerializer on Windows PowerShell 5.1 (it serialises the dictionary
 # graphs that Read-ReportJson produced there, which ConvertTo-Json cannot).
@@ -241,6 +355,7 @@ $bwmSnapshots = New-Object System.Collections.Generic.List[object]
 $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
+$cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
 $skipped = 0
 foreach ($f in $files) {
     try {
@@ -454,6 +569,49 @@ foreach ($f in $files) {
                     file       = $f.Name
                 }) | Out-Null
             }
+
+            # CBM graded items. Each tile is one physical component instance
+            # within a fixed inspection template ("class") - e.g. the class
+            # "Gate Valves" covers many valve instances (Choke Line Isolation,
+            # Kill Line Isolation, Gas Bleed Dual, ...), each with the SAME
+            # checklist numbering but its own grades. cbmData.equip is always
+            # the class (confirmed against real exports - it's identical
+            # across physically different instances of the same template);
+            # the specific instance label comes from rcpt_model/rcpt_serial.
+            $cbm = Get-Prop $tile 'cbmData'
+            if ($cbm) {
+                $cbmClass = [string](Get-Prop $cbm 'equip')
+                if (-not $cbmClass.Trim()) {
+                    $cbmClass = ([string](Get-Prop $tile 'title')) -replace '^.*—\s*', ''
+                    $cbmClass = $cbmClass.Trim()
+                }
+                if (-not $cbmClass) { $cbmClass = 'Unknown equipment' }
+                $cbmEquip = Get-CbmInstanceLabel -Model ([string](Get-Prop $cbm 'rcpt_model')) `
+                    -Serial ([string](Get-Prop $cbm 'rcpt_serial')) -FallbackClass $cbmClass
+                $cbmDate = [string](Get-Prop $cbm 'date')
+                if (-not $cbmDate) { $cbmDate = [string](Get-Prop $meta 'date') }
+                foreach ($it in (Get-CbmGradedItems -Cbm $cbm)) {
+                    $key = "$rig|$cbmClass|$cbmEquip|$($it.itemKey)|$cbmDate"
+                    $rec = [pscustomobject]@{
+                        rig       = [string]$rig
+                        class     = $cbmClass
+                        equip     = $cbmEquip
+                        itemKey   = $it.itemKey
+                        itemLabel = $it.itemLabel
+                        itemShape = $it.itemShape
+                        sortKey   = $it.sortKey
+                        grade     = $it.grade
+                        comment   = $it.comment
+                        photos    = $it.photos
+                        date      = $cbmDate
+                        file      = $f.Name
+                    }
+                    $existing = $cbmGradeEntries[$key]
+                    if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {
+                        $cbmGradeEntries[$key] = @{ modified = $f.LastWriteTime; entry = $rec }
+                    }
+                }
+            }
         }
     }
 
@@ -518,6 +676,17 @@ $logSorted = New-Object System.Collections.Generic.List[object]
 $logEntries | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $logSorted.Add($_) | Out-Null }
 
+# CBM grade history: flatten the deduped entries, newest first - same
+# convention as the daily-log index above. Unlike that index, the dedup key
+# here includes the date, so successive inspection dates for the same
+# rig+class+equip+item are all kept (that's what the heatmap's per-item
+# history drill-down reads), not collapsed to one row per key.
+$cbmGradeList = New-Object System.Collections.Generic.List[object]
+foreach ($v in $cbmGradeEntries.Values) { $cbmGradeList.Add($v.entry) | Out-Null }
+$cbmGradeSorted = New-Object System.Collections.Generic.List[object]
+$cbmGradeList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
+    ForEach-Object { $cbmGradeSorted.Add($_) | Out-Null }
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = ($existingFolders -join '  |  ')
@@ -526,6 +695,7 @@ $payload = [pscustomobject]@{
         entries   = $logSorted.ToArray()
         r53Events = $r53Events.ToArray()
     }
+    cbmGrades    = $cbmGradeSorted.ToArray()
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10

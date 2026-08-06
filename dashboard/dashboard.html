@@ -303,6 +303,38 @@
   .cbm-tally .lbl { color: var(--sd-text-light); font-weight: 700; }
   .cbm-tally .cbm-grade { margin-left: 4px; margin-right: 2px; }
 
+  /* ── View tabs (Report List / CBM Heatmap) ── */
+  .view-tabs { display: flex; gap: 10px; margin-bottom: 14px; }
+  .view-tab {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--sd-text-light); background: var(--sd-white); border: 1.5px solid var(--sd-border);
+    border-radius: 20px; padding: 7px 18px; cursor: pointer;
+  }
+  .view-tab:hover { border-color: var(--sd-blue); color: var(--sd-blue); }
+  .view-tab.active { background: var(--sd-blue); border-color: var(--sd-blue); color: #fff; }
+
+  /* ── CBM Heatmap ── */
+  .cbm-heat-wrap table { border-collapse: separate; border-spacing: 3px; }
+  .cbm-heat-wrap th, .cbm-heat-wrap td { padding: 0; border-bottom: none; }
+  .cbm-heat-wrap th { padding: 4px 6px; font-size: 10px; white-space: nowrap; text-align: left; }
+  .cbm-heat-row-label {
+    position: sticky; left: 0; background: var(--sd-white);
+    font-size: 11px; font-weight: 700; white-space: nowrap; padding: 4px 10px 4px 0;
+  }
+  .cbm-heat-cell {
+    width: 34px; height: 24px; border-radius: 3px; cursor: pointer; background: var(--sd-border);
+  }
+  .cbm-heat-cell.g1  { background: var(--sd-blue); }
+  .cbm-heat-cell.g2  { background: var(--sd-orange); }
+  .cbm-heat-cell.g34 { background: var(--sd-fail); }
+  .cbm-heat-cell.gnone { background: transparent; cursor: default; }
+  .cbm-heat-cell:hover:not(.gnone) { outline: 2px solid var(--sd-light-blue); outline-offset: -1px; }
+  .cbm-heat-empty { color: var(--sd-text-light); padding: 24px 0; text-align: center; }
+  .cbm-heat-legend {
+    display: flex; gap: 12px; align-items: center; margin-top: 10px; flex-wrap: wrap;
+    font-size: 11px; color: var(--sd-text-light);
+  }
+
   /* ── Daily log & lessons section ── */
   .log-flag {
     display: inline-block; font-size: 10px; font-weight: 700;
@@ -376,7 +408,12 @@
     <main id="app" hidden>
       <div class="source-line" id="folder-line"></div>
 
-      <div class="filter-row">
+      <div class="view-tabs">
+        <button type="button" class="view-tab active" id="tab-list-btn">Report List</button>
+        <button type="button" class="view-tab" id="tab-cbm-btn">CBM Heatmap</button>
+      </div>
+
+      <div class="filter-row" id="filter-row">
         <div class="segmented" role="group" aria-label="Date range" id="range-group">
           <button type="button" data-days="30">30 days</button>
           <button type="button" data-days="90">90 days</button>
@@ -389,54 +426,69 @@
         <input type="search" id="search" placeholder="Search rig, WCE, location, type…" aria-label="Search reports">
       </div>
 
-      <section class="kpi-row" id="kpi-row"></section>
+      <div id="list-view">
+        <section class="kpi-row" id="kpi-row"></section>
 
-      <div class="chart-grid">
+        <div class="chart-grid">
+          <section class="card">
+            <h2 id="time-chart-title">Visits over time</h2>
+            <div class="chart-host" id="time-chart"></div>
+          </section>
+          <section class="card">
+            <h2>Reports by rig</h2>
+            <div class="chart-host" id="rig-chart"></div>
+          </section>
+        </div>
+
         <section class="card">
-          <h2 id="time-chart-title">Visits over time</h2>
-          <div class="chart-host" id="time-chart"></div>
+          <h2>Reports</h2>
+          <div class="table-scroll">
+            <table>
+              <thead><tr id="table-head"></tr></thead>
+              <tbody id="table-body"></tbody>
+            </table>
+          </div>
+          <div class="table-empty" id="table-empty" hidden>No reports match the current filters.</div>
         </section>
-        <section class="card">
-          <h2>Reports by rig</h2>
-          <div class="chart-host" id="rig-chart"></div>
+
+        <section class="card" id="log-section" style="margin-top: 16px" hidden>
+          <h2>Daily logs &amp; lessons learned</h2>
+          <div class="filter-row" style="margin-bottom: 12px">
+            <div class="segmented" role="group" aria-label="Entry kind" id="log-kind">
+              <button type="button" data-kind="all" aria-pressed="true">All</button>
+              <button type="button" data-kind="failure">Failures</button>
+              <button type="button" data-kind="lesson">Lessons learned</button>
+              <button type="button" data-kind="r53">R53 events</button>
+            </div>
+            <select id="log-rig" aria-label="Filter log by rig"><option value="">All rigs</option></select>
+            <select id="log-equip" aria-label="Filter log by equipment"><option value="">All equipment</option></select>
+            <input type="search" id="log-search" placeholder="Search notes, equipment…" aria-label="Search log entries">
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr>
+                <th>Date</th><th>Rig</th><th>Equipment</th><th>Flags</th><th>Entry</th>
+              </tr></thead>
+              <tbody id="log-body"></tbody>
+            </table>
+          </div>
+          <div class="table-empty" id="log-empty" hidden>No log entries match the current filters.</div>
+          <div class="source-line" id="log-truncated" style="margin: 8px 0 0" hidden></div>
         </section>
       </div>
 
-      <section class="card">
-        <h2>Reports</h2>
-        <div class="table-scroll">
-          <table>
-            <thead><tr id="table-head"></tr></thead>
-            <tbody id="table-body"></tbody>
-          </table>
-        </div>
-        <div class="table-empty" id="table-empty" hidden>No reports match the current filters.</div>
-      </section>
-
-      <section class="card" id="log-section" style="margin-top: 16px" hidden>
-        <h2>Daily logs &amp; lessons learned</h2>
-        <div class="filter-row" style="margin-bottom: 12px">
-          <div class="segmented" role="group" aria-label="Entry kind" id="log-kind">
-            <button type="button" data-kind="all" aria-pressed="true">All</button>
-            <button type="button" data-kind="failure">Failures</button>
-            <button type="button" data-kind="lesson">Lessons learned</button>
-            <button type="button" data-kind="r53">R53 events</button>
+      <div id="cbm-view" hidden>
+        <section class="card">
+          <h2>CBM Heatmap</h2>
+          <div class="source-line">Latest graded condition per equipment component. Click a colored cell for its full grade history.</div>
+          <div class="filter-row" style="margin: 12px 0">
+            <select id="cbm-class-select" aria-label="Filter by equipment class"></select>
           </div>
-          <select id="log-rig" aria-label="Filter log by rig"><option value="">All rigs</option></select>
-          <select id="log-equip" aria-label="Filter log by equipment"><option value="">All equipment</option></select>
-          <input type="search" id="log-search" placeholder="Search notes, equipment…" aria-label="Search log entries">
-        </div>
-        <div class="table-scroll">
-          <table>
-            <thead><tr>
-              <th>Date</th><th>Rig</th><th>Equipment</th><th>Flags</th><th>Entry</th>
-            </tr></thead>
-            <tbody id="log-body"></tbody>
-          </table>
-        </div>
-        <div class="table-empty" id="log-empty" hidden>No log entries match the current filters.</div>
-        <div class="source-line" id="log-truncated" style="margin: 8px 0 0" hidden></div>
-      </section>
+          <div class="cbm-heat-empty" id="cbm-heat-empty" hidden></div>
+          <div class="table-scroll" id="cbm-heat-wrap"></div>
+          <div class="cbm-heat-legend" id="cbm-heat-legend"></div>
+        </section>
+      </div>
     </main>
   </div>
 </div>
@@ -454,7 +506,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   'use strict';
 
   var POLL_MS = 60 * 1000;       // how often to re-check reports-data.js
-  var state = { days: 180, rig: '', rtype: '', search: '', lastStamp: null, expanded: {} };
+  var state = { days: 180, rig: '', rtype: '', search: '', lastStamp: null, expanded: {}, tab: 'list', cbmClass: '' };
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -1106,13 +1158,193 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     ['rcpt_nwn', 'NOV witness']
   ];
 
+  function cbmGradeClass(grade) {
+    var g = String(grade || '').trim();
+    if (g === '1') return 'g1';
+    if (g === '2') return 'g2';
+    if (g === '3' || g === '4') return 'g34';
+    return '';   // '', 'N/A', or anything else -> neutral bucket
+  }
+
   function cbmGradeChip(grade) {
     var g = String(grade || '').trim();
-    var cls = 'cbm-grade';
-    if (g === '1') cls += ' g1';
-    else if (g === '2') cls += ' g2';
-    else if (g === '3' || g === '4') cls += ' g34';
-    return mk('span', cls, g ? 'Grade ' + g : 'Ungraded');
+    var b = cbmGradeClass(g);
+    var cls = 'cbm-grade' + (b ? ' ' + b : '');
+    var text = g === 'N/A' ? 'N/A' : (g ? 'Grade ' + g : 'Ungraded');
+    return mk('span', cls, text);
+  }
+
+  // ---------- CBM Heatmap ----------
+  // window.DASHBOARD_DATA.cbmGrades: one row per graded/commented checklist
+  // item per report, { rig, class, equip, itemKey, itemLabel, itemShape,
+  // sortKey, grade, comment, photos, date, file }, newest-first. class is
+  // the fixed inspection template (e.g. "Gate Valves") shared by several
+  // physical equip instances - each class has its own item numbering, not
+  // comparable across classes, so the grid is scoped to one class at a time.
+
+  function cbmClassesForRig(rig) {
+    var seen = [];
+    (window.DASHBOARD_DATA.cbmGrades || []).forEach(function (g) {
+      if (g.rig === rig && seen.indexOf(g.class) === -1) seen.push(g.class);
+    });
+    seen.sort();
+    return seen;
+  }
+
+  function renderCbmHeatmap() {
+    var sel = $('cbm-class-select');
+    var wrap = $('cbm-heat-wrap'), msg = $('cbm-heat-empty'), legend = $('cbm-heat-legend');
+    wrap.textContent = ''; legend.textContent = '';
+    var rig = state.rig;
+
+    if (!rig) {
+      sel.hidden = true; msg.hidden = false; wrap.hidden = true;
+      msg.textContent = 'Select a rig above to view its CBM Heatmap — equipment names aren’t unique across the fleet, so an all-rigs view can’t be shown as one grid.';
+      return;
+    }
+
+    var classes = cbmClassesForRig(rig);
+    if (!classes.length) {
+      sel.hidden = true; msg.hidden = false; wrap.hidden = true;
+      msg.textContent = 'No CBM inspection history yet for ' + rig + '.';
+      return;
+    }
+
+    sel.hidden = false;
+    if (classes.indexOf(state.cbmClass) === -1) state.cbmClass = classes[0];
+    sel.textContent = '';
+    classes.forEach(function (c) {
+      var opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      if (c === state.cbmClass) opt.selected = true;
+      sel.appendChild(opt);
+    });
+
+    var entries = (window.DASHBOARD_DATA.cbmGrades || [])
+      .filter(function (e) { return e.rig === rig && e.class === state.cbmClass; });
+
+    msg.hidden = true; wrap.hidden = false;
+
+    // cbmGrades ships newest-first, so the first entry seen per key is
+    // already the latest - no date comparison needed here.
+    var latest = {}, equips = [], itemMeta = {};
+    entries.forEach(function (e) {
+      var key = e.equip + '|' + e.itemKey;
+      if (!latest[key]) latest[key] = e;
+      if (equips.indexOf(e.equip) === -1) equips.push(e.equip);
+      if (!itemMeta[e.itemKey]) itemMeta[e.itemKey] = { label: e.itemLabel, sortKey: e.sortKey };
+    });
+    equips.sort();
+    var items = Object.keys(itemMeta).map(function (k) {
+      return { key: k, label: itemMeta[k].label, sortKey: itemMeta[k].sortKey };
+    });
+    items.sort(function (a, b) {
+      var ak = a.sortKey || [], bk = b.sortKey || [];
+      for (var i = 0; i < Math.max(ak.length, bk.length); i++) {
+        var d = (ak[i] || 0) - (bk[i] || 0);
+        if (d) return d;
+      }
+      return 0;
+    });
+
+    var table = document.createElement('table');
+    var thead = document.createElement('thead'), htr = document.createElement('tr');
+    htr.appendChild(document.createElement('th'));
+    equips.forEach(function (eq) {
+      var th = mk('th', '', eq);
+      th.title = eq;
+      htr.appendChild(th);
+    });
+    thead.appendChild(htr);
+    table.appendChild(thead);
+
+    var tbody = document.createElement('tbody');
+    items.forEach(function (it) {
+      var tr = document.createElement('tr');
+      tr.appendChild(mk('td', 'cbm-heat-row-label', it.label));
+      equips.forEach(function (eq) {
+        tr.appendChild(cbmHeatCell(latest[eq + '|' + it.key], rig));
+      });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table);
+
+    [['g1', 'Grade 1'], ['g2', 'Grade 2'], ['g34', 'Grade 3 / 4'], ['', 'Ungraded / N/A']].forEach(function (p) {
+      legend.appendChild(mk('span', 'cbm-grade' + (p[0] ? ' ' + p[0] : ''), p[1]));
+    });
+    legend.appendChild(mk('span', '', 'Blank cell = no item reported at that position for that equipment'));
+  }
+
+  function cbmHeatCell(entry, rig) {
+    var td = document.createElement('td');
+    if (!entry) {
+      td.appendChild(mk('div', 'cbm-heat-cell gnone', ''));
+      return td;
+    }
+    var b = cbmGradeClass(entry.grade);
+    var cell = mk('div', 'cbm-heat-cell' + (b ? ' ' + b : ''), '');
+    var gradeText = entry.grade === 'N/A' ? 'N/A' : (entry.grade ? 'Grade ' + entry.grade : 'Ungraded');
+    cell.title = entry.equip + ' — ' + entry.itemLabel + ' — ' + gradeText + (entry.comment ? '\n' + entry.comment : '');
+    cell.tabIndex = 0;
+    cell.addEventListener('click', function () { openCbmHistory(rig, entry.equip, entry.itemKey, entry.itemLabel); });
+    cell.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cell.click(); } });
+    td.appendChild(cell);
+    return td;
+  }
+
+  function openCbmHistory(rig, equip, itemKey, itemLabel) {
+    var overlay = mk('div', 'report-overlay');
+    var frame = mk('div', 'report-frame');
+    frame.style.maxWidth = '640px';
+    var head = mk('div', 'report-head');
+    var title = mk('div', 'rh-title');
+    title.appendChild(mk('div', 'rh-rig', equip + ' — ' + itemLabel));
+    title.appendChild(mk('div', 'rh-sub', rig + ' · Grade history'));
+    head.appendChild(title);
+    var closeBtn = mk('button', 'report-close', '✕');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Close');
+    head.appendChild(closeBtn);
+    var body = mk('div', 'report-body');
+    frame.appendChild(head);
+    frame.appendChild(body);
+    overlay.appendChild(frame);
+    document.body.appendChild(overlay);
+    document.body.classList.add('no-scroll');
+
+    var history = (window.DASHBOARD_DATA.cbmGrades || [])
+      .filter(function (e) { return e.rig === rig && e.equip === equip && e.itemKey === itemKey; });
+    // already date-descending from the source data; no re-sort needed.
+    if (!history.length) {
+      body.appendChild(mk('div', 'rv-error', 'No history found for this item.'));
+    } else {
+      body.appendChild(detailKeyTable('', ['Date', 'Grade', 'Comment', 'Source'],
+        history.map(function (h) {
+          var d = parseDate(h.date);
+          var link = mk('a', '', h.file || '—');
+          link.href = '#';
+          if (h.file) {
+            link.addEventListener('click', function (ev) {
+              ev.preventDefault();
+              var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === h.file; });
+              if (rec) openReportViewer(rec);
+            });
+          }
+          var dateTxt = isNaN(d) ? (h.date || '—') : (fmtDate(d) + ', ' + d.getFullYear());
+          return [dateTxt, cbmGradeChip(h.grade), h.comment || '—', link];
+        })));
+    }
+
+    function close() {
+      overlay.remove();
+      document.body.classList.remove('no-scroll');
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
   }
 
   function rvCbm(cbm, body) {
@@ -1750,6 +1982,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     renderRigChart(reports);
     renderTable(reports);
     renderLogSection();
+    renderCbmHeatmap();
   }
 
   // ---------- auto-refresh: re-load reports-data.js and re-render on change ----------
@@ -1795,6 +2028,25 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   $('type-filter').addEventListener('change', function () {
     state.rtype = this.value;
     render();
+  });
+
+  function showTab(name) {
+    state.tab = name;
+    var isList = name === 'list';
+    $('tab-list-btn').classList.toggle('active', isList);
+    $('tab-cbm-btn').classList.toggle('active', !isList);
+    $('list-view').hidden = !isList;
+    $('cbm-view').hidden = isList;
+    $('range-group').hidden = !isList;
+    $('type-filter').hidden = !isList;
+    $('search').hidden = !isList;
+  }
+  $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
+  $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
+
+  $('cbm-class-select').addEventListener('change', function () {
+    state.cbmClass = this.value;
+    renderCbmHeatmap();
   });
 
   $('log-kind').addEventListener('click', function (e) {
