@@ -222,7 +222,31 @@
     width: 30px; height: 30px; border-radius: 4px; font-size: 16px; line-height: 1;
   }
   .report-close:hover { background: rgba(255,255,255,0.25); }
+  .report-print {
+    appearance: none; border: 0; cursor: pointer; flex-shrink: 0;
+    background: rgba(255,255,255,0.12); color: #fff;
+    height: 30px; padding: 0 12px; border-radius: 4px; font-size: 12px;
+    font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .report-print:hover { background: rgba(255,255,255,0.25); }
   .report-body { padding: 20px 24px 32px; }
+  @media print {
+    body.no-scroll .container { display: none; }
+    body.no-scroll .report-overlay,
+    body.no-scroll .report-overlay * {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    body.no-scroll .report-overlay {
+      position: static; inset: auto; background: none; overflow: visible;
+    }
+    body.no-scroll .report-frame { max-width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
+    body.no-scroll .report-head {
+      position: static; background: #fff; color: #000;
+      border-bottom: 2px solid #000;
+    }
+    body.no-scroll .report-head .rh-sub { color: #333; }
+    .report-close, .report-print { display: none !important; }
+  }
   .rv-loading, .rv-error { color: var(--sd-text-light); padding: 32px 0; text-align: center; }
   .rv-error { color: var(--sd-fail); }
   .rv-section-label {
@@ -1494,6 +1518,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     title.appendChild(mk('div', 'rh-sub',
       (rec.type || rec.reporttype || 'Report') + ' · ' + fmtVisitSpan(rec) + (rec.wce ? ' · ' + rec.wce : '')));
     head.appendChild(title);
+    var printBtn = mk('button', 'report-print', 'Print / Save as PDF');
+    printBtn.type = 'button';
+    head.appendChild(printBtn);
     var closeBtn = mk('button', 'report-close', '✕');
     closeBtn.type = 'button';
     closeBtn.setAttribute('aria-label', 'Close report');
@@ -1518,6 +1545,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       close();
     }
     closeBtn.addEventListener('click', close);
+    printBtn.addEventListener('click', function () { window.print(); });
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
 
