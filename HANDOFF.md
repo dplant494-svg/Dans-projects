@@ -167,17 +167,21 @@ paths with credentials, but this shape is fine to document)
   `drilling_fluids_into_environment`) have no source in the tool yet. An
   email listing these open questions has been drafted for
   `iadc_dev@softway.com` / `mike.kucharski@iadc.org` — confirm with Dan
-  whether it's been sent before assuming this is still blocked. The relay
-  code, its tests, a Power Automate alternative spec, and a status PDF
-  were archived and handed to Dan directly (not committed here, since none
-  of it is dashboard code). **Confirmed no dashboard changes are needed
-  regardless of hold status**: SSORT Rev 104 now embeds a new
-  `rapidIncident` object inside R53 report JSON alongside the existing
-  `fields`, and both `dashboard/dashboard.html`'s `rvR53()` (~line 1277)
-  and `scripts/Update-Dashboard.ps1`'s R53 ingestion (~line 425) only ever
-  read named `s53_*` keys off `fields` by name — an unread sibling key is
-  inert. Resume by re-reading the archived `report-backend/HANDOFF.md`
-  once IADC responds.
+  whether it's been sent before assuming this is still blocked. **The
+  paperwork lives in this repo** — see `RAPID-S53-RELAY-HANDOFF.md`
+  (start here), `RAPID-S53-POWER-AUTOMATE-SPEC.md`,
+  `RAPID-S53-IADC-EMAIL-DRAFT.md`, and `RAPID-S53-Status.pdf`. **The
+  actual relay code and its 122-test suite are NOT in this repo** — they
+  were archived to `RAPID-S53-ON-HOLD-ARCHIVE.zip` and saved to Dan's
+  external hard drive, since none of that code is dashboard code.
+  **Confirmed no dashboard changes are needed regardless of hold status**:
+  SSORT Rev 104 now embeds a new `rapidIncident` object inside R53 report
+  JSON alongside the existing `fields`, and both `dashboard/dashboard.html`'s
+  `rvR53()` (~line 1277) and `scripts/Update-Dashboard.ps1`'s R53 ingestion
+  (~line 425) only ever read named `s53_*` keys off `fields` by name — an
+  unread sibling key is inert. Resume by reading
+  `RAPID-S53-RELAY-HANDOFF.md`'s "How to resume" section once IADC
+  responds.
 - **IT request pending**: Dan sent IT a Word doc requesting an SMTP relay +
   shared mailbox address for the type-based email notification feature
   (discipline owners get notified when a report needing their review lands).
