@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUX Pod Seal Integrity Test</title>
+<style>
+  :root{
+    --blue:#003366; --blue-light:#e8f0fa; --pass:#1a7f37; --pass-bg:#e6f6ea;
+    --fail:#b3261e; --fail-bg:#fdeceb; --warn:#8a5a00; --warn-bg:#fff6e0;
+    --border:#d0d7de; --muted:#57606a; --bg:#f6f8fa;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:var(--bg);color:#1b1f23;}
+  header.app{background:var(--blue);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  header.app h1{font-size:19px;margin:0;font-weight:600;}
+  header.app .sub{font-size:12px;opacity:.85;}
+  main{max-width:1100px;margin:0 auto;padding:16px;}
+  section.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;}
+  section.card h2{font-size:15px;margin:0 0 12px;color:var(--blue);border-bottom:1px solid var(--border);padding-bottom:8px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;}
+  label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.02em;}
+  input[type=text],input[type=date],input[type=number],select{width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:13px;}
+  .checkrow{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;}
+  .checkrow input{width:auto;}
+  button{cursor:pointer;border:1px solid var(--blue);background:var(--blue);color:#fff;padding:7px 14px;border-radius:5px;font-size:13px;font-weight:600;}
+  button.secondary{background:#fff;color:var(--blue);}
+  button.ghost{background:#fff;color:var(--muted);border-color:var(--border);}
+  button.danger{background:#fff;color:var(--fail);border-color:var(--fail);}
+  button:disabled{opacity:.45;cursor:not-allowed;}
+  button:hover:not(:disabled){filter:brightness(1.08);}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+  .port{border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+  .port-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--blue-light);cursor:pointer;}
+  .port-head .title{font-weight:600;font-size:14px;}
+  .port-head .medium{font-size:11px;color:var(--muted);margin-left:8px;font-weight:400;}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:12px;text-transform:uppercase;}
+  .badge.pass{background:var(--pass-bg);color:var(--pass);}
+  .badge.fail{background:var(--fail-bg);color:var(--fail);}
+  .badge.pending{background:#eee;color:var(--muted);}
+  .badge.holding{background:var(--warn-bg);color:var(--warn);}
+  .port-body{padding:12px;display:none;}
+  .port.open .port-body{display:block;}
+  .stage{border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:10px;background:#fbfcfd;}
+  .stage h4{margin:0 0 8px;font-size:13px;color:var(--blue);}
+  .stage-meta{font-size:12px;color:var(--muted);margin-bottom:8px;}
+  .stage-meta b{color:#1b1f23;}
+  .timer{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .timer.ok{color:var(--pass);} .timer.wait{color:var(--warn);}
+  .row-inline{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px;}
+  .row-inline .field{flex:1;min-width:120px;}
+  table.log{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px;}
+  table.log th,table.log td{border:1px solid var(--border);padding:4px 6px;text-align:left;}
+  table.log th{background:#f0f3f6;}
+  .status-line{margin-top:8px;padding:8px 10px;border-radius:5px;font-size:12.5px;font-weight:600;}
+  .status-line.holding{background:var(--warn-bg);color:var(--warn);}
+  .status-line.pass{background:var(--pass-bg);color:var(--pass);}
+  .status-line.fail{background:var(--fail-bg);color:var(--fail);}
+  .status-line.idle{background:#eee;color:var(--muted);}
+  .note-field textarea{width:100%;font-size:12px;padding:6px;border:1px solid var(--border);border-radius:5px;font-family:inherit;min-height:40px;}
+  .overall-banner{padding:12px 16px;border-radius:8px;font-weight:700;font-size:14px;margin-bottom:16px;}
+  .overall-banner.pending{background:#eee;color:var(--muted);}
+  .overall-banner.pass{background:var(--pass-bg);color:var(--pass);}
+  .overall-banner.fail{background:var(--fail-bg);color:var(--fail);}
+  .results-table{width:100%;border-collapse:collapse;font-size:12px;}
+  .results-table th,.results-table td{border:1px solid var(--border);padding:5px 7px;}
+  .results-table th{background:#f0f3f6;text-align:left;}
+  .muted{color:var(--muted);}
+  .footnote{font-size:11px;color:var(--muted);margin-top:6px;}
+  .disabled-note{font-size:12px;color:var(--muted);font-style:italic;padding:8px;}
+  @media print{
+    header.app,.toolbar,.port-head .toggle-hint,button,.no-print{display:none !important;}
+    section.card{border:none;box-shadow:none;break-inside:avoid;}
+    .port-body{display:block !important;}
+    body{background:#fff;}
+  }
+</style>
+</head>
+<body>
+
+<header class="app">
+  <div>
+    <h1>MUX Pod Seal Integrity Test</h1>
+    <div class="sub">Subsea electronics pressure vessel seal verification — 112/120 Line Mux Pods (ref. NOV AX060497)</div>
+  </div>
+  <div class="sub" id="autosaveNote"></div>
+</header>
+
+<main>
+
+  <section class="card no-print">
+    <h2>Session</h2>
+    <div class="toolbar">
+      <button id="btnNew" class="danger">New Test (clear session)</button>
+      <button id="btnSaveFile" class="secondary">Save Session File</button>
+      <button id="btnLoadFile" class="secondary">Load Session File</button>
+      <input type="file" id="fileInput" accept="application/json" style="display:none;">
+      <button id="btnPrint" class="secondary">Print / Save PDF</button>
+      <button id="btnExportJson" class="secondary">Export Dashboard JSON</button>
+    </div>
+    <div class="footnote">Progress autosaves to this browser every few seconds. Use "Save Session File" for a portable backup or to hand off / resume on another machine — long holds (55 min) survive a page refresh since timers are wall-clock based, but not a different device unless you save/load the file.</div>
+  </section>
+
+  <section class="card">
+    <h2>Test Header</h2>
+    <div class="grid">
+      <div><label>Rig / Asset</label><input type="text" id="h_rig" placeholder="e.g. West Neptune"></div>
+      <div><label>W/O #</label><input type="text" id="h_wo"></div>
+      <div><label>PN / SN</label><input type="text" id="h_pnsn"></div>
+      <div><label>S/N (Pod)</label><input type="text" id="h_serial"></div>
+      <div><label>Customer / Inspector</label><input type="text" id="h_inspector"></div>
+      <div><label>Test Date</label><input type="date" id="h_date"></div>
+      <div><label>Gauge Cal. Date</label><input type="date" id="h_calDate"></div>
+      <div>
+        <label>Mux Pod Line</label>
+        <select id="h_podLine">
+          <option value="112">112 Line</option>
+          <option value="120">120 Line</option>
+        </select>
+      </div>
+      <div>
+        <label>Rated Depth</label>
+        <select id="h_ratedDepth">
+          <option value="10000">10,000 ft (high-P target 4,500 psi)</option>
+          <option value="12000">12,000 ft (high-P target 5,400 psi)</option>
+        </select>
+      </div>
+    </div>
+    <div class="checkrow"><input type="checkbox" id="h_port7b"><label style="margin:0;text-transform:none;font-weight:400;">Port 7B present (per appendix)</label></div>
+    <div class="checkrow"><input type="checkbox" id="h_port10b"><label style="margin:0;text-transform:none;font-weight:400;">Port 10B present (per appendix)</label></div>
+    <div class="checkrow"><input type="checkbox" id="h_fcr"><label style="margin:0;text-transform:none;font-weight:400;">FCR gooseneck connector fitted (enables Dry-Mate ports 13 / 13B)</label></div>
+    <div class="checkrow" id="row13b" style="display:none;"><input type="checkbox" id="h_port13b"><label style="margin:0;text-transform:none;font-weight:400;">Port 13B present (per appendix)</label></div>
+  </section>
+
+  <div id="overallBanner" class="overall-banner pending">Overall result: NOT COMPLETE — work through each port below.</div>
+
+  <section class="card">
+    <h2>Test Ports</h2>
+    <div id="portsContainer"></div>
+  </section>
+
+  <section class="card">
+    <h2>Results Summary — Low Pressure Test</h2>
+    <div style="overflow-x:auto;"><table class="results-table" id="lowTable"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Results Summary — High Pressure Test</h2>
+    <div style="overflow-x:auto;"><table class="results-table" id="highTable"></table></div>
+  </section>
+
+</main>
+
+<script>
+/* ---------------------------------------------------------------------
+   Config: port test matrix, transcribed from NOV AX060497 Rev Y
+   (Seal Verification for Subsea Electronics Pressure Vessel).
+--------------------------------------------------------------------- */
+const STAGE_TYPES = {
+  '200_DC200':      { medium:'DC-200/PMX-200', visual:false,
+                       low:  {target:200, plus:50, minus:0, holdMin:15, maxDrop:5},
+                       high: {holdMin:15, maxDrop:15} },
+  '200_N2_visual':   { medium:'N2', visual:true,
+                       low:  {target:200, plus:50, minus:0, holdMin:55, maxDrop:10},
+                       high: {holdMin:55, maxDrop:50} },
+  '200_N2_novisual': { medium:'N2', visual:false,
+                       low:  {target:200, plus:50, minus:0, holdMin:55, maxDrop:10},
+                       high: {holdMin:55, maxDrop:50} },
+  'checkvalve_N2':   { medium:'N2', visual:false,
+                       high: {holdMin:55, maxDrop:50} },
+  'drymate_DC710':   { medium:'DC-710', visual:false,
+                       high: {holdMin:15, maxDrop:10} }
+};
+
+const PORT_DEFS = [
+  {id:'1',   label:'Test Port 1 — SEA Housing',  type:'200_DC200' },
+  {id:'4',   label:'Test Port 4 — SEA Housing',  type:'200_DC200' },
+  {id:'2',   label:'Test Port 2',  type:'200_N2_visual' },
+  {id:'3',   label:'Test Port 3',  type:'200_N2_visual' },
+  {id:'5',   label:'Test Port 5',  type:'200_N2_visual' },
+  {id:'6',   label:'Test Port 6',  type:'200_N2_visual' },
+  {id:'7',   label:'Test Port 7',  type:'200_N2_visual' },
+  {id:'7B',  label:'Test Port 7B', type:'200_N2_visual', optionalFlag:'port7b' },
+  {id:'8',   label:'Test Port 8',  type:'200_N2_novisual' },
+  {id:'9',   label:'Test Port 9',  type:'200_N2_novisual' },
+  {id:'10',  label:'Test Port 10', type:'200_N2_visual' },
+  {id:'10B', label:'Test Port 10B',type:'200_N2_visual', optionalFlag:'port10b' },
+  {id:'14',  label:'Test Port 14', type:'200_N2_visual', pod:'120' },
+  {id:'15',  label:'Test Port 15', type:'200_N2_visual', pod:'120' },
+  {id:'16',  label:'Test Port 16', type:'200_N2_visual', pod:'120' },
+  {id:'17',  label:'Test Port 17', type:'200_N2_visual', pod:'120' },
+  {id:'18',  label:'Test Port 18', type:'200_N2_visual', pod:'120' },
+  {id:'19',  label:'Test Port 19', type:'200_N2_visual', pod:'120' },
+  {id:'CV11',label:'Check Valve 11 (1")',  type:'checkvalve_N2', checkValve:true, cvOrder:1 },
+  {id:'CV12',label:'Check Valve 12 (3/4")',type:'checkvalve_N2', checkValve:true, cvOrder:2, cvAfter:'CV11' },
+  {id:'13',  label:'Test Port 13 — Dry-Mate',  type:'drymate_DC710', requiresFCR:true },
+  {id:'13B', label:'Test Port 13B — Dry-Mate', type:'drymate_DC710', requiresFCR:true, optionalFlag:'port13b' },
+];
+
+/* ---------------------------------------------------------------------
+   State
+--------------------------------------------------------------------- */
+const STORAGE_KEY = 'seal-integrity-test-session-v1';
+
+function blankStage(){
+  return { status:'not-started', readings:[], notes:'', visualCheckOk:null };
+}
+function blankPortState(){
+  return { stages: { low: blankStage(), high: blankStage() } };
+}
+function freshState(){
+  return {
+    header:{ rig:'', wo:'', pnsn:'', serial:'', inspector:'', date:'', calDate:'',
+             podLine:'112', ratedDepth:'10000', port7b:false, port10b:false, fcr:false, port13b:false },
+    ports:{},
+    openPort:null
+  };
+}
+let state = loadState() || freshState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  const note = document.getElementById('autosaveNote');
+  const now = new Date();
+  note.textContent = 'Autosaved ' + now.toLocaleTimeString();
+}
+
+/* ---------------------------------------------------------------------
+   Helpers
+--------------------------------------------------------------------- */
+function highTarget(){ return state.header.ratedDepth === '12000' ? 5400 : 4500; }
+
+function applicablePorts(){
+  return PORT_DEFS.filter(p=>{
+    if(p.pod && p.pod !== state.header.podLine) return false;
+    if(p.requiresFCR && !state.header.fcr) return false;
+    if(p.optionalFlag && !state.header[p.optionalFlag]) return false;
+    return true;
+  });
+}
+
+function ensurePortState(id){
+  if(!state.ports[id]) state.ports[id] = blankPortState();
+  return state.ports[id];
+}
+
+function stageConfig(portDef, stageName){
+  const st = STAGE_TYPES[portDef.type];
+  const cfg = st[stageName];
+  if(!cfg) return null;
+  const out = Object.assign({}, cfg, {medium:st.medium, visual: stageName==='high' ? st.visual : false});
+  if(stageName === 'low'){
+    out.targetLabel = cfg.target + ' psi (+' + cfg.plus + '/-' + cfg.minus + ')';
+    out.targetLow = cfg.target - cfg.minus;
+    out.targetHigh = cfg.target + cfg.plus;
+  } else {
+    const t = highTarget();
+    out.targetLabel = t + ' psi (+200/-0)';
+    out.targetLow = t;
+    out.targetHigh = t + 200;
+  }
+  return out;
+}
+
+function maxDropObserved(stage){
+  if(stage.readings.length < 2) return 0;
+  const p0 = stage.readings[0].pressure;
+  let max = 0;
+  for(let i=1;i<stage.readings.length;i++){
+    const d = p0 - stage.readings[i].pressure;
+    if(d > max) max = d;
+  }
+  return max;
+}
+
+function elapsedMinutes(stage){
+  if(!stage.readings.length) return 0;
+  const t0 = stage.readings[0].t;
+  const last = stage.readings[stage.readings.length-1].t;
+  return (last - t0) / 60000;
+}
+
+function liveElapsedMinutes(stage){
+  if(!stage.readings.length) return 0;
+  return (Date.now() - stage.readings[0].t) / 60000;
+}
+
+function computeStageStatus(stage, cfg){
+  if(!stage.readings.length) return 'not-started';
+  if(stage.status === 'pass' || stage.status === 'fail') return stage.status;
+  const drop = maxDropObserved(stage);
+  if(drop > cfg.maxDrop) return 'fail';
+  if(cfg.visual && stage.visualCheckOk === false) return 'fail';
+  const mins = liveElapsedMinutes(stage);
+  if(mins < cfg.holdMin) return 'holding';
+  return 'min-met';
+}
+
+function stageApplies(portDef, stageName){
+  return !!STAGE_TYPES[portDef.type][stageName];
+}
+
+function portOverallStatus(portDef){
+  const ps = state.ports[portDef.id];
+  if(!ps) return 'pending';
+  const stagesToCheck = ['low','high'].filter(s=>stageApplies(portDef,s));
+  const statuses = stagesToCheck.map(s=>{
+    const cfg = stageConfig(portDef, s);
+    return computeStageStatus(ps.stages[s], cfg);
+  });
+  if(statuses.some(s=>s==='fail')) return 'fail';
+  if(statuses.every(s=>s==='pass')) return 'pass';
+  return 'pending';
+}
+
+function checkValveGateOk(portDef){
+  if(!portDef.cvAfter) return true;
+  const prior = state.ports[portDef.cvAfter];
+  if(!prior) return false;
+  const priorDef = PORT_DEFS.find(p=>p.id===portDef.cvAfter);
+  return portOverallStatus(priorDef) === 'pass';
+}
+
+/* ---------------------------------------------------------------------
+   Rendering
+--------------------------------------------------------------------- */
+function fmtTime(ms){
+  const d = new Date(ms);
+  return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function fmtDuration(mins){
+  const m = Math.floor(mins);
+  const s = Math.round((mins - m) * 60);
+  return (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+
+function renderHeader(){
+  const h = state.header;
+  document.getElementById('h_rig').value = h.rig;
+  document.getElementById('h_wo').value = h.wo;
+  document.getElementById('h_pnsn').value = h.pnsn;
+  document.getElementById('h_serial').value = h.serial;
+  document.getElementById('h_inspector').value = h.inspector;
+  document.getElementById('h_date').value = h.date;
+  document.getElementById('h_calDate').value = h.calDate;
+  document.getElementById('h_podLine').value = h.podLine;
+  document.getElementById('h_ratedDepth').value = h.ratedDepth;
+  document.getElementById('h_port7b').checked = h.port7b;
+  document.getElementById('h_port10b').checked = h.port10b;
+  document.getElementById('h_fcr').checked = h.fcr;
+  document.getElementById('h_port13b').checked = h.port13b;
+  document.getElementById('row13b').style.display = h.fcr ? 'flex' : 'none';
+}
+
+function stageBlock(portDef, stageName){
+  const cfg = stageConfig(portDef, stageName);
+  if(!cfg) return '';
+  const ps = ensurePortState(portDef.id);
+  const stage = ps.stages[stageName];
+  const status = computeStageStatus(stage, cfg);
+  const drop = maxDropObserved(stage);
+  const mins = stage.readings.length ? liveElapsedMinutes(stage) : 0;
+  const remaining = Math.max(0, cfg.holdMin - mins);
+
+  let timerHtml = '';
+  if(stage.readings.length && status !== 'pass' && status !== 'fail'){
+    timerHtml = '<div class="timer ' + (mins>=cfg.holdMin?'ok':'wait') + '">' +
+      fmtDuration(mins) + ' elapsed <span style="font-size:13px;font-weight:400;">(min hold ' + cfg.holdMin + ':00' +
+      (remaining>0 ? ', ' + fmtDuration(remaining) + ' remaining' : ', minimum met — keep holding or finish') + ')</span></div>';
+  }
+
+  let statusLineClass = 'idle', statusLineText = 'Not started.';
+  if(status==='holding'){ statusLineClass='holding'; statusLineText='Holding — minimum time not yet reached.'; }
+  else if(status==='min-met'){ statusLineClass='holding'; statusLineText='Minimum hold time met and drop within tolerance so far. Log more readings or finish the stage.'; }
+  else if(status==='pass'){ statusLineClass='pass'; statusLineText='PASS — hold time met, drop stayed within tolerance throughout.'; }
+  else if(status==='fail'){ statusLineClass='fail'; statusLineText='FAIL — ' + (cfg.visual && stage.visualCheckOk===false ? 'leak observed at visual inspection port.' : 'pressure drop exceeded allowed tolerance during the hold.'); }
+
+  const readingsRows = stage.readings.map((r,i)=>{
+    const d = i===0 ? 0 : (stage.readings[0].pressure - r.pressure);
+    return '<tr><td>'+(i+1)+'</td><td>'+fmtTime(r.t)+'</td><td>'+r.pressure+'</td><td>'+(i===0?'—':d)+'</td></tr>';
+  }).join('');
+
+  const locked = status==='pass' || status==='fail';
+  const canFinish = status==='min-met';
+  const canLog = stage.readings.length>0 && !locked;
+  const canStart = stage.readings.length===0 && !locked;
+
+  let gateNote = '';
+  if(portDef.checkValve && stageName==='high' && !checkValveGateOk(portDef)){
+    return '<div class="stage"><h4>High Pressure Stage</h4><div class="disabled-note">Locked until ' + portDef.cvAfter + ' passes (per procedure: 1&quot; check valve tested and passed before the 3/4&quot; valve is installed).</div></div>';
+  }
+
+  return '<div class="stage" data-port="'+portDef.id+'" data-stage="'+stageName+'">' +
+    '<h4>' + (stageName==='low' ? 'Low Pressure Stage' : 'High Pressure Stage') + '</h4>' +
+    '<div class="stage-meta">Medium: <b>' + cfg.medium + '</b> &nbsp;·&nbsp; Target: <b>' + cfg.targetLabel + '</b> ' +
+    '&nbsp;·&nbsp; Min hold: <b>' + cfg.holdMin + ' min</b> &nbsp;·&nbsp; Max allowed drop: <b>' + cfg.maxDrop + ' psi</b></div>' +
+    timerHtml +
+    (canStart ? '<div class="row-inline"><div class="field"><label>Initial Pressure (psi)</label><input type="number" class="startPressure"></div><button class="btnStart">Start Hold</button></div>' : '') +
+    (canLog ? '<div class="row-inline"><div class="field"><label>New Reading (psi)</label><input type="number" class="logPressure"></div><button class="btnLog secondary">Log Reading</button>' +
+      (canFinish ? '<button class="btnFinish">Finish Stage</button>' : '') + '</div>' : '') +
+    (cfg.visual ? '<div class="checkrow"><input type="checkbox" class="visualCheck" '+(stage.visualCheckOk?'checked':'')+' '+(locked?'disabled':'')+'><label style="margin:0;text-transform:none;font-weight:400;">No leak observed at visual inspection port (tubing to bucket of water)</label></div>' : '') +
+    (stage.readings.length ? '<table class="log"><thead><tr><th>#</th><th>Time</th><th>Pressure (psi)</th><th>Drop from initial</th></tr></thead><tbody>'+readingsRows+'</tbody></table>' : '') +
+    '<div class="note-field" style="margin-top:8px;"><label>Notes</label><textarea class="stageNotes" '+(locked?'':'')+'>'+ (stage.notes||'') +'</textarea></div>' +
+    '<div class="status-line ' + statusLineClass + '">' + statusLineText + (stage.readings.length ? ' Max drop so far: ' + drop.toFixed(1) + ' psi.' : '') + '</div>' +
+    (portDef.checkValve && status==='fail' ? '<button class="btnReplace danger" style="margin-top:8px;">Replace Unit & Retest</button>' : '') +
+    '</div>';
+}
+
+function renderPorts(){
+  const container = document.getElementById('portsContainer');
+  const ports = applicablePorts();
+  container.innerHTML = ports.map(portDef=>{
+    ensurePortState(portDef.id);
+    const status = portOverallStatus(portDef);
+    const open = state.openPort === portDef.id;
+    const st = STAGE_TYPES[portDef.type];
+    const stagesHtml = ['low','high'].filter(s=>st[s]).map(s=>stageBlock(portDef,s)).join('');
+    return '<div class="port'+(open?' open':'')+'" data-port="'+portDef.id+'">' +
+      '<div class="port-head">' +
+        '<div><span class="title">'+portDef.label+'</span><span class="medium">'+st.medium+'</span></div>' +
+        '<div><span class="badge '+(status==='pass'?'pass':status==='fail'?'fail':status==='pending'&&hasStarted(portDef)?'holding':'pending')+'">'+
+          (status==='pass'?'PASS':status==='fail'?'FAIL':hasStarted(portDef)?'IN PROGRESS':'PENDING')+'</span></div>' +
+      '</div>' +
+      '<div class="port-body">'+stagesHtml+'</div>' +
+    '</div>';
+  }).join('');
+  renderOverall(ports);
+  renderResultsTables(ports);
+}
+
+function hasStarted(portDef){
+  const ps = state.ports[portDef.id];
+  if(!ps) return false;
+  return ['low','high'].some(s=>ps.stages[s] && ps.stages[s].readings && ps.stages[s].readings.length);
+}
+
+function renderOverall(ports){
+  const banner = document.getElementById('overallBanner');
+  const statuses = ports.map(portOverallStatus);
+  let cls='pending', text='Overall result: NOT COMPLETE — work through each port below.';
+  if(statuses.some(s=>s==='fail')){
+    cls='fail'; text='Overall result: FAIL — one or more ports failed. See flagged ports below.';
+  } else if(statuses.every(s=>s==='pass')){
+    cls='pass'; text='Overall result: PASS — all applicable ports passed.';
+  }
+  banner.className = 'overall-banner ' + cls;
+  banner.textContent = text;
+}
+
+function renderResultsTables(ports){
+  renderResultsTable('lowTable','low',ports);
+  renderResultsTable('highTable','high',ports);
+}
+function renderResultsTable(elId, stageName, ports){
+  const rows = ports.filter(p=>STAGE_TYPES[p.type][stageName]).map(portDef=>{
+    const cfg = stageConfig(portDef, stageName);
+    const ps = ensurePortState(portDef.id);
+    const stage = ps.stages[stageName];
+    const status = stage.readings.length ? computeStageStatus(stage,cfg) : 'not-started';
+    const initial = stage.readings.length ? stage.readings[0].pressure : '';
+    const final = stage.readings.length ? stage.readings[stage.readings.length-1].pressure : '';
+    const dur = stage.readings.length ? fmtDuration(elapsedMinutes(stage)) : '';
+    const badgeClass = status==='pass'?'pass':status==='fail'?'fail':'pending';
+    const badgeText = status==='pass'?'PASS':status==='fail'?'FAIL':status==='not-started'?'—':'IN PROGRESS';
+    return '<tr><td>'+portDef.label+'</td><td>'+initial+'</td><td>'+final+'</td><td>'+dur+'</td>' +
+      '<td><span class="badge '+badgeClass+'">'+badgeText+'</span></td><td>'+(stage.notes||'')+'</td></tr>';
+  }).join('');
+  document.getElementById(elId).innerHTML =
+    '<thead><tr><th>Location</th><th>Initial Pressure (psi)</th><th>Final Pressure (psi)</th><th>Duration</th><th>Result</th><th>Notes</th></tr></thead><tbody>'+
+    (rows || '<tr><td colspan="6" class="muted">No applicable ports.</td></tr>') + '</tbody>';
+}
+
+function renderAll(){
+  renderHeader();
+  renderPorts();
+}
+
+/* ---------------------------------------------------------------------
+   Event wiring
+--------------------------------------------------------------------- */
+document.querySelectorAll('#h_rig,#h_wo,#h_pnsn,#h_serial,#h_inspector,#h_date,#h_calDate').forEach(el=>{
+  el.addEventListener('input', ()=>{
+    const key = el.id.replace('h_','');
+    state.header[key] = el.value;
+    saveState();
+  });
+});
+document.getElementById('h_podLine').addEventListener('change', e=>{ state.header.podLine = e.target.value; saveState(); renderAll(); });
+document.getElementById('h_ratedDepth').addEventListener('change', e=>{ state.header.ratedDepth = e.target.value; saveState(); renderAll(); });
+document.getElementById('h_port7b').addEventListener('change', e=>{ state.header.port7b = e.target.checked; saveState(); renderAll(); });
+document.getElementById('h_port10b').addEventListener('change', e=>{ state.header.port10b = e.target.checked; saveState(); renderAll(); });
+document.getElementById('h_fcr').addEventListener('change', e=>{ state.header.fcr = e.target.checked; saveState(); renderAll(); });
+document.getElementById('h_port13b').addEventListener('change', e=>{ state.header.port13b = e.target.checked; saveState(); renderAll(); });
+
+document.getElementById('portsContainer').addEventListener('click', e=>{
+  const portDiv = e.target.closest('.port');
+  if(!portDiv) return;
+  const portId = portDiv.dataset.port;
+
+  if(e.target.closest('.port-head')){
+    state.openPort = (state.openPort === portId) ? null : portId;
+    saveState(); renderAll();
+    return;
+  }
+
+  const stageDiv = e.target.closest('.stage');
+  if(!stageDiv) return;
+  const stageName = stageDiv.dataset.stage;
+  const ps = ensurePortState(portId);
+  const stage = ps.stages[stageName];
+
+  if(e.target.classList.contains('btnStart')){
+    const input = stageDiv.querySelector('.startPressure');
+    const val = parseFloat(input.value);
+    if(isNaN(val)){ alert('Enter the initial pressure reading first.'); return; }
+    stage.readings = [{t:Date.now(), pressure:val}];
+    stage.status = 'not-started';
+    saveState(); renderAll();
+  }
+  else if(e.target.classList.contains('btnLog')){
+    const input = stageDiv.querySelector('.logPressure');
+    const val = parseFloat(input.value);
+    if(isNaN(val)){ alert('Enter a pressure reading first.'); return; }
+    stage.readings.push({t:Date.now(), pressure:val});
+    saveState(); renderAll();
+  }
+  else if(e.target.classList.contains('btnFinish')){
+    const portDef = PORT_DEFS.find(p=>p.id===portId);
+    const cfg = stageConfig(portDef, stageName);
+    if(cfg.visual && stage.visualCheckOk === null){
+      alert('Confirm the visual inspection check before finishing this stage.');
+      return;
+    }
+    const computed = computeStageStatus(stage, cfg);
+    stage.status = (computed === 'fail') ? 'fail' : (computed === 'min-met' ? 'pass' : computed);
+    saveState(); renderAll();
+  }
+  else if(e.target.classList.contains('btnReplace')){
+    if(confirm('Reset this port\'s test and retest with a replacement unit?')){
+      ps.stages[stageName] = blankStage();
+      saveState(); renderAll();
+    }
+  }
+});
+
+document.getElementById('portsContainer').addEventListener('change', e=>{
+  const stageDiv = e.target.closest('.stage');
+  if(!stageDiv) return;
+  const portId = stageDiv.closest('.port').dataset.port;
+  const stageName = stageDiv.dataset.stage;
+  const stage = ensurePortState(portId).stages[stageName];
+  if(e.target.classList.contains('visualCheck')){
+    stage.visualCheckOk = e.target.checked;
+    saveState(); renderAll();
+  }
+});
+document.getElementById('portsContainer').addEventListener('input', e=>{
+  if(e.target.classList.contains('stageNotes')){
+    const stageDiv = e.target.closest('.stage');
+    const portId = stageDiv.closest('.port').dataset.port;
+    const stageName = stageDiv.dataset.stage;
+    ensurePortState(portId).stages[stageName].notes = e.target.value;
+    saveState();
+  }
+});
+
+document.getElementById('btnNew').addEventListener('click', ()=>{
+  if(confirm('Clear the current test session? This cannot be undone unless you saved a session file.')){
+    state = freshState();
+    saveState(); renderAll();
+  }
+});
+
+document.getElementById('btnSaveFile').addEventListener('click', ()=>{
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const rig = (state.header.rig || 'session').replace(/[^a-z0-9]+/gi,'-');
+  const date = state.header.date || new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'seal-integrity-test_' + rig + '_' + date + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btnLoadFile').addEventListener('click', ()=> document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const loaded = JSON.parse(reader.result);
+      state = loaded;
+      saveState(); renderAll();
+    }catch(err){ alert('Could not read that file as a session JSON.'); }
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('btnPrint').addEventListener('click', ()=> window.print());
+
+document.getElementById('btnExportJson').addEventListener('click', ()=>{
+  const ports = applicablePorts();
+  const overall = ports.map(portOverallStatus).some(s=>s==='fail') ? 'FAIL' :
+                  ports.every(p=>portOverallStatus(p)==='pass') ? 'PASS' : 'INCOMPLETE';
+  const portResults = ports.map(portDef=>{
+    const ps = ensurePortState(portDef.id);
+    const stagesOut = {};
+    ['low','high'].filter(s=>stageApplies(portDef,s)).forEach(s=>{
+      const cfg = stageConfig(portDef,s);
+      const stage = ps.stages[s];
+      stagesOut[s] = {
+        medium: cfg.medium,
+        targetLabel: cfg.targetLabel,
+        holdMinRequired: cfg.holdMin,
+        maxAllowedDropPsi: cfg.maxDrop,
+        holdActualMin: stage.readings.length ? +elapsedMinutes(stage).toFixed(1) : null,
+        maxDropObservedPsi: stage.readings.length ? +maxDropObserved(stage).toFixed(1) : null,
+        visualCheckOk: cfg.visual ? stage.visualCheckOk : null,
+        readings: stage.readings.map(r=>({time:new Date(r.t).toISOString(), pressurePsi:r.pressure})),
+        result: stage.readings.length ? computeStageStatus(stage,cfg).toUpperCase().replace('MIN-MET','HOLDING') : 'NOT TESTED',
+        notes: stage.notes || ''
+      };
+    });
+    return { id:portDef.id, label:portDef.label, overallResult: portOverallStatus(portDef).toUpperCase(), stages: stagesOut };
+  });
+
+  const payload = {
+    meta: {
+      reporttype: 'Seal Integrity Test - MUX Pod',
+      asset: state.header.rig,
+      date: state.header.date,
+      wo: state.header.wo,
+      pnsn: state.header.pnsn,
+      serial: state.header.serial,
+      inspector: state.header.inspector,
+      calDate: state.header.calDate
+    },
+    tiles: [{
+      title: 'MUX Pod Seal Integrity Test',
+      status: overall,
+      tileDate: state.header.date,
+      sealTestData: {
+        podLine: state.header.podLine,
+        ratedDepthFt: +state.header.ratedDepth,
+        fcrFitted: state.header.fcr,
+        ports: portResults
+      }
+    }]
+  };
+
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const rig = (state.header.rig || 'unknown-rig').replace(/[^a-z0-9]+/gi,'-');
+  const date = state.header.date || new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = 'seadrill-report_' + rig + '_' + date + '_seal-integrity-test.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+/* Live re-render every second while anything is holding, so timers/status move. */
+setInterval(()=>{
+  const anyHolding = Object.values(state.ports).some(ps =>
+    ['low','high'].some(s => ps.stages[s] && ps.stages[s].readings.length && !['pass','fail'].includes(ps.stages[s].status))
+  );
+  if(anyHolding) renderPorts();
+}, 1000);
+
+renderAll();
+</script>
+</body>
+</html>
