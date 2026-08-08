@@ -1485,18 +1485,57 @@ renderAll = function(){
 
 function snapshotKey(res){ return res.week || res.reportDate || ''; }
 
+function base64ToUint8Array(b64){
+  var bin = atob(b64);
+  var arr = new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+
+// Planners now drop the weekly workbook straight into the report folder
+// instead of re-entering it into WCGRRT; Update-Dashboard.ps1 carries the
+// raw file through as base64 (it never parses Excel itself) and this is
+// where it's actually read - reusing parsePlannerSheet(), the same parser
+// the manual "Weekly Planner" upload box above already uses.
+function parsePipelineExcelSnapshots(){
+  var data = window.BWM_DATA;
+  if(!data || !Array.isArray(data.excelSnapshots) || !data.excelSnapshots.length) return [];
+  var out = [];
+  data.excelSnapshots.forEach(function(s){
+    try {
+      var wb = XLSX.read(base64ToUint8Array(s.base64), {type:'array'});
+      var sheetName = wb.SheetNames.find(function(n){ return /status report/i.test(n); }) || wb.SheetNames[0];
+      var rows = parsePlannerSheet(wb.Sheets[sheetName]);
+      if(!rows.length) return;
+      var latest = rows.reduce(function(best, r){
+        return (!best || (r.lastUpdated && r.lastUpdated > best.lastUpdated)) ? r : best;
+      }, null);
+      var wm = (s.file || '').match(/(\d{4}).*?week[\s_-]?(\d+)/i);
+      out.push({
+        week: wm ? (wm[1] + ' – Week ' + wm[2]) : '',
+        reportDate: (latest && latest.lastUpdated) || '',
+        compiledBy: (latest && latest.planner) || '',
+        rows: rows
+      });
+    } catch(err){ console.error('Excel snapshot skipped (' + s.file + '):', err.message); }
+  });
+  return out;
+}
+
 function parsePipelineSnapshots(){
   var data = window.BWM_DATA;
-  if(!data || !Array.isArray(data.snapshots) || !data.snapshots.length) return null;
   var parsed = [];
-  data.snapshots.forEach(function(s){
-    try {
-      var res = parseBwmJson({ tiles: [{ title: 'BWM Weekly Planning', bwmData: s.bwm }] }, s.file || 'pipeline');
-      parsed.push(res);
-      if(res.week) BWM_SNAPSHOTS[res.week] = res;
-    } catch(err){ console.error('Pipeline snapshot skipped:', err.message); }
-  });
+  if(data && Array.isArray(data.snapshots) && data.snapshots.length){
+    data.snapshots.forEach(function(s){
+      try {
+        var res = parseBwmJson({ tiles: [{ title: 'BWM Weekly Planning', bwmData: s.bwm }] }, s.file || 'pipeline');
+        parsed.push(res);
+      } catch(err){ console.error('Pipeline snapshot skipped:', err.message); }
+    });
+  }
+  parsed = parsed.concat(parsePipelineExcelSnapshots());
   if(!parsed.length) return null;
+  parsed.forEach(function(res){ if(res.week) BWM_SNAPSHOTS[res.week] = res; });
   parsed.sort(function(a,b){
     return String(b.reportDate||'').localeCompare(String(a.reportDate||'')) ||
            String(b.week||'').localeCompare(String(a.week||''));
@@ -1539,7 +1578,7 @@ function initPipelineData(){
   var data = window.BWM_DATA;
   var parsedList = parsePipelineSnapshots();
   if(parsedList){
-    PIPELINE_STAMP = data.generatedAt + ':' + data.snapshots.length + ':' + Object.keys(data.planningReports || {}).length;
+    PIPELINE_STAMP = data.generatedAt + ':' + (data.snapshots||[]).length + ':' + (data.excelSnapshots||[]).length + ':' + Object.keys(data.planningReports || {}).length;
     PLANNING_REPORTS = data.planningReports || {};
     loadSnapshot(parsedList[0]);
     populateWeekSelect(parsedList, snapshotKey(parsedList[0]));
@@ -1556,7 +1595,7 @@ function pollPipelineData(){
     s.remove();
     var data = window.BWM_DATA;
     if(!data) return;
-    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + Object.keys(data.planningReports || {}).length;
+    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + (data.excelSnapshots || []).length + ':' + Object.keys(data.planningReports || {}).length;
     if(stamp === PIPELINE_STAMP) return;
     PIPELINE_STAMP = stamp;
     PLANNING_REPORTS = data.planningReports || {};

@@ -3,7 +3,7 @@
 **For:** whichever Claude Code session picks this project up next.
 **Owner:** Dan Plant, WCE Technical Superintendent, Technical Services / Well Control Group, Seadrill.
 **Repo:** `dplant494-svg/Dans-projects` — working branch `claude/dashboard-automation-planning-aa0sqi`.
-**Last updated:** 2026-07-24.
+**Last updated:** 2026-08-08.
 
 Read this before touching anything. It's written so a fresh session with zero
 prior context can be productive in one pass — assume nothing, verify against
@@ -24,9 +24,11 @@ steps after setup:
    graded condition (colored cells, click for grade history over time).
 2. **BOP Fleet Planning Dashboard** (`bop-dashboard/dashboard.html`) — a
    1920×1080 TV kiosk view of BOP status fleet-wide, fed by the weekly
-   `bwmData` tile, plus a per-rig **Planning Report** panel (daily-cadence
-   project report: % complete, variance, critical path, milestones) shown
-   when you click a rig.
+   `bwmData` tile **or** a planner's `*_BWM_Reporting*.xlsx` workbook dropped
+   straight into the report folder (parsed client-side, no tool re-entry
+   needed — see "Background" below), plus a per-rig **Planning Report** panel
+   (daily-cadence project report: % complete, variance, critical path,
+   milestones) shown when you click a rig.
 
 `scripts/Update-Dashboard.ps1` (the "scanner") runs as a Windows Scheduled
 Task every 10 minutes on Dan's workstation, scans the report folder(s),
@@ -148,9 +150,13 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.26** (adds the `cbmGrades` aggregate
-  behind the new CBM Heatmap tab — see `INTEGRATION-CONTRACT.md`'s `cbmData`
-  entry for the exact shape and the real-data findings behind it).
+- `scripts/Update-Dashboard.ps1`: **v2.27** (adds the `excelSnapshots` byte
+  -ferry for planner-dropped weekly BWM workbooks — see
+  `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry, and the "Background"
+  section below for why it's designed this way).
+  v2.26 added the `cbmGrades` aggregate behind the CBM Heatmap tab — see
+  `INTEGRATION-CONTRACT.md`'s `cbmData` entry for the exact shape and the
+  real-data findings behind it.
 - `scripts/Deploy-Dashboard.ps1`: warns explicitly (rather than silently
   skipping) when `bop-dashboard\dashboard.html` isn't found locally; always
   loads `config.json` for `bopDeployPath`/`bopPageName` even when
@@ -158,6 +164,27 @@ paths with credentials, but this shape is fine to document)
 
 ## Background / not-actively-worked items
 
+- **Weekly BWM Excel drop-in — shipped, replaces tool re-entry for the
+  weekly report only.** The BWM planners didn't want to re-type their
+  weekly fleet status into WCGRRT anymore; they already keep a
+  `2026_Week_NN_BWM_Reporting.xlsx` workbook by hand and just want to drop
+  that into the report folder. `scripts/Update-Dashboard.ps1` v2.27 scans
+  for `*BWM*Report*.xlsx` (config key `weeklyExcelPattern` to override) as a
+  completely separate pass from the daily JSON scan — **daily reporting via
+  the tool is unchanged**. It doesn't parse the workbook at all: it just
+  base64-reads the raw file into `window.BWM_DATA.excelSnapshots[]`. The
+  actual parsing happens client-side in `bop-dashboard/dashboard.html`'s new
+  `parsePipelineExcelSnapshots()`, which reuses the **existing**
+  `parsePlannerSheet()` (already built and header-validated against this
+  exact template for the manual "Weekly Planner" drag-and-drop upload box)
+  and the vendored SheetJS (`xlsx.full.min.js`) — no new PowerShell Excel
+  module/dependency was needed. Excel-sourced and tool-exported weeks
+  interleave in the same week dropdown/history, so nothing breaks if a
+  planner reverts to the tool for one week during the transition. Verified
+  end-to-end against the real Week 31 and Week 32 workbooks Dan provided
+  (18 rigs each, byte-identical round-trip through the scanner, correct
+  rendering and week-switching in a headless browser) — see
+  `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry for the exact shape.
 - **RAPID-S53 relay — on hold, blocked on IADC/Softway.** A standalone
   Python FastAPI relay (`report-backend/` — NOT part of this repo, hosted
   separately) was built and fully tested (122 passing tests, stub mode) to

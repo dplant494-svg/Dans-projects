@@ -12,6 +12,12 @@
     dashboard/reports-data.js. The dashboard HTML loads that file with a
     plain <script> tag, so it works when opened as a local file.
 
+    Also picks up weekly BWM planning workbooks (*BWM*Report*.xlsx) from the
+    same folder(s) and passes them through as raw bytes to
+    bop-dashboard/bop-planning-data.js - that page parses the workbook itself
+    (see parsePlannerSheet() in bop-dashboard/dashboard.html), so this script
+    never needs to understand Excel's file format.
+
     Run it once by hand to test, then schedule it with Register-DashboardTask.ps1.
 
 .PARAMETER ConfigPath
@@ -30,7 +36,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.26'
+$ScriptVersion = '2.27'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -334,29 +340,65 @@ if ($config.PSObject.Properties['excludeFolders'] -and $config.excludeFolders) {
     $excludeFolders = @($config.excludeFolders)
 }
 
-$filesList = New-Object System.Collections.Generic.List[object]
-foreach ($baseFolder in $existingFolders) {
-    Get-ChildItem -Path $baseFolder -Filter $config.filePattern -File -Recurse:$recurse |
-        Where-Object {
-            $rel = $_.FullName.Substring($baseFolder.Length).Trim('\', '/')
-            $parts = $rel -split '[\\/]'
-            $dirParts = @()
-            if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
-            $excluded = $false
-            foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
-            (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json') -and
-            ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json')
-        } | ForEach-Object { $filesList.Add($_) | Out-Null }
+# Shared by every file-discovery pass (JSON reports, weekly BWM Excel
+# workbooks): finds files matching $Pattern under $existingFolders, skipping
+# this project's own folders and known non-report JSON files.
+function Get-ScannedFiles {
+    param([string]$Pattern)
+    $list = New-Object System.Collections.Generic.List[object]
+    foreach ($baseFolder in $existingFolders) {
+        Get-ChildItem -Path $baseFolder -Filter $Pattern -File -Recurse:$recurse |
+            Where-Object {
+                $rel = $_.FullName.Substring($baseFolder.Length).Trim('\', '/')
+                $parts = $rel -split '[\\/]'
+                $dirParts = @()
+                if ($parts.Length -gt 1) { $dirParts = $parts[0..($parts.Length - 2)] }
+                $excluded = $false
+                foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
+                (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json') -and
+                ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json')
+            } | ForEach-Object { $list.Add($_) | Out-Null }
+    }
+    return $list.ToArray()
 }
-$files = $filesList.ToArray()
+
+$files = Get-ScannedFiles -Pattern $config.filePattern
+
+# Weekly BWM planning workbook: planners maintain this by hand and want to
+# just drop it in the report folder instead of re-entering it into WCGRRT.
+# Kept as a completely separate scan/pass from the JSON reports above - daily
+# reporting (the $files loop) is untouched by this. The scanner never parses
+# the workbook itself (no Excel dependency in PowerShell); it just carries the
+# raw bytes through to bop-planning-data.js, where bop-dashboard's existing
+# parsePlannerSheet()/SheetJS already know how to read this exact template.
+$weeklyExcelPattern = '*BWM*Report*.xlsx'
+if ($config.PSObject.Properties['weeklyExcelPattern'] -and $config.weeklyExcelPattern) {
+    $weeklyExcelPattern = [string]$config.weeklyExcelPattern
+}
+$excelFiles = Get-ScannedFiles -Pattern $weeklyExcelPattern
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
+$excelSnapshots = New-Object System.Collections.Generic.List[object]
 $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
 $skipped = 0
+
+foreach ($xf in $excelFiles) {
+    try {
+        $bytes = [System.IO.File]::ReadAllBytes($xf.FullName)
+        $excelSnapshots.Add(@{
+            file   = $xf.Name
+            mtime  = $xf.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+            base64 = [Convert]::ToBase64String($bytes)
+        }) | Out-Null
+    }
+    catch {
+        Write-Warning "Skipping $($xf.Name): could not read file ($($_.Exception.Message))"
+    }
+}
 foreach ($f in $files) {
     try {
         $json = Read-ReportJson -Path $f.FullName
@@ -958,13 +1000,14 @@ $bwmSnapshots | Sort-Object -Property @{ Expression = { [string]$_['reportDate']
 $bopPayload = @{
     generatedAt      = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     snapshots        = $bwmSortedList.ToArray()
+    excelSnapshots   = $excelSnapshots.ToArray()
     planningReports  = $planningReports
 }
 $bopContent = 'window.BWM_DATA = ' + (ConvertTo-ReportJson $bopPayload) + ";`n"
 $bopDir = Split-Path -Parent $bopOutputFile
 if (-not (Test-Path -Path $bopDir)) { New-Item -ItemType Directory -Path $bopDir -Force | Out-Null }
 [System.IO.File]::WriteAllText($bopOutputFile, $bopContent, (New-Object System.Text.UTF8Encoding($false)))
-Write-Host "Wrote $($bwmSortedList.Count) BWM snapshot(s) to $bopOutputFile" -ForegroundColor Green
+Write-Host "Wrote $($bwmSortedList.Count) BWM snapshot(s) and $($excelSnapshots.Count) weekly Excel workbook(s) to $bopOutputFile" -ForegroundColor Green
 
 # If a deploy path is configured (the IIS/network folder the dashboard is
 # served from), push the fresh data file there too so viewers stay current.
