@@ -1132,6 +1132,14 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (v && String(v).trim()) grid.appendChild(rvField(pair[1], String(v)));
     });
     if (grid.childNodes.length) body.appendChild(grid);
+    if (vsr.refDocFile) {
+      var docWrap = mk('div', 'rv-sched'); docWrap.style.margin = '4px 0 12px';
+      var docBtn = mk('button', 'rv-sched-btn', '📄 View Document' + (vsr.refDocName ? ' — ' + vsr.refDocName : ''));
+      docBtn.type = 'button';
+      docBtn.style.cssText = 'font-size:12px;padding:6px 14px;border:1px solid #1a5cff;background:#1a5cff;color:#fff;border-radius:5px;cursor:pointer;';
+      docBtn.addEventListener('click', function () { openDataUrl(vsr.refDocFile, vsr.refDocName); });
+      docWrap.appendChild(docBtn); body.appendChild(docWrap);
+    }
     (vsr.sections || []).forEach(function (sec) {
       var checked = (sec.items || []).filter(function (it) { return it.checked; });
       if (!checked.length) return;
