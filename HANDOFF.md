@@ -30,7 +30,7 @@ after setup:
    needed — see "Background" below), plus a per-rig **Planning Report** panel
    (daily-cadence project report: % complete, variance, critical path,
    milestones) shown when you click a rig.
-3. **SSCE Requests Dashboard** (`requests-dashboard/dashboard.html`) — a
+3. **SSCE Requests Dashboard** (`requests-dashboard/requests-dashboard.html`) — a
    flat, searchable log of Central Spares equipment requests submitted from
    the (separate) WCE COC Dashboard, with an approve/deny-with-comment
    workflow for an SSCE approver. On approval, a review copy of the COC
@@ -169,7 +169,7 @@ paths with credentials, but this shape is fine to document)
   `INTEGRATION-CONTRACT.md`'s `cbmData` entry for the exact shape and the
   real-data findings behind it.
 - `scripts/Deploy-Dashboard.ps1`: now also publishes
-  `requests-dashboard/dashboard.html` (+ current `ssce-requests-data.js`),
+  `requests-dashboard/requests-dashboard.html` (+ current `ssce-requests-data.js`),
   same pattern as the existing BOP Fleet Planning Dashboard publish step.
 - `scripts/Deploy-Dashboard.ps1`: warns explicitly (rather than silently
   skipping) when `bop-dashboard\dashboard.html` isn't found locally; always
@@ -179,7 +179,7 @@ paths with credentials, but this shape is fine to document)
 ## Background / not-actively-worked items
 
 - **SSCE Requests Dashboard — shipped, v1 scope.** New third dashboard
-  (`requests-dashboard/dashboard.html`) for Central Spares equipment
+  (`requests-dashboard/requests-dashboard.html`) for Central Spares equipment
   requests submitted from the WCE COC Dashboard (a separate tool, now also
   tracked here as `requests-dashboard/coc-source/Seadrill_WCE_COC_Dashboard.html`
   — **check this matches whatever revision is actually live in production**

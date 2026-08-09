@@ -20,7 +20,7 @@
 
     Also picks up SSCE equipment requests (ssce-request_*.json, downloaded by
     the WCE COC Dashboard's "Request" button) and approver decisions
-    (ssce-decision_*.json, downloaded by requests-dashboard/dashboard.html),
+    (ssce-decision_*.json, downloaded by requests-dashboard/requests-dashboard.html),
     merges them by requestId into requests-dashboard/ssce-requests-data.js,
     writes a pending-notifications feed for an eventual Power Automate flow,
     and - only once 'cocDashboardPath' is set in config.json - regenerates a
@@ -418,7 +418,7 @@ $excelFiles = Get-ScannedFiles -Pattern $weeklyExcelPattern
 
 # SSCE Requests Dashboard: the WCE COC Dashboard's "Request" button downloads
 # a ssce-request_*.json (per SSCE-REQUESTS-INTEGRATION-CONTRACT.md); an SSCE
-# approver's decision in requests-dashboard/dashboard.html downloads a
+# approver's decision in requests-dashboard/requests-dashboard.html downloads a
 # matching ssce-decision_*.json. Both are dropped in the same report
 # folder(s) (Dan's real subfolder: "...\TSC REPORTING\SSCE Requests" and its
 # "Decisions" subfolder) and picked up here - completely separate from both

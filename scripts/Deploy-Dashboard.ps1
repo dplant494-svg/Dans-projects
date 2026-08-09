@@ -97,21 +97,30 @@ else {
 }
 
 
-# SSCE Requests Dashboard: page + current data file. 'requestsDeployPath' in
-# config.json names the folder the page is served from (default: requests/
-# under the main deploy path).
+# SSCE Requests Dashboard: page + current data file. Source file is named
+# requests-dashboard.html (not dashboard.html - this project already had
+# two identically-named dashboard.html files in different folders, which
+# caused real mix-ups; every dashboard's source file now has its own name).
+# 'requestsDeployPath' names the folder the page is served from (default:
+# requests/ under the main deploy path); 'requestsPageName' names the
+# published page file (default: 'SSCE Requests Dashboard.html', same
+# distinct-name idea as 'bopPageName' above).
 $requestsDir = Join-Path $repoRoot 'requests-dashboard'
-if (-not (Test-Path -Path (Join-Path $requestsDir 'dashboard.html'))) {
-    Write-Warning "No requests-dashboard\dashboard.html found next to this project - Requests page NOT published. (Looked in: $requestsDir)"
+if (-not (Test-Path -Path (Join-Path $requestsDir 'requests-dashboard.html'))) {
+    Write-Warning "No requests-dashboard\requests-dashboard.html found next to this project - Requests page NOT published. (Looked in: $requestsDir)"
 }
 else {
     $requestsDeployDir = Join-Path $DeployPath 'requests'
     if ($config -and $config.PSObject.Properties['requestsDeployPath'] -and $config.requestsDeployPath) {
         $requestsDeployDir = [Environment]::ExpandEnvironmentVariables($config.requestsDeployPath)
     }
+    $requestsPageName = 'SSCE Requests Dashboard.html'
+    if ($config -and $config.PSObject.Properties['requestsPageName'] -and $config.requestsPageName) {
+        $requestsPageName = $config.requestsPageName
+    }
     if (-not (Test-Path -Path $requestsDeployDir)) { New-Item -ItemType Directory -Path $requestsDeployDir -Force | Out-Null }
-    Copy-Item -Path (Join-Path $requestsDir 'dashboard.html') -Destination (Join-Path $requestsDeployDir 'dashboard.html') -Force
-    Write-Host "Published SSCE Requests page to $requestsDeployDir" -ForegroundColor Green
+    Copy-Item -Path (Join-Path $requestsDir 'requests-dashboard.html') -Destination (Join-Path $requestsDeployDir $requestsPageName) -Force
+    Write-Host "Published SSCE Requests page as '$requestsPageName' to $requestsDeployDir" -ForegroundColor Green
     $requestsDataSrc = Join-Path $requestsDir 'ssce-requests-data.js'
     if (Test-Path -Path $requestsDataSrc) {
         Copy-Item -Path $requestsDataSrc -Destination (Join-Path $requestsDeployDir 'ssce-requests-data.js') -Force

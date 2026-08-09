@@ -3,7 +3,7 @@
 **Audience: anyone (human or Claude) editing any of the three files this
 feature touches:** `requests-dashboard/coc-source/Seadrill_WCE_COC_Dashboard.html`
 (the WCE COC Dashboard, tracked here as the write-back template),
-`requests-dashboard/dashboard.html` (the SSCE Requests Dashboard), and
+`requests-dashboard/requests-dashboard.html` (the SSCE Requests Dashboard), and
 `scripts/Update-Dashboard.ps1` (the scanner). This is the contract between
 them, in the same spirit as `INTEGRATION-CONTRACT.md` for the reporting
 tools.
