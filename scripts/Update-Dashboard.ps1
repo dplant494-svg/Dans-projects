@@ -18,6 +18,15 @@
     (see parsePlannerSheet() in bop-dashboard/dashboard.html), so this script
     never needs to understand Excel's file format.
 
+    Also picks up SSCE equipment requests (ssce-request_*.json, downloaded by
+    the WCE COC Dashboard's "Request" button) and approver decisions
+    (ssce-decision_*.json, downloaded by requests-dashboard/dashboard.html),
+    merges them by requestId into requests-dashboard/ssce-requests-data.js,
+    writes a pending-notifications feed for an eventual Power Automate flow,
+    and - only once 'cocDashboardPath' is set in config.json - regenerates a
+    REVIEW COPY of the COC dashboard with approved items marked unavailable.
+    See SSCE-REQUESTS-INTEGRATION-CONTRACT.md for the full data contract.
+
     Run it once by hand to test, then schedule it with Register-DashboardTask.ps1.
 
 .PARAMETER ConfigPath
@@ -36,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.27'
+$ScriptVersion = '2.28'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -103,6 +112,32 @@ function Get-Prop {
     return $prop.Value
 }
 
+# PowerShell 7's ConvertFrom-Json (unlike the JavaScriptSerializer path used
+# on Windows PowerShell 5.1) silently auto-converts ISO-8601-looking JSON
+# string values into [datetime] objects - a plain [string] cast on one then
+# renders in the CURRENT CULTURE's format ("08/06/2026 10:00:00"), not the
+# original ISO string, which breaks lexicographic date sorting/comparison.
+# Timestamp fields read from SSCE request/decision JSON go through this
+# instead of a bare [string] cast so sorting stays correct on both editions.
+function ConvertTo-StableTimestamp {
+    param($Value)
+    if ($null -eq $Value) { return '' }
+    if ($Value -is [datetime]) { return $Value.ToString('yyyy-MM-ddTHH:mm:ss.fffZ') }
+    return [string]$Value
+}
+
+# Same dictionary-vs-PSObject split as Get-Prop, for callers that need to
+# set/add a key rather than just read one (SSCE COC write-back). Dictionaries
+# support plain key assignment; PSObjects need Add-Member for a genuinely new
+# property, since a plain '.Name = value' throws when the property doesn't
+# already exist.
+function Set-Prop {
+    param($Object, [string]$Name, $Value)
+    if ($Object -is [System.Collections.IDictionary]) { $Object[$Name] = $Value; return }
+    if ($Object.PSObject.Properties[$Name]) { $Object.PSObject.Properties[$Name].Value = $Value; return }
+    $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value -Force
+}
+
 # Same dictionary-vs-PSObject split as Get-Prop, for callers that need to
 # enumerate every key on a flat data block (CBM's cbm_<equip>_... keys)
 # rather than look up one known name.
@@ -117,11 +152,10 @@ function Get-KeyNames {
 # exports with photos routinely exceed that (CBM exports reach 15 MB+). Use
 # JavaScriptSerializer with a raised limit there; PowerShell 7+ has no limit.
 $script:BigJsonSerializer = $null
-function Read-ReportJson {
-    param([string]$Path)
-    $raw = [System.IO.File]::ReadAllText($Path)
+function ConvertFrom-ReportJsonText {
+    param([string]$Raw)
     if ($PSVersionTable.PSEdition -eq 'Core') {
-        return ($raw | ConvertFrom-Json)
+        return ($Raw | ConvertFrom-Json)
     }
     if ($null -eq $script:BigJsonSerializer) {
         Add-Type -AssemblyName System.Web.Extensions
@@ -129,7 +163,11 @@ function Read-ReportJson {
         $script:BigJsonSerializer.MaxJsonLength = [int]::MaxValue
         $script:BigJsonSerializer.RecursionLimit = 1000
     }
-    return $script:BigJsonSerializer.DeserializeObject($raw)
+    return $script:BigJsonSerializer.DeserializeObject($Raw)
+}
+function Read-ReportJson {
+    param([string]$Path)
+    return ConvertFrom-ReportJsonText -Raw ([System.IO.File]::ReadAllText($Path))
 }
 
 # Report type: SSORT exports carry meta.reporttype; older exports are
@@ -362,7 +400,8 @@ function Get-ScannedFiles {
     return $list.ToArray()
 }
 
-$files = Get-ScannedFiles -Pattern $config.filePattern
+$files = Get-ScannedFiles -Pattern $config.filePattern |
+    Where-Object { ($_.Name -notlike 'ssce-request_*') -and ($_.Name -notlike 'ssce-decision_*') }
 
 # Weekly BWM planning workbook: planners maintain this by hand and want to
 # just drop it in the report folder instead of re-entering it into WCGRRT.
@@ -376,6 +415,25 @@ if ($config.PSObject.Properties['weeklyExcelPattern'] -and $config.weeklyExcelPa
     $weeklyExcelPattern = [string]$config.weeklyExcelPattern
 }
 $excelFiles = Get-ScannedFiles -Pattern $weeklyExcelPattern
+
+# SSCE Requests Dashboard: the WCE COC Dashboard's "Request" button downloads
+# a ssce-request_*.json (per SSCE-REQUESTS-INTEGRATION-CONTRACT.md); an SSCE
+# approver's decision in requests-dashboard/dashboard.html downloads a
+# matching ssce-decision_*.json. Both are dropped in the same report
+# folder(s) (Dan's real subfolder: "...\TSC REPORTING\SSCE Requests" and its
+# "Decisions" subfolder) and picked up here - completely separate from both
+# the daily JSON scan above and the Excel scan, so neither the Reports nor
+# BOP Planning dashboards ever see these.
+$ssceRequestPattern = 'ssce-request_*.json'
+if ($config.PSObject.Properties['ssceRequestPattern'] -and $config.ssceRequestPattern) {
+    $ssceRequestPattern = [string]$config.ssceRequestPattern
+}
+$ssceDecisionPattern = 'ssce-decision_*.json'
+if ($config.PSObject.Properties['ssceDecisionPattern'] -and $config.ssceDecisionPattern) {
+    $ssceDecisionPattern = [string]$config.ssceDecisionPattern
+}
+$ssceRequestFiles = Get-ScannedFiles -Pattern $ssceRequestPattern
+$ssceDecisionFiles = Get-ScannedFiles -Pattern $ssceDecisionPattern
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
@@ -399,6 +457,92 @@ foreach ($xf in $excelFiles) {
         Write-Warning "Skipping $($xf.Name): could not read file ($($_.Exception.Message))"
     }
 }
+
+# SSCE requests: keyed by requestId, newest file mtime wins on exact collision
+# (a request is never expected to be re-submitted under the same id, but the
+# same dedup idiom used everywhere else in this script applies just in case).
+$ssceRequestsById = @{}
+foreach ($rf in $ssceRequestFiles) {
+    try {
+        $req = Read-ReportJson -Path $rf.FullName
+    }
+    catch {
+        Write-Warning "Skipping $($rf.Name): not valid JSON ($($_.Exception.Message))"
+        continue
+    }
+    $reqId = [string](Get-Prop $req 'requestId')
+    if (-not $reqId) {
+        Write-Warning "Skipping $($rf.Name): no requestId - not a recognized SSCE request export"
+        continue
+    }
+    $existing = $ssceRequestsById[$reqId]
+    if (-not $existing -or ($rf.LastWriteTime -gt $existing.modified)) {
+        $ssceRequestsById[$reqId] = @{ modified = $rf.LastWriteTime; file = $rf.Name; request = $req }
+    }
+}
+
+# SSCE decisions: same keying, matched onto a request by requestId below. A
+# decision file for a requestId never scanned in yet (arrived out of order,
+# or a typo) is kept as an orphan and warned about, not silently dropped.
+$ssceDecisionsById = @{}
+foreach ($df in $ssceDecisionFiles) {
+    try {
+        $dec = Read-ReportJson -Path $df.FullName
+    }
+    catch {
+        Write-Warning "Skipping $($df.Name): not valid JSON ($($_.Exception.Message))"
+        continue
+    }
+    $decReqId = [string](Get-Prop $dec 'requestId')
+    if (-not $decReqId) {
+        Write-Warning "Skipping $($df.Name): no requestId - not a recognized SSCE decision export"
+        continue
+    }
+    $existing = $ssceDecisionsById[$decReqId]
+    if (-not $existing -or ($df.LastWriteTime -gt $existing.modified)) {
+        $ssceDecisionsById[$decReqId] = @{ modified = $df.LastWriteTime; file = $df.Name; decision = $dec }
+    }
+}
+foreach ($orphanId in $ssceDecisionsById.Keys) {
+    if (-not $ssceRequestsById.ContainsKey($orphanId)) {
+        Write-Warning "SSCE decision for requestId '$orphanId' ($($ssceDecisionsById[$orphanId].file)) has no matching request on file yet - it will apply once that request's file is scanned"
+    }
+}
+
+$ssceRequestRecords = New-Object System.Collections.Generic.List[object]
+foreach ($reqId in $ssceRequestsById.Keys) {
+    $reqEntry = $ssceRequestsById[$reqId]
+    $req = $reqEntry.request
+    $decEntry = $ssceDecisionsById[$reqId]
+    $rec = [ordered]@{
+        requestId          = $reqId
+        submittedAt        = ConvertTo-StableTimestamp (Get-Prop $req 'submittedAt')
+        file               = $reqEntry.file
+        sourceItem         = Get-Prop $req 'sourceItem'
+        ssceItem           = Get-Prop $req 'ssceItem'
+        applicant          = Get-Prop $req 'applicant'
+        requestedEquipment = Get-Prop $req 'requestedEquipment'
+        returningEquipment = Get-Prop $req 'returningEquipment'
+        afePo              = Get-Prop $req 'afePo'
+        justification      = [string](Get-Prop $req 'justification')
+        termsAcknowledged  = [bool](Get-Prop $req 'termsAcknowledged')
+        decision           = $null
+        comment            = ''
+        decidedBy          = ''
+        decidedAt          = ''
+        decisionFile       = $null
+    }
+    if ($decEntry) {
+        $rec.decision     = [string](Get-Prop $decEntry.decision 'decision')
+        $rec.comment      = [string](Get-Prop $decEntry.decision 'comment')
+        $rec.decidedBy    = [string](Get-Prop $decEntry.decision 'decidedBy')
+        $rec.decidedAt    = ConvertTo-StableTimestamp (Get-Prop $decEntry.decision 'decidedAt')
+        $rec.decisionFile = $decEntry.file
+    }
+    $ssceRequestRecords.Add([pscustomobject]$rec) | Out-Null
+}
+$ssceRequestsSorted = $ssceRequestRecords | Sort-Object -Property @{ Expression = { [string]$_.submittedAt } } -Descending
+
 foreach ($f in $files) {
     try {
         $json = Read-ReportJson -Path $f.FullName
@@ -988,6 +1132,160 @@ catch {
     Write-Warning "Break-in notification feed failed (scan unaffected): $($_.Exception.Message)"
 }
 
+# SSCE Requests Dashboard data: every request (merged with its decision, if
+# any) - see SSCE-REQUESTS-INTEGRATION-CONTRACT.md.
+$requestsOutputFile = Join-Path $repoRoot 'requests-dashboard\ssce-requests-data.js'
+if ($config.PSObject.Properties['requestsOutputFile'] -and $config.requestsOutputFile) {
+    $requestsOutputFile = [Environment]::ExpandEnvironmentVariables($config.requestsOutputFile)
+    if (-not [System.IO.Path]::IsPathRooted($requestsOutputFile)) { $requestsOutputFile = Join-Path $repoRoot $requestsOutputFile }
+}
+$ssceRequestsArr = $ssceRequestsSorted
+$requestsPayload = @{
+    generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+    requests    = if ($ssceRequestsArr) { @($ssceRequestsArr) } else { @() }
+}
+$requestsContent = 'window.SSCE_REQUESTS_DATA = ' + (ConvertTo-ReportJson $requestsPayload) + ";`n"
+$requestsDir = Split-Path -Parent $requestsOutputFile
+if (-not (Test-Path -Path $requestsDir)) { New-Item -ItemType Directory -Path $requestsDir -Force | Out-Null }
+[System.IO.File]::WriteAllText($requestsOutputFile, $requestsContent, (New-Object System.Text.UTF8Encoding($false)))
+Write-Host "Wrote $($requestsPayload.requests.Count) SSCE request(s) ($($ssceDecisionsById.Count) decided) to $requestsOutputFile" -ForegroundColor Green
+
+# SSCE notification feed: same "write a small pending-events file for an
+# external Power Automate flow to pick up" pattern already used for break-in
+# work above (break-ins-pending.json) - not a live webhook call, since
+# nothing in this project has ever called out to a live endpoint, and the
+# Power Platform environment this will eventually feed (per Dan's IT thread,
+# "SEADRILL-WC-DEV") doesn't exist yet. Whenever it does, a flow just needs
+# pointing at wherever this file gets deployed - no code change here.
+# Dedup key is "requestId|submitted" / "requestId|decided", persisted in
+# ssce-notified-state.json so the same event never re-fires.
+try {
+    $ssceNotifStateFile = Join-Path $repoRoot 'ssce-notified-state.json'
+    $ssceNotifSeen = @{}
+    if (Test-Path -Path $ssceNotifStateFile) {
+        foreach ($k in (Get-Content -Path $ssceNotifStateFile -Raw | ConvertFrom-Json)) { $ssceNotifSeen[[string]$k] = $true }
+    }
+    $ssceNotifPending = New-Object System.Collections.Generic.List[object]
+    foreach ($rec in $ssceRequestsArr) {
+        $submittedKey = "$($rec.requestId)|submitted"
+        if (-not $ssceNotifSeen.ContainsKey($submittedKey)) {
+            $ssceNotifPending.Add(@{
+                event       = 'submitted'
+                requestId   = $rec.requestId
+                rig         = [string](Get-Prop $rec.applicant 'siteUnit')
+                priority    = [string](Get-Prop $rec.applicant 'priorityLevel')
+                part        = [string](Get-Prop $rec.ssceItem 'desc')
+                submittedAt = $rec.submittedAt
+            }) | Out-Null
+            $ssceNotifSeen[$submittedKey] = $true
+        }
+        if ($rec.decision) {
+            $decidedKey = "$($rec.requestId)|decided"
+            if (-not $ssceNotifSeen.ContainsKey($decidedKey)) {
+                $ssceNotifPending.Add(@{
+                    event     = 'decided'
+                    requestId = $rec.requestId
+                    decision  = $rec.decision
+                    comment   = $rec.comment
+                    decidedBy = $rec.decidedBy
+                    decidedAt = $rec.decidedAt
+                }) | Out-Null
+                $ssceNotifSeen[$decidedKey] = $true
+            }
+        }
+    }
+    if ($ssceNotifPending.Count -gt 0) {
+        Write-Host "SSCE notifications: $($ssceNotifPending.Count) new event(s) written to ssce-notifications-pending.json" -ForegroundColor Green
+    }
+    $ssceNotifJson = if ($ssceNotifPending.Count -eq 0) { '[]' } else { ConvertTo-JsonArray $ssceNotifPending.ToArray() }
+    $ssceNotifOutputFile = Join-Path $repoRoot 'ssce-notifications-pending.json'
+    [System.IO.File]::WriteAllText($ssceNotifOutputFile, $ssceNotifJson, (New-Object System.Text.UTF8Encoding($false)))
+    $seenKeysArr = @($ssceNotifSeen.Keys)
+    $ssceNotifStateJson = if ($seenKeysArr.Count -eq 0) { '[]' } else { ConvertTo-JsonArray $seenKeysArr }
+    [System.IO.File]::WriteAllText($ssceNotifStateFile, $ssceNotifStateJson, (New-Object System.Text.UTF8Encoding($false)))
+}
+catch {
+    Write-Warning "SSCE notification feed failed (scan unaffected): $($_.Exception.Message)"
+}
+
+# SSCE -> COC dashboard write-back: for every APPROVED request, mark the
+# matching Central Spares item unavailable/assigned on a REVIEW COPY of the
+# COC dashboard - never the live file itself (Dan reviews and manually
+# replaces the live one, same manual-redistribution step that dashboard's
+# own "Download updated dashboard" button already requires). Skipped
+# entirely (with one visible warning) until 'cocDashboardPath' is set.
+$cocDashboardPath = ''
+if ($config.PSObject.Properties['cocDashboardPath'] -and $config.cocDashboardPath) {
+    $cocDashboardPath = [Environment]::ExpandEnvironmentVariables($config.cocDashboardPath)
+}
+if (-not $cocDashboardPath) {
+    Write-Warning "SSCE COC write-back skipped: 'cocDashboardPath' not set in config.json"
+}
+elseif (-not (Test-Path -Path $cocDashboardPath)) {
+    Write-Warning "SSCE COC write-back skipped: cocDashboardPath not found: $cocDashboardPath"
+}
+else {
+    try {
+        $approved = @($ssceRequestsArr | Where-Object { $_.decision -eq 'approved' })
+        if ($approved.Count -eq 0) {
+            Write-Host "SSCE COC write-back: no approved requests to apply" -ForegroundColor Yellow
+        }
+        else {
+            $cocHtml = [System.IO.File]::ReadAllText($cocDashboardPath)
+            $appDataMatch = [regex]::Match($cocHtml, '(<script id="app-data">\s*const APP_DATA = )([\s\S]*?)(;\s*const SFI_GROUPS)')
+            if (-not $appDataMatch.Success) {
+                throw "could not find the embedded APP_DATA block in $cocDashboardPath - is this the right file/version?"
+            }
+            # Same dictionary-vs-PSObject split as everywhere else in this
+            # script: on Windows PowerShell 5.1 this JSON is well over the
+            # native ConvertFrom-Json size limit, so it comes back as nested
+            # Dictionary/ArrayList objects, not PSObjects - Get-Prop/Set-Prop
+            # (not dot-notation or Add-Member) throughout this block.
+            $appData = ConvertFrom-ReportJsonText -Raw $appDataMatch.Groups[2].Value
+            $ssceFolder = $null
+            foreach ($folder in (Get-Prop $appData 'folders')) {
+                if ([string](Get-Prop $folder 'id') -eq 'ssce') { $ssceFolder = $folder; break }
+            }
+            if (-not $ssceFolder) { throw "no 'ssce' folder found in APP_DATA - is this the right file/version?" }
+            $ssceItems = New-Object System.Collections.Generic.List[object]
+            foreach ($bop in (Get-Prop $ssceFolder 'bops')) {
+                foreach ($cat in (Get-Prop $bop 'categories')) {
+                    foreach ($it in (Get-Prop $cat 'items')) { $ssceItems.Add($it) | Out-Null }
+                }
+            }
+
+            $appliedCount = 0
+            foreach ($rec in $approved) {
+                $target = [string](Get-Prop $rec.ssceItem 'asset')
+                $targetOem = [string](Get-Prop $rec.ssceItem 'oem')
+                $targetSerial = [string](Get-Prop $rec.ssceItem 'serial')
+                $match = $null
+                foreach ($it in $ssceItems) {
+                    if ([string](Get-Prop $it 'asset') -eq $target -and [string](Get-Prop $it 'oem') -eq $targetOem -and [string](Get-Prop $it 'serial') -eq $targetSerial) {
+                        $match = $it; break
+                    }
+                }
+                if (-not $match) {
+                    Write-Warning "SSCE COC write-back: approved request $($rec.requestId) - no matching item found for asset '$target' (oem '$targetOem', serial '$targetSerial')"
+                    continue
+                }
+                Set-Prop $match 'available' $false
+                Set-Prop $match 'assignedTo' ([string](Get-Prop $rec.applicant 'siteUnit'))
+                $appliedCount++
+            }
+
+            $newAppData = ConvertTo-ReportJson $appData
+            $newCocHtml = $cocHtml.Substring(0, $appDataMatch.Index) + $appDataMatch.Groups[1].Value + $newAppData + $appDataMatch.Groups[3].Value + $cocHtml.Substring($appDataMatch.Index + $appDataMatch.Length)
+            $cocReviewPath = Join-Path (Split-Path -Parent $cocDashboardPath) 'Seadrill_WCE_COC_Dashboard_PENDING_REVIEW.html'
+            [System.IO.File]::WriteAllText($cocReviewPath, $newCocHtml, (New-Object System.Text.UTF8Encoding($false)))
+            Write-Host "SSCE COC write-back: $appliedCount item(s) marked unavailable in review copy $cocReviewPath" -ForegroundColor Green
+        }
+    }
+    catch {
+        Write-Warning "SSCE COC write-back failed (scan unaffected): $($_.Exception.Message)"
+    }
+}
+
 # BOP Fleet Planning Dashboard data: every BWM weekly snapshot, newest first.
 $bopOutputFile = Join-Path $repoRoot 'bop-dashboard\bop-planning-data.js'
 if ($config.PSObject.Properties['bopOutputFile'] -and $config.bopOutputFile) {
@@ -1035,6 +1333,13 @@ elseif ($deployPath) {
             Copy-Item -Path $breakinOutputFile -Destination (Join-Path $deployPath 'break-ins-pending.json') -Force
         }
 
+        # ssce-notifications-pending.json alongside it too, for the same
+        # reason - whichever Power Automate flow eventually watches this
+        # share just needs pointing at it once it exists.
+        if (Test-Path -Path $ssceNotifOutputFile) {
+            Copy-Item -Path $ssceNotifOutputFile -Destination (Join-Path $deployPath 'ssce-notifications-pending.json') -Force
+        }
+
         # Full report files for the dashboard's 'View full report' feature:
         # copy each scanned .json into <deployPath>\reports (only new/changed
         # ones), and remove any that no longer exist in the source folder.
@@ -1075,6 +1380,18 @@ elseif ($deployPath) {
         if (-not (Test-Path -Path $bopDeployDir)) { New-Item -ItemType Directory -Path $bopDeployDir -Force | Out-Null }
         Copy-Item -Path $bopOutputFile -Destination (Join-Path $bopDeployDir 'bop-planning-data.js') -Force
         Write-Host "Deployed BWM snapshot data to $bopDeployDir" -ForegroundColor Green
+
+        # Requests dashboard data must land in the folder that page is
+        # served from, same idea as bopDeployDir above. Set
+        # 'requestsDeployPath' in config.json; defaults to a requests/
+        # subfolder of the main deploy path.
+        $requestsDeployDir = Join-Path $deployPath 'requests'
+        if ($config.PSObject.Properties['requestsDeployPath'] -and $config.requestsDeployPath) {
+            $requestsDeployDir = [Environment]::ExpandEnvironmentVariables($config.requestsDeployPath)
+        }
+        if (-not (Test-Path -Path $requestsDeployDir)) { New-Item -ItemType Directory -Path $requestsDeployDir -Force | Out-Null }
+        Copy-Item -Path $requestsOutputFile -Destination (Join-Path $requestsDeployDir 'ssce-requests-data.js') -Force
+        Write-Host "Deployed SSCE requests data to $requestsDeployDir" -ForegroundColor Green
     }
     catch {
         # Don't fail the scheduled task over a transient network issue -

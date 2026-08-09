@@ -1,9 +1,9 @@
-# Project handoff — TSC Rig Visit Dashboard / BOP Fleet Planning Dashboard
+# Project handoff — TSC Rig Visit Dashboard / BOP Fleet Planning Dashboard / SSCE Requests Dashboard
 
 **For:** whichever Claude Code session picks this project up next.
 **Owner:** Dan Plant, WCE Technical Superintendent, Technical Services / Well Control Group, Seadrill.
 **Repo:** `dplant494-svg/Dans-projects` — working branch `claude/dashboard-automation-planning-aa0sqi`.
-**Last updated:** 2026-08-08.
+**Last updated:** 2026-08-09.
 
 Read this before touching anything. It's written so a fresh session with zero
 prior context can be productive in one pass — assume nothing, verify against
@@ -14,8 +14,9 @@ real files, and don't guess at data shapes.
 Two internal Seadrill reporting tools — the **TSC Rig Reporting Tool**
 (WCGRRT) and the **Seadrill Subsea Onboard Reporting Tool** (SSORT) — export
 `.json` files that rig crews drop into a shared SharePoint/OneDrive folder.
-This repo turns those exports into two live dashboards with zero manual
-steps after setup:
+This repo turns those exports (plus, now, SSCE equipment requests from a
+third, separate tool) into three live dashboards with zero manual steps
+after setup:
 
 1. **Reports dashboard** (`dashboard/dashboard.html`) — every visit/report,
    filterable, with a full-report viewer (photos, CBM grading, Daily Logs &
@@ -29,11 +30,18 @@ steps after setup:
    needed — see "Background" below), plus a per-rig **Planning Report** panel
    (daily-cadence project report: % complete, variance, critical path,
    milestones) shown when you click a rig.
+3. **SSCE Requests Dashboard** (`requests-dashboard/dashboard.html`) — a
+   flat, searchable log of Central Spares equipment requests submitted from
+   the (separate) WCE COC Dashboard, with an approve/deny-with-comment
+   workflow for an SSCE approver. On approval, a review copy of the COC
+   Dashboard gets the matched item marked unavailable/assigned — see
+   "Background" below and `SSCE-REQUESTS-INTEGRATION-CONTRACT.md` for the
+   full design and why it's built this way.
 
 `scripts/Update-Dashboard.ps1` (the "scanner") runs as a Windows Scheduled
 Task every 10 minutes on Dan's workstation, scans the report folder(s),
-regenerates both dashboards' data files, and copies them to the IIS server.
-`scripts/Deploy-Dashboard.ps1` publishes the dashboard **HTML pages
+regenerates all three dashboards' data files, and copies them to the IIS
+server. `scripts/Deploy-Dashboard.ps1` publishes the dashboard **HTML pages
 themselves** — it only needs to be re-run when the HTML changes (i.e. after
 a code update), not on every scan.
 
@@ -150,13 +158,19 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.27** (adds the `excelSnapshots` byte
-  -ferry for planner-dropped weekly BWM workbooks — see
-  `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry, and the "Background"
-  section below for why it's designed this way).
+- `scripts/Update-Dashboard.ps1`: **v2.28** (adds SSCE request/decision
+  ingestion, the `ssce-notifications-pending.json` feed, and the
+  `cocDashboardPath`-gated COC Dashboard write-back — see
+  `SSCE-REQUESTS-INTEGRATION-CONTRACT.md` and the "Background" section
+  below).
+  v2.27 added the `excelSnapshots` byte-ferry for planner-dropped weekly BWM
+  workbooks — see `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry.
   v2.26 added the `cbmGrades` aggregate behind the CBM Heatmap tab — see
   `INTEGRATION-CONTRACT.md`'s `cbmData` entry for the exact shape and the
   real-data findings behind it.
+- `scripts/Deploy-Dashboard.ps1`: now also publishes
+  `requests-dashboard/dashboard.html` (+ current `ssce-requests-data.js`),
+  same pattern as the existing BOP Fleet Planning Dashboard publish step.
 - `scripts/Deploy-Dashboard.ps1`: warns explicitly (rather than silently
   skipping) when `bop-dashboard\dashboard.html` isn't found locally; always
   loads `config.json` for `bopDeployPath`/`bopPageName` even when
@@ -164,6 +178,27 @@ paths with credentials, but this shape is fine to document)
 
 ## Background / not-actively-worked items
 
+- **SSCE Requests Dashboard — shipped, v1 scope.** New third dashboard
+  (`requests-dashboard/dashboard.html`) for Central Spares equipment
+  requests submitted from the WCE COC Dashboard (a separate tool, now also
+  tracked here as `requests-dashboard/coc-source/Seadrill_WCE_COC_Dashboard.html`
+  — **check this matches whatever revision is actually live in production**
+  before relying on the write-back feature). Full design, data shapes, and
+  the reasoning behind every architectural choice (file-drop instead of a
+  live backend, review-copy instead of auto-overwrite, rig name instead of
+  a code table) are in `SSCE-REQUESTS-INTEGRATION-CONTRACT.md` — read that
+  before changing anything here. Three things are real but not yet *live*:
+  - **Notifications**: `ssce-notifications-pending.json` is produced
+    correctly every run but nothing reads it yet. IT is planning a Power
+    Platform environment ("SEADRILL-WC-DEV") with an HTTP-trigger flow for
+    this and the wider report pipeline, but it doesn't exist yet as of this
+    writing — check with Dan before assuming it's ready.
+  - **COC write-back**: inert until `cocDashboardPath` is set in
+    `config.json` to the real, live COC Dashboard file's path — not yet
+    known; Dan needs to supply it.
+  - **No auth on approve/deny** — same trust level as every other page in
+    this project, stated explicitly in the contract doc, not a bug to fix
+    reflexively.
 - **Weekly BWM Excel drop-in — shipped, replaces tool re-entry for the
   weekly report only.** The BWM planners didn't want to re-type their
   weekly fleet status into WCGRRT anymore; they already keep a

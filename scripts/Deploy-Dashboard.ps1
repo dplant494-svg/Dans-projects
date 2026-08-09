@@ -3,9 +3,10 @@
     Publishes the dashboard to the network/IIS folder it is served from.
 
 .DESCRIPTION
-    Copies dashboard/dashboard.html (and the current reports-data.js) to the
-    folder configured as 'deployPath' in config.json - the physical folder
-    behind your intranet URL, e.g. the folder IIS serves as
+    Copies dashboard/dashboard.html, bop-dashboard/dashboard.html, and
+    requests-dashboard/dashboard.html (each with its current data file) to
+    the folders configured in config.json - the physical folders behind your
+    intranet URLs, e.g. the folder IIS serves as
     http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/
 
     Run this once to publish, and again whenever the dashboard itself is
@@ -92,6 +93,29 @@ else {
             Copy-Item -Path $src -Destination (Join-Path $bopDeployDir $name) -Force
             Write-Host "Published $name alongside it" -ForegroundColor Green
         }
+    }
+}
+
+
+# SSCE Requests Dashboard: page + current data file. 'requestsDeployPath' in
+# config.json names the folder the page is served from (default: requests/
+# under the main deploy path).
+$requestsDir = Join-Path $repoRoot 'requests-dashboard'
+if (-not (Test-Path -Path (Join-Path $requestsDir 'dashboard.html'))) {
+    Write-Warning "No requests-dashboard\dashboard.html found next to this project - Requests page NOT published. (Looked in: $requestsDir)"
+}
+else {
+    $requestsDeployDir = Join-Path $DeployPath 'requests'
+    if ($config -and $config.PSObject.Properties['requestsDeployPath'] -and $config.requestsDeployPath) {
+        $requestsDeployDir = [Environment]::ExpandEnvironmentVariables($config.requestsDeployPath)
+    }
+    if (-not (Test-Path -Path $requestsDeployDir)) { New-Item -ItemType Directory -Path $requestsDeployDir -Force | Out-Null }
+    Copy-Item -Path (Join-Path $requestsDir 'dashboard.html') -Destination (Join-Path $requestsDeployDir 'dashboard.html') -Force
+    Write-Host "Published SSCE Requests page to $requestsDeployDir" -ForegroundColor Green
+    $requestsDataSrc = Join-Path $requestsDir 'ssce-requests-data.js'
+    if (Test-Path -Path $requestsDataSrc) {
+        Copy-Item -Path $requestsDataSrc -Destination (Join-Path $requestsDeployDir 'ssce-requests-data.js') -Force
+        Write-Host "Published ssce-requests-data.js alongside it" -ForegroundColor Green
     }
 }
 
