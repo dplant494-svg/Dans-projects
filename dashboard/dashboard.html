@@ -1640,8 +1640,13 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // SSORT daily log entries: legacy meta.dayLog / current meta.dayLogMonth
     // (both an array of { date, shift, personnel, equip, note, photos }),
     // plus meta.dayLogEntry - the same shape as a single object - on
-    // individual Daily Log Entry / Lesson Learned posts.
-    var dayLog = (meta.dayLogMonth || meta.dayLog || []).slice();
+    // individual Daily Log Entry / Lesson Learned posts. Some real exports
+    // carry both keys at once - an empty dayLogMonth stub alongside the
+    // actual content still in the legacy dayLog - so `||` on the arrays
+    // themselves is wrong (a [] is truthy in JS and would win, discarding
+    // real data); prefer whichever one actually has entries.
+    var dayLog = ((meta.dayLogMonth && meta.dayLogMonth.length) ? meta.dayLogMonth : meta.dayLog) || [];
+    dayLog = dayLog.slice();
     if (meta.dayLogEntry) dayLog = dayLog.concat([meta.dayLogEntry]);
     if (dayLog.length) {
       body.appendChild(mk('div', 'rv-section-label', 'Daily log'));
