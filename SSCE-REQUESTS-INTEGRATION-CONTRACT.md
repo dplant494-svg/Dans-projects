@@ -83,6 +83,17 @@ submission (`form.reportValidity()` fails with no visible error if the empty fie
 to be scrolled out of view) — fixed by prefilling it the same way `description`/`partNumber`
 already were.
 
+**Second, bigger contributor to the same symptom, found after that fix**: the file's global
+CSS reset (`button,input,select,textarea{...appearance:none...}`) strips ALL radio buttons
+and checkboxes in the entire tool down to an invisible box with no checked-state indicator —
+not just unstyled, genuinely impossible to tell if one is selected. This silently blocked
+`Priority Level`, `Rig on downtime`, and the Terms checkbox the same way the blank serial
+field did. Fixed with a small, scoped override restoring native appearance for just
+`input[type="radio"]`/`input[type="checkbox"]`, added right after the existing
+`input[type="search"]`/`input[type="number"]` overrides. This was a pre-existing defect in
+the tool, not something introduced by this feature — worth keeping in mind if radio/checkbox
+issues turn up elsewhere in the COC Dashboard outside the SSCE request form.
+
 `ssceItem.status` is a **certificate validity** snapshot at request time
 (`"VALID"`/`"EXPIRED"`/etc, same meaning as everywhere else in the COC
 Dashboard) — it is NOT an availability flag. Availability is what this whole

@@ -39,6 +39,13 @@
   input[type="search"]::-webkit-search-results-decoration{-webkit-appearance:none}
   input[type="number"]::-webkit-inner-spin-button,
   input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+  /* The blanket appearance:none reset above strips radio buttons and
+     checkboxes down to an invisible box with no checked-state indicator
+     at all - not just unstyled, genuinely impossible to tell if they're
+     selected. Nothing elsewhere in this file re-styles them, so restore
+     the browser's native rendering for just these two types (used for the
+     SSCE request form's Priority/Downtime/Terms fields, among others). */
+  input[type="radio"],input[type="checkbox"]{-webkit-appearance:auto;appearance:auto}
   .overflow-x-auto,.overflow-y-auto{-webkit-overflow-scrolling:touch;contain:layout paint}
 
   /* ---- Brand tokens (CSS variables) ---- */
