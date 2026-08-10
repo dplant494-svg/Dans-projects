@@ -539,7 +539,15 @@ foreach ($reqId in $ssceRequestsById.Keys) {
         $rec.decidedAt    = ConvertTo-StableTimestamp (Get-Prop $decEntry.decision 'decidedAt')
         $rec.decisionFile = $decEntry.file
     }
-    $ssceRequestRecords.Add([pscustomobject]$rec) | Out-Null
+    # Kept as a plain ordered hashtable, NOT cast to [pscustomobject] - unlike
+    # every other output record in this script, this one embeds raw nested
+    # dictionaries (sourceItem/ssceItem/applicant/etc, straight from
+    # Get-Prop) rather than coercing every field to a primitive first. A
+    # [pscustomobject] wrapping raw nested dictionaries is what actually
+    # crashed JavaScriptSerializer on Windows PowerShell 5.1 ("circular
+    # reference ... PSMethod"); a plain hashtable with the same nested
+    # dictionaries serializes fine, same as $planningReports already does.
+    $ssceRequestRecords.Add($rec) | Out-Null
 }
 # Collected into a List and emitted via ToArray() - see the note above the
 # $reports sort below: @() and direct pipeline assignment can both choke on
