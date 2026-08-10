@@ -74,6 +74,15 @@ COC Dashboard "Request" button        Requests Dashboard approve/deny
 }
 ```
 
+`returningEquipment.serialNumber` is pre-filled from the source vessel item's own serial
+(`source.it.serial` in `openSsceRequestForm()`) — it's the same physical unit being sent
+back, so the serial is always known at request time, unlike `date` which genuinely isn't
+knowable yet and stays blank for the applicant to fill in. An earlier build of this form
+left `serialNumber` blank like `date`; since it's a required field, that silently blocked
+submission (`form.reportValidity()` fails with no visible error if the empty field happens
+to be scrolled out of view) — fixed by prefilling it the same way `description`/`partNumber`
+already were.
+
 `ssceItem.status` is a **certificate validity** snapshot at request time
 (`"VALID"`/`"EXPIRED"`/etc, same meaning as everywhere else in the COC
 Dashboard) — it is NOT an availability flag. Availability is what this whole

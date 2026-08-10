@@ -1963,7 +1963,7 @@ function openSsceRequestForm(source, ssceItem){
       <div></div>
       ${ssceFieldRow('Returning Equipment Description *', `<input type="text" id="ret-desc" required value="${esc(source.it.desc||'')}" ${inputStyle}>`)}
       ${ssceFieldRow('Returning Equipment Part Number *', `<input type="text" id="ret-part" required value="${esc(source.it.oem||'')}" ${inputStyle}>`)}
-      ${ssceFieldRow('Returning Serial Number *', `<input type="text" id="ret-serial" required ${inputStyle}>`)}
+      ${ssceFieldRow('Returning Serial Number *', `<input type="text" id="ret-serial" required value="${esc(source.it.serial||'')}" ${inputStyle}>`)}
 
       <div style="grid-column:1 / -1" class="mt-2"><h3 class="text-sm font-bold text-blue uppercase tracking-wide">AFE / PO Information</h3></div>
       ${ssceFieldRow('AFE Number *', `<input type="text" id="afe-number" required ${inputStyle}>`)}
