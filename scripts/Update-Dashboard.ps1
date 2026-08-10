@@ -541,7 +541,13 @@ foreach ($reqId in $ssceRequestsById.Keys) {
     }
     $ssceRequestRecords.Add([pscustomobject]$rec) | Out-Null
 }
-$ssceRequestsSorted = $ssceRequestRecords | Sort-Object -Property @{ Expression = { [string]$_.submittedAt } } -Descending
+# Collected into a List and emitted via ToArray() - see the note above the
+# $reports sort below: @() and direct pipeline assignment can both choke on
+# JSON-derived object graphs on Windows PowerShell 5.1.
+$ssceRequestsSortedList = New-Object System.Collections.Generic.List[object]
+$ssceRequestRecords | Sort-Object -Property @{ Expression = { [string]$_.submittedAt } } -Descending |
+    ForEach-Object { $ssceRequestsSortedList.Add($_) | Out-Null }
+$ssceRequestsSorted = $ssceRequestsSortedList.ToArray()
 
 foreach ($f in $files) {
     try {
@@ -1142,7 +1148,7 @@ if ($config.PSObject.Properties['requestsOutputFile'] -and $config.requestsOutpu
 $ssceRequestsArr = $ssceRequestsSorted
 $requestsPayload = @{
     generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
-    requests    = if ($ssceRequestsArr) { @($ssceRequestsArr) } else { @() }
+    requests    = $ssceRequestsArr
 }
 $requestsContent = 'window.SSCE_REQUESTS_DATA = ' + (ConvertTo-ReportJson $requestsPayload) + ";`n"
 $requestsDir = Split-Path -Parent $requestsOutputFile
@@ -1226,7 +1232,9 @@ elseif (-not (Test-Path -Path $cocDashboardPath)) {
 }
 else {
     try {
-        $approved = @($ssceRequestsArr | Where-Object { $_.decision -eq 'approved' })
+        $approvedList = New-Object System.Collections.Generic.List[object]
+        $ssceRequestsArr | Where-Object { $_.decision -eq 'approved' } | ForEach-Object { $approvedList.Add($_) | Out-Null }
+        $approved = $approvedList.ToArray()
         if ($approved.Count -eq 0) {
             Write-Host "SSCE COC write-back: no approved requests to apply" -ForegroundColor Yellow
         }
