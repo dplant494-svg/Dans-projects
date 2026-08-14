@@ -158,11 +158,13 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.28** (adds SSCE request/decision
-  ingestion, the `ssce-notifications-pending.json` feed, and the
-  `cocDashboardPath`-gated COC Dashboard write-back — see
-  `SSCE-REQUESTS-INTEGRATION-CONTRACT.md` and the "Background" section
-  below).
+- `scripts/Update-Dashboard.ps1`: **v2.29** (adds the `rigChecks` aggregate
+  behind the Reports Dashboard's new "Rig Monitoring" tab — Daily Checks/FLM
+  ingestion from `meta.checks` — see `INTEGRATION-CONTRACT.md`'s
+  `meta.checks`/`rigChecks` entries and the "Background" section below).
+  v2.28 added SSCE request/decision ingestion, the
+  `ssce-notifications-pending.json` feed, and the `cocDashboardPath`-gated
+  COC Dashboard write-back — see `SSCE-REQUESTS-INTEGRATION-CONTRACT.md`.
   v2.27 added the `excelSnapshots` byte-ferry for planner-dropped weekly BWM
   workbooks — see `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry.
   v2.26 added the `cbmGrades` aggregate behind the CBM Heatmap tab — see
@@ -178,6 +180,32 @@ paths with credentials, but this shape is fine to document)
 
 ## Background / not-actively-worked items
 
+- **Rig Monitoring (Daily Checks / FLM) — shipped, v1 scope (logging +
+  viewing only).** Per `DASHBOARDSHAREPOINTINGESTIONHANDOFF.md`, two new
+  report types now land in the scanned folder: **Daily Checks** (per
+  shift) and **FLM** (weekly) — each a free-form set of pass/fail and
+  numeric readings per rig system, at `meta.checks` (not inside `tiles[]`,
+  unlike every other payload type — see `INTEGRATION-CONTRACT.md`'s
+  `meta.checks` entry for why that needed its own top-level check in both
+  the scanner and the viewer). `scripts/Update-Dashboard.ps1` v2.29 adds
+  `Get-CheckReadings` and the `window.DASHBOARD_DATA.rigChecks[]`
+  aggregate (same flat-list-then-pivot-client-side pattern as
+  `cbmGrades`). `dashboard/dashboard.html` gained a `meta.checks` section
+  in the full-report viewer and a new "Rig Monitoring" tab (latest
+  reading per system/item, click-through to a history modal — same
+  pattern as the CBM Heatmap's `openCbmHistory()`). Verified against two
+  real West Saturn exports (Daily Checks + FLM) Dan provided — confirmed
+  the `_unit`/`_cmt` companion-suffix merge behavior, confirmed at least
+  one item (`ccc_faults_alarms`) uses `"pass"` itself as the
+  attention-worthy value with the comment carrying the real signal (so
+  attention-styling keys off comment presence, not the pass/fail value
+  alone — applies everywhere this data is read, not just this one item),
+  and fixed a self-found natural-sort bug so FLM's `t1`..`t16` tensioner
+  readings order numerically instead of alphabetically. **Explicitly
+  deferred per the handoff's own "eventually"**: automatic drift/anomaly
+  detection and notifications, and a cross-rig/fleet-wide rollup — this
+  ships as per-rig latest-plus-history only, same scope boundary as the
+  CBM Heatmap.
 - **SSCE Requests Dashboard — shipped, v1 scope.** New third dashboard
   (`requests-dashboard/requests-dashboard.html`) for Central Spares equipment
   requests submitted from the WCE COC Dashboard (a separate tool, now also

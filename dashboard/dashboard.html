@@ -303,6 +303,38 @@
   .cbm-tally .lbl { color: var(--sd-text-light); font-weight: 700; }
   .cbm-tally .cbm-grade { margin-left: 4px; margin-right: 2px; }
 
+  /* ── Daily Checks / FLM readings (meta.checks) ── */
+  .rv-check-row {
+    display: flex; justify-content: space-between; gap: 12px;
+    font-size: 13px; padding: 3px 0;
+  }
+  .rv-check-row.attention { background: rgba(194,57,43,0.06); border-radius: 3px; padding: 3px 6px; margin: 0 -6px; }
+  .rv-check-label { color: var(--sd-text); text-transform: capitalize; }
+  .rv-check-value { font-weight: 700; white-space: nowrap; }
+  .rv-check-value.pass { color: var(--sd-pass); }
+  .rv-check-value.fail { color: var(--sd-fail); }
+  .rv-check-comment { font-size: 12px; color: var(--sd-fail); margin: 0 0 6px; padding-left: 2px; }
+
+  /* ── Rig Monitoring tab ── */
+  .rig-mon-system { margin-bottom: 16px; }
+  .rig-mon-system h3 {
+    font-size: 11px; font-weight: 700; text-transform: capitalize; color: var(--sd-blue);
+    margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--sd-border);
+  }
+  .rig-mon-row {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    font-size: 13px; padding: 5px 8px; border-radius: 3px; cursor: pointer;
+  }
+  .rig-mon-row:hover { background: var(--sd-bg); }
+  .rig-mon-row.attention { background: rgba(194,57,43,0.08); }
+  .rig-mon-row.attention:hover { background: rgba(194,57,43,0.14); }
+  .rig-mon-label { color: var(--sd-text); text-transform: capitalize; }
+  .rig-mon-value { font-weight: 700; white-space: nowrap; }
+  .rig-mon-value.pass { color: var(--sd-pass); }
+  .rig-mon-value.fail { color: var(--sd-fail); }
+  .rig-mon-meta { font-size: 10px; color: var(--sd-text-light); margin-top: 2px; }
+  .rig-mon-empty { color: var(--sd-text-light); padding: 24px 0; text-align: center; }
+
   /* ── View tabs (Report List / CBM Heatmap) ── */
   .view-tabs { display: flex; gap: 10px; margin-bottom: 14px; }
   .view-tab {
@@ -411,6 +443,7 @@
       <div class="view-tabs">
         <button type="button" class="view-tab active" id="tab-list-btn">Report List</button>
         <button type="button" class="view-tab" id="tab-cbm-btn">CBM Heatmap</button>
+        <button type="button" class="view-tab" id="tab-monitoring-btn">Rig Monitoring</button>
       </div>
 
       <div class="filter-row" id="filter-row">
@@ -487,6 +520,15 @@
           <div class="cbm-heat-empty" id="cbm-heat-empty" hidden></div>
           <div class="table-scroll" id="cbm-heat-wrap"></div>
           <div class="cbm-heat-legend" id="cbm-heat-legend"></div>
+        </section>
+      </div>
+
+      <div id="monitoring-view" hidden>
+        <section class="card">
+          <h2>Rig Monitoring — Daily Checks &amp; FLM</h2>
+          <div class="source-line">Latest reading per item, grouped by system. Click a reading for its history over time.</div>
+          <div class="rig-mon-empty" id="rig-mon-empty" hidden></div>
+          <div id="rig-mon-body"></div>
         </section>
       </div>
     </main>
@@ -1355,6 +1397,136 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     document.addEventListener('keydown', onKey);
   }
 
+  // ---------- Rig Monitoring (Daily Checks / FLM) ----------
+  // window.DASHBOARD_DATA.rigChecks: one row per reading per submission,
+  // { rig, kind, date, shift, by, supervisor, system, item, itemKey, value,
+  // unit, pass, comment, photos, file }, newest-first. A reading is worth
+  // flagging when it's pass:false OR carries a comment - some items
+  // (confirmed on a real "ccc_faults_alarms" export) use "pass" itself as
+  // the attention-worthy value, with the comment as the real signal, so
+  // comment presence drives the highlighting here too, same as the
+  // full-report viewer's meta.checks section.
+
+  function rigCheckAttention(e) { return e.pass === false || !!e.comment; }
+
+  function renderRigMonitoring() {
+    var body = $('rig-mon-body'), msg = $('rig-mon-empty');
+    body.textContent = '';
+    var rig = state.rig;
+    if (!rig) {
+      msg.hidden = false; body.hidden = true;
+      msg.textContent = 'Select a rig above to view its Daily Checks and FLM readings — equipment names aren’t unique across the fleet, so an all-rigs view can’t be shown as one list.';
+      return;
+    }
+    var entries = (window.DASHBOARD_DATA.rigChecks || []).filter(function (e) { return e.rig === rig; });
+    if (!entries.length) {
+      msg.hidden = false; body.hidden = true;
+      msg.textContent = 'No Daily Checks or FLM readings yet for ' + rig + '.';
+      return;
+    }
+    msg.hidden = true; body.hidden = false;
+
+    ['Daily Checks', 'FLM'].forEach(function (kind) {
+      var kindEntries = entries.filter(function (e) { return e.kind === kind; });
+      if (!kindEntries.length) return;
+
+      // rigChecks ships newest-first, so the first entry seen per key is
+      // already the latest - no date comparison needed here.
+      var latest = {}, systems = [], itemsBySystem = {};
+      kindEntries.forEach(function (e) {
+        var key = e.system + '|' + e.itemKey;
+        if (!latest[key]) latest[key] = e;
+      });
+      Object.keys(latest).forEach(function (key) {
+        var e = latest[key];
+        if (!itemsBySystem[e.system]) { itemsBySystem[e.system] = []; systems.push(e.system); }
+        itemsBySystem[e.system].push(e);
+      });
+      systems.sort();
+
+      var newest = kindEntries[0];
+      var headText = kind + ' — latest ' + (newest.date || '') + (newest.shift ? ' · ' + newest.shift : '');
+      body.appendChild(mk('div', 'rv-section-label', headText));
+
+      systems.forEach(function (system) {
+        var card = mk('div', 'rig-mon-system');
+        card.appendChild(mk('h3', '', system.replace(/_/g, ' ')));
+        var items = itemsBySystem[system];
+        // Natural sort so "t2" sorts before "t10" (plain < / > sorts these
+        // alphabetically - confirmed a real problem on FLM's t1..t16
+        // tensioner cycle items, which rendered t1, t10, t11...t2, t3...).
+        items.sort(function (a, b) { return a.item.localeCompare(b.item, undefined, { numeric: true }); });
+        items.forEach(function (e) {
+          var row = mk('div', 'rig-mon-row' + (rigCheckAttention(e) ? ' attention' : ''));
+          var left = mk('div', '');
+          left.appendChild(mk('div', 'rig-mon-label', e.item.replace(/_/g, ' ')));
+          if (e.comment) left.appendChild(mk('div', 'rig-mon-meta', e.comment));
+          row.appendChild(left);
+          var valCls = e.pass === true ? ' pass' : e.pass === false ? ' fail' : '';
+          var valText = e.pass === true ? 'Pass' : e.pass === false ? 'Fail' : (e.value + (e.unit ? ' ' + e.unit : ''));
+          row.appendChild(mk('span', 'rig-mon-value' + valCls, valText));
+          row.addEventListener('click', function () { openRigCheckHistory(rig, kind, e.itemKey, e.item, e.system); });
+          card.appendChild(row);
+        });
+        body.appendChild(card);
+      });
+    });
+  }
+
+  function openRigCheckHistory(rig, kind, itemKey, item, system) {
+    var overlay = mk('div', 'report-overlay');
+    var frame = mk('div', 'report-frame');
+    frame.style.maxWidth = '640px';
+    var head = mk('div', 'report-head');
+    var title = mk('div', 'rh-title');
+    title.appendChild(mk('div', 'rh-rig', system.replace(/_/g, ' ') + ' — ' + item.replace(/_/g, ' ')));
+    title.appendChild(mk('div', 'rh-sub', rig + ' · ' + kind + ' history'));
+    head.appendChild(title);
+    var closeBtn = mk('button', 'report-close', '✕');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Close');
+    head.appendChild(closeBtn);
+    var body = mk('div', 'report-body');
+    frame.appendChild(head);
+    frame.appendChild(body);
+    overlay.appendChild(frame);
+    document.body.appendChild(overlay);
+    document.body.classList.add('no-scroll');
+
+    var history = (window.DASHBOARD_DATA.rigChecks || [])
+      .filter(function (e) { return e.rig === rig && e.kind === kind && e.itemKey === itemKey; });
+    if (!history.length) {
+      body.appendChild(mk('div', 'rv-error', 'No history found for this item.'));
+    } else {
+      body.appendChild(detailKeyTable('', ['Date', 'Value', 'Comment', 'Source'],
+        history.map(function (h) {
+          var d = parseDate(h.date);
+          var link = mk('a', '', h.file || '—');
+          link.href = '#';
+          if (h.file) {
+            link.addEventListener('click', function (ev) {
+              ev.preventDefault();
+              var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === h.file; });
+              if (rec) openReportViewer(rec);
+            });
+          }
+          var dateTxt = isNaN(d) ? (h.date || '—') : (fmtDate(d) + ', ' + d.getFullYear());
+          var valTxt = h.pass === true ? 'Pass' : h.pass === false ? 'Fail' : (h.value + (h.unit ? ' ' + h.unit : ''));
+          return [dateTxt, valTxt, h.comment || '—', link];
+        })));
+    }
+
+    function close() {
+      overlay.remove();
+      document.body.classList.remove('no-scroll');
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+  }
+
   function rvCbm(cbm, body) {
     body.appendChild(mk('div', 'rv-section-label', 'CBM inspection details'));
     var grid = mk('div', 'rv-grid');
@@ -1666,6 +1838,69 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         t.appendChild(tb);
         body.appendChild(t);
       });
+    }
+
+    // Daily Checks / FLM readings: meta.checks, not inside tiles[] - same
+    // "meta-level, needs its own section" situation as dayLog above. Value
+    // keys are <prefix>_<system>__<item>; "_unit"/"_cmt" suffixed keys are
+    // companions of a base reading, not their own item, but only when that
+    // base key actually exists (an orphaned suffix is kept standalone).
+    // A reading counts as worth flagging when it's pass:false OR carries a
+    // comment - some items (confirmed on a real "ccc_faults_alarms" export)
+    // use "pass" itself as the attention-worthy value, with the comment as
+    // the real signal, so comment presence - not the pass/fail value alone -
+    // drives the highlighting.
+    if (meta.checks && meta.checks.values) {
+      var checks = meta.checks;
+      var checksLabel = (checks.kind || 'Checks') + (checks.date ? ' — ' + checks.date : '') + (checks.shift ? ' · ' + checks.shift : '');
+      body.appendChild(mk('div', 'rv-section-label', checksLabel));
+      var checksInfo = mk('div', 'rv-grid');
+      if (checks.by) checksInfo.appendChild(rvField('Completed by', checks.by));
+      if (checks.supervisor) checksInfo.appendChild(rvField('Supervisor', checks.supervisor));
+      if (checksInfo.childNodes.length) body.appendChild(checksInfo);
+
+      var checkValues = checks.values || {};
+      var checkKeySet = {};
+      Object.keys(checkValues).forEach(function (k) { checkKeySet[k] = true; });
+      var bySystem = {}, systemOrder = [];
+      Object.keys(checkValues).forEach(function (key) {
+        if (/_unit$/.test(key) && checkKeySet[key.slice(0, -5)]) return;
+        if (/_cmt$/.test(key) && checkKeySet[key.slice(0, -4)]) return;
+        var m = /^[^_]+_(.+?)__(.+)$/.exec(key);
+        if (!m) return;
+        var system = m[1], item = m[2];
+        if (!bySystem[system]) { bySystem[system] = []; systemOrder.push(system); }
+        var value = String(checkValues[key]);
+        var unit = checkValues[key + '_unit'] || '';
+        var comment = checkValues[key + '_cmt'] || '';
+        var pass = value === 'pass' ? true : (value === 'fail' ? false : null);
+        bySystem[system].push({ item: item, value: value, unit: unit, comment: comment, pass: pass });
+      });
+      systemOrder.forEach(function (system) {
+        var t = mk('div', 'rv-tile');
+        var head = mk('div', 'rv-tile-head');
+        head.appendChild(mk('span', 't-title', system.replace(/_/g, ' ')));
+        t.appendChild(head);
+        var tb = mk('div', 'rv-tile-body');
+        bySystem[system].forEach(function (row) {
+          var attention = row.pass === false || !!row.comment;
+          var line = mk('div', 'rv-check-row' + (attention ? ' attention' : ''));
+          line.appendChild(mk('span', 'rv-check-label', row.item.replace(/_/g, ' ')));
+          var valCls = row.pass === true ? ' pass' : row.pass === false ? ' fail' : '';
+          var valText = row.pass === true ? 'Pass' : row.pass === false ? 'Fail' : (row.value + (row.unit ? ' ' + row.unit : ''));
+          line.appendChild(mk('span', 'rv-check-value' + valCls, valText));
+          tb.appendChild(line);
+          if (row.comment) tb.appendChild(mk('div', 'rv-check-comment', row.comment));
+        });
+        t.appendChild(tb);
+        body.appendChild(t);
+      });
+
+      var alarmPh = rvPhotos(checks.alarmPhotos);
+      if (alarmPh) {
+        body.appendChild(mk('div', 'rv-section-label', 'Alarm photos'));
+        body.appendChild(alarmPh);
+      }
     }
 
     var tiles = full.tiles || [];
@@ -1996,6 +2231,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     renderTable(reports);
     renderLogSection();
     renderCbmHeatmap();
+    renderRigMonitoring();
   }
 
   // ---------- auto-refresh: re-load reports-data.js and re-render on change ----------
@@ -2046,16 +2282,21 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   function showTab(name) {
     state.tab = name;
     var isList = name === 'list';
+    var isCbm = name === 'cbm';
+    var isMonitoring = name === 'monitoring';
     $('tab-list-btn').classList.toggle('active', isList);
-    $('tab-cbm-btn').classList.toggle('active', !isList);
+    $('tab-cbm-btn').classList.toggle('active', isCbm);
+    $('tab-monitoring-btn').classList.toggle('active', isMonitoring);
     $('list-view').hidden = !isList;
-    $('cbm-view').hidden = isList;
+    $('cbm-view').hidden = !isCbm;
+    $('monitoring-view').hidden = !isMonitoring;
     $('range-group').hidden = !isList;
     $('type-filter').hidden = !isList;
     $('search').hidden = !isList;
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
+  $('tab-monitoring-btn').addEventListener('click', function () { showTab('monitoring'); });
 
   $('cbm-class-select').addEventListener('change', function () {
     state.cbmClass = this.value;

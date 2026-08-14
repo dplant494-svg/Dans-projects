@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.28'
+$ScriptVersion = '2.29'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -302,6 +302,64 @@ function Get-CbmGradedItems {
     return $result.ToArray()
 }
 
+# Daily Checks / FLM readings: meta.checks.values is a flat dictionary of
+# <prefix>_<system>__<item> => value (prefix is "dc" or "flm", system/item
+# split on the FIRST "__"; system/item names themselves may contain single
+# underscores, e.g. "hp_compressor_1__cooling_water_temp"). Two companion
+# suffixes ride alongside a base reading key rather than being their own
+# item - "..._unit" (e.g. "..._cooling_water_temp_unit": "°C") and "..._cmt"
+# (a comment, always present on a real "fail" value, and - confirmed on the
+# real "ccc_faults_alarms" item - also present on some items where "pass"
+# itself is the attention-worthy value; the comment's presence, not the
+# pass/fail value, is what actually signals "worth a look", so the dashboard
+# should key attention-styling off Comment being non-empty, not off pass
+# alone). A companion suffix only merges onto its base if that base key
+# genuinely exists as its own reading - an orphaned "_unit"/"_cmt" key
+# (base missing) is kept as its own standalone item rather than dropped.
+function Get-CheckReadings {
+    param($Checks)
+    $result = New-Object System.Collections.Generic.List[object]
+    if ($null -eq $Checks) { return $result.ToArray() }
+    $values = Get-Prop $Checks 'values'
+    if ($null -eq $values) { return $result.ToArray() }
+
+    $allKeys = @(Get-KeyNames $values)
+    $keySet = @{}
+    foreach ($k in $allKeys) { $keySet[[string]$k] = $true }
+
+    $companionSuffixes = @('_unit', '_cmt')
+    $baseKeys = New-Object System.Collections.Generic.List[object]
+    foreach ($k in $allKeys) {
+        $key = [string]$k
+        $isCompanion = $false
+        foreach ($suf in $companionSuffixes) {
+            if ($key.EndsWith($suf)) {
+                $base = $key.Substring(0, $key.Length - $suf.Length)
+                if ($keySet.ContainsKey($base)) { $isCompanion = $true; break }
+            }
+        }
+        if (-not $isCompanion) { $baseKeys.Add($key) | Out-Null }
+    }
+
+    foreach ($key in $baseKeys) {
+        if ($key -notmatch '^[^_]+_(.+?)__(.+)$') { continue }
+        $value = [string](Get-Prop $values $key)
+        $pass = $null
+        if ($value -eq 'pass') { $pass = $true }
+        elseif ($value -eq 'fail') { $pass = $false }
+        $result.Add([pscustomobject]@{
+            system  = $Matches[1]
+            item    = $Matches[2]
+            itemKey = $key
+            value   = $value
+            unit    = [string](Get-Prop $values ($key + '_unit'))
+            pass    = $pass
+            comment = ConvertTo-PlainText ([string](Get-Prop $values ($key + '_cmt')))
+        }) | Out-Null
+    }
+    return $result.ToArray()
+}
+
 # cbmData.equip is always the equipment CLASS (a fixed inspection template,
 # e.g. "Gate Valves", "U2B Door") - confirmed against real exports where
 # several physically distinct instances (Choke Line Isolation Valve, Kill
@@ -442,6 +500,7 @@ $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
+$rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
 
 foreach ($xf in $excelFiles) {
@@ -733,6 +792,54 @@ foreach ($f in $files) {
         }
     }
 
+    # Daily Checks / FLM readings: unlike every other payload type handled
+    # so far, this one lives at meta.checks, not inside tiles[] - needs its
+    # own top-level check rather than a tile-loop branch. meta.reporttype
+    # already routes these correctly for the report-type filter with no
+    # code change (Get-ReportType reads meta.reporttype directly); this is
+    # what feeds the aggregated rigChecks[] trend index instead.
+    $checksBlock = Get-Prop $meta 'checks'
+    if ($checksBlock) {
+        $checkKind = [string](Get-Prop $checksBlock 'kind')
+        if (-not $checkKind) { $checkKind = [string](Get-Prop $meta 'reporttype') }
+        $checkDate = [string](Get-Prop $checksBlock 'date')
+        if (-not $checkDate) { $checkDate = [string](Get-Prop $meta 'logDate') }
+        $checkShift = [string](Get-Prop $checksBlock 'shift')
+        if (-not $checkShift) { $checkShift = [string](Get-Prop $meta 'shift') }
+        $checkBy = [string](Get-Prop $checksBlock 'by')
+        $checkSupervisor = [string](Get-Prop $checksBlock 'supervisor')
+        $alarmPhotosRaw = Get-Prop $checksBlock 'alarmPhotos'
+        $alarmPhotoCount = 0
+        if ($alarmPhotosRaw -is [System.Array]) { $alarmPhotoCount = $alarmPhotosRaw.Length }
+
+        foreach ($reading in (Get-CheckReadings -Checks $checksBlock)) {
+            $rec = [pscustomobject]@{
+                rig        = [string]$rig
+                kind       = $checkKind
+                date       = $checkDate
+                shift      = $checkShift
+                by         = $checkBy
+                supervisor = $checkSupervisor
+                system     = $reading.system
+                item       = $reading.item
+                itemKey    = $reading.itemKey
+                value      = $reading.value
+                unit       = $reading.unit
+                pass       = $reading.pass
+                comment    = $reading.comment
+                photos     = $alarmPhotoCount
+                file       = $f.Name
+            }
+            # FLM has no shift (always weekly); the key naturally collapses
+            # to rig|date|itemKey there since $checkShift is blank.
+            $rcKey = "$rig|$checkDate|$checkShift|$($reading.itemKey)"
+            $rcExisting = $rigCheckEntries[$rcKey]
+            if (-not $rcExisting -or ($f.LastWriteTime -gt $rcExisting.modified)) {
+                $rigCheckEntries[$rcKey] = @{ modified = $f.LastWriteTime; entry = $rec }
+            }
+        }
+    }
+
     # RAPID-S53 events: standalone R53 Report tiles, plus Conditional
     # Assessments flagged as failures (same field set per the handoff).
     if ($tilesRaw) {
@@ -887,6 +994,16 @@ $cbmGradeSorted = New-Object System.Collections.Generic.List[object]
 $cbmGradeList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $cbmGradeSorted.Add($_) | Out-Null }
 
+# Rig Monitoring (Daily Checks / FLM): same flatten-and-sort convention as
+# cbmGrades above - one row per reading per submission, newest first, dates
+# kept (not collapsed) so the Rig Monitoring tab's history drill-down has
+# something to show.
+$rigCheckList = New-Object System.Collections.Generic.List[object]
+foreach ($v in $rigCheckEntries.Values) { $rigCheckList.Add($v.entry) | Out-Null }
+$rigCheckSorted = New-Object System.Collections.Generic.List[object]
+$rigCheckList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
+    ForEach-Object { $rigCheckSorted.Add($_) | Out-Null }
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = ($existingFolders -join '  |  ')
@@ -896,6 +1013,7 @@ $payload = [pscustomobject]@{
         r53Events = $r53Events.ToArray()
     }
     cbmGrades    = $cbmGradeSorted.ToArray()
+    rigChecks    = $rigCheckSorted.ToArray()
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10
