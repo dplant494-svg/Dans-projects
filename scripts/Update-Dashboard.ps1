@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.29'
+$ScriptVersion = '2.30'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -678,17 +678,50 @@ foreach ($f in $files) {
     if ($tilesRaw -is [System.Array]) { $tileCount = $tilesRaw.Length }
     elseif ($null -ne $tilesRaw) { $tileCount = 1 }
 
+    # Daily Checks/FLM exports carry their own rig field at meta.checks.rig,
+    # separate from meta.asset - checked here (before the recognition/rig
+    # fallback below) so a checks export with asset blank but checks.rig
+    # populated still resolves to the real rig instead of falling through to
+    # the filename.
+    $checksRaw = Get-Prop $meta 'checks'
+    $checksHasValues = $false
+    if ($checksRaw) {
+        $checksValuesRaw = Get-Prop $checksRaw 'values'
+        if ($checksValuesRaw) { $checksHasValues = @(Get-KeyNames $checksValuesRaw).Count -gt 0 }
+    }
+    $checksRigRaw = ''
+    if ($checksRaw) { $checksRigRaw = [string](Get-Prop $checksRaw 'rig') }
+
     $assetRaw = [string](Get-Prop $meta 'asset')
     $rig = $assetRaw
+    if (-not $rig) { $rig = $checksRigRaw }
     if (-not $rig) { $rig = $f.BaseName }
 
     # A bare 'meta' block with nothing else recognizable (no tiles, no rig
-    # identity, no critical/action rows) isn't a WCGRRT/SSORT export at all -
-    # e.g. a different tool's save file that happens to have its own 'meta'
-    # object. Skip it rather than adding an empty, meaningless report row
-    # keyed by the filename.
-    if ($tileCount -eq 0 -and -not $assetRaw -and $criticalItems.Count -eq 0 -and $actionItems.Count -eq 0) {
+    # identity, no critical/action rows, no Daily Checks/FLM readings) isn't
+    # a WCGRRT/SSORT export at all - e.g. a different tool's save file that
+    # happens to have its own 'meta' object. Skip it rather than adding an
+    # empty, meaningless report row keyed by the filename. meta.checks with
+    # real readings counts as recognized here even when asset/checks.rig are
+    # both blank - that case is handled as its own, more specific skip
+    # below, not lumped in with "not a recognized export" at all.
+    if ($tileCount -eq 0 -and -not $assetRaw -and $criticalItems.Count -eq 0 -and $actionItems.Count -eq 0 -and -not $checksHasValues) {
         Write-Warning "Skipping $($f.Name): has a 'meta' block but no tiles, rig identity, or critical/action rows - not a recognized report export"
+        $skipped++
+        continue
+    }
+
+    # A Daily Checks/FLM export that never got a rig assigned at the source -
+    # both meta.asset and meta.checks.rig are blank. Confirmed real (a West
+    # Saturn Daily Checks submission, 2026-08-15, had every reading filled in
+    # but no rig field set at all). This is a report-tool data-quality gap,
+    # not a dashboard bug - there's no rig identity anywhere in the file to
+    # attribute these readings to, and falling back to the filename would
+    # silently invent a fake "rig" that fragments the Rig Monitoring tab.
+    # Skip loudly with a distinct message so it reads as "fix the source
+    # tool," not "this file is junk."
+    if ($checksHasValues -and -not $assetRaw -and -not $checksRigRaw) {
+        Write-Warning "Skipping $($f.Name): Daily Checks/FLM export has no rig identity (meta.asset and meta.checks.rig both blank) - needs a fix on the report tool side, not the dashboard scanner"
         $skipped++
         continue
     }
