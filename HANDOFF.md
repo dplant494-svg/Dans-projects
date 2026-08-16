@@ -180,32 +180,50 @@ paths with credentials, but this shape is fine to document)
 
 ## Background / not-actively-worked items
 
-- **Rig Monitoring (Daily Checks / FLM) — shipped, v1 scope (logging +
-  viewing only).** Per `DASHBOARDSHAREPOINTINGESTIONHANDOFF.md`, two new
-  report types now land in the scanned folder: **Daily Checks** (per
+- **Rig Monitoring (Daily Checks / FLM) — shipped, v2 scope (fleet tiles
+  + readings matrix + trends).** Per `DASHBOARDSHAREPOINTINGESTIONHANDOFF.md`,
+  two new report types land in the scanned folder: **Daily Checks** (per
   shift) and **FLM** (weekly) — each a free-form set of pass/fail and
   numeric readings per rig system, at `meta.checks` (not inside `tiles[]`,
   unlike every other payload type — see `INTEGRATION-CONTRACT.md`'s
   `meta.checks` entry for why that needed its own top-level check in both
-  the scanner and the viewer). `scripts/Update-Dashboard.ps1` v2.29 adds
+  the scanner and the viewer). `scripts/Update-Dashboard.ps1` v2.29 added
   `Get-CheckReadings` and the `window.DASHBOARD_DATA.rigChecks[]`
   aggregate (same flat-list-then-pivot-client-side pattern as
-  `cbmGrades`). `dashboard/dashboard.html` gained a `meta.checks` section
-  in the full-report viewer and a new "Rig Monitoring" tab (latest
-  reading per system/item, click-through to a history modal — same
-  pattern as the CBM Heatmap's `openCbmHistory()`). Verified against two
-  real West Saturn exports (Daily Checks + FLM) Dan provided — confirmed
-  the `_unit`/`_cmt` companion-suffix merge behavior, confirmed at least
-  one item (`ccc_faults_alarms`) uses `"pass"` itself as the
-  attention-worthy value with the comment carrying the real signal (so
-  attention-styling keys off comment presence, not the pass/fail value
-  alone — applies everywhere this data is read, not just this one item),
-  and fixed a self-found natural-sort bug so FLM's `t1`..`t16` tensioner
-  readings order numerically instead of alphabetically. **Explicitly
-  deferred per the handoff's own "eventually"**: automatic drift/anomaly
-  detection and notifications, and a cross-rig/fleet-wide rollup — this
-  ships as per-rig latest-plus-history only, same scope boundary as the
-  CBM Heatmap.
+  `cbmGrades`); v2.30 added a distinct skip warning for checks exports
+  with no rig identity anywhere (confirmed real — a Daily Checks
+  submission arrived with `meta.asset` AND `meta.checks.rig` both blank;
+  that's a report-tool-side gap, raised with Dan to take to the tool
+  team, not a scanner bug). The dashboard side (all in
+  `dashboard/dashboard.html`, per Dan's spec after seeing v1): the Rig
+  Monitoring tab is a **fleet tile grid** — one tile per rig (union of
+  the planning dashboard's fleet and every rig that has submitted, so a
+  never-reported rig shows as a visible gap) with latest Daily
+  Checks/FLM dates, an ⚠ count for the latest submissions, and a "BOP on
+  deck — under maint. / daily checks suspended" badge for **single-stack
+  rigs in Performing Maint.** (status read from `bop-planning-data.js`
+  via a relative-path load with repo/production fallback — see the
+  cross-dashboard row in `INTEGRATION-CONTRACT.md`; in production that
+  status comes through the **Excel snapshot path**, which is explicitly
+  tested). Clicking a tile opens a **full-screen-width readings matrix**:
+  Daily Checks / FLM tabs, criteria down the left grouped by system,
+  one column per submission chronologically, ✓/✗/value cells with
+  attention highlighting and comment dots (cell click opens the source
+  report), date-range presets (7/14/30/90/All) + custom From/To anchored
+  to the newest submission, and a per-item **Trend** toggle rendering an
+  SVG line chart (time-proportional X, crosshair + tooltip) for any item
+  with ≥2 numeric readings in range. The **report list** also flags any
+  submission containing a failed/flagged check with a red ⚠ next to the
+  rig name (matched by `file` against `rigChecks`; attention = pass:false
+  OR non-empty comment — one real item, `ccc_faults_alarms`, flags
+  trouble in its comment while still reading "pass", so comment presence
+  drives flagging everywhere this data is read). Verified end-to-end via
+  Playwright against the real West Saturn exports plus multi-date
+  synthetic fixtures derived from them (33 checks incl. the Excel-path
+  maintenance badge, chronological matrix, range presets, trend charts,
+  natural-sorted `t1`..`t16`). **Still deferred**: automatic
+  drift/anomaly detection and notifications — trends are on-demand
+  visual, not computed alerts.
 - **SSCE Requests Dashboard — shipped, v1 scope.** New third dashboard
   (`requests-dashboard/requests-dashboard.html`) for Central Spares equipment
   requests submitted from the WCE COC Dashboard (a separate tool, now also

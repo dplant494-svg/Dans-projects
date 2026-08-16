@@ -83,6 +83,9 @@
   /* ── Filter row — one row, above everything it scopes ── */
   .filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
   .segmented { display: inline-flex; border: 1px solid var(--sd-border); border-radius: 4px; overflow: hidden; }
+  /* A display property beats the hidden attribute, so pin it back down -
+     without this the day-range pills stay visible on non-list tabs. */
+  [hidden] { display: none !important; }
   .segmented button {
     appearance: none; border: 0; background: var(--sd-white);
     color: var(--sd-text-light); font: inherit; font-size: 12px;
@@ -149,6 +152,7 @@
   td .rig { font-weight: 700; color: var(--sd-blue); font-size: 13px; }
   td .visit-type { color: var(--sd-text); }
   td .file { color: var(--sd-text-light); font-size: 11px; }
+  .check-flag { color: var(--sd-fail); margin-left: 6px; font-size: 13px; cursor: help; }
   tr:last-child td { border-bottom: 0; }
   .table-empty { color: var(--sd-text-light); padding: 22px 0; text-align: center; }
 
@@ -315,25 +319,93 @@
   .rv-check-value.fail { color: var(--sd-fail); }
   .rv-check-comment { font-size: 12px; color: var(--sd-fail); margin: 0 0 6px; padding-left: 2px; }
 
-  /* ── Rig Monitoring tab ── */
-  .rig-mon-system { margin-bottom: 16px; }
-  .rig-mon-system h3 {
-    font-size: 11px; font-weight: 700; text-transform: capitalize; color: var(--sd-blue);
-    margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid var(--sd-border);
-  }
-  .rig-mon-row {
-    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
-    font-size: 13px; padding: 5px 8px; border-radius: 3px; cursor: pointer;
-  }
-  .rig-mon-row:hover { background: var(--sd-bg); }
-  .rig-mon-row.attention { background: rgba(194,57,43,0.08); }
-  .rig-mon-row.attention:hover { background: rgba(194,57,43,0.14); }
-  .rig-mon-label { color: var(--sd-text); text-transform: capitalize; }
-  .rig-mon-value { font-weight: 700; white-space: nowrap; }
-  .rig-mon-value.pass { color: var(--sd-pass); }
-  .rig-mon-value.fail { color: var(--sd-fail); }
-  .rig-mon-meta { font-size: 10px; color: var(--sd-text-light); margin-top: 2px; }
+  /* ── Rig Monitoring tab: fleet tile grid ── */
   .rig-mon-empty { color: var(--sd-text-light); padding: 24px 0; text-align: center; }
+  .rig-mon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .rig-tile {
+    border: 1px solid var(--sd-border); border-radius: 6px; padding: 12px 14px;
+    background: var(--sd-white); cursor: pointer; text-align: left; font: inherit;
+    display: block;  /* buttons center their content by default; keep tile content top-aligned */
+  }
+  .rig-tile:hover { box-shadow: 0 2px 8px rgba(0,32,91,0.15); border-color: var(--sd-light-blue); }
+  .rig-tile h3 {
+    font-size: 14px; font-weight: 700; color: var(--sd-blue); margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  }
+  .rig-tile-attn { color: var(--sd-fail); font-size: 12px; white-space: nowrap; }
+  .rig-tile-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 2px 0; }
+  .rig-tile-row .lbl { color: var(--sd-text-light); }
+  .rig-tile-row .val { color: var(--sd-text); font-weight: 700; white-space: nowrap; }
+  .rig-tile-row .val.none { color: var(--sd-text-light); font-weight: 400; }
+  .rig-tile-badge {
+    margin-top: 8px; font-size: 11px; border-radius: 4px; padding: 5px 8px;
+    color: var(--sd-orange); background: rgba(226,83,3,0.08); border: 1px solid rgba(226,83,3,0.35);
+  }
+  .rig-tile-badge strong { display: block; font-weight: 700; }
+  .rig-tile-badge span { color: var(--sd-text); }
+
+  /* ── Rig Monitoring detail: full-width readings matrix ── */
+  .rm-frame { max-width: none; width: auto; margin: 12px; }
+  .rm-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .rm-tabs { display: flex; gap: 8px; }
+  .rm-tab {
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--sd-text-light); background: var(--sd-white); border: 1.5px solid var(--sd-border);
+    border-radius: 20px; padding: 6px 16px; cursor: pointer;
+  }
+  .rm-tab.active { color: #fff; background: var(--sd-blue); border-color: var(--sd-blue); }
+  .rm-range { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+  .rm-range .rm-preset {
+    font-size: 11px; font-weight: 700; color: var(--sd-text-light); background: var(--sd-white);
+    border: 1px solid var(--sd-border); border-radius: 4px; padding: 4px 9px; cursor: pointer;
+  }
+  .rm-range .rm-preset[aria-pressed="true"] { color: #fff; background: var(--sd-blue); border-color: var(--sd-blue); }
+  .rm-range input[type="date"] {
+    font: inherit; font-size: 12px; padding: 3px 6px;
+    border: 1px solid var(--sd-border); border-radius: 4px; color: var(--sd-text);
+  }
+  .rm-range .rm-range-lbl { font-size: 11px; color: var(--sd-text-light); }
+  .rm-scroll { overflow: auto; max-height: calc(100vh - 190px); border: 1px solid var(--sd-border); border-radius: 6px; }
+  table.rm-matrix { border-collapse: separate; border-spacing: 0; width: max-content; min-width: 100%; font-size: 12px; }
+  .rm-matrix th, .rm-matrix td {
+    padding: 5px 10px; border-bottom: 1px solid var(--sd-border); border-right: 1px solid var(--sd-border);
+    background: var(--sd-white); white-space: nowrap; text-align: center;
+  }
+  .rm-matrix thead th {
+    position: sticky; top: 0; z-index: 3; background: var(--sd-bg);
+    font-size: 11px; color: var(--sd-text); font-weight: 700;
+  }
+  .rm-matrix thead th .rm-col-shift { display: block; font-weight: 400; font-size: 10px; color: var(--sd-text-light); }
+  .rm-matrix .rm-item-cell {
+    position: sticky; left: 0; z-index: 2; text-align: left; text-transform: capitalize;
+    color: var(--sd-text); max-width: 340px; white-space: normal; min-width: 220px;
+  }
+  .rm-matrix thead th.rm-item-cell { z-index: 4; background: var(--sd-bg); }
+  .rm-matrix tr.rm-system-row th {
+    position: sticky; left: 0; z-index: 2; text-align: left; text-transform: capitalize;
+    background: var(--sd-blue); color: #fff; font-size: 11px; letter-spacing: .03em;
+  }
+  .rm-cell { cursor: pointer; }
+  .rm-cell:hover { outline: 2px solid var(--sd-light-blue); outline-offset: -2px; }
+  .rm-cell.pass { color: var(--sd-pass); font-weight: 700; }
+  .rm-cell.fail { color: var(--sd-fail); font-weight: 700; }
+  .rm-cell.attention { background: rgba(194,57,43,0.10); }
+  .rm-cell .rm-cmt-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--sd-fail); margin-left: 5px; vertical-align: middle; }
+  .rm-trend-btn {
+    font-size: 10px; font-weight: 700; color: var(--sd-blue); background: none;
+    border: 1px solid var(--sd-border); border-radius: 4px; padding: 1px 7px;
+    cursor: pointer; margin-left: 8px; vertical-align: middle;
+  }
+  .rm-trend-btn[aria-pressed="true"] { color: #fff; background: var(--sd-blue); border-color: var(--sd-blue); }
+  .rm-trend-cell { padding: 0 !important; }
+  .rm-trend-wrap { position: sticky; left: 0; padding: 10px 14px; background: var(--sd-white); }
+  .rm-trend-tip {
+    position: absolute; pointer-events: none; background: var(--sd-white); border: 1px solid var(--sd-border);
+    border-radius: 4px; padding: 4px 8px; font-size: 11px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    white-space: nowrap; z-index: 5; display: none;
+  }
+  .rm-trend-tip strong { font-size: 12px; }
+  .rm-empty { color: var(--sd-text-light); padding: 24px; text-align: center; }
 
   /* ── View tabs (Report List / CBM Heatmap) ── */
   .view-tabs { display: flex; gap: 10px; margin-bottom: 14px; }
@@ -526,9 +598,9 @@
       <div id="monitoring-view" hidden>
         <section class="card">
           <h2>Rig Monitoring — Daily Checks &amp; FLM</h2>
-          <div class="source-line">Latest reading per item, grouped by system. Click a reading for its history over time.</div>
+          <div class="source-line" id="rig-mon-source">One tile per rig — latest Daily Checks and FLM received. Click a rig for its full readings history.</div>
           <div class="rig-mon-empty" id="rig-mon-empty" hidden></div>
-          <div id="rig-mon-body"></div>
+          <div class="rig-mon-grid" id="rig-mon-grid"></div>
         </section>
       </div>
     </main>
@@ -995,6 +1067,20 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var _isPlan = (r.discipline === 'Planning') || /planning|weekly status/i.test(String(r.reporttype || r.type || ''));
       var _schedName = r.schedule || r.scheduleName || '';
       var rig = document.createElement('div'); rig.className = 'rig'; rig.textContent = (_isPlan && _schedName) ? _schedName : r.rig;
+      // Daily Checks / FLM exports with a failed or commented reading get a
+      // red attention triangle - matched by file name against rigChecks[],
+      // using the same rule as everywhere else this data is read (pass:false
+      // OR a non-empty comment; comment presence matters because at least
+      // one real item flags trouble in its comment while still reading
+      // "pass" - see the meta.checks notes in INTEGRATION-CONTRACT.md).
+      if (checkAttentionFiles().has(r.file)) {
+        var flagIco = document.createElement('span');
+        flagIco.className = 'check-flag';
+        flagIco.textContent = '⚠';
+        flagIco.title = 'This submission contains a failed or flagged check — open the report for details.';
+        flagIco.setAttribute('aria-label', 'Contains a failed or flagged check');
+        rig.appendChild(flagIco);
+      }
       var typ = document.createElement('div'); typ.className = 'visit-type';
       typ.textContent = _isPlan ? ((r.rig ? r.rig + ' · ' : '') + 'Planning Report') : (r.type || r.reporttype || 'Report');
       var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file;
@@ -1397,6 +1483,170 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     document.addEventListener('keydown', onKey);
   }
 
+  // ---------- BWM planning status (feeds the Rig Monitoring tiles) ----------
+  // The Rig Monitoring tiles mirror the BOP Fleet Planning Dashboard's
+  // current per-rig status ("single BOP rig with its BOP on deck for
+  // maintenance" = daily checks suspended). That status lives in the
+  // planning dashboard's own data file, bop-planning-data.js - one folder
+  // up from this page on the deployed share, ../bop-dashboard/ in the repo
+  // layout - so it's loaded dynamically here with a path fallback rather
+  // than a hardcoded <script> tag. Two snapshot sources, same as the BOP
+  // dashboard reads: JSON snapshots (parsed directly) and planner-dropped
+  // Excel workbooks carried as base64 (need SheetJS, loaded on demand from
+  // the same two candidate folders; in production ALL current weeks come
+  // this way, so the Excel path is the one that matters most). Latest week
+  // wins. Everything degrades gracefully: if neither data file nor SheetJS
+  // loads, tiles render without maintenance badges and nothing else breaks.
+  var BWM_STATUS = { ready: false, week: '', byRig: {} };
+
+  var BWM_MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+  function bwmFlexDate(str) {  // ported from the BOP dashboard's parseFlexDate
+    if (!str) return null;
+    str = String(str).trim();
+    if (!str || /^n\/?a$/i.test(str)) return null;
+    var m = str.match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{2,4})/);
+    if (m) {
+      var mon = BWM_MONTHS[m[2].toLowerCase().slice(0, 3)];
+      if (mon === undefined) return null;
+      var yr = parseInt(m[3], 10); if (yr < 100) yr += 2000;
+      return new Date(Date.UTC(yr, mon, parseInt(m[1], 10))).toISOString().slice(0, 10);
+    }
+    var d2 = new Date(str);
+    return isNaN(d2) ? null : d2.toISOString().slice(0, 10);
+  }
+
+  function bwmNormHeader(s) { return String(s || '').trim().toLowerCase().replace(/\s+/g, ' ').replace(/[#:]/g, ''); }
+  // Only the columns the tiles need - a subset of the BOP dashboard's
+  // HEADER_MAP, same normalized spellings.
+  var BWM_HEADER_COLS = { 'rig': 'rigRaw', 'bop': 'stackType', 'bop status': 'status', 'last updated': 'lastUpdated' };
+
+  function bwmSplitRig(rigRaw) {
+    var m = String(rigRaw).match(/^(.*?)\s*\(BOP\s*(\d+)\)\s*$/i);
+    return { rig: m ? m[1].trim() : String(rigRaw).trim(), bop: m ? parseInt(m[2], 10) : 1 };
+  }
+
+  // Minimal port of the BOP dashboard's parsePlannerSheet - same header-row
+  // discovery (a "Rig" column within the first 6 rows), reading only the
+  // status-relevant columns.
+  function bwmParseSheet(ws) {
+    var rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: '' });
+    var headerRowIdx = -1, colIdx = {};
+    for (var i = 0; i < Math.min(6, rows.length); i++) {
+      if (rows[i].map(bwmNormHeader).indexOf('rig') !== -1) { headerRowIdx = i; break; }
+    }
+    if (headerRowIdx === -1) throw new Error('No "Rig" column found in planner sheet');
+    rows[headerRowIdx].forEach(function (cell, idx) {
+      var key = BWM_HEADER_COLS[bwmNormHeader(cell)];
+      if (key !== undefined && colIdx[key] === undefined) colIdx[key] = idx;
+    });
+    var out = [];
+    for (var r = headerRowIdx + 1; r < rows.length; r++) {
+      var row = rows[r];
+      var rigRaw = colIdx.rigRaw !== undefined ? row[colIdx.rigRaw] : '';
+      if (!rigRaw || !String(rigRaw).trim()) continue;
+      var split = bwmSplitRig(rigRaw);
+      out.push({
+        rig: split.rig, bop: split.bop,
+        stackType: colIdx.stackType !== undefined ? String(row[colIdx.stackType] || '').trim() : '',
+        status: colIdx.status !== undefined ? String(row[colIdx.status] || '').trim() : '',
+        lastUpdated: colIdx.lastUpdated !== undefined ? (bwmFlexDate(row[colIdx.lastUpdated]) || '') : ''
+      });
+    }
+    return out;
+  }
+
+  function bwmBase64ToBytes(b64) {
+    var bin = atob(b64), arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr;
+  }
+
+  // Collect every snapshot (JSON + Excel), pick the latest - same
+  // reportDate-then-week sort the BOP dashboard uses to choose its default.
+  function bwmLatestSnapshot() {
+    var data = window.BWM_DATA;
+    if (!data) return null;
+    var snaps = [];
+    (data.snapshots || []).forEach(function (s) {
+      var bwm = s.bwm || {};
+      var rows = (bwm.rows || []).map(function (r) {
+        var rigRaw = String(r.rig || '').trim();
+        if (!rigRaw) return null;
+        var split = bwmSplitRig(rigRaw);
+        return {
+          rig: split.rig, bop: split.bop,
+          stackType: String(r.bop || '').trim(),
+          status: String(r.bopStatus || '').trim(),
+          lastUpdated: bwmFlexDate(r.lastUpdated) || ''
+        };
+      }).filter(Boolean);
+      if (rows.length) snaps.push({ week: bwm.week || '', reportDate: bwm.reportDate || '', rows: rows });
+    });
+    if (window.XLSX) {
+      (data.excelSnapshots || []).forEach(function (s) {
+        try {
+          var wb = XLSX.read(bwmBase64ToBytes(s.base64), { type: 'array' });
+          var sheetName = wb.SheetNames.find(function (n) { return /status report/i.test(n); }) || wb.SheetNames[0];
+          var rows = bwmParseSheet(wb.Sheets[sheetName]);
+          if (!rows.length) return;
+          var latestUpd = rows.reduce(function (best, r) {
+            return (!best || (r.lastUpdated && r.lastUpdated > best)) ? r.lastUpdated : best;
+          }, '');
+          var wm = (s.file || '').match(/(\d{4}).*?week[\s_-]?(\d+)/i);
+          snaps.push({ week: wm ? (wm[1] + ' – Week ' + wm[2]) : '', reportDate: latestUpd || '', rows: rows });
+        } catch (err) { console.error('BWM Excel snapshot skipped (' + (s.file || '?') + '):', err.message); }
+      });
+    }
+    if (!snaps.length) return null;
+    snaps.sort(function (a, b) {
+      return String(b.reportDate || '').localeCompare(String(a.reportDate || '')) ||
+             String(b.week || '').localeCompare(String(a.week || ''));
+    });
+    return snaps[0];
+  }
+
+  function bwmApplySnapshot(snap) {
+    var byRig = {};
+    snap.rows.forEach(function (r) {
+      if (!byRig[r.rig]) byRig[r.rig] = { rows: [], singleStack: false, maint: false };
+      byRig[r.rig].rows.push(r);
+    });
+    Object.keys(byRig).forEach(function (rig) {
+      var g = byRig[rig];
+      // "Single BOP rig" = its stack type says Single Stack (dual-stack rigs
+      // keep one BOP deployed while the other is on deck, so daily checks
+      // continue there and no suspension badge applies).
+      g.singleStack = g.rows.length > 0 && g.rows.every(function (r) { return /single/i.test(r.stackType); });
+      g.maint = g.rows.some(function (r) { return /performing\s*maint/i.test(r.status); });
+    });
+    BWM_STATUS = { ready: true, week: snap.week || snap.reportDate || '', byRig: byRig };
+  }
+
+  function loadScriptFallback(paths, idx, onDone, onFail) {
+    if (idx >= paths.length) { onFail(); return; }
+    var s = document.createElement('script');
+    s.src = paths[idx];
+    s.onload = function () { s.remove(); onDone(); };
+    s.onerror = function () { s.remove(); loadScriptFallback(paths, idx + 1, onDone, onFail); };
+    document.body.appendChild(s);
+  }
+
+  function initBwmStatus() {
+    var bust = '?v=' + Date.now();
+    loadScriptFallback(['../bop-planning-data.js' + bust, '../bop-dashboard/bop-planning-data.js' + bust], 0, function () {
+      var data = window.BWM_DATA;
+      var finish = function () {
+        var snap = bwmLatestSnapshot();
+        if (snap) { bwmApplySnapshot(snap); renderRigMonitoring(); }
+      };
+      if (data && (data.excelSnapshots || []).length && !window.XLSX) {
+        loadScriptFallback(['../xlsx.full.min.js', '../bop-dashboard/xlsx.full.min.js'], 0, finish, finish);
+      } else {
+        finish();
+      }
+    }, function () { /* no planning data reachable - tiles render without maintenance badges */ });
+  }
+
   // ---------- Rig Monitoring (Daily Checks / FLM) ----------
   // window.DASHBOARD_DATA.rigChecks: one row per reading per submission,
   // { rig, kind, date, shift, by, supervisor, system, item, itemKey, value,
@@ -1409,78 +1659,113 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   function rigCheckAttention(e) { return e.pass === false || !!e.comment; }
 
+  // Set of source file names whose submission contains at least one
+  // attention-worthy reading - drives the red triangle in the report list.
+  // Cached against the rigChecks array reference (the data file is re-loaded
+  // by polling, which swaps the whole DASHBOARD_DATA object).
+  var _attnFilesCache = null, _attnFilesSource = null;
+  function checkAttentionFiles() {
+    var src = window.DASHBOARD_DATA.rigChecks || [];
+    if (_attnFilesCache && _attnFilesSource === src) return _attnFilesCache;
+    var set = new Set();
+    src.forEach(function (e) { if (rigCheckAttention(e) && e.file) set.add(e.file); });
+    _attnFilesCache = set; _attnFilesSource = src;
+    return set;
+  }
+
+  function rmFmtDate(iso) {
+    var d = parseDate(iso);
+    return isNaN(d) ? (iso || '—') : (fmtDate(d) + ' ' + d.getFullYear());
+  }
+
+  // One tile per rig, whole fleet on one screen - deliberately ignores the
+  // rig filter above (fleet-at-a-glance is this tab's job). Rig list is the
+  // union of the planning dashboard's fleet (once BWM status loads) and
+  // every rig that has submitted Daily Checks/FLM readings, so a rig that
+  // has never reported still gets a tile - a visible gap, which is exactly
+  // what a monitoring view is for.
   function renderRigMonitoring() {
-    var body = $('rig-mon-body'), msg = $('rig-mon-empty');
-    body.textContent = '';
-    var rig = state.rig;
-    if (!rig) {
-      msg.hidden = false; body.hidden = true;
-      msg.textContent = 'Select a rig above to view its Daily Checks and FLM readings — equipment names aren’t unique across the fleet, so an all-rigs view can’t be shown as one list.';
+    var grid = $('rig-mon-grid'), msg = $('rig-mon-empty');
+    grid.textContent = '';
+    var checks = window.DASHBOARD_DATA.rigChecks || [];
+    var rigSet = {}, rigs = [];
+    checks.forEach(function (e) { if (e.rig && !rigSet[e.rig]) { rigSet[e.rig] = true; rigs.push(e.rig); } });
+    Object.keys(BWM_STATUS.byRig).forEach(function (rig) { if (!rigSet[rig]) { rigSet[rig] = true; rigs.push(rig); } });
+    if (!rigs.length) {
+      msg.hidden = false; grid.hidden = true;
+      msg.textContent = 'No Daily Checks or FLM readings received yet.';
       return;
     }
-    var entries = (window.DASHBOARD_DATA.rigChecks || []).filter(function (e) { return e.rig === rig; });
-    if (!entries.length) {
-      msg.hidden = false; body.hidden = true;
-      msg.textContent = 'No Daily Checks or FLM readings yet for ' + rig + '.';
-      return;
-    }
-    msg.hidden = true; body.hidden = false;
+    msg.hidden = true; grid.hidden = false;
+    rigs.sort(function (a, b) { return a.localeCompare(b); });
 
-    ['Daily Checks', 'FLM'].forEach(function (kind) {
-      var kindEntries = entries.filter(function (e) { return e.kind === kind; });
-      if (!kindEntries.length) return;
+    // Latest submission per rig per kind, plus how many of THAT submission's
+    // readings are attention-worthy (rigChecks is newest-first, so the first
+    // entry seen per rig|kind identifies the latest submission; only rows
+    // sharing its date+shift belong to it).
+    var latest = {};
+    checks.forEach(function (e) {
+      var k = e.rig + '|' + e.kind;
+      var cur = latest[k];
+      if (!cur) { cur = latest[k] = { date: e.date, shift: e.shift, attn: 0 }; }
+      if (e.date === cur.date && e.shift === cur.shift && rigCheckAttention(e)) cur.attn++;
+    });
 
-      // rigChecks ships newest-first, so the first entry seen per key is
-      // already the latest - no date comparison needed here.
-      var latest = {}, systems = [], itemsBySystem = {};
-      kindEntries.forEach(function (e) {
-        var key = e.system + '|' + e.itemKey;
-        if (!latest[key]) latest[key] = e;
+    var srcLine = $('rig-mon-source');
+    srcLine.textContent = 'One tile per rig — latest Daily Checks and FLM received. Click a rig for its full readings history.' +
+      (BWM_STATUS.ready && BWM_STATUS.week ? (' BOP status per planning dashboard (' + BWM_STATUS.week + ').') : '');
+
+    rigs.forEach(function (rig) {
+      var tile = mk('button', 'rig-tile');
+      tile.type = 'button';
+      var h = mk('h3', '', rig);
+      var dc = latest[rig + '|Daily Checks'];
+      var flm = latest[rig + '|FLM'];
+      var attnTotal = (dc ? dc.attn : 0) + (flm ? flm.attn : 0);
+      if (attnTotal) {
+        var a = mk('span', 'rig-tile-attn', '⚠ ' + attnTotal);
+        a.title = attnTotal + ' failed or flagged reading' + (attnTotal === 1 ? '' : 's') + ' in the latest submissions';
+        h.appendChild(a);
+      }
+      tile.appendChild(h);
+
+      var bwm = BWM_STATUS.byRig[rig];
+      var suspended = !!(bwm && bwm.singleStack && bwm.maint);
+      [['Daily Checks', dc], ['FLM', flm]].forEach(function (pair) {
+        var row = mk('div', 'rig-tile-row');
+        row.appendChild(mk('span', 'lbl', pair[0]));
+        var e = pair[1];
+        var valTxt = e ? rmFmtDate(e.date) : (suspended && pair[0] === 'Daily Checks' ? 'Suspended' : 'None received');
+        row.appendChild(mk('span', 'val' + (e ? '' : ' none'), valTxt));
+        tile.appendChild(row);
       });
-      Object.keys(latest).forEach(function (key) {
-        var e = latest[key];
-        if (!itemsBySystem[e.system]) { itemsBySystem[e.system] = []; systems.push(e.system); }
-        itemsBySystem[e.system].push(e);
-      });
-      systems.sort();
-
-      var newest = kindEntries[0];
-      var headText = kind + ' — latest ' + (newest.date || '') + (newest.shift ? ' · ' + newest.shift : '');
-      body.appendChild(mk('div', 'rv-section-label', headText));
-
-      systems.forEach(function (system) {
-        var card = mk('div', 'rig-mon-system');
-        card.appendChild(mk('h3', '', system.replace(/_/g, ' ')));
-        var items = itemsBySystem[system];
-        // Natural sort so "t2" sorts before "t10" (plain < / > sorts these
-        // alphabetically - confirmed a real problem on FLM's t1..t16
-        // tensioner cycle items, which rendered t1, t10, t11...t2, t3...).
-        items.sort(function (a, b) { return a.item.localeCompare(b.item, undefined, { numeric: true }); });
-        items.forEach(function (e) {
-          var row = mk('div', 'rig-mon-row' + (rigCheckAttention(e) ? ' attention' : ''));
-          var left = mk('div', '');
-          left.appendChild(mk('div', 'rig-mon-label', e.item.replace(/_/g, ' ')));
-          if (e.comment) left.appendChild(mk('div', 'rig-mon-meta', e.comment));
-          row.appendChild(left);
-          var valCls = e.pass === true ? ' pass' : e.pass === false ? ' fail' : '';
-          var valText = e.pass === true ? 'Pass' : e.pass === false ? 'Fail' : (e.value + (e.unit ? ' ' + e.unit : ''));
-          row.appendChild(mk('span', 'rig-mon-value' + valCls, valText));
-          row.addEventListener('click', function () { openRigCheckHistory(rig, kind, e.itemKey, e.item, e.system); });
-          card.appendChild(row);
-        });
-        body.appendChild(card);
-      });
+      if (suspended) {
+        var badge = mk('div', 'rig-tile-badge');
+        badge.appendChild(mk('strong', '', 'BOP on deck — under maint.'));
+        badge.appendChild(mk('span', '', 'Daily checks suspended while the BOP is on deck (single-BOP rig).'));
+        tile.appendChild(badge);
+      }
+      tile.addEventListener('click', function () { openRigMonitorDetail(rig); });
+      grid.appendChild(tile);
     });
   }
 
-  function openRigCheckHistory(rig, kind, itemKey, item, system) {
+  // ---------- Rig Monitoring detail: full-width readings matrix ----------
+  // Criteria down the left (grouped by system), one column per submission,
+  // chronological left-to-right, with a date-range picker and an optional
+  // trend line per numeric item. Full-width overlay by design - the matrix
+  // is the one view in this dashboard that genuinely needs the whole screen.
+
+  function rmIsNumeric(v) { return /^-?\d+(\.\d+)?$/.test(String(v).trim()); }
+
+  function openRigMonitorDetail(rig) {
     var overlay = mk('div', 'report-overlay');
-    var frame = mk('div', 'report-frame');
-    frame.style.maxWidth = '640px';
+    var frame = mk('div', 'report-frame rm-frame');
     var head = mk('div', 'report-head');
     var title = mk('div', 'rh-title');
-    title.appendChild(mk('div', 'rh-rig', system.replace(/_/g, ' ') + ' — ' + item.replace(/_/g, ' ')));
-    title.appendChild(mk('div', 'rh-sub', rig + ' · ' + kind + ' history'));
+    title.appendChild(mk('div', 'rh-rig', rig));
+    var sub = mk('div', 'rh-sub', 'Rig Monitoring — readings history');
+    title.appendChild(sub);
     head.appendChild(title);
     var closeBtn = mk('button', 'report-close', '✕');
     closeBtn.type = 'button';
@@ -1493,28 +1778,203 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     document.body.appendChild(overlay);
     document.body.classList.add('no-scroll');
 
-    var history = (window.DASHBOARD_DATA.rigChecks || [])
-      .filter(function (e) { return e.rig === rig && e.kind === kind && e.itemKey === itemKey; });
-    if (!history.length) {
-      body.appendChild(mk('div', 'rv-error', 'No history found for this item.'));
-    } else {
-      body.appendChild(detailKeyTable('', ['Date', 'Value', 'Comment', 'Source'],
-        history.map(function (h) {
-          var d = parseDate(h.date);
-          var link = mk('a', '', h.file || '—');
-          link.href = '#';
-          if (h.file) {
-            link.addEventListener('click', function (ev) {
-              ev.preventDefault();
-              var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === h.file; });
-              if (rec) openReportViewer(rec);
+    var all = (window.DASHBOARD_DATA.rigChecks || []).filter(function (e) { return e.rig === rig; });
+    var view = { kind: 'Daily Checks', from: null, to: null, preset: '30', trends: {} };
+    if (!all.some(function (e) { return e.kind === 'Daily Checks'; }) &&
+        all.some(function (e) { return e.kind === 'FLM'; })) view.kind = 'FLM';
+
+    // Toolbar: kind tabs left, date range right
+    var toolbar = mk('div', 'rm-toolbar');
+    var tabs = mk('div', 'rm-tabs');
+    var tabBtns = {};
+    ['Daily Checks', 'FLM'].forEach(function (kind) {
+      var b = mk('button', 'rm-tab', kind);
+      b.type = 'button';
+      b.addEventListener('click', function () { view.kind = kind; view.trends = {}; update(); });
+      tabBtns[kind] = b;
+      tabs.appendChild(b);
+    });
+    toolbar.appendChild(tabs);
+
+    var range = mk('div', 'rm-range');
+    var presetBtns = {};
+    [['7', '7 days'], ['14', '14 days'], ['30', '30 days'], ['90', '90 days'], ['all', 'All']].forEach(function (p) {
+      var b = mk('button', 'rm-preset', p[1]);
+      b.type = 'button';
+      b.addEventListener('click', function () { view.preset = p[0]; view.from = null; view.to = null; update(); });
+      presetBtns[p[0]] = b;
+      range.appendChild(b);
+    });
+    var fromIn = document.createElement('input'); fromIn.type = 'date';
+    var toIn = document.createElement('input'); toIn.type = 'date';
+    var onCustom = function () {
+      if (fromIn.value && toIn.value) { view.preset = null; view.from = fromIn.value; view.to = toIn.value; update(); }
+    };
+    fromIn.addEventListener('change', onCustom);
+    toIn.addEventListener('change', onCustom);
+    range.appendChild(mk('span', 'rm-range-lbl', 'From'));
+    range.appendChild(fromIn);
+    range.appendChild(mk('span', 'rm-range-lbl', 'to'));
+    range.appendChild(toIn);
+    toolbar.appendChild(range);
+    body.appendChild(toolbar);
+
+    var matrixHost = mk('div', '');
+    body.appendChild(matrixHost);
+
+    function update() {
+      Object.keys(tabBtns).forEach(function (k) { tabBtns[k].classList.toggle('active', view.kind === k); });
+      Object.keys(presetBtns).forEach(function (k) { presetBtns[k].setAttribute('aria-pressed', String(view.preset === k)); });
+
+      var kindEntries = all.filter(function (e) { return e.kind === view.kind && e.date; });
+      matrixHost.textContent = '';
+      if (!kindEntries.length) {
+        matrixHost.appendChild(mk('div', 'rm-empty', 'No ' + view.kind + ' submissions received from ' + rig + ' yet.'));
+        sub.textContent = 'Rig Monitoring — readings history';
+        return;
+      }
+
+      // Range: presets anchor to the newest submission (not today), so a rig
+      // that stopped reporting still shows its last weeks of data instead of
+      // an empty window.
+      var maxDate = kindEntries.reduce(function (m, e) { return e.date > m ? e.date : m; }, '');
+      var from = view.from, to = view.to;
+      if (view.preset === 'all') { from = '0000'; to = '9999'; }
+      else if (view.preset) {
+        var d = parseDate(maxDate);
+        d.setDate(d.getDate() - (Number(view.preset) - 1));
+        from = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        to = maxDate;
+        fromIn.value = from; toIn.value = to;
+      }
+      var entries = kindEntries.filter(function (e) { return e.date >= from && e.date <= to; });
+      if (!entries.length) {
+        matrixHost.appendChild(mk('div', 'rm-empty', 'No ' + view.kind + ' submissions in this date range — newest is ' + rmFmtDate(maxDate) + '.'));
+        return;
+      }
+
+      // Columns: one per submission (date+shift), chronological. "Day"
+      // sorts before "Night" alphabetically, which matches the real shift
+      // order within a date.
+      var colSet = {}, cols = [];
+      entries.forEach(function (e) {
+        var ck = e.date + '|' + (e.shift || '');
+        if (!colSet[ck]) { colSet[ck] = true; cols.push({ key: ck, date: e.date, shift: e.shift || '' }); }
+      });
+      cols.sort(function (a, b) { return a.key < b.key ? -1 : a.key > b.key ? 1 : 0; });
+      sub.textContent = 'Rig Monitoring — ' + view.kind + ' · ' + cols.length + ' submission' + (cols.length === 1 ? '' : 's') +
+        ' · ' + rmFmtDate(cols[0].date) + ' – ' + rmFmtDate(cols[cols.length - 1].date);
+
+      // Rows: system -> items (every item seen in range, natural-sorted so
+      // t2 sorts before t10 on FLM's tensioner cycles).
+      var bySystem = {}, systems = [], cells = {};
+      entries.forEach(function (e) {
+        if (!bySystem[e.system]) { bySystem[e.system] = {}; systems.push(e.system); }
+        if (!bySystem[e.system][e.itemKey]) bySystem[e.system][e.itemKey] = e;
+        cells[e.itemKey + '|' + e.date + '|' + (e.shift || '')] = e;
+      });
+      systems.sort();
+
+      var scroll = mk('div', 'rm-scroll');
+      var table = mk('table', 'rm-matrix');
+      var thead = mk('thead', '');
+      var hrow = mk('tr', '');
+      var corner = mk('th', 'rm-item-cell', 'Check item');
+      hrow.appendChild(corner);
+      cols.forEach(function (c) {
+        var th = mk('th', '');
+        var d = parseDate(c.date);
+        th.appendChild(document.createTextNode(isNaN(d) ? c.date : fmtDate(d)));
+        var shiftShort = c.shift ? c.shift.replace(/\s*\(.*\)$/, '') : (isNaN(d) ? '' : String(d.getFullYear()));
+        if (shiftShort) th.appendChild(mk('span', 'rm-col-shift', shiftShort));
+        hrow.appendChild(th);
+      });
+      thead.appendChild(hrow);
+      table.appendChild(thead);
+      var tbody = mk('tbody', '');
+
+      systems.forEach(function (system) {
+        var srow = mk('tr', 'rm-system-row');
+        var sth = mk('th', '', system.replace(/_/g, ' '));
+        sth.colSpan = 1;
+        srow.appendChild(sth);
+        var filler = mk('td', '');
+        filler.colSpan = cols.length;
+        filler.style.background = 'var(--sd-bg)';
+        srow.appendChild(filler);
+        tbody.appendChild(srow);
+
+        var items = Object.keys(bySystem[system]).map(function (k) { return bySystem[system][k]; });
+        items.sort(function (a, b) { return a.item.localeCompare(b.item, undefined, { numeric: true }); });
+        items.forEach(function (it) {
+          var row = mk('tr', '');
+          var label = mk('th', 'rm-item-cell');
+          label.appendChild(document.createTextNode(it.item.replace(/_/g, ' ') + (it.unit ? ' (' + it.unit + ')' : '')));
+
+          var numericCount = cols.reduce(function (n, c) {
+            var e = cells[it.itemKey + '|' + c.key];
+            return n + (e && rmIsNumeric(e.value) ? 1 : 0);
+          }, 0);
+          if (numericCount >= 2) {
+            var tbtn = mk('button', 'rm-trend-btn', 'Trend');
+            tbtn.type = 'button';
+            tbtn.setAttribute('aria-pressed', String(!!view.trends[it.itemKey]));
+            tbtn.addEventListener('click', function () {
+              view.trends[it.itemKey] = !view.trends[it.itemKey];
+              update();
             });
+            label.appendChild(tbtn);
           }
-          var dateTxt = isNaN(d) ? (h.date || '—') : (fmtDate(d) + ', ' + d.getFullYear());
-          var valTxt = h.pass === true ? 'Pass' : h.pass === false ? 'Fail' : (h.value + (h.unit ? ' ' + h.unit : ''));
-          return [dateTxt, valTxt, h.comment || '—', link];
-        })));
+          row.appendChild(label);
+
+          cols.forEach(function (c) {
+            var e = cells[it.itemKey + '|' + c.key];
+            var td = mk('td', 'rm-cell');
+            if (!e) {
+              td.textContent = '·';
+              td.style.color = 'var(--sd-text-light)';
+            } else {
+              var attn = rigCheckAttention(e);
+              if (attn) td.className += ' attention';
+              if (e.pass === true) { td.className += ' pass'; td.appendChild(document.createTextNode('✓')); }
+              else if (e.pass === false) { td.className += ' fail'; td.appendChild(document.createTextNode('✗')); }
+              else {
+                var vtxt = String(e.value || '—');
+                td.appendChild(document.createTextNode(vtxt.length > 14 ? vtxt.slice(0, 13) + '…' : vtxt));
+              }
+              if (e.comment) td.appendChild(mk('span', 'rm-cmt-dot'));
+              td.title = it.item.replace(/_/g, ' ') + ' — ' + rmFmtDate(e.date) + (e.shift ? ' · ' + e.shift : '') +
+                '\nValue: ' + e.value + (e.unit ? ' ' + e.unit : '') +
+                (e.comment ? '\nComment: ' + e.comment : '') +
+                '\nClick to open the source report.';
+              td.addEventListener('click', function () {
+                var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === e.file; });
+                if (rec) openReportViewer(rec);
+              });
+            }
+            row.appendChild(td);
+          });
+          tbody.appendChild(row);
+
+          if (view.trends[it.itemKey] && numericCount >= 2) {
+            var trow = mk('tr', '');
+            var tcell = mk('td', 'rm-trend-cell');
+            tcell.colSpan = cols.length + 1;
+            var wrap = mk('div', 'rm-trend-wrap');
+            wrap.appendChild(rmTrendChart(it, cols, cells));
+            tcell.appendChild(wrap);
+            trow.appendChild(tcell);
+            tbody.appendChild(trow);
+          }
+        });
+      });
+
+      table.appendChild(tbody);
+      scroll.appendChild(table);
+      matrixHost.appendChild(scroll);
     }
+
+    update();
 
     function close() {
       overlay.remove();
@@ -1525,6 +1985,123 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
+  }
+
+  // Single-series line chart for one item's numeric readings over the
+  // selected range. Time-proportional X (a two-week reporting gap shows as
+  // a gap, not an even step), 2px line, ≥8px dots with a surface ring,
+  // hairline horizontal gridlines on clean tick values, crosshair+tooltip
+  // snapping to the nearest submission. No legend - single series, the row
+  // label already names it (values are also all visible in the matrix row
+  // itself, so nothing is tooltip-gated).
+  function rmTrendChart(it, cols, cells) {
+    var pts = [];
+    cols.forEach(function (c) {
+      var e = cells[it.itemKey + '|' + c.key];
+      if (e && rmIsNumeric(e.value)) {
+        var d = parseDate(e.date);
+        if (!isNaN(d)) pts.push({ t: d.getTime(), date: e.date, shift: e.shift || '', v: parseFloat(e.value), e: e });
+      }
+    });
+    pts.sort(function (a, b) { return a.t - b.t || (a.shift < b.shift ? -1 : 1); });
+    // Same-date Day/Night submissions share a timestamp - spread them a few
+    // hours apart so both points plot.
+    for (var i = 1; i < pts.length; i++) { if (pts[i].t <= pts[i - 1].t) pts[i].t = pts[i - 1].t + 6 * 3600 * 1000; }
+
+    var W = 760, H = 170, padL = 52, padR = 18, padT = 14, padB = 26;
+    var minV = Math.min.apply(null, pts.map(function (p) { return p.v; }));
+    var maxV = Math.max.apply(null, pts.map(function (p) { return p.v; }));
+    if (minV === maxV) { minV -= 1; maxV += 1; }
+    var span = maxV - minV;
+    minV -= span * 0.08; maxV += span * 0.08;
+    // Clean y ticks: a 1/2/5×10^n step giving ~4 gridlines.
+    var rawStep = (maxV - minV) / 4;
+    var mag = Math.pow(10, Math.floor(Math.log(rawStep) / Math.LN10));
+    var step = [1, 2, 5, 10].map(function (m) { return m * mag; }).find(function (s) { return s >= rawStep; }) || rawStep;
+    var tick0 = Math.ceil(minV / step) * step;
+
+    var minT = pts[0].t, maxT = pts[pts.length - 1].t;
+    if (minT === maxT) maxT = minT + 1;
+    function x(t) { return padL + (t - minT) / (maxT - minT) * (W - padL - padR); }
+    function y(v) { return padT + (maxV - v) / (maxV - minV) * (H - padT - padB); }
+
+    var host = mk('div', '');
+    host.style.position = 'relative';
+    host.style.maxWidth = W + 'px';
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('width', '100%');
+    svg.style.display = 'block';
+    function el(name, attrs) {
+      var n = document.createElementNS('http://www.w3.org/2000/svg', name);
+      Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
+      return n;
+    }
+
+    for (var tv = tick0; tv <= maxV; tv += step) {
+      var gy = y(tv);
+      svg.appendChild(el('line', { x1: padL, y1: gy, x2: W - padR, y2: gy, stroke: '#e3e6ea', 'stroke-width': 1 }));
+      var lbl = el('text', { x: padL - 8, y: gy + 3, 'text-anchor': 'end', 'font-size': 10, fill: '#5b6572' });
+      lbl.textContent = (Math.round(tv * 100) / 100).toLocaleString();
+      svg.appendChild(lbl);
+    }
+    // X labels: first, last, and ~3 in between, on submission positions.
+    var lblIdx = [0, pts.length - 1];
+    [0.25, 0.5, 0.75].forEach(function (f) {
+      var idx = Math.round(f * (pts.length - 1));
+      if (lblIdx.indexOf(idx) === -1) lblIdx.push(idx);
+    });
+    lblIdx.sort(function (a, b) { return a - b; });
+    var lastX = -Infinity;
+    lblIdx.forEach(function (idx) {
+      var p = pts[idx], px = x(p.t);
+      if (px - lastX < 64) return;  // don't collide labels on dense ranges
+      lastX = px;
+      var d = parseDate(p.date);
+      var t = el('text', { x: px, y: H - 8, 'text-anchor': 'middle', 'font-size': 10, fill: '#5b6572' });
+      t.textContent = isNaN(d) ? p.date : fmtDate(d);
+      svg.appendChild(t);
+    });
+
+    var lineD = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(p.t).toFixed(1) + ' ' + y(p.v).toFixed(1); }).join(' ');
+    var blue = '#00205b';
+    svg.appendChild(el('path', {
+      d: lineD + ' L' + x(pts[pts.length - 1].t).toFixed(1) + ' ' + y(minV) + ' L' + x(pts[0].t).toFixed(1) + ' ' + y(minV) + ' Z',
+      fill: blue, opacity: 0.08, stroke: 'none'
+    }));
+    svg.appendChild(el('path', { d: lineD, fill: 'none', stroke: blue, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    pts.forEach(function (p) {
+      svg.appendChild(el('circle', { cx: x(p.t), cy: y(p.v), r: 4, fill: blue, stroke: '#fff', 'stroke-width': 2 }));
+    });
+
+    var cross = el('line', { x1: 0, y1: padT, x2: 0, y2: H - padB, stroke: '#9aa3ad', 'stroke-width': 1, visibility: 'hidden' });
+    svg.appendChild(cross);
+    var tip = mk('div', 'rm-trend-tip');
+    host.appendChild(svg);
+    host.appendChild(tip);
+
+    svg.addEventListener('pointermove', function (ev) {
+      var rect = svg.getBoundingClientRect();
+      var mx = (ev.clientX - rect.left) / rect.width * W;
+      var best = pts[0], bestDx = Infinity;
+      pts.forEach(function (p) { var dx = Math.abs(x(p.t) - mx); if (dx < bestDx) { bestDx = dx; best = p; } });
+      cross.setAttribute('x1', x(best.t)); cross.setAttribute('x2', x(best.t));
+      cross.setAttribute('visibility', 'visible');
+      tip.textContent = '';
+      var strong = mk('strong', '', best.v.toLocaleString() + (it.unit ? ' ' + it.unit : ''));
+      tip.appendChild(strong);
+      tip.appendChild(document.createTextNode(' — ' + rmFmtDate(best.date) + (best.shift ? ' · ' + best.shift.replace(/\s*\(.*\)$/, '') : '')));
+      tip.style.display = 'block';
+      var px = x(best.t) / W * rect.width;
+      tip.style.left = Math.min(px + 10, rect.width - 150) + 'px';
+      tip.style.top = (y(best.v) / H * rect.height - 30) + 'px';
+    });
+    svg.addEventListener('pointerleave', function () {
+      cross.setAttribute('visibility', 'hidden');
+      tip.style.display = 'none';
+    });
+
+    return host;
   }
 
   function rvCbm(cbm, body) {
@@ -2293,6 +2870,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     $('range-group').hidden = !isList;
     $('type-filter').hidden = !isList;
     $('search').hidden = !isList;
+    // The monitoring tab is deliberately fleet-wide (one tile per rig), so
+    // the rig filter has nothing to scope there.
+    $('rig-filter').hidden = isMonitoring;
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
@@ -2335,6 +2915,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (logo && SEADRILL_LOGO_WHITE.indexOf('data:image') === 0) logo.src = SEADRILL_LOGO_WHITE;
     state.lastStamp = dataStamp();
     render();
+    initBwmStatus();  // async; re-renders the Rig Monitoring tiles when planning status arrives
     setInterval(reloadData, POLL_MS);
 
     // Deep link from notification emails: ?report=<file> opens that report.
