@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.30'
+$ScriptVersion = '2.31'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -500,6 +500,7 @@ $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
+$marineEntries = @{}     # keyed rig|date (newest file wins) - Marine Integrity Reports
 $rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
 
@@ -952,6 +953,82 @@ foreach ($f in $files) {
                     }
                 }
             }
+
+            # Marine Integrity Reports (meta.discipline "Marine",
+            # tiles[].marineData - WCGRRT REV 145+, see
+            # DASHBOARDMARINEINTEGRITYHANDOFF.md). One record per report:
+            # the tool's own pre-computed section/overall averages are passed
+            # through as-is (null = nothing scored in that section yet, kept
+            # as null, not zero), plus the attention fields, the nine
+            # executive-summary texts, and one row per item that has a score
+            # or a comment. Items are discovered by iterating
+            # mi_(pol|reg|eqp)__ keys - NEVER a hard-coded item list; the
+            # handoff says the item set will grow with template revisions,
+            # so new items must appear automatically. Kept as plain
+            # hashtables (not [pscustomobject]) because the record nests a
+            # dictionary and an array - same PS5.1 JavaScriptSerializer
+            # constraint the SSCE request records hit.
+            $marine = Get-Prop $tile 'marineData'
+            if ($marine) {
+                $miDate = [string](Get-Prop $tile 'tileDate')
+                if (-not $miDate) { $miDate = [string](Get-Prop $meta 'date') }
+                $miItems = New-Object System.Collections.Generic.List[object]
+                foreach ($mk in @(Get-KeyNames $marine)) {
+                    $miKey = [string]$mk
+                    # _cmt keys are companions read off their base item, not
+                    # items themselves (both keys are always emitted by the
+                    # tool, even when empty - confirmed on all three sample
+                    # exports - so no orphan-comment handling is needed here)
+                    if ($miKey.EndsWith('_cmt')) { continue }
+                    if ($miKey -notmatch '^mi_(pol|reg|eqp)__(.+)$') { continue }
+                    $miScore = ([string](Get-Prop $marine $miKey)).Trim()
+                    $miCmt = ConvertTo-PlainText ([string](Get-Prop $marine ($miKey + '_cmt')))
+                    if (-not $miScore -and -not $miCmt) { continue }  # unscored, uncommented - nothing to show
+                    $miItems.Add(@{
+                        section = $Matches[1]
+                        item    = $Matches[2]
+                        score   = $miScore   # '' | '1'..'4' ('' = comment without a score)
+                        comment = $miCmt
+                    }) | Out-Null
+                }
+                $miRec = @{
+                    rig         = [string]$rig
+                    date        = $miDate
+                    file        = $f.Name
+                    avgPol      = Get-Prop $marine 'avg_pol'
+                    avgReg      = Get-Prop $marine 'avg_reg'
+                    avgEqp      = Get-Prop $marine 'avg_eqp'
+                    avgOverall  = Get-Prop $marine 'avg_overall'
+                    target      = Get-Prop $marine 'target'
+                    scoredCount = Get-Prop $marine 'scoredCount'
+                    certexp     = [string](Get-Prop $marine 'mi_certexp')
+                    asidef      = [string](Get-Prop $marine 'mi_asidef')
+                    classcc     = [string](Get-Prop $marine 'mi_classcc')
+                    unit        = [string](Get-Prop $marine 'mi_unit')
+                    imo         = [string](Get-Prop $marine 'mi_imo')
+                    design      = [string](Get-Prop $marine 'mi_design')
+                    flagclass   = [string](Get-Prop $marine 'mi_flagclass')
+                    client      = [string](Get-Prop $marine 'mi_client')
+                    field       = [string](Get-Prop $marine 'mi_field')
+                    ex          = @{
+                        pol_bp = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_pol_bp'))
+                        pol_nc = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_pol_nc'))
+                        pol_ip = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_pol_ip'))
+                        reg_bp = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_reg_bp'))
+                        reg_nc = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_reg_nc'))
+                        reg_ip = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_reg_ip'))
+                        eqp_bp = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_eqp_bp'))
+                        eqp_nc = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_eqp_nc'))
+                        eqp_ip = ConvertTo-PlainText ([string](Get-Prop $marine 'mi_ex_eqp_ip'))
+                    }
+                    items       = $miItems.ToArray()
+                }
+                $miDedupKey = "$rig|$miDate"
+                $miExisting = $marineEntries[$miDedupKey]
+                if (-not $miExisting -or ($f.LastWriteTime -gt $miExisting.modified)) {
+                    $marineEntries[$miDedupKey] = @{ modified = $f.LastWriteTime; entry = $miRec }
+                }
+            }
         }
     }
 
@@ -1037,6 +1114,14 @@ $rigCheckSorted = New-Object System.Collections.Generic.List[object]
 $rigCheckList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $rigCheckSorted.Add($_) | Out-Null }
 
+# Marine Integrity: one record per report, newest first - all dates kept per
+# rig (that's what the Marine tab's score trending reads).
+$marineList = New-Object System.Collections.Generic.List[object]
+foreach ($v in $marineEntries.Values) { $marineList.Add($v.entry) | Out-Null }
+$marineSorted = New-Object System.Collections.Generic.List[object]
+$marineList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
+    ForEach-Object { $marineSorted.Add($_) | Out-Null }
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = ($existingFolders -join '  |  ')
@@ -1047,6 +1132,7 @@ $payload = [pscustomobject]@{
     }
     cbmGrades    = $cbmGradeSorted.ToArray()
     rigChecks    = $rigCheckSorted.ToArray()
+    marineScores = $marineSorted.ToArray()
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10

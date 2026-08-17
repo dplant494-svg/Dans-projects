@@ -158,10 +158,15 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.29** (adds the `rigChecks` aggregate
-  behind the Reports Dashboard's new "Rig Monitoring" tab — Daily Checks/FLM
-  ingestion from `meta.checks` — see `INTEGRATION-CONTRACT.md`'s
-  `meta.checks`/`rigChecks` entries and the "Background" section below).
+- `scripts/Update-Dashboard.ps1`: **v2.31** (adds the `marineScores`
+  aggregate behind the Reports Dashboard's "Marine Integrity" tab — see
+  `INTEGRATION-CONTRACT.md`'s `marineData`/`marineScores` entries and the
+  "Background" section below).
+  v2.30 added a distinct skip warning for Daily Checks/FLM exports with no
+  rig identity (a report-tool-side gap, not a scanner bug).
+  v2.29 added the `rigChecks` aggregate behind the "Rig Monitoring" tab —
+  Daily Checks/FLM ingestion from `meta.checks` — see
+  `INTEGRATION-CONTRACT.md`'s `meta.checks`/`rigChecks` entries.
   v2.28 added SSCE request/decision ingestion, the
   `ssce-notifications-pending.json` feed, and the `cocDashboardPath`-gated
   COC Dashboard write-back — see `SSCE-REQUESTS-INTEGRATION-CONTRACT.md`.
@@ -180,6 +185,36 @@ paths with credentials, but this shape is fine to document)
 
 ## Background / not-actively-worked items
 
+- **Marine Integrity — shipped, v1 scope (fleet cards + score trends +
+  action list).** Per `DASHBOARDMARINEINTEGRITYHANDOFF.md` (WCGRRT REV
+  145+), the Marine department now posts scored compliance assessments
+  (`meta.discipline: "Marine"`, `tiles[].marineData`) through the same
+  pipeline as everything else. Decision (Dan's, after weighing tab vs
+  standalone page): a **fourth tab on the Reports Dashboard**, not a
+  separate dashboard — it reuses the tile/trend/attention patterns just
+  built for Rig Monitoring, needs no new deploy step, and can be promoted
+  to a standalone page later if the Marine department wants its own link.
+  `scripts/Update-Dashboard.ps1` v2.31 extracts `marineScores[]` (one
+  record per report — averages passed through as-is incl. nulls, items
+  discovered by key iteration, never a hard-coded list). Dashboard side:
+  Marine reports are **routed out of** the Well Control rig-visit
+  list/KPIs/filters (still in `reports[]` so the viewer and deep links
+  work); the Marine Integrity tab shows one card per rig ranked
+  worst-first (overall average RAG'd against the 3.0 target, section
+  averages, cert/ASI/Class attention flags); card click opens score
+  trends (four small-multiple charts with a target reference line, fixed
+  1–4 scale) plus a per-report drill-down: items scored 1 or 2 with
+  comments (the action list), the nine executive-summary fields with
+  non-conformities highlighted ("to Synergi"), and an
+  open-the-full-report button. The full-report viewer also renders the
+  complete marineData tile (score summary, installation info, exec
+  summary, all scored items). Verified end-to-end via Playwright against
+  the three generated-by-the-real-tool sample exports (West Jupiter ×2
+  for trending, West Gemini below target with a fully-unscored section
+  and open deficiencies) — including the null-section "not scored"
+  handling and the recomputed-average cross-check. **Scores run 4=good
+  down to 1=very poor — opposite polarity to CBM grades**; don't mix the
+  two up when touching either.
 - **Rig Monitoring (Daily Checks / FLM) — shipped, v2 scope (fleet tiles
   + readings matrix + trends).** Per `DASHBOARDSHAREPOINTINGESTIONHANDOFF.md`,
   two new report types land in the scanned folder: **Daily Checks** (per
