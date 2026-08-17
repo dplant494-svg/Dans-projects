@@ -1161,6 +1161,7 @@ function selectVessel(rig){
   const ssceStatsHtml = rig.id!=='ssce' ? '' : (() => {
     const expiredCount = items.filter(it=>it.action==='expired').length;
     const noEdocsCount = items.filter(it=>!it.edocs).length;
+    const allocatedCount = items.filter(it=>it.available===false).length;
     return `<div class="flex items-center gap-2">
         <button data-ssce-stat="expired" class="flex items-center gap-2 bg-white rounded-lg shadow border-l-4 transition hover-card" style="border-left-color:var(--sd-red);padding:.5rem .9rem">
           <span class="w-2 h-2 rounded-full bg-red flex-shrink-0"></span>
@@ -1171,6 +1172,11 @@ function selectVessel(rig){
           <span class="w-2 h-2 rounded-full bg-grey flex-shrink-0"></span>
           <span class="text-xs font-bold tracking-wide uppercase text-blue50 whitespace-nowrap">No eDocs</span>
           <span class="text-sm font-bold text-ink tabular">${noEdocsCount}</span>
+        </button>
+        <button data-ssce-stat="allocated" class="flex items-center gap-2 bg-white rounded-lg shadow border-l-4 transition hover-card" style="border-left-color:var(--sd-red);padding:.5rem .9rem">
+          <span class="w-2 h-2 rounded-full bg-red flex-shrink-0"></span>
+          <span class="text-xs font-bold tracking-wide uppercase text-blue50 whitespace-nowrap">Allocated</span>
+          <span class="text-sm font-bold text-red tabular">${allocatedCount}</span>
         </button>
       </div>`;
   })();
@@ -1218,12 +1224,13 @@ function selectVessel(rig){
 function selectSsceStat(rig, statKey){
   STATE.view='vessel'; STATE.rig=rig; STATE.bop=null; STATE.cat=null;
   setActiveNav('vessel');
-  const label = statKey==='expired' ? 'Expired' : 'No eDocs';
+  const label = statKey==='expired' ? 'Expired' : statKey==='allocated' ? 'Allocated' : 'No eDocs';
   crumb([{label:rig.name, onClick:()=>selectVessel(rig)},{label}]);
   const flatItems = [];
   rig.bops.forEach(bop=>bop.categories.forEach(cat=>cat.items.forEach(it=>{
     if(isCkManifoldItem(it)) return;
-    if(statKey==='expired' ? it.action==='expired' : !it.edocs) flatItems.push({it,rig,bop,cat});
+    const match = statKey==='expired' ? it.action==='expired' : statKey==='allocated' ? it.available===false : !it.edocs;
+    if(match) flatItems.push({it,rig,bop,cat});
   })));
   $('main-count').textContent = `${flatItems.length} components`;
   renderTable(flatItems, {
@@ -1630,8 +1637,13 @@ function renderTable(rows, opts){
   function bodyRows(list){
     if(!list.length) return `<tr><td colspan="${(showRig?1:0) + (showModel?1:0) + (hideCompliance?9:13)}" class="px-4 py-10 text-center text-blue50">${esc(opts.emptyMessage||'No components match.')}</td></tr>`;
     return list.map(({it,rig})=>`
-      <tr class="border-b border-line cursor-pointer hover-blue transition" data-key="${esc((rig?rig.id:'')+'|'+(it.sfi||'')+'|'+(it.serial||'')+'|'+(it.certNum||''))}">
-        <td class="px-3 py-2.5 text-center">${actionChip(it.action)}</td>
+      <tr class="border-b border-line cursor-pointer hover-blue transition${it.available===false?' opacity-60':''}" data-key="${esc((rig?rig.id:'')+'|'+(it.sfi||'')+'|'+(it.serial||'')+'|'+(it.certNum||''))}">
+        <td class="px-3 py-2.5 text-center">
+          <div class="flex flex-col items-center gap-1">
+            ${actionChip(it.action)}
+            ${it.available===false?`<span class="px-2 py-1 text-xs font-bold text-white bg-red rounded whitespace-nowrap">Allocated${it.assignedTo?' — '+esc(it.assignedTo):''}</span>`:''}
+          </div>
+        </td>
         ${showRig?`<td class="px-3 py-2.5 text-sm text-blue font-medium whitespace-nowrap text-center">${esc((rig&&rig.name)||'')}</td>`:''}
         <td class="px-3 py-2.5 text-sm text-blue50 tabular whitespace-nowrap text-center">${esc(it.sfi||'—')}</td>
         <td class="px-3 py-2.5 text-sm text-ink" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(it.desc)}">${esc(it.desc||'—')}</td>
@@ -1863,7 +1875,7 @@ function renderModalView(){
     });
   }
 
-  $('modal-foot').innerHTML = actionChip(it.action) + (String(it.certAge).match(/^\d+$/)?`<span class="text-xs text-blue50 whitespace-nowrap">CoC age: <span class="font-bold text-ink tabular">${it.certAge}d</span></span>`:'');
+  $('modal-foot').innerHTML = actionChip(it.action) + (String(it.certAge).match(/^\d+$/)?`<span class="text-xs text-blue50 whitespace-nowrap">CoC age: <span class="font-bold text-ink tabular">${it.certAge}d</span></span>`:'') + (it.available===false?`<span class="px-2 py-1 text-xs font-bold text-white bg-red rounded whitespace-nowrap">Allocated${it.assignedTo?' — '+esc(it.assignedTo):''}</span>`:'');
 
   const ssceMatches = it.oem
     ? flat.filter(f => f.rig.id === 'ssce' && f.it.oem === it.oem && f.it !== it)
@@ -1880,7 +1892,7 @@ function renderModalView(){
       ? `<p class="text-sm text-grey">No OEM part number on file — cannot look up SSCE stock.</p>`
       : ssceMatches.length
         ? ssceMatches.map((f,i) => `
-            <div class="flex items-center justify-between gap-3 py-1.5 border-b border-line last:border-0">
+            <div class="flex items-center justify-between gap-3 py-1.5 border-b border-line last:border-0${f.it.available===false?' opacity-60':''}">
               <div class="min-w-0">
                 <p class="text-sm text-ink truncate">${esc(f.it.desc||'—')}</p>
                 <p class="text-xs text-blue50">Asset ${esc(f.it.asset||'—')} · Serial ${esc(f.it.serial||'—')} · OEM ${esc(f.it.oem||'—')}</p>
@@ -1888,7 +1900,7 @@ function renderModalView(){
               <div class="flex items-center gap-2 flex-shrink-0">
                 ${actionChip(f.it.action)}
                 ${f.it.available === false
-                  ? `<span class="px-2 py-1 text-xs font-bold text-white bg-red rounded whitespace-nowrap">Unavailable${f.it.assignedTo ? ' — ' + esc(f.it.assignedTo) : ''}</span>`
+                  ? `<span class="px-2 py-1 text-xs font-bold text-white bg-red rounded whitespace-nowrap">Allocated${f.it.assignedTo ? ' — ' + esc(f.it.assignedTo) : ''}</span>`
                   : `<button type="button" data-ssce-request-idx="${i}" class="px-2 py-1 text-xs font-bold text-white bg-lblue rounded transition whitespace-nowrap">Request</button>`
                 }
               </div>
