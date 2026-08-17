@@ -19,10 +19,33 @@ the file-drop-and-scan pattern already used everywhere else in this repo.
 
 ## Data flow
 
+> **Updated 2026-08-17 — both buttons now POST directly.** The COC
+> Dashboard's "Submit Request" and the Requests Dashboard's approve/deny
+> post their JSON straight to the same Power Automate HTTP trigger WCGRRT
+> uses (endpoint + transport rules in `POSTCONTRACTFORDASHBOARDBUTTONS.md`
+> from the reporting-tools session — **follow it exactly**: `Content-Type:
+> application/json` or the flow 202s and writes nothing; plain `fetch` and
+> `res.ok`, never `mode:'no-cors'`; UTF-8-safe base64
+> `btoa(unescape(encodeURIComponent(json)))` because payloads contain
+> `°`/`—`/`✓`; the URL is SAS-signed, use unmodified). The flow writes the
+> file into SharePoint **WellControl / PostedReports**, which is already in
+> `reportFolders`, so the scanner needs **zero changes** — filenames keep
+> the `ssce-request_*` / `ssce-decision_*` prefixes the scanner routes on
+> (NOT the `seadrill-*` names the post contract suggests — those would be
+> scanned as rig-visit reports). The download-a-file flow below is retained
+> verbatim as the **automatic fallback** when the post fails (flow down,
+> DLP policy withdrawn, offline) — the user is told the file downloaded and
+> where to put it, so an action is never lost. Buttons disable while a post
+> is in flight (a double-tap would write two files).
+
 ```
 COC Dashboard "Request" button        Requests Dashboard approve/deny
-  → downloads ssce-request_*.json       → downloads ssce-decision_*.json
-  → saved into the SSCE Requests folder → saved into its Decisions subfolder
+  → POSTs ssce-request_*.json           → POSTs ssce-decision_*.json
+    to the WCGRRT Power Automate flow     to the same flow
+  → lands in WellControl/PostedReports  → lands in WellControl/PostedReports
+  (fallback: downloads the same file     (fallback: downloads the same file
+   for manual drop into the SSCE          for manual drop into the
+   Requests folder)                       Decisions subfolder)
                     \_______________________________/
                                   ↓
                     Update-Dashboard.ps1 (scheduled)
@@ -183,11 +206,11 @@ The COC Dashboard's own rendering (`requests-dashboard/coc-source/Seadrill_WCE_C
 - **No live notifications yet.** `ssce-notifications-pending.json` is
   produced correctly but nothing currently reads it — it activates the
   moment a real flow is pointed at it, with zero code changes needed here.
-- **Two-step approve/deny, not one click.** The approver downloads a file
-  and has to save it into the right folder for the decision to take effect
-  on the next scan (up to the scan interval's delay, not instant). This was
-  a deliberate choice to avoid standing up a live backend (which would need
-  new IT-hosted infrastructure) — see the "Approve/deny UX" discussion in
-  this feature's build history if that tradeoff needs revisiting.
+- **~~Two-step approve/deny, not one click~~ — RESOLVED 2026-08-17.**
+  Approve/deny (and COC submit) now post directly to the WCGRRT Power
+  Automate flow (see the Data flow note above); the manual save-a-file step
+  only reappears as the fallback when posting fails. Decisions still take
+  effect on the next scan (up to the scan interval's delay, not instant) —
+  that part is unchanged and inherent to the file-drop-and-scan design.
 - **Rig name, not a short code, for `assignedTo`.** Easy to swap for a code
   table later if Dan wants one — none exists anywhere in this project today.

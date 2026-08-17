@@ -259,7 +259,18 @@ paths with credentials, but this shape is fine to document)
   natural-sorted `t1`..`t16`). **Still deferred**: automatic
   drift/anomaly detection and notifications — trends are on-demand
   visual, not computed alerts.
-- **SSCE Requests Dashboard — shipped, v1 scope.** New third dashboard
+- **SSCE Requests Dashboard — shipped; one-click posting added
+  2026-08-17.** The COC Dashboard's "Submit Request" and the Requests
+  Dashboard's approve/deny now POST their JSON straight to the WCGRRT
+  Power Automate flow (→ SharePoint WellControl/PostedReports → scanner,
+  zero scanner changes needed) instead of downloading a file for manual
+  drop — the download flow survives as the automatic fallback when
+  posting fails, so no action is ever lost. Transport contract and its
+  hard-won gotchas: `POSTCONTRACTFORDASHBOARDBUTTONS.md` (from the
+  reporting-tools session) + the updated Data flow section in
+  `SSCE-REQUESTS-INTEGRATION-CONTRACT.md`. **Filenames must keep the
+  `ssce-request_*`/`ssce-decision_*` prefixes** — the scanner routes SSCE
+  files by prefix. New third dashboard
   (`requests-dashboard/requests-dashboard.html`) for Central Spares equipment
   requests submitted from the WCE COC Dashboard (a separate tool, now also
   tracked here as `requests-dashboard/coc-source/Seadrill_WCE_COC_Dashboard.html`

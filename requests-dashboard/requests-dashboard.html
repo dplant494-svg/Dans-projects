@@ -229,7 +229,7 @@
     <div id="setup-notice" class="card setup-notice" hidden>
       <h2>No data yet — one-time setup</h2>
       <ol>
-        <li>Requests come from the WCE COC Dashboard's "Request" button (downloads <code>ssce-request_*.json</code>) — save those into your configured SSCE Requests folder.</li>
+        <li>Requests come from the WCE COC Dashboard's "Request" button — they post straight to the report server (a <code>ssce-request_*.json</code> file downloads instead only if posting fails; save that into your configured SSCE Requests folder).</li>
         <li>Run <code>scripts\Update-Dashboard.ps1</code> once — it creates <code>ssce-requests-data.js</code> next to this file.</li>
         <li>Leave this page open — it re-checks for data every minute.</li>
       </ol>
@@ -432,22 +432,50 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     });
   }
 
-  // ---------- decision download ----------
+  // ---------- decision post / download ----------
 
-  function downloadDecision(requestId, decision, comment, decidedBy) {
-    var payload = {
-      requestId: requestId,
-      decision: decision,
-      comment: comment,
-      decidedBy: decidedBy,
-      decidedAt: new Date().toISOString()
-    };
+  // Same Power Automate HTTP trigger WCGRRT posts reports through
+  // (POSTCONTRACTFORDASHBOARDBUTTONS.md - copied verbatim from the shipped
+  // REV 145, confirmed working in production). Rules that actually bit the
+  // tool team, kept exactly: Content-Type must be application/json (a
+  // text/plain body returns 202 and silently writes NOTHING); never use
+  // mode:'no-cors' (opaque response - success and failure look identical);
+  // check res.ok, not status 200 (the flow answers 202 Accepted); base64
+  // must be the UTF-8-safe wrapper (plain btoa throws on any character
+  // above U+00FF - real payloads contain them - and inside a try/catch
+  // that reads as "post failed" with no network request at all). Do not
+  // modify or re-encode the URL - it is SAS-signed.
+  var SSCE_POST_URL = 'https://76e054f3a40ce46e84574bd43fc3ad.06.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/19/workflows/6dc9957e2cab4d889c3d8a868dc42476/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1zBOi-67vesw_x-jd937bCL3x2RPdE4gYK6JURimJWg';
+
+  function postJsonToPostedReports(json, filename) {
+    if (!SSCE_POST_URL) return Promise.resolve(false);
+    try {
+      var b64 = btoa(unescape(encodeURIComponent(json)));  // UTF-8 safe base64
+      var payload = { FileName: filename, ContentType: 'application/json', FileContent: b64 };
+      return fetch(SSCE_POST_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function (res) { return !!(res && res.ok); })
+        .catch(function () { return false; });
+    } catch (e) { return Promise.resolve(false); }
+  }
+
+  // The filename keeps the ssce-decision_ prefix - the scanner routes SSCE
+  // files by that prefix (excluded from the report scan, picked up by its
+  // own glob), so a different prefix would be treated as a rig-visit report.
+  function decisionFileName(requestId, decidedAt) {
+    return 'ssce-decision_' + requestId + '_' + decidedAt.replace(/[:.]/g, '-') + '.json';
+  }
+
+  // Fallback when the post fails (flow down, DLP policy withdrawn, offline):
+  // download the same file locally so the approver's action is never lost.
+  function downloadDecision(payload) {
     var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
     var url = URL.createObjectURL(blob);
-    var ts = payload.decidedAt.replace(/[:.]/g, '-');
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'ssce-decision_' + requestId + '_' + ts + '.json';
+    a.download = decisionFileName(payload.requestId, payload.decidedAt);
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -569,16 +597,41 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       '<button type="button" class="btn-approve" id="btn-approve">Approve</button>' +
       '<button type="button" class="btn-deny" id="btn-deny">Deny</button>' +
       '</div>' +
-      '<div class="decision-hint">This downloads a small decision file — save it into your configured <code>SSCE Requests\\Decisions</code> folder so the scanner picks it up on its next run.</div>';
+      '<div class="decision-hint">Your decision posts straight to the report server and applies on the scanner’s next run (~10 min). If posting fails, a decision file downloads instead — save that into your configured <code>SSCE Requests\\Decisions</code> folder.</div>';
     body.appendChild(box);
 
     function submitDecision(decision) {
       var by = document.getElementById('dec-by').value.trim();
       var comment = document.getElementById('dec-comment').value.trim();
       if (!by) { alert('Enter your name or email before deciding.'); return; }
-      downloadDecision(r.requestId, decision, comment, by);
-      box.innerHTML = '<div class="decision-done">Decision file downloaded — save it into the Decisions folder. This request will show as ' +
-        (decision === 'approved' ? '<strong>Approved</strong>' : '<strong>Denied</strong>') + ' once the scanner picks it up.</div>';
+      var payload = {
+        requestId: r.requestId,
+        decision: decision,
+        comment: comment,
+        decidedBy: by,
+        decidedAt: new Date().toISOString()
+      };
+      // Disable both buttons while the post is in flight - a double-tap
+      // would write two decision files.
+      var btnA = document.getElementById('btn-approve'), btnD = document.getElementById('btn-deny');
+      btnA.disabled = true; btnD.disabled = true;
+      var active = decision === 'approved' ? btnA : btnD;
+      var oldLabel = active.textContent;
+      active.textContent = 'Posting…';
+      postJsonToPostedReports(JSON.stringify(payload, null, 2), decisionFileName(payload.requestId, payload.decidedAt))
+        .then(function (ok) {
+          if (ok) {
+            box.innerHTML = '<div class="decision-done">Decision posted to the report server. This request will show as ' +
+              (decision === 'approved' ? '<strong>Approved</strong>' : '<strong>Denied</strong>') +
+              ' once the scanner picks it up (usually within ~10 minutes).</div>';
+          } else {
+            downloadDecision(payload);
+            btnA.disabled = false; btnD.disabled = false; active.textContent = oldLabel;
+            box.insertBefore(mk('div', 'decision-done',
+              'Posting to the server failed, so the decision file was downloaded instead — save it into the SSCE Requests\\Decisions folder so the scanner picks it up. (Your decision is in that file; nothing is lost.)'),
+              box.firstChild);
+          }
+        });
     }
     document.getElementById('btn-approve').addEventListener('click', function () { submitDecision('approved'); });
     document.getElementById('btn-deny').addEventListener('click', function () { submitDecision('denied'); });

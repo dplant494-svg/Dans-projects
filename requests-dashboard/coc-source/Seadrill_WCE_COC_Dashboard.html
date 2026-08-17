@@ -1990,7 +1990,27 @@ function openSsceRequestForm(source, ssceItem){
   $('ssce-request-modal').showModal();
 }
 
-function submitSsceRequest(){
+/* Same Power Automate HTTP trigger WCGRRT posts reports through (see
+   POSTCONTRACTFORDASHBOARDBUTTONS.md, copied verbatim from the shipped
+   REV 145). Transport rules kept exactly as proven in production:
+   Content-Type application/json (text/plain returns 202 and writes
+   nothing), plain fetch with res.ok (the flow answers 202 Accepted; never
+   mode:'no-cors' - its opaque response makes success indistinguishable
+   from failure), UTF-8-safe base64 (plain btoa throws on °/—/✓ etc. and
+   masquerades as an endpoint failure), URL used unmodified (SAS-signed). */
+const SSCE_POST_URL = 'https://76e054f3a40ce46e84574bd43fc3ad.06.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/19/workflows/6dc9957e2cab4d889c3d8a868dc42476/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=1zBOi-67vesw_x-jd937bCL3x2RPdE4gYK6JURimJWg';
+
+async function postJsonToPostedReports(json, filename){
+  if(!SSCE_POST_URL) return false;
+  try{
+    const b64 = btoa(unescape(encodeURIComponent(json)));   // UTF-8 safe base64
+    const payload = { FileName: filename, ContentType: 'application/json', FileContent: b64 };
+    const res = await fetch(SSCE_POST_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    return !!(res && res.ok);
+  }catch(e){ return false; }
+}
+
+async function submitSsceRequest(){
   const form = $('ssce-request-form');
   if(!form.reportValidity()) return;
 
@@ -2038,7 +2058,28 @@ function submitSsceRequest(){
 
   const safeSite = String(record.applicant.siteUnit||'site').replace(/[^a-z0-9]+/gi,'-');
   const ts = record.submittedAt.replace(/[:.]/g,'-');
-  downloadBlob(JSON.stringify(record, null, 2), `ssce-request_${safeSite}_${ts}.json`, 'application/json');
+  // Filename keeps the ssce-request_ prefix - the dashboard scanner routes
+  // SSCE files by that prefix; a different one would be treated as a
+  // rig-visit report.
+  const fileName = `ssce-request_${safeSite}_${ts}.json`;
+  const json = JSON.stringify(record, null, 2);
+
+  // Post straight to the report server; disable the button while in flight
+  // (a double-tap would write two request files). If posting fails - flow
+  // down, DLP policy withdrawn, offline - fall back to the original
+  // download-a-file flow so the request is never lost.
+  const submitBtn = $('btn-ssce-request-submit');
+  const oldLabel = submitBtn.textContent;
+  submitBtn.disabled = true; submitBtn.textContent = 'Posting…';
+  const ok = await postJsonToPostedReports(json, fileName);
+  submitBtn.disabled = false; submitBtn.textContent = oldLabel;
+
+  if(ok){
+    alert('✓ Request posted to Central Spares.\n\nIt will appear on the SSCE Requests Dashboard once the scanner next runs (usually within ~10 minutes).');
+  }else{
+    downloadBlob(json, fileName, 'application/json');
+    alert('⚠ Posting to the server failed, so the request file was downloaded instead.\n\nSend ' + fileName + ' through the normal SSCE channel (or save it into the SSCE Requests folder) so it still gets processed - nothing is lost.');
+  }
 
   $('ssce-request-modal').close();
   $('modal').close();
