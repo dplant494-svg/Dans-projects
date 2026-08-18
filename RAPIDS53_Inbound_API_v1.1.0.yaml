@@ -1,0 +1,1899 @@
+swagger: "2.0"
+info:
+  description: "Incident API for submitting events into the database."
+  version: "1.1.0"
+  title: "RAPID S53 Incident Submission API"
+  contact:
+    email: "mike.kucharski@iadc.org"
+host: "api.rapid4s53.com"
+basePath: "/"
+tags:
+  - name: "authentication"
+    description: "Obtain an access token"
+  - name: "incident"
+    description: "Post API incident"
+schemes:
+  - "https"
+paths:
+  /authentication:
+    get:
+      tags:
+        - "authentication"
+      summary: "Exchange HMAC-signed credentials for an access token"
+      description: >
+        Sign the string <username><password><timestamp> with HMAC-SHA256 using the
+        secret key supplied by the administrator. The hash must be generated as raw
+        binary data and then base64-encoded, e.g.
+        base64_encode(hash_hmac('sha256', username.password.timestamp, secret_key, true)).
+        The timestamp must be GMT in the format 'YYYY-MM-DD hh:mm:ss' (e.g. 2019-12-01 23:00:00)
+        and is rejected more than 2 hours after it was issued. The secret key is sent in a
+        separate email by the administrator.
+      operationId: "authenticate"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "X-Authorization-Username"
+          in: "header"
+          description: "The 'username' provided in the email. Eg: \"john\""
+          required: true
+          type: "string"
+        - name: "X-Authorization-Content-SHA256"
+          in: "header"
+          description: "Base64-encoded HMAC-SHA256 of <username><password><timestamp>, keyed with the secret key."
+          required: true
+          type: "string"
+        - name: "X-Authorization-Timestamp"
+          in: "header"
+          description: "The same GMT date and time used to generate X-Authorization-Content-SHA256, formatted 'YYYY-MM-DD hh:mm:ss'."
+          required: true
+          type: "string"
+      responses:
+        "200":
+          description: >
+            The access token, in JWT format, used to authorize every other endpoint.
+            The token expires 2 hours after issue; re-authenticate to obtain a new one.
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: "The access token, in JWT format"
+        "401":
+          description: "Credentials not provided, hash expired, or invalid hash value"
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error_message:
+                type: string
+        "500":
+          description: "Unexpected error during authentication"
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              error_message:
+                type: string
+      security:
+        - ApiKey: []
+  /incident:
+    post:
+      tags:
+        - "incident"
+      summary: "Add a new incident to the RAPID-S53 database"
+      description: ""
+      operationId: "addIncident"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Incident object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/Incident"
+      responses:
+        "200":
+          description: "The incident was created"
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  incident_number:
+                    type: string
+                    example: "R1617283810146"
+                  warnings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        warning:
+                          type: string
+                          example: "invalid component manufacturer, input ignored"
+        "400":
+          description: >
+            The request body was empty, the identifying header was missing, or the
+            submission was rejected.
+          schema:
+            $ref: "#/definitions/SubmissionError"
+        "403":
+          description: "Unauthorized access, unknown user, or the account is disabled"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: "The submission could not be processed"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "503":
+          description: "The incident service is unreachable. Retry later."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /update/incident:
+    post:
+      tags:
+        - "incident"
+      summary: "Edit an existing incident in the RAPID-S53 database"
+      description: ""
+      operationId: "editIncident"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Incident object that needs to be added to the database"
+          required: true
+          schema:
+            $ref: "#/definitions/EditIncident"
+      responses:
+        "200":
+          description: "The incident was updated"
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  incident_number:
+                    type: string
+                    example: "R1617283810146"
+                  warnings:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        warning:
+                          type: string
+                          example: "invalid component manufacturer, input ignored"
+        "400":
+          description: "The update was rejected"
+          schema:
+            $ref: "#/definitions/SubmissionError"
+        "403":
+          description: "Unauthorized access, unknown user, or the account is disabled"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "500":
+          description: "The update could not be processed"
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        "503":
+          description: "The incident service is unreachable. Retry later."
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /component-manufacturer:
+    get:
+      tags:
+        - "options"
+      summary: Get list of component manufacturers
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: Json array of component manufacturer names and its ids
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              api_version:
+                type: string
+                example: "v2.1"
+              api_spec_document_revision:
+                type: integer
+                example: 15
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: SLB
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /rigs:
+    get:
+      tags:
+        - "options"
+      summary: Get list of rigs
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: Json array of rig names,their ids and authorized reporter names assigned to the rig.
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              api_version:
+                type: string
+                example: "v2.1"
+              api_spec_document_revision:
+                type: integer
+                example: 15
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: Rig A
+                    reporters:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          first_name:
+                            type: string
+                            example: John
+                          last_name:
+                            type: string
+                            example: Doe
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /control-fluids:
+    get:
+      tags:
+        - "options"
+      summary: Get list of control fluids
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: Json array of control fluid names and its ids
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              api_version:
+                type: string
+                example: "v2.1"
+              api_spec_document_revision:
+                type: integer
+                example: 15
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: Fluid A
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /subunit-hierarchy:
+    get:
+      tags:
+        - "options"
+      summary: Get subunits, their corresponding items and their corresponding components
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: Json array of subunits, its corresponding items and its corresponding components
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              api_version:
+                type: string
+                example: "v2.1"
+              api_spec_document_revision:
+                type: integer
+                example: 15
+              data:
+                $ref: "#/definitions/SubunitHierarchy"
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /observed-failures:
+    get:
+      tags:
+        - "options"
+      summary: Get a list of components and its observed failures
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: Json array of Components and it's observed failures
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              api_version:
+                type: string
+                example: "v2.1"
+              api_spec_document_revision:
+                type: integer
+                example: 15
+              data:
+                $ref: "#/definitions/ObservedFailures"
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /models:
+    get:
+      tags:
+        - "options"
+      summary: Get models by component manufacturer and by subunit-hierarchy
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: Json array of models by component manufacturer by subunit-hierarchy
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              api_version:
+                type: string
+                example: "v2.1"
+              api_spec_document_revision:
+                type: integer
+                example: 15
+              data:
+                $ref: "#/definitions/ModelOptions"
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+  /download-spec-doc:
+    get:
+      tags:
+        - "options"
+      summary: Get a temporary URL to the API specification document
+      description: >
+        Returns a pre-signed URL to the RAPID-S53 API Specification document. The URL is
+        valid for 5 minutes (300 seconds) and can be opened directly in a browser. Call the
+        endpoint again to generate a new URL once it expires.
+      operationId: "downloadSpecDoc"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: The temporary document URL and its lifetime in seconds
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: true
+              data:
+                type: object
+                properties:
+                  url:
+                    type: string
+                    description: Pre-signed URL to the specification document
+                  expires_in:
+                    type: integer
+                    description: Lifetime of the URL in seconds
+                    example: 300
+        401:
+          description: Token expired, missing, or the user is not authorized
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+        500:
+          description: The document URL could not be generated
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+      security:
+        - Authorization: []
+          ApiKey: []
+securityDefinitions:
+  Authorization:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+    description: >
+      Cognito IdToken (JWT) returned by GET /authentication.
+      Expires 2 hours after issue; re-authenticate to obtain a new one.
+  ApiKey:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+    description: >
+      The API key issued to your organisation by the RAPID-S53 administrator.
+definitions:
+  ErrorResponse:
+    type: "object"
+    properties:
+      success:
+        type: boolean
+        example: false
+      error_message:
+        type: string
+        description: >
+          The reason the request was rejected, e.g. "The incoming token has expired",
+          "Unauthorized", "Unauthorized user access", or "Account is Disabled".
+        example: "The incoming token has expired"
+  SubmissionError:
+    type: "object"
+    properties:
+      success:
+        type: boolean
+        example: false
+      error_message:
+        type: string
+        description: >
+          The reason the submission was rejected, e.g. "Request body cannot be empty",
+          "cogntio-username header is required", or a validation message from the portal.
+        example: "Failed to create incident"
+      data:
+        description: >
+          Field-level detail returned by the portal when the submission is rejected.
+          Absent, or an empty array, when the portal supplies none.
+  Incident:
+    type: "object"
+    required:
+      - "bop_control_fluid"
+      - "component_manufacturer_name"
+      - "component_name"
+      - "component_status"
+      - "concentration"
+      - "date_affected_component_was_installed"
+      - "date_of_last_laboratory_sample"
+      - "date_of_last_maintenance"
+      - "desc_well_control_system_status"
+      - "desc_ongoing_wcs_related_work"
+      - "desc_malfunction"
+      - "desc_problem_isolation"
+      - "desc_assumed_cause"
+      - "desc_initial_remedy"
+      - "desc_investigations_performed"
+      - "desc_summary_of_findings"
+      - "description_of_last_completed_maintenance"
+      - "did_the_event_involve_unplanned_stack_operations"
+      - "drilling_fluid_type"
+      - "detection_method"
+      - "equipment_id_number"
+      - "event_date"
+      - "event_date_is"
+      - "glycol"
+      - "hours_of_npt"
+      - "hours_of_repair_time"
+      - "iadc_code_description"
+      - "immediate_corrective_action"
+      - "usage_amount"
+      - "usage_amount_unit"
+      - "item_name"
+      - "maintenance_deferred_on_equipment"
+      - "model"
+      - "water_depth"
+      - "water_depth_unit"
+      - "observed_failure_name"
+      - "oem_incident_reference_number"
+      - "oem_part_number"
+      - "oem_representative"
+      - "oem_serial_number"
+      - "owner_primary_contact"
+      - "owner_primary_contact_email"
+      - "pressure_rating"
+      - "pressure_rating_unit"
+      - "quantity"
+      - "rig_name"
+      - "root_cause"
+      - "size_primary"
+      - "size_secondary"
+      - "subunit_name"
+      - "was_the_last_laboratory_sample_acceptable"
+      - "what_was_the_system_status"
+    properties:
+      bop_control_fluid:
+        type: "string"
+        example: "Houghton Stack Magic ECO-G"
+        description:
+          Provides the name of the BOP control fluid in use at the site.
+          Get the complete list using [/control-fluids](#/options/control-fluids)
+      component_manufacturer_name:
+        type: "string"
+        example: "NOV"
+        description: Provides the name of the Component Manufacturer.
+          Get the complete list using [/component-manufacturer](#/options/component-manufacturer)
+      component_name:
+        type: "string"
+        example: "Choke and Kill Valve Operator Sea"
+        description: This is the lowest maintainable item that failed.
+          Get the complete list using [/subunit-hierarchy](#/options/subunit-hierarchy)
+      component_status:
+        type: "string"
+        example: "OEM - Analysis"
+        enum:
+          [
+            Equipment Owner Repaired,
+            Disposal,
+            OEM - Analysis,
+            OEM - Repair,
+            Storage,
+            Third Party Analysis,
+            Third Party Repair,
+          ]
+        description: Provides the status of the component where "Storage"
+          is returned if the equipment was not sent ashore. If the
+          equipment was sent ashore
+      concentration:
+        type: "string"
+        example: "5%"
+        enum: [0%, 1%, 2%, 3%, 4%, 5%, 6%, 7%, 8%, 9%, 10%, 11%, 12%, 100%]
+        description: Percentage of control fluid concentrate in the mixture.
+      date_affected_component_was_installed:
+        type: "string"
+        example: "MMM DD,YYYY e.g.: Sep 08, 2018"
+        description: Provides the name of Drilling Contractor / Equipment
+          Owner
+      date_of_last_laboratory_sample:
+        type: "string"
+        example: "MMM DD, YYYY e.g.: Sep 08, 2018"
+        description: This is a date field that records the date when the
+          affected component was installed into the system on
+          the rig. This could be the date that the equipment was
+          delivered, or it could be after a major
+          inspection/maintenance (e.g.five-yearly).
+      date_of_last_maintenance:
+        type: "string"
+        example: "MMM DD,YYYY e.g.: Sep 08, 2018"
+        description: This field records the date of the last laboratory
+          analysis.
+      desc_well_control_system_status:
+        type: "string"
+        example: ""
+        description:
+          Describe what was happening operationally from an overall WCS-perspective at the time the
+          event occurred, complete with information on the statuses of all the BOP stacks on the rig.
+      desc_ongoing_wcs_related_work:
+        type: "string"
+        example: ""
+        description:
+          Describe the WCS tasks that were being performed by, or on, the equipment (subunit/item
+          /component) at the center of the event at the time the event occurred.
+      desc_malfunction:
+        type: "string"
+        example: ""
+        description:
+          Describe how it was determined that the component at the center of the event was not
+          performing as required.
+      desc_problem_isolation:
+        type: "string"
+        example: ""
+        description:
+          Describe the steps taken to either (a) prevent the problem from escalating, preserve the
+          integrity of the WCS and allow the ongoing operations/WCS tasks to be completed as intended
+          or (b) discontinue ongoing operations/WCS tasks, troubleshoot the problem and eliminate the
+          problem such that the ongoing operations/WCS tasks could be completed as originally intended.
+      desc_assumed_cause:
+        type: "string"
+        example: ""
+        description:
+          Describe the initial assumptions that were made with regard to what caused the component at
+          the center of the event to fail to perform as required.
+      desc_initial_remedy:
+        type: "string"
+        example: ""
+        description:
+          Describe the immediate steps taken to rectify the problem, stemming from the malfunction of
+          the component at the center of this event, based on the assumptions made about the initial
+          cause.
+      desc_investigations_performed:
+        type: "string"
+        example: ""
+        description:
+          Describe the investigative actions taken to confirm the assumed root cause or establish a
+          credible root cause.
+      desc_summary_of_findings:
+        type: "string"
+        example: ""
+        description: Provide a summary of what was found as a result of performing the investigations.
+      desc_support_for_root_cause_selection:
+        type: "string"
+        example: ""
+        description:
+          Provide a description of the established root cause in a manner that supports the value
+          assigned in the ‘Root Cause’ field.
+      desc_lessons_learned_summary:
+        type: "string"
+        example: ""
+        description:
+          Describe the actions to be taken in an effort to eliminate the malfunction or at least reduce
+          the likelihood of a repeat occurrence of the malfunction.
+      description_of_last_completed_maintenance:
+        type: "string"
+        example: "No previous maintenance"
+        enum:
+          [
+            Adjustment,
+            Cleaned and Inspected,
+            Greased,
+            Installed repair kit,
+            Installed seal kit,
+            No previous maintenance,
+          ]
+        description: Provides the type of maintenance that was performed
+          on the affected component.
+      detection_method:
+        type: "string"
+        example: "Functional Testing Surface"
+        enum:
+          [
+            Casual Observation,
+            Condition Monitoring,
+            Maintanace,
+            Inspection,
+            Pressure Testing,
+            Function Testing,
+            Production Interference,
+            On Demand,
+          ]
+        description: Provides information on how the event was discovered.
+      did_the_event_involve_unplanned_stack_operations:
+        type: "string"
+        example: "yes"
+        enum: [yes, no]
+        description: Provides a boolean value which dictates whether the
+          event was a direct factor in the decision to retrieve the
+          subsea BOP stack for repairs or not.
+      drilling_fluid_type:
+        type: "string"
+        example: "Seawater"
+        enum:
+          [
+            Brine,
+            Seawater,
+            Synthetic Based Mud,
+            Water Based Mud,
+            Completion Fluids,
+            Oil Based Mud,
+          ]
+        description: Provides the type of drilling fluid in use at the site.
+      drilling_fluids_into_environment:
+        type: string
+        example: "yes"
+        enum: [yes, no]
+        description:
+          RCFA is mandated in the event that there is a release of wellbore fluid to the environment.
+          It has been determined that the component in question is associated with an item of equipment
+          which is required to maintain the integrity of the wellbore. The selection of ‘Yes’ will
+          automatically result in the ‘Root Cause’ field being set to ‘RCFA Required’.
+      equipment_id_number:
+        type: "string"
+        example: "E12345E123"
+        description: An anonymous SFI code or similar that the equipment owner uses to identify the specific equipment or component.
+      event_date:
+        type: "string"
+        example: "MMM DD,YYYY e.g.: Sep 08, 2018"
+        description: Provides the date issue was identified
+      event_date_is:
+        type: "string"
+        example: "Date of Occurrence"
+        enum: [Date of Detection, Date of Occurrence]
+        description: Describes whether the date when the incident was
+          identified was either the Date of Detection or the Date of Occurrence
+      glycol:
+        type: "string"
+        example: "5%"
+        enum:
+          [
+            0%,
+            5%,
+            10%,
+            15%,
+            20%,
+            25%,
+            30%,
+            35%,
+            40%,
+            45%,
+            50%,
+            55%,
+            60%,
+            1%,
+            2%,
+            3%,
+            4%,
+            6%,
+            7%,
+            8%,
+            9%,
+            11%,
+            12%,
+            13%,
+            14%,
+            16%,
+            17%,
+            18%,
+            19%,
+            65%,
+            70%,
+            75%,
+            80%,
+            85%,
+            90%,
+            95%,
+            100%,
+          ]
+        description: Percentage of glycol in the mixture.
+      hours_of_npt:
+        type: "integer"
+        example: 2
+        description: This field records the number of hours that is inclusive
+          of BOP recovery and reinstallation etc., plus all time inbetween event detection and getting
+          back to the point at which the event occurred
+      hours_of_repair_time:
+        type: "integer"
+        example: 1
+        description: The actual time take to repair and test the affected component.
+      iadc_code_description:
+        type: "string"
+        example: "15 - Test B.O.P"
+        enum:
+          [
+            1 - Rig Up and Tear Down,
+            2 - Drill Actual,
+            3 - Reaming,
+            4 - Coring,
+            5 - Condition Mud & Circulate,
+            6 - Trips,
+            7 - Lubricate Rig,
+            8 - Repair Rig,
+            9 - Cut Off Drilling Line,
+            10 - Deviation Survey,
+            11 - Wire Line Logs,
+            12 - Run Casing & Cement,
+            13 - Wait On Cement,
+            14 - Nipple Up B.O.P.,
+            15 - Test B.O.P.,
+            16 - Drill Stem Test,
+            17 - Plug Back,
+            18 - Squeeze Cement,
+            19 - Fishing,
+            20 - Dir. Work,
+            21 - Running / Retrieving Riser Equipment,
+            22 - Testing Surface Equipment,
+            23 - Other,
+            A - Perforating,
+            B - Tubing Trips,
+            C - Treating,
+            D - Swabbing,
+            E - Testing,
+            F - NULL,
+            G - NULL,
+            H - NULL,
+          ]
+      immediate_corrective_action:
+        type: "string"
+        enum:
+          [
+            Adjust,
+            Check,
+            Inspection,
+            Modify,
+            Refit,
+            Repair,
+            Replace,
+            Service,
+            Test,
+          ]
+        example: "Replace"
+        description: This is the action taken on the rig to place the component back into an operational state.
+      impacted_element:
+        type: string
+        example: "Offline"
+        enum: ["Offline", "Inline"]
+        description:
+          On dual-stack rigs, this dropdown is used to identify whether the event is associated with that
+          part of the WCS that it is ‘Inline’ (i.e. the part of the WCS impacted includes the ‘Stack In Use’)
+          or whether it is associated with that part of the WCS that is ‘Offline’ (i.e. the BOP Stack on deck
+          on a rig with two stacks). This field will automatically be set to ‘Inline’ for single-stack rigs.
+      item_name:
+        type: "string"
+        example: "Stack Choke and Kill System"
+        description: This is the subunit item category
+          Get the complete list using [/subunit-hierarchy](#/options/subunit-hierarchy)
+      maintenance_deferred_on_equipment:
+        type: "string"
+        example: "yes"
+        enum: [yes, no]
+        description: This field records if a planned maintenance was overdue at the time of failure
+      model:
+        type: "string"
+        example: "M184972-E312"
+        description: This is manufacture’s equipment model for the defective component
+      observed_failure_name:
+        type: "string"
+        example: "External Leak"
+        description: Provides the failure mode for the component. This is
+          dependent on the component selected
+          Get the complete list using [/observed-failures](#/options/observed-failures)
+      oem_incident_reference_number:
+        type: "string"
+        example: "OIRN1944626"
+        description: Provides the reference number issued by the OEM if involved
+      oem_part_number:
+        type: "string"
+        example: "OPN1234-R1234"
+      oem_representative:
+        type: "string"
+        example: "Eric Theodore Cartman"
+        description: Provides the name of OEM representative on the rig
+          that was involved in the component analysis
+      reporter_first_name:
+        type: "string"
+        example: "John"
+        description: Provides the first name of the reporter
+      reporter_last_name:
+        type: "string"
+        example: "Doe"
+        description: Provides the last name of the reporter
+      oem_serial_number:
+        type: "string"
+        example: "OSN123748-URE342"
+      owner_primary_contact:
+        type: "string"
+        example: "Eric Theodore Cartman"
+      owner_primary_contact_email:
+        type: "string"
+        example: "abc@example.com"
+      pressure_rating:
+        type: "string"
+        enum:
+          [
+            "0psi",
+            "500psi",
+            "1,000psi",
+            "1,500psi",
+            "2,000psi",
+            "2,500psi",
+            "3,000psi",
+            "3,500psi",
+            "4,000psi",
+            "4,500psi",
+            "5,000psi",
+            "5,500psi",
+            "6,000psi",
+            "6,500psi",
+            "7,000psi",
+            "10,000psi",
+            "12,500psi",
+            "15,000psi",
+            "16,500psi",
+            "17,500psi",
+            "20,000psi",
+            "22,500psi",
+            "25,000psi",
+            "30,000psi",
+            "7,500psi",
+          ]
+        example: "10,000psi"
+        description: This refers to the drilling pressure at the time of event occurrence.
+      pressure_rating_unit:
+        type: "string"
+        enum: [Operating Circuit, Wellbore]
+      quantity:
+        type: "string"
+        example: "6"
+        description: Quantity of Failed Components - Provides the number
+          components that failed during this event.
+      rig_name:
+        type: "string"
+        example: "Mad Dog"
+        description: Name of the rig where the event occurred
+          Get the complete list using [/rigs](#/options/rigs)
+      root_cause:
+        type: "string"
+        example: "Wear and Tear"
+        enum:
+          [
+            Assessment Pending,
+            Design Issue,
+            Documentation Error,
+            Maintenance Error,
+            Procedural Error,
+            QA/QC Manufacturing,
+            RCFA Required,
+            Wear and Tear,
+          ]
+        description: Root cause of failure - Provides the root cause of the incident.
+      assessment_pending_root_cause_reason:
+        type: "string"
+        example: "Provide info on the root cause of the incident."
+        description: Provides more information from the Equipment Owner on the root cause of the incident.
+      size_primary:
+        type: "string"
+        enum:
+          [
+            "0",
+            '1"',
+            '2"',
+            '3"',
+            '4"',
+            '5"',
+            '6"',
+            '7"',
+            '8"',
+            '9"',
+            '10"',
+            '11"',
+            '12"',
+            '13"',
+            '14"',
+            '15"',
+            '16"',
+            '17"',
+            '18"',
+            '19"',
+            '20"',
+            '21"',
+            '22"',
+            '23"',
+            '24"',
+            '25"',
+            '26"',
+            '27"',
+            '28"',
+            '29"',
+            '30"',
+            '31"',
+            '32"',
+            '33"',
+            '34"',
+            '35"',
+            '36"',
+          ]
+        example: '30"'
+        description: Provides the whole and fractional size for the affected component.
+      size_secondary:
+        type: "string"
+        enum:
+          [
+            '0"',
+            '1/16"',
+            '1/8"',
+            '3/16"',
+            '1/4"',
+            '5/16"',
+            '3/8"',
+            '7/16"',
+            '1/2"',
+            '9/16"',
+            '5/8"',
+            '11/16"',
+            '3/4"',
+            '13/16"',
+            '7/8"',
+            '15/16"',
+            '11/64"',
+          ]
+        example: '13/16"'
+      subunit_name:
+        type: "string"
+        example: "BOP Stack"
+        description: Name of the subunit
+          Get the complete list using [/subunit-hierarchy](#/options/subunit-hierarchy)
+      what_was_the_system_status:
+        type: "string"
+        example: "In Operation"
+        enum: ["In Operation", "Not in Operation"]
+        description:
+          Dropdown box used to determine whether the Well Control System (WCS) was ‘In Operation’ or
+          ‘Not In Operation’. The WCS is determined to be ‘In Operation’ after the ‘Inline’ BOP Stack
+          (‘Stack In Use’) has been latched to the wellhead and the initial subsea testing program specified
+          in Section 6.4 of API Standard 53 has been successfully completed. The WCS is determined to be
+          ‘Not In Operation’ while the ‘Inline’ BOP Stack, or the ‘Inline’ LMRP, is being run,
+          latched to the wellhead, or the lower stack, in the case of the ‘Inline’ LMRP, and the WCS is
+          undergoing initial subsea testing. The WCS changes from ‘In Operation’ to ‘Not In Operation’ when
+          either the ‘Inline’ BOP Stack is removed from the wellhead (except in Subsea Well Hopping
+          situations – see below) or the ‘Inline’ LMRP is removed from the lower stack subsequent to the WCS
+          being designated as being ‘In Operation’. Consequently, the WCS is deemed to be ‘Not in Operation’
+          when running or retrieving (pulling) the ‘Inline’ BOP Stack or LMRP. In situations where the
+          ‘Inline’ BOP Stack is involved in a Subsea Well Hop, the WCS shall continue to be ‘In Operation’
+          from the time the previous well is secured, while unlatching from the previous well, during the
+          period associated with the transit from the previous well to the subsequent well,
+          while it is being latched to the subsequent well and during the performance of the subsea testing
+          program for Subsea Well Hops specified in Section 6.4 of API Standard 53.
+      usage_amount:
+        type: "number"
+        example: 35
+        description: This provides the usage amount of effected component.
+      usage_amount_unit:
+        type: "string"
+        enum: [Cycle, Hours, Unknown]
+        example: "Cycle"
+        description: This provides the usage of effected component.
+      was_the_last_laboratory_sample_acceptable:
+        type: "string"
+        example: "yes"
+        enum: [yes, no]
+        description: This boolean field records the results of the last
+          laboratory sample (as opposed to a rig test).
+      water_depth:
+        type: "string"
+        example: "4300"
+        description: This gives the level of water when event occurred (value)
+      water_depth_unit:
+        type: "string"
+        example: "Feet"
+        enum: [Feet, Meter]
+        description: This gives the level of water when event occurred (unit)
+      what_maintenance_was_deferred:
+        type: "string"
+        example: "Annual"
+        enum: [Annual, BWM/EOW, Five-Yearly, Quarterly]
+        description: The category of maintenance that was deferred
+      work_phase:
+        type: string
+        example: "Maintaining Stack/LMRP on deck"
+        enum:
+          [
+            Disconnecting Stack,
+            Disconnecting Stack before well hop,
+            Disconnecting Stack/LMRP,
+            Drilling Well,
+            Hopping Stack between Well,
+            Initial Subsea Testing on Well,
+            Initial Testing,
+            Latching Stack,
+            Latching Stack to Well after well hop,
+            Latching Stack/LMRP,
+            Maintaining Stack,
+            Maintaining Stack/LMRP on deck,
+            Nippling Down Stack,
+            Nippling Down Stack/LMRP,
+            Nippling Up Stack,
+            Nippling Up Stack/LMRP,
+            Retrieving Stack/LMRP,
+            Running Stack/LMRP,
+            Securing Well,
+            Setting back Stack/LMRP on deck,
+            Subsea Testing prior to starting new well after well hop,
+            Testing BOP Stack (WCS) on Well,
+            Maintaining Offline Riser & TJ Components,
+            Transporting Stack/LMRP from Set-back area,
+          ]
+        description:
+          This field is used to provide a unique definition of the various phases of operational work that
+          the impacted part of the WCS was undergoing at the time of the event and will be utilized to
+          categorize unplanned stack-pulls and to estimate equipment usage cycles.
+          The dropdown is configured such that it reflects the selections made in connection with the
+          ‘What was the system status?’ and ‘Which part of the system was impacted by the event?’ fields.
+  EditIncident:
+    type: "object"
+    required:
+      - "incident_number"
+      - "bop_control_fluid"
+      - "component_manufacturer_name"
+      - "component_name"
+      - "component_status"
+      - "concentration"
+      - "date_affected_component_was_installed"
+      - "date_of_last_laboratory_sample"
+      - "date_of_last_maintenance"
+      - "desc_well_control_system_status"
+      - "desc_ongoing_wcs_related_work"
+      - "desc_malfunction"
+      - "desc_problem_isolation"
+      - "desc_assumed_cause"
+      - "desc_initial_remedy"
+      - "desc_investigations_performed"
+      - "desc_summary_of_findings"
+      - "description_of_last_completed_maintenance"
+      - "did_the_event_involve_unplanned_stack_operations"
+      - "drilling_fluid_type"
+      - "detection_method"
+      - "equipment_id_number"
+      - "event_date"
+      - "event_date_is"
+      - "glycol"
+      - "hours_of_npt"
+      - "hours_of_repair_time"
+      - "iadc_code_description"
+      - "immediate_corrective_action"
+      - "usage_amount"
+      - "usage_amount_unit"
+      - "item_name"
+      - "maintenance_deferred_on_equipment"
+      - "model"
+      - "water_depth"
+      - "water_depth_unit"
+      - "observed_failure_name"
+      - "oem_incident_reference_number"
+      - "oem_part_number"
+      - "oem_representative"
+      - "oem_serial_number"
+      - "owner_primary_contact"
+      - "owner_primary_contact_email"
+      - "pressure_rating"
+      - "pressure_rating_unit"
+      - "quantity"
+      - "rig_name"
+      - "root_cause"
+      - "size_primary"
+      - "size_secondary"
+      - "subunit_name"
+      - "was_the_last_laboratory_sample_acceptable"
+      - "what_was_the_system_status"
+    properties:
+      incident_number:
+        type: "string"
+        example: "R1617283810146"
+        description: Provides the incident number of edited incident.
+      bop_control_fluid:
+        type: "string"
+        example: "Houghton Stack Magic ECO-G"
+        description:
+          Provides the name of the BOP control fluid in use at the site.
+          Get the complete list using [/control-fluids](#/options/control-fluids)
+      component_manufacturer_name:
+        type: "string"
+        example: "NOV"
+        description: Provides the name of the Component Manufacturer.
+          Get the complete list using [/component-manufacturer](#/options/component-manufacturer)
+      component_name:
+        type: "string"
+        example: "Choke and Kill Valve Operator Sea"
+        description: This is the lowest maintainable item that failed.
+          Get the complete list using [/subunit-hierarchy](#/options/subunit-hierarchy)
+      component_status:
+        type: "string"
+        example: "OEM - Analysis"
+        enum:
+          [
+            Equipment Owner Repaired,
+            Disposal,
+            OEM - Analysis,
+            OEM - Repair,
+            Storage,
+            Third Party Analysis,
+            Third Party Repair,
+          ]
+        description: Provides the status of the component where "Storage"
+          is returned if the equipment was not sent ashore. If the
+          equipment was sent ashore
+      concentration:
+        type: "string"
+        example: "5%"
+        enum: [0%, 5%, 10%, 15%, 20%, 25%, 30%, 35%, 40%, 45%, 50%, 55%, 60%]
+        description: Percentage of control fluid concentrate in the mixture.
+      date_affected_component_was_installed:
+        type: "string"
+        example: "MMM DD,YYYY e.g.: Sep 08, 2018"
+        description: Provides the name of Drilling Contractor / Equipment
+          Owner
+      date_of_last_laboratory_sample:
+        type: "string"
+        example: "MMM DD, YYYY e.g.: Sep 08, 2018"
+        description: This is a date field that records the date when the
+          affected component was installed into the system on
+          the rig. This could be the date that the equipment was
+          delivered, or it could be after a major
+          inspection/maintenance (e.g.five-yearly).
+      date_of_last_maintenance:
+        type: "string"
+        example: "MMM DD,YYYY e.g.: Sep 08, 2018"
+        description: This field records the date of the last laboratory
+          analysis.
+      desc_well_control_system_status:
+        type: "string"
+        example: ""
+        description:
+          Describe what was happening operationally from an overall WCS-perspective at the time the
+          event occurred, complete with information on the statuses of all the BOP stacks on the rig.
+      desc_ongoing_wcs_related_work:
+        type: "string"
+        example: ""
+        description:
+          Describe the WCS tasks that were being performed by, or on, the equipment (subunit/item
+          /component) at the center of the event at the time the event occurred.
+      desc_malfunction:
+        type: "string"
+        example: ""
+        description:
+          Describe how it was determined that the component at the center of the event was not
+          performing as required.
+      desc_problem_isolation:
+        type: "string"
+        example: ""
+        description:
+          Describe the steps taken to either (a) prevent the problem from escalating, preserve the
+          integrity of the WCS and allow the ongoing operations/WCS tasks to be completed as intended
+          or (b) discontinue ongoing operations/WCS tasks, troubleshoot the problem and eliminate the
+          problem such that the ongoing operations/WCS tasks could be completed as originally intended.
+      desc_assumed_cause:
+        type: "string"
+        example: ""
+        description:
+          Describe the initial assumptions that were made with regard to what caused the component at
+          the center of the event to fail to perform as required.
+      desc_initial_remedy:
+        type: "string"
+        example: ""
+        description:
+          Describe the immediate steps taken to rectify the problem, stemming from the malfunction of
+          the component at the center of this event, based on the assumptions made about the initial
+          cause.
+      desc_investigations_performed:
+        type: "string"
+        example: ""
+        description:
+          Describe the investigative actions taken to confirm the assumed root cause or establish a
+          credible root cause.
+      desc_summary_of_findings:
+        type: "string"
+        example: ""
+        description: Provide a summary of what was found as a result of performing the investigations.
+      desc_support_for_root_cause_selection:
+        type: "string"
+        example: ""
+        description:
+          Provide a description of the established root cause in a manner that supports the value
+          assigned in the ‘Root Cause’ field.
+      desc_lessons_learned_summary:
+        type: "string"
+        example: ""
+        description:
+          Describe the actions to be taken in an effort to eliminate the malfunction or at least reduce
+          the likelihood of a repeat occurrence of the malfunction.
+      description_of_last_completed_maintenance:
+        type: "string"
+        example: "No previous maintenance"
+        enum:
+          [
+            Adjustment,
+            Cleaned and Inspected,
+            Greased,
+            Installed repair kit,
+            Installed seal kit,
+            No previous maintenance,
+          ]
+        description: Provides the type of maintenance that was performed
+          on the affected component.
+      detection_method:
+        type: "string"
+        example: "Functional Testing Surface"
+        enum:
+          [
+            Casual Observation,
+            Condition Monitoring,
+            Maintanace,
+            Inspection,
+            Pressure Testing,
+            Function Testing,
+            Production Interference,
+            On Demand,
+            pressure testing of surface equipment,
+            Function testing of surface equipment,
+            pressure testing subsea,
+            Function testing subsea,
+            Pressure testing surface,
+            Function testing surface,
+          ]
+        description: Provides information on how the event was discovered.
+      did_the_event_involve_unplanned_stack_operations:
+        type: "string"
+        example: "yes"
+        enum: [yes, no]
+        description: Provides a boolean value which dictates whether the
+          event was a direct factor in the decision to retrieve the
+          subsea BOP stack for repairs or not.
+      drilling_fluid_type:
+        type: "string"
+        example: "Seawater"
+        enum:
+          [
+            Brine,
+            Seawater,
+            Synthetic based mud,
+            Water based mud,
+            Completion fluids,
+            Oil based muds,
+          ]
+        description: Provides the type of drilling fluid in use at the site.
+      drilling_fluids_into_environment:
+        type: string
+        example: "yes"
+        enum: [yes, no]
+        description:
+          RCFA is mandated in the event that there is a release of wellbore fluid to the environment.
+          It has been determined that the component in question is associated with an item of equipment
+          which is required to maintain the integrity of the wellbore. The selection of ‘Yes’ will
+          automatically result in the ‘Root Cause’ field being set to ‘RCFA Required’.
+      equipment_id_number:
+        type: "string"
+        example: "E12345E123"
+        description: An anonymous SFI code or similar that the equipment owner uses to identify the specific equipment or component.
+      event_date:
+        type: "string"
+        example: "MMM DD,YYYY e.g.: Sep 08, 2018"
+        description: Provides the date issue was identified
+      event_date_is:
+        type: "string"
+        example: "Date of Occurrence"
+        enum: [Date of Detection, Date of Occurrence]
+        description: Describes whether the date when the incident was
+          identified was either the Date of Detection or the Date of Occurrence
+      glycol:
+        type: "string"
+        example: "5%"
+        enum:
+          [
+            0%,
+            1%,
+            2%,
+            3%,
+            4%,
+            5%,
+            6%,
+            7%,
+            8%,
+            9%,
+            10%,
+            11%,
+            12%,
+            13%,
+            14%,
+            15%,
+            16%,
+            17%,
+            18%,
+            19%,
+            20%,
+            25%,
+            30%,
+            35%,
+            40%,
+            45%,
+            50%,
+            55%,
+            60%,
+            65%,
+            70%,
+            75%,
+            80%,
+            85%,
+            90%,
+            95%,
+            100%,
+          ]
+        description: Percentage of glycol in the mixture.
+      hours_of_npt:
+        type: "integer"
+        example: 2
+        description: This field records the number of hours that is inclusive
+          of BOP recovery and reinstallation etc., plus all time inbetween event detection and getting
+          back to the point at which the event occurred
+      hours_of_repair_time:
+        type: "integer"
+        example: 1
+        description: The actual time take to repair and test the affected component.
+      iadc_code_description:
+        type: "string"
+        example: "15 - Test B.O.P"
+        enum:
+          [
+            1 - Rig Up and Tear Down,
+            2 - Drill Actual,
+            3 - Reaming,
+            4 - Coring,
+            5 - Condition Mud & Circulate,
+            6 - Trips,
+            7 - Lubricate Rig,
+            8 - Repair Rig,
+            9 - Cut Off Drilling Line,
+            10 - Deviation Survey,
+            11 - Wire Line Logs,
+            12 - Run Casing & Cement,
+            13 - Wait On Cement,
+            14 - Nipple Up B.O.P.,
+            15 - Test B.O.P.,
+            16 - Drill Stem Test,
+            17 - Plug Back,
+            18 - Squeeze Cement,
+            19 - Fishing,
+            20 - Dir. Work,
+            21 - Running / Retrieving Riser Equipment,
+            22 - Testing Surface Equipment,
+            23 - Other,
+            A - Perforating,
+            B - Tubing Trips,
+            C - Treating,
+            D - Swabbing,
+            E - Testing,
+            F - NULL,
+            G - NULL,
+            H - NULL,
+          ]
+      immediate_corrective_action:
+        type: "string"
+        enum:
+          [
+            Adjust,
+            Check,
+            Inspection,
+            Modify,
+            Refit,
+            Repair,
+            Replace,
+            Service,
+            Test,
+          ]
+        example: "Replace"
+        description: This is the action taken on the rig to place the component back into an operational state.
+      impacted_element:
+        type: string
+        example: "Offline"
+        enum: ["Offline", "Inline"]
+        description:
+          On dual-stack rigs, this dropdown is used to identify whether the event is associated with that
+          part of the WCS that it is ‘Inline’ (i.e. the part of the WCS impacted includes the ‘Stack In Use’)
+          or whether it is associated with that part of the WCS that is ‘Offline’ (i.e. the BOP Stack on deck
+          on a rig with two stacks). This field will automatically be set to ‘Inline’ for single-stack rigs.
+      item_name:
+        type: "string"
+        example: "Stack Choke and Kill System"
+        description: This is the subunit item category
+          Get the complete list using [/subunit-hierarchy](#/options/subunit-hierarchy)
+      maintenance_deferred_on_equipment:
+        type: "string"
+        example: "yes"
+        enum: [yes, no]
+        description: This field records if a planned maintenance was overdue at the time of failure
+      model:
+        type: "string"
+        example: "M184972-E312"
+        description: This is manufacture’s equipment model for the defective component
+      observed_failure_name:
+        type: "string"
+        example: "External Leak"
+        description: Provides the failure mode for the component. This is
+          dependent on the component selected
+          Get the complete list using [/observed-failures](#/options/observed-failures)
+      oem_incident_reference_number:
+        type: "string"
+        example: "OIRN1944626"
+        description: Provides the reference number issued by the OEM if involved
+      oem_part_number:
+        type: "string"
+        example: "OPN1234-R1234"
+      oem_representative:
+        type: "string"
+        example: "Eric Theodore Cartman"
+        description: Provides the name of OEM representative on the rig
+          that was involved in the component analysis
+      reporter_first_name:
+        type: "string"
+        example: "John"
+        description: Provides the first name of the reporter
+      reporter_last_name:
+        type: "string"
+        example: "Doe"
+        description: Provides the last name of the reporter
+      oem_serial_number:
+        type: "string"
+        example: "OSN123748-URE342"
+      owner_primary_contact:
+        type: "string"
+        example: "Eric Theodore Cartman"
+      owner_primary_contact_email:
+        type: "string"
+        example: "abc@example.com"
+      pressure_rating:
+        type: "string"
+        enum:
+          [
+            "0psi",
+            "500psi",
+            "1,000psi",
+            "1,500psi",
+            "2,000psi",
+            "2,500psi",
+            "3,000psi",
+            "3,500psi",
+            "4,000psi",
+            "4,500psi",
+            "5,000psi",
+            "5,500psi",
+            "6,000psi",
+            "6,500psi",
+            "7,000psi",
+            "10,000psi",
+            "12,500psi",
+            "15,000psi",
+            "16,500psi",
+            "17,500psi",
+            "20,000psi",
+            "22,500psi",
+            "25,000psi",
+            "30,000psi",
+            "7,500psi",
+          ]
+        example: "10,000psi - Wellbore"
+        description: This refers to the drilling pressure at the time of event occurrence.
+      pressure_rating_unit:
+        type: "string"
+        enum: [Operating Circuit, Wellbore]
+      quantity:
+        type: "string"
+        example: "6"
+        description: Quantity of Failed Components - Provides the number
+          components that failed during this event.
+      rig_name:
+        type: "string"
+        example: "Mad Dog"
+        description: Name of the rig where the event occurred
+          Get the complete list using [/rigs](#/options/rigs)
+      root_cause:
+        type: "string"
+        example: "Wear and Tear"
+        enum:
+          [
+            Assessment Pending,
+            Design Issue,
+            Documentation Error,
+            Maintenance Error,
+            Procedural Error,
+            QA/QC Manufacturing,
+            RCFA Required,
+            Wear and Tear,
+          ]
+        description: Root cause of failure - Provides the root cause of the incident.
+      assessment_pending_root_cause_reason:
+        type: "string"
+        example: "Provide info on the root cause of the incident."
+        description: Provides more information from the Equipment Owner on the root cause of the incident.
+      size_primary:
+        type: "string"
+        enum:
+          [
+            "0",
+            '1"',
+            '2"',
+            '3"',
+            '4"',
+            '5"',
+            '6"',
+            '7"',
+            '8"',
+            '9"',
+            '10"',
+            '11"',
+            '12"',
+            '13"',
+            '14"',
+            '15"',
+            '16"',
+            '17"',
+            '18"',
+            '19"',
+            '20"',
+            '21"',
+            '22"',
+            '23"',
+            '24"',
+            '25"',
+            '26"',
+            '27"',
+            '28"',
+            '29"',
+            '30"',
+            '31"',
+            '32"',
+            '33"',
+            '34"',
+            '35"',
+            '36"',
+          ]
+        example: '30"'
+        description: Provides the whole and fractional size for the affected component.
+      size_secondary:
+        type: "string"
+        enum:
+          [
+            '0"',
+            '1/16"',
+            '1/8"',
+            '3/16"',
+            '1/4"',
+            '5/16"',
+            '3/8"',
+            '7/16"',
+            '1/2"',
+            '9/16"',
+            '5/8"',
+            '11/16"',
+            '3/4"',
+            '13/16"',
+            '7/8"',
+            '15/16"',
+            '11/64"',
+          ]
+        example: '13/16"'
+      subunit_name:
+        type: "string"
+        example: "BOP Stack"
+        description: Name of the subunit
+          Get the complete list using [/subunit-hierarchy](#/options/subunit-hierarchy)
+      what_was_the_system_status:
+        type: "string"
+        example: "In Operation"
+        enum: ["In Operation", "Not in Operation"]
+        description:
+          Dropdown box used to determine whether the Well Control System (WCS) was ‘In Operation’ or
+          ‘Not In Operation’. The WCS is determined to be ‘In Operation’ after the ‘Inline’ BOP Stack
+          (‘Stack In Use’) has been latched to the wellhead and the initial subsea testing program specified
+          in Section 6.4 of API Standard 53 has been successfully completed. The WCS is determined to be
+          ‘Not In Operation’ while the ‘Inline’ BOP Stack, or the ‘Inline’ LMRP, is being run,
+          latched to the wellhead, or the lower stack, in the case of the ‘Inline’ LMRP, and the WCS is
+          undergoing initial subsea testing. The WCS changes from ‘In Operation’ to ‘Not In Operation’ when
+          either the ‘Inline’ BOP Stack is removed from the wellhead (except in Subsea Well Hopping
+          situations – see below) or the ‘Inline’ LMRP is removed from the lower stack subsequent to the WCS
+          being designated as being ‘In Operation’. Consequently, the WCS is deemed to be ‘Not in Operation’
+          when running or retrieving (pulling) the ‘Inline’ BOP Stack or LMRP. In situations where the
+          ‘Inline’ BOP Stack is involved in a Subsea Well Hop, the WCS shall continue to be ‘In Operation’
+          from the time the previous well is secured, while unlatching from the previous well, during the
+          period associated with the transit from the previous well to the subsequent well,
+          while it is being latched to the subsequent well and during the performance of the subsea testing
+          program for Subsea Well Hops specified in Section 6.4 of API Standard 53.
+      usage_amount:
+        type: "number"
+        example: 35
+        description: This provides the usage amount of effected component.
+      usage_amount_unit:
+        type: "string"
+        enum: [Cycle, Hours, Unknown]
+        example: "Cycle"
+        description: This provides the usage of effected component.
+      was_the_last_laboratory_sample_acceptable:
+        type: "string"
+        example: "yes"
+        enum: [yes, no]
+        description: This boolean field records the results of the last
+          laboratory sample (as opposed to a rig test).
+      water_depth:
+        type: "string"
+        example: "4300"
+        description: This gives the level of water when event occurred (value)
+      water_depth_unit:
+        type: "string"
+        example: "Feet"
+        enum: [Feet, Meter]
+        description: This gives the level of water when event occurred (unit)
+      what_maintenance_was_deferred:
+        type: "string"
+        example: "Annual"
+        enum: [Annual, BWM/EOW, Five-Yearly, Quarterly]
+        description: The category of maintenance that was deferred
+      work_phase:
+        type: string
+        example: "Maintaining Stack/LMRP on deck"
+        enum:
+          [
+            Disconnecting Stack,
+            Disconnecting Stack before well hop,
+            Disconnecting Stack/LMRP,
+            Drilling Well,
+            Hopping Stack between Well,
+            Initial Subsea Testing on Well,
+            Initial Testing,
+            Latching Stack,
+            Latching Stack to Well after well hop,
+            Latching Stack/LMRP,
+            Maintaining Stack,
+            Maintaining Stack/LMRP on deck,
+            Nippling Down Stack,
+            Nippling Down Stack/LMRP,
+            Nippling Up Stack,
+            Nippling Up Stack/LMRP,
+            Retrieving Stack/LMRP,
+            Running Stack/LMRP,
+            Securing Well,
+            Setting back Stack/LMRP on deck,
+            Subsea Testing prior to starting new well after well hop,
+            Testing BOP Stack (WCS) on Well,
+            Maintaining Offline Riser & TJ Components,
+            Transporting Stack/LMRP from Set-back area,
+          ]
+        description:
+          This field is used to provide a unique definition of the various phases of operational work that
+          the impacted part of the WCS was undergoing at the time of the event and will be utilized to
+          categorize unplanned stack-pulls and to estimate equipment usage cycles.
+          The dropdown is configured such that it reflects the selections made in connection with the
+          ‘What was the system status?’ and ‘Which part of the system was impacted by the event?’ fields.
+  SubunitHierarchy:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "BOP Stack"
+        id:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Annual Preventer"
+              id:
+                type: integer
+                example: 1
+              components:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "End Connection"
+  ObservedFailures:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: End Connection
+        observed-failures:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 1
+              name:
+                type: string
+                example: Internal Leak
+  ModelOptions:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "BOP Stack"
+        id:
+          type: integer
+          example: 1
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "Annual Preventer"
+              id:
+                type: integer
+                example: 1
+              components:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      example: 1
+                    name:
+                      type: string
+                      example: "End Connection"
+                    component_manufacturer:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                            example: 1
+                          name:
+                            type: string
+                            example: "NOV"
+                          models:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: integer
+                                  example: 1
+                                name:
+                                  type: "string"
+                                  example: "Model A"

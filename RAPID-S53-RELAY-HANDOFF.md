@@ -1,8 +1,37 @@
 # RAPID-S53 Relay — Handoff
 
-**Status: ON HOLD**, blocked on IADC/Softway answering the open questions
-below. See `HANDOFF.md`'s "Background / not-actively-worked items" for
-the one-paragraph pointer to this.
+**Status: HOLD LIFTED 2026-08-17 — superseded as the delivery route.**
+IADC (Mike Kucharski) answered all four open questions and issued Swagger
+**v1.1.0** (`RAPIDS53_Inbound_API_v1.1.0.yaml`, in this repo). Answers,
+in short:
+
+1. **Auth = API-Key + HMAC-SHA256** (the scheme this relay implements as
+   `RAPID_AUTH_MODE=hmac`; the inbound schema's OAuth2 block was their
+   labeling error, removed in v1.1.0). Two-step: HMAC-signed
+   `GET /authentication` → JWT (2h expiry) → `Authorization` + `x-api-key`
+   on every other endpoint.
+2. **`when_did_the_event_occur` is deprecated** — replaced by
+   `what_was_the_system_status` (required, `In Operation`/`Not in
+   Operation`).
+3. **Reporter names**: free text accepted but silently dropped unless
+   matching an authorised reporter from `GET /rigs`; IADC recommends
+   treating the mismatch warning as an error (adopted).
+4. **Sandbox exists**: `https://api-demo.rapid4s53.com`, same endpoints;
+   credentials from the RAPID administrator. Some process steps are
+   portal-only — a Teams session with Mike covers those.
+
+**Route decision (Dan, 2026-08-18): the submission service is being
+built as a Power Automate flow** — see `RAPID-S53-POWER-AUTOMATE-SPEC.md`
+(rewritten to v1.1.0) and `RAPID-S53-TOOL-UPDATE-HANDOFF.md` for the
+tool-side field changes. This Python relay stays archived as the
+documented fallback: if the flow route ever stalls, the relay's `hmac`
+auth mode is exactly the confirmed scheme — resume per "How to resume"
+below, updating validation to v1.1.0's field list first.
+
+Everything below this line is the original hold-era document, kept
+verbatim for the record.
+
+---
 
 **Where the code is:** NOT in this repo. A standalone Python (FastAPI)
 relay service was built and fully tested (122 passing tests, zero live

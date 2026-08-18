@@ -1,256 +1,327 @@
-# RAPID-S53 submission flow — Power Automate build spec
+# RAPID-S53 submission flow — Power Automate build spec (v1.1.0)
+
+**Status: UNBLOCKED — build this.** IADC (Mike Kucharski) answered all
+open questions on 2026-08-17 and issued Swagger **v1.1.0**
+(`RAPIDS53_Inbound_API_v1.1.0.yaml`, checked into this repo — the
+authoritative schema for everything below). The chosen route for the
+RAPID-S53 submission service is this Power Automate flow, NOT the
+archived Python relay (decision recorded in
+`RAPID-S53-RELAY-HANDOFF.md`; the relay stays archived as fallback).
 
 **Audience:** someone building this in the Power Automate designer, no
-coding background assumed. **Companion, not a replacement, for the Python
-relay** (`report-backend/app/rapid_s53/`) — build whichever one your
-organization is better positioned to host and maintain; the two are
-functionally equivalent by design (same field mapping table, same
-contract). `mapping.py` in that folder is the single source of truth this
-spec's Compose expressions must match.
-
-**Do not start building step 6 (HMAC) until you've read it** — it's a real
-blocker, not a formality.
+coding background assumed — plus one small helper (§6) that needs IT to
+deploy a few lines of provided code. The org already runs a Premium
+HTTP-trigger flow in production (the PostedReports posting flow), so
+licensing and the build pattern are proven.
 
 ---
 
 ## 1. Overview
 
+SSORT Rev 104+ **builds the finished, RAPID-shaped `rapidIncident`
+object inside the tool** — so unlike the original draft of this spec,
+there is **no field-mapping stage**. The flow's whole job is: validate,
+authenticate, submit, respond.
+
 ```
-[HTTP trigger: receive report]
+[HTTP trigger: receive submission from SSORT]
         |
         v
 [Condition: X-Api-Key matches stored secret?] --No--> [Terminate: 401]
         |Yes
         v
-[Compose: build the Incident from the report — same field table as mapping.py]
+[Validate rapidIncident: 52 required fields present,
+ enums legal, vocab + reporter checked against cached lists (§8-9)]
+        |--fail--> [Respond 400 naming the field(s); nothing sent to RAPID]
+        v
+[Idempotency lookup for report_id (§10)]
         |
         v
-[Check idempotency list for this report_id]
+[Get RAPID token: cached, or re-auth via HMAC helper (§6-7)]
         |
         v
-[Get/refresh RAPID auth token]  <-- separate concern, see §6-7
+[HTTP: POST /incident  (or /update/incident if report_id known)]
         |
         v
-[HTTP: POST /incident or /update/incident]
+[Write report_id -> incident_number FIRST, then branch on warnings (§11)]
         |
         v
-[Branch on response: success / warnings / 405 / other error]
-        |
-        v
-[Write report_id -> incident_number to idempotency list]  (before evaluating warnings — see §10)
-        |
-        v
-[Respond to the caller]
+[Respond to SSORT]
 ```
 
-A **separate, scheduled** child flow (§8) refreshes RAPID's six option
-lists once a day — it does not run inside this synchronous flow.
+A **separate, scheduled** child flow (§8) refreshes RAPID's option lists
+(including the authorised-reporters list) once a day.
 
----
+## 2. Licensing — resolved
 
-## 2. Licensing note — read this before opening the designer
+The HTTP request trigger and generic HTTP action are Premium connectors.
+**This is no longer a risk**: the PostedReports posting flow already runs
+on this tenant using the same trigger, in production, today. Build in the
+same environment family (IT's SEADRILL-WC-DEV per their plan, or wherever
+the PostedReports flow lives).
 
-The **HTTP request trigger** ("When a HTTP request is received") and the
-generic **HTTP action** (used to call RAPID's API) are both **Premium**
-connectors in most Power Automate tenants. Confirm your organization's
-license tier covers Premium connectors, or this entire flow can't be built
-as described. This is the same constraint the SharePoint-relay side of
-this project doesn't have (it's a small Python service instead) —
-flagging it now, not discovered halfway through the build.
-
----
-
-## 3. Trigger
+## 3. Trigger + contract with SSORT
 
 - Trigger: **"When a HTTP request is received."**
-- **Request body JSON schema**: generate it from a sample payload matching
-  the flat `/rapid-s53` contract the Python relay defines — every `s53_*`
-  field from `mapping.py`, plus `report_id`, `contract_version`, `assetid`,
-  `asset`, `createdby`. Include `report_id` in the sample — it's easy to
-  forget since it's not one of the RAPID-facing fields, but the whole flow
-  depends on it.
-- Immediately after the trigger, add a **Condition**: does the incoming
-  `X-Api-Key` header equal the stored secret (§4)? If not, **Terminate**
-  the flow with status "Failed" and respond `401`. Do this before touching
-  the payload at all.
+- Body (confirm final shape with the reporting-tools session — see
+  `RAPID-S53-TOOL-UPDATE-HANDOFF.md`; this is the recommended contract):
 
----
+```json
+{
+  "report_id": "<client-generated UUID - REQUIRED, the only safe idempotency key>",
+  "contract_version": 2,
+  "asset": "<rig name>",
+  "assetid": "<rig id in the tool>",
+  "createdby": "<report creator>",
+  "rapidIncident": { "...": "the complete Incident object in RAPID's own field names, built by SSORT" }
+}
+```
+
+- Immediately after the trigger: **Condition** — incoming `X-Api-Key`
+  header equals the stored secret (§4)? If not, Terminate + 401, before
+  touching the payload.
 
 ## 4. Secret storage
 
-Store the shared API key (and RAPID's own credentials, once §6/§7 are
-resolved) as **Power Platform environment variables of type Secret**, or
-in **Azure Key Vault** via the Key Vault connector. **Never** paste a
-secret as a literal string into a Compose or HTTP action — flow
-definitions are readable by anyone with maker-portal access to the
-environment, so a literal secret there is not meaningfully protected.
+Store the SSORT shared key, the RAPID credentials (username, password,
+secret key, x-api-key — all four arrive from the RAPID administrator by
+email during onboarding; the secret key comes in a **separate** email),
+and the HMAC helper's own key as **Power Platform environment variables
+of type Secret** or in **Azure Key Vault**. Never as literals in a
+Compose/HTTP action — flow definitions are readable by anyone with
+maker-portal access.
 
----
+## 5. ~~Build-the-Incident~~ — deleted
 
-## 5. Build-the-Incident stage
+SSORT builds the incident. The flow performs **no field mapping** and
+**invents no values**. If something required is missing, that's a
+validation failure back to the tool (§9), never a default filled in here.
 
-One **Compose** action, `BuildIncident`, with one expression per RAPID
-field. Keep this in lockstep with `mapping.py`'s tables — that file is the
-authoritative list, this Compose action is a second, independently
-maintained implementation of the same table, and the two **will** drift if
-one changes without the other:
+## 6. RAPID authentication — the confirmed recipe
 
-- **Direct fields** (`mapping.DIRECT_FIELD_MAP`): `triggerBody()?['s53_bopfluid']` → straight into `component_manufacturer_name` etc. No expression logic.
-- **Dates** (`mapping.DATE_FIELD_MAP`): `formatDateTime(triggerBody()?['s53_installdate'], 'MMM dd, yyyy')`. Our stored value is already ISO `yyyy-MM-dd`, so no separate parse step is needed.
-- **Integers** (`mapping.INTEGER_FIELD_MAP`): `int(triggerBody()?['s53_npt'])`. If the source value isn't numeric, this expression throws — let it; don't wrap it in a fallback that silently sends `0`.
-- **Numbers** (`mapping.NUMBER_FIELD_MAP`): `float(triggerBody()?['s53_usagehours'])`.
-- **Booleans** (`mapping.BOOLEAN_FIELD_MAP`): `if(equals(triggerBody()?['s53_unplanned'], true), 'yes', 'no')`. RAPID wants the lower-case string, not a JSON boolean.
-- **Enum reconciliation** (`mapping.ENUM_RECONCILE_FIELD_MAP` / `ENUM_VALUE_MAPS`): a `switch()` expression per flagged field. Today only `detection_method` has a confirmed mismatch (`"Functional Testing Surface"` → `"Function Testing"`); default the `switch()` to the original value for everything else, so an unmapped value passes through rather than being silently dropped.
-- **`rig_name`**: `triggerBody()?['asset']` — not one of the `s53_*` fields, comes from the report's own rig identity.
-- **Reporter name split**: `first(split(triggerBody()?['createdby'], ' '))` for `reporter_first_name`; the corresponding "everything after the first space" expression for `reporter_last_name` — Power Automate has no direct "split once" function, so build it as `if(contains(...), substring(...), '')` around the first space's index (`indexOf`). This is the same naive fallback the Python relay uses; it's a stopgap, not a fix — see §9 for the real gap.
-- **The three genuine gaps** (`when_did_the_event_occur`, `pressure_rating_unit`, `drilling_fluids_into_environment`): do **not** invent a value. If the trigger payload doesn't carry one of these under its own RAPID field name, this flow should fail the same way the Python relay does — see §9.
+**Confirmed by IADC 2026-08-17: API-Key + HMAC-SHA256. The OAuth2 block
+in the old inbound schema was their labeling error, removed in v1.1.0.**
 
----
+Two steps:
 
-## 6. HMAC — the real blocker, named plainly
+**Step 1 — `GET https://api.rapid4s53.com/authentication`** with exactly
+four headers:
 
-**Power Automate has no built-in keyed HMAC-SHA256 expression.** The
-`ApiKeyHmacAuth` scheme in the Python relay (`base64(HMAC_SHA256(username +
-password + UTC timestamp, secret))`) cannot be computed inside a Compose
-action or any stock connector action. Two honest options, pick one before
-going further:
+| Header | Value |
+|---|---|
+| `X-Authorization-Username` | username from the onboarding email |
+| `X-Authorization-Content-SHA256` | `base64( HMAC_SHA256( username + password + timestamp, secret_key ) )` — hash computed over the **plain concatenation** (no separators), digest taken as **raw binary** before base64 |
+| `X-Authorization-Timestamp` | the same timestamp used in the hash — **GMT**, format `YYYY-MM-DD hh:mm:ss`; rejected if more than 2 hours old |
+| `x-api-key` | the API key from the onboarding email |
 
-**(a) A minimal Azure Function**, doing only this one computation — input:
-username/password/timestamp/secret; output: the base64 signature. Called
-from this flow via an HTTP action. This is a few lines of code, but it is
-code, hosted somewhere, with its own secret (the HMAC secret) to protect —
-functionally a tiny sibling of the Python relay this spec is meant to be
-an alternative to.
+Response: `{"success": true, "data": {"token": "<JWT>"}}`.
 
-**(b) If IADC confirms the bearer/OAuth path is the real one** (see the
-open question list this relay sent them — §7 below explains why the
-inbound YAML's stated "implicit flow" can't actually work unattended),
-this entire section disappears and the flow gets substantially simpler:
-no HMAC, just a token-acquisition HTTP call and a cached bearer token.
+**Step 2 —** every other endpoint gets two headers: `Authorization:
+<that JWT>` and `x-api-key`. The token **expires 2 hours after issue**;
+re-authenticate to get a new one.
 
-Do not build §6 assuming (a) or (b) without confirming which is real —
-that confirmation is one of the six open questions in
-`RAPID-S53-RELAY-HANDOFF.md`, sent to IADC/Softway. The Python relay's
-`auth.py` hedges this exact ambiguity behind one interchangeable
-`RapidAuth` interface for the same reason.
+### 6.1 The one piece Power Automate can't do itself
 
----
+Power Automate has **no HMAC-SHA256 expression**, so the signature in
+step 1 is computed by a tiny helper IT deploys once. Two equivalent
+options — deploy EITHER, both verified to produce identical signatures:
 
-## 7. RAPID authentication call
+**Option A — Azure Function (Node.js):**
 
-Whichever of §6(a)/(b) is confirmed:
+```js
+const crypto = require("crypto");
+module.exports = async function (context, req) {
+  const { username, password, timestamp } = req.body || {};
+  const secret = process.env.RAPID_SECRET_KEY;   // Function app setting, not in the flow
+  if (!username || !password || !timestamp || !secret) {
+    context.res = { status: 400, body: { error: "missing input" } }; return;
+  }
+  const signature = crypto.createHmac("sha256", secret)
+    .update(username + password + timestamp, "utf8").digest("base64");
+  context.res = { status: 200, body: { signature } };
+};
+```
 
-- Call RAPID's `/authentication` endpoint (or whatever token endpoint the
-  confirmed scheme uses) in its own action, before the submit call.
-- **Cache the resulting token with its expiry in a Dataverse table or
-  SharePoint list**, not in a flow variable — Power Automate does not keep
-  in-memory state across separate runs, so every run without a persisted
-  cache would re-authenticate needlessly (and, if RAPID rate-limits
-  `/authentication`, could start failing under normal traffic).
-- Before calling RAPID, check the cached expiry; only re-authenticate if
-  expired or missing.
+**Option B — Azure Automation PowerShell runbook (webhook-triggered):**
 
----
+```powershell
+param([object]$WebhookData)
+$in = $WebhookData.RequestBody | ConvertFrom-Json
+$secret = Get-AutomationVariable -Name 'RAPID_SECRET_KEY'   # encrypted automation variable
+$h = New-Object System.Security.Cryptography.HMACSHA256
+$h.Key = [Text.Encoding]::UTF8.GetBytes($secret)
+$sig = [Convert]::ToBase64String($h.ComputeHash(
+    [Text.Encoding]::UTF8.GetBytes($in.username + $in.password + $in.timestamp)))
+@{ signature = $sig } | ConvertTo-Json
+```
 
-## 8. Option-list caching — separate scheduled flow
+Notes for IT: the RAPID **secret key lives in the helper's own
+configuration** (Function app setting / encrypted Automation variable),
+never in the flow and never in the request body — the flow sends only
+username, password and timestamp. Keep the helper's URL non-guessable
+(function key / webhook token) since anyone who can call it can obtain
+signatures.
 
-Build the six RAPID option-list lookups (`/rigs`, `/control-fluids`,
-`/component-manufacturer`, `/subunit-hierarchy`, `/observed-failures`,
-`/models`) as their **own flow**, triggered on a **daily recurrence**, that
-writes the results into a Dataverse table or SharePoint list. The
-submission flow (this document) only **reads** that list — it does not
-call RAPID's option endpoints inline. Two reasons: it keeps the
-synchronous submission flow well under Power Automate's ~120-second
-timeout, and it means a slow/failing RAPID option endpoint never blocks an
-actual incident submission.
+### 6.2 Verification test vector — run this BEFORE credentials arrive
 
-On a fetch failure, the daily flow should leave the existing cached list
-untouched (log the failure, don't overwrite good data with nothing) — same
-stale-on-failure-fallback behavior as the Python relay's `options.py`.
+With inputs `username=testuser`, `password=TestPassword123`,
+`timestamp=2026-08-18 12:00:00`, `secret=test-secret-key`, the helper
+MUST return exactly:
 
----
+```
+yP3QFwesU4mPBXVX+BuT5KE6HD6E69s9kgHjZuW6F6Q=
+```
 
-## 9. Vocabulary validation
+(Verified 2026-08-18 against three independent implementations — Python
+`hmac`, .NET `HMACSHA256`, Node `crypto` — all identical.) If the
+deployed helper returns anything else for these inputs, it is wrong —
+usual suspects: hex output instead of raw-binary→base64, separators
+added between the three concatenated values, or a non-UTF-8 encoding.
 
-For each of the six controlled-vocabulary fields
-(`rig_name`, `subunit_name`/`item_name`/`component_name`,
-`component_manufacturer_name`, `model`, `observed_failure_name`,
-`bop_control_fluid`), add a **Condition** (or a `contains()` check against
-the cached list from §8) after `BuildIncident`. If a value isn't in the
-cached list, **Terminate** the flow with status "Failed" and a structured
-message naming the field — mirroring the Python relay's `400
-transform_failed` response, so both integrations fail the same way for the
-same reason. Do this **before** calling RAPID: RAPID's own `warnings[]`
-response silently drops unmatched vocab rather than rejecting it, so
-catching it here is the only way to get a clear, immediate failure instead
-of a false "success."
+### 6.3 Flow expressions for step 1
 
-The same Condition-based approach handles the three named gaps from §5:
-if `when_did_the_event_occur` / `pressure_rating_unit` /
-`drilling_fluids_into_environment` aren't present in the trigger payload,
-Terminate naming the missing field, rather than sending RAPID an
-incomplete `Incident`.
+- Timestamp: `formatDateTime(utcNow(), 'yyyy-MM-dd HH:mm:ss')` — capital
+  `HH` (24-hour). Compute it ONCE into a Compose and reuse the same
+  output for both the helper call and the header — a re-evaluated
+  `utcNow()` can differ between actions and invalidate the signature.
+- HTTP action → helper URL with `{username, password, timestamp}` →
+  returns `{signature}`.
+- HTTP action → `GET https://api.rapid4s53.com/authentication` with the
+  four headers → parse `body('...')?['data']?['token']`.
 
----
+## 7. Token caching
+
+Cache the token **with an expiry timestamp** (issue time + ~110 minutes,
+inside the 2-hour window) in a SharePoint list or Dataverse table — not a
+flow variable (no state across runs). Before calling RAPID: read cache →
+if missing/expired, run §6 and update the cache. If any RAPID call
+returns 401/`"The incoming token has expired"`, invalidate the cache,
+re-authenticate once, retry the call once.
+
+## 8. Option-list caching — separate scheduled daily flow
+
+Fetch and store (SharePoint list / Dataverse):
+
+- `/rigs` — rig names **and each rig's `reporters[]` (first_name,
+  last_name)**. This is now the authoritative source for reporter
+  validation (§9), per IADC's answer 3.
+- `/control-fluids`, `/component-manufacturer`, `/subunit-hierarchy`,
+  `/observed-failures`, `/models`.
+
+On fetch failure, keep the previous cached list (log, don't overwrite
+good data with nothing). These calls use the same token + x-api-key
+headers as everything else.
+
+## 9. Validation — before anything is sent to RAPID
+
+All checks run against `triggerBody()?['rapidIncident']`; any failure →
+Terminate/respond **400 naming the exact field(s)**, nothing sent.
+
+1. **Required fields**: all **52** entries of v1.1.0's
+   `definitions.Incident.required` present and non-empty. Take the list
+   verbatim from `RAPIDS53_Inbound_API_v1.1.0.yaml` — do not retype it
+   from memory. Notables vs the old spec: `what_was_the_system_status`
+   is required (enum `In Operation` / `Not in Operation`) —
+   `when_did_the_event_occur` no longer exists;
+   `pressure_rating_unit` is required (enum `Operating Circuit` /
+   `Wellbore`). `drilling_fluids_into_environment` is **optional** —
+   pass through when present, never block on it.
+2. **Enums**: v1.1.0 defines 24 enum fields — validate at least the
+   high-risk ones (`what_was_the_system_status`, `pressure_rating_unit`,
+   `event_date_is`, `component_status`, `detection_method`,
+   `iadc_code_description`, yes/no fields) against the YAML's exact
+   values; case and punctuation must match exactly.
+3. **Controlled vocabulary** (values RAPID silently drops if unmatched):
+   `rig_name`, `subunit_name`, `item_name`, `component_name`,
+   `component_manufacturer_name`, `model`, `observed_failure_name`,
+   `bop_control_fluid` — check against the §8 cache. Catching these here
+   is the only way to get a clear failure instead of a false success.
+4. **Reporter pre-flight (Dan's decision, per IADC recommendation)**:
+   if `reporter_first_name`/`reporter_last_name` are present, they must
+   match (case-insensitive) an entry in the cached `reporters[]` for
+   `rig_name`. No match → 400: *"reporter '<first last>' is not an
+   authorised reporter for <rig> — pick a name from the rig's authorised
+   list or contact the RAPID administrator to have them added."* This
+   runs BEFORE submission because RAPID's own behavior is to create the
+   incident **without** a reporter and only warn.
 
 ## 10. Idempotency
 
-Keep a Dataverse table (or SharePoint list) keyed by `report_id`, one
-column `incident_number`. Before calling RAPID:
+SharePoint list / Dataverse table keyed `report_id` → `incident_number`.
 
-1. Look up `report_id` in this table.
-2. If found → call `/update/incident` with the stored `incident_number`.
-3. If not found → call `/incident` (create).
+1. Look up the incoming `report_id`.
+2. Found → `POST /update/incident` including the stored
+   `incident_number` in the body.
+3. Not found → `POST /incident`.
 
 **Non-negotiable ordering**: RAPID returns a real `incident_number` even
-on a response that also carries `warnings[]`. Write the `report_id` →
-`incident_number` mapping to the table **immediately after** either call
-succeeds — **before** the next step evaluates `warnings[]`. If this order
-is reversed, a caller who sees "submitted with warnings" and naively
-retries from scratch will create a **duplicate incident** in RAPID for
-something that already exists.
-
----
+when the response carries `warnings[]`. Write the mapping **immediately
+after** either call succeeds — **before** evaluating warnings. Reversed,
+a user who retries after a warning creates a duplicate incident.
 
 ## 11. Submit + response handling
 
-After the `/incident` or `/update/incident` call, branch explicitly:
-
-- **2xx, empty `warnings[]`** → success. Respond 200 to the caller with the `incident_number`.
-- **2xx, non-empty `warnings[]`** → "submitted with warnings," **not** a failure. Still write the idempotency mapping (§10). Respond 200 but surface the warnings list so the tool/user knows a value was silently ignored by RAPID.
-- **405** → RAPID's documented response for a malformed request body. Treat as non-retryable — this means something in `BuildIncident` is wrong, not a transient RAPID problem. Respond with a distinct message ("request rejected as malformed — check field mapping"), don't retry.
-- **Other 4xx** (e.g. 401) → non-retryable, respond with the RAPID error body passed through.
-- **5xx** → potentially transient, eligible for retry (§12).
-
----
+- **2xx, empty `warnings[]`** → respond 200 with `incident_number`.
+- **2xx with the reporter warning** (*"The provided reporter was not
+  found…"*) → the §9 pre-flight makes this rare (stale cache window).
+  Mapping is already written (§10); respond as a **failure** telling the
+  submitter the incident was created without a reporter and to fix the
+  name and resubmit — the resubmit updates the same incident via §10.
+- **2xx, other warnings** → "submitted with warnings", not a failure;
+  respond 200 and surface the warnings list verbatim.
+- **400** → RAPID rejected the body (`SubmissionError` may carry
+  field-level detail in `data`) — non-retryable; pass the detail through.
+- **403** → unauthorized/unknown user/account disabled — non-retryable;
+  check credentials and that onboarding is complete.
+- **5xx / 503** → potentially transient (§12).
 
 ## 12. Retry policy
 
-On the HTTP action that calls RAPID, set the built-in retry policy to
-trigger only on **429 and 5xx**. Explicitly **exclude 405 and 401** from
-retry — retrying a malformed request or a bad credential just repeats the
-same failure and burns RAPID's rate limit for no benefit.
+Built-in retry on the RAPID HTTP actions for **429 and 5xx only**.
+Explicitly exclude 400/401/403 — retrying a malformed request or bad
+credential repeats the failure and burns rate limit.
 
----
+## 13. Sandbox first — test sequence
 
-## 13. Risks appendix
+**Sandbox: `https://api-demo.rapid4s53.com`** — same endpoints as
+production; authenticate against the demo host and use the returned
+token against the demo host. Credentials (username, password, secret
+key, x-api-key) must be requested from the RAPID **system administrator**
+— they are separate from production credentials. Keep the base URL as an
+environment variable so demo → production is a config change, not an
+edit.
 
-- **Run-history retention**: Power Automate's default run-history window may not be long enough for after-the-fact incident investigation — consider exporting run history or logging outcomes to a SharePoint list/Dataverse table separately from the platform's own history.
-- **Connector throttling**: Premium HTTP connector calls count against tenant-level API request limits: high-volume submission days (e.g. a fleet-wide well-control drill) could hit throttling Power Automate surfaces as a generic error, easy to mistake for a RAPID-side problem.
-- **JSON action size limits**: Compose/Parse JSON actions have payload size ceilings well below what a large multi-attachment report could reach — this flow's trigger payload is the flat `/rapid-s53` contract only (no attachments), so this is a lower risk here than elsewhere in this project, but worth confirming against your tenant's actual limits before assuming it's a non-issue.
+In order, all against the sandbox:
 
----
+1. Helper returns the §6.2 test vector exactly (no credentials needed).
+2. `GET /authentication` returns `success: true` and a token.
+3. `GET /rigs` with the token → confirm Seadrill's rigs and their
+   authorised reporters appear; run the §8 daily flow once.
+4. Submit a complete test incident → 200 + `incident_number`.
+5. Re-submit the same `report_id` → flow takes the `/update/incident`
+   path; NO second incident appears in the demo portal.
+6. Submit with a junk `component_manufacturer_name` → the flow's own 400
+   (never reaches RAPID).
+7. Submit with a junk reporter name → the flow's own 400 from the §9
+   pre-flight.
+8. Have Mike/administrator confirm in the demo portal that the test
+   incidents display correctly (this is also a natural Teams-call
+   agenda item — some steps of the RAPID process are portal-only, per
+   Mike).
 
-## Open questions this spec depends on
+Only after all eight: switch the base URL + credentials to production.
 
-Same six questions the Python relay sent to IADC/Softway — §6 and §7 above
-cannot be finalized until at least question 1 (and ideally 2) is answered.
-See `RAPID-S53-RELAY-HANDOFF.md` / the Python relay's `HANDOFF.md` for the
-full list; summarized:
+## 14. Risks appendix
 
-1. Is machine-to-machine auth actually client-credentials or API-Key+HMAC — the inbound YAML's stated "implicit flow" can't run unattended.
-2. For the HMAC scheme: is there a header carrying the raw timestamp, and what clock-skew tolerance does RAPID accept?
-3. What does `when_did_the_event_occur` actually expect, given the YAML defines no property for it?
-4. Must `reporter_first_name`/`last_name` match an authorised reporter from `/rigs`, or is free text accepted?
-5. Does `pressure_rating_unit` map from `s53_bore`, or is a new tool field needed?
-6. Is there a sandbox environment, and what are its rate limits?
+- **Run-history retention**: default retention may be too short for
+  incident forensics — log outcomes (report_id, incident_number,
+  warnings, timestamp) to your own SharePoint list/Dataverse table.
+- **Connector throttling**: Premium HTTP calls count against tenant API
+  limits; a fleet-wide drill day could throttle. The §8 daily flow and
+  token cache keep steady-state volume minimal.
+- **Payload size**: the trigger payload is the flat contract + one
+  incident object, no attachments — well under Compose/Parse JSON
+  ceilings.
+- **Clock skew**: the timestamp window is 2 hours, so ordinary clock
+  drift is a non-issue; if `/authentication` returns 401 "hash expired"
+  with a fresh timestamp, check the helper's inputs, not the clock.

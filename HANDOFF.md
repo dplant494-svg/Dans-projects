@@ -312,6 +312,25 @@ paths with credentials, but this shape is fine to document)
   (18 rigs each, byte-identical round-trip through the scanner, correct
   rendering and week-switching in a headless browser) — see
   `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry for the exact shape.
+- **RAPID-S53 — UNBLOCKED 2026-08-17, in progress via Power Automate.**
+  IADC (Mike Kucharski) answered all four blocking questions and issued
+  Swagger v1.1.0 (`RAPIDS53_Inbound_API_v1.1.0.yaml`, in this repo):
+  auth is confirmed **API-Key + HMAC-SHA256** (OAuth2 was their labeling
+  error); `when_did_the_event_occur` is deprecated in favour of required
+  `what_was_the_system_status`; reporter names must match `GET /rigs`'
+  authorised list (mismatches rejected pre-submit, per Dan's decision);
+  sandbox exists at `api-demo.rapid4s53.com`. **Route (Dan's decision):
+  Power Automate flow, not the archived Python relay** — the org already
+  runs Premium HTTP flows (PostedReports) and no Python hosting exists.
+  Build from `RAPID-S53-POWER-AUTOMATE-SPEC.md` (rewritten to v1.1.0;
+  includes the confirmed HMAC recipe, ready-to-deploy signing-helper code
+  in two variants with a verified test vector, reporter pre-flight
+  validation, and an eight-step sandbox test sequence). Tool-side field
+  changes: `RAPID-S53-TOOL-UPDATE-HANDOFF.md` (for the reporting-tools
+  session). Next steps waiting on Dan: send the reply in
+  `RAPID-S53-IADC-EMAIL-DRAFT.md` (sandbox credentials + Teams), have IT
+  deploy the HMAC helper, build the flow. The paragraph below is the
+  pre-2026-08-17 hold-era record, kept for history.
 - **RAPID-S53 relay — on hold, blocked on IADC/Softway.** A standalone
   Python FastAPI relay (`report-backend/` — NOT part of this repo, hosted
   separately) was built and fully tested (122 passing tests, stub mode) to

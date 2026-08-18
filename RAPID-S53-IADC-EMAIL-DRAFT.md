@@ -1,47 +1,47 @@
-To: iadc_dev@softway.com; mike.kucharski@iadc.org
-Subject: RAPID-S53 auth scheme — which spec is right? (+ 3 quick ones)
+# Email draft — reply to Mike Kucharski (IADC), RAPID-S53 next steps
 
-Hi Mike, hi Softway team,
+> The original four-questions email this file used to hold was answered
+> in full by Mike on 2026-08-17 (v1.1.0 issued alongside). This is the
+> reply draft. Copy the body below into Outlook.
 
-I'm the Technical Superintendent overseeing this on our side, not a
-software engineer - I've been building this integration with AI-assisted
-development support, so if any answer below has real implementation
-nuance, a plain-language note alongside the technical detail would help a
-lot.
+**To:** mike.kucharski@iadc.org
+**Cc:** iadc_dev@softway.com
+**Subject:** RE: RAPID-S53 Inbound API — thanks; sandbox access + Teams session
 
-We're connecting our internal well-control incident reporting tool
-directly to the RAPID-S53 Inbound API, so incident reports post straight
-into RAPID-S53 instead of being re-keyed by hand. As of our latest build,
-the tool itself now assembles the finished incident record in RAPID's own
-format before it ever reaches our relay - so the remaining open items are
-really about how we're allowed to authenticate and submit, not about field
-mapping.
+---
 
-Four questions, most important first:
+Hi Mike,
 
-1. Which authentication actually applies to /incident: OAuth2 (as the
-   inbound schema states), or the API-Key + username/password +
-   HMAC-SHA256 scheme (as the outbound documentation for the same portal
-   states)? The two disagree, and we don't want to build against the
-   wrong one.
+Thank you — that answers everything we had open, and the v1.1.0 Swagger
+resolves the schema inconsistencies we'd flagged. We're proceeding on
+exactly the basis you described: API-Key + HMAC-SHA256 authentication,
+`what_was_the_system_status` in place of the deprecated field, and
+reporter names sourced from the authorised list per rig — we've taken
+your recommendation and will treat a non-matching reporter as an error on
+our side before anything is submitted.
 
-2. when_did_the_event_occur is listed as required, but the schema doesn't
-   define a property for it at all. What value and type does this field
-   actually expect?
+Two things to move us forward:
 
-3. Must reporter_first_name / reporter_last_name match an authorised
-   reporter you return from GET /rigs for that rig, or is free text
-   accepted?
+1. **Sandbox access** — could the system administrator set us up with
+   credentials for https://api-demo.rapid4s53.com (username, password,
+   secret key and API key)? We'll validate our full submission sequence
+   there — including create, edit-and-resubmit, and rejection handling —
+   before anything touches production. If the sandbox has rate limits we
+   should respect, a note on those would be appreciated.
 
-4. Is there a sandbox or test environment available so we can validate
-   submissions before we point this at production, and if so, what are
-   its rate limits?
+2. **Teams session** — yes please, on the portal-only parts of the
+   reporting process. Once we have sandbox access and have run our test
+   submissions, a session where we walk through how they appear on the
+   portal side would be ideal — I'll bring our test incident numbers.
+   Please suggest a few times that suit you.
 
-Happy to jump on a call if that's easier than email, especially for
-question 1 - I'd rather talk it through than misread a spec. Thanks for
-your patience while we get this right.
+One small confirmation while we're at it: we'd like our test rigs and
+authorised reporter names to be present in the sandbox's GET /rigs data
+so we can exercise the reporter validation — is that something the
+administrator sets up as part of sandbox onboarding?
+
+Thanks again — this was exactly the clarity we needed.
 
 Best,
 Dan Plant
-Technical Superintendent, Well Control Engineering
-Seadrill
+Technical Superintendent, Well Control Engineering — Seadrill
