@@ -158,10 +158,15 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.31** (adds the `marineScores`
-  aggregate behind the Reports Dashboard's "Marine Integrity" tab — see
-  `INTEGRATION-CONTRACT.md`'s `marineData`/`marineScores` entries and the
-  "Background" section below).
+- `scripts/Update-Dashboard.ps1`: **v2.32** (fixes the Project Complete
+  latch — completion now tracked per rig|bopNo from the newest EXPLICIT
+  `projectComplete` value, outside the planning content gate, so an
+  untick submission clears it; the real West Gemini case, per the WCGRRT
+  REV 147 handoff — see `INTEGRATION-CONTRACT.md`'s `planningData`
+  entry).
+  v2.31 added the `marineScores` aggregate behind the Reports Dashboard's
+  "Marine Integrity" tab — see `INTEGRATION-CONTRACT.md`'s
+  `marineData`/`marineScores` entries and the "Background" section below.
   v2.30 added a distinct skip warning for Daily Checks/FLM exports with no
   rig identity (a report-tool-side gap, not a scanner bug).
   v2.29 added the `rigChecks` aggregate behind the "Rig Monitoring" tab —

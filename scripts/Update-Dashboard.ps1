@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.31'
+$ScriptVersion = '2.32'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -497,6 +497,7 @@ $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
 $excelSnapshots = New-Object System.Collections.Generic.List[object]
 $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
+$planningCompletion = @{}   # keyed rig|bopNo; newest EXPLICIT projectComplete value (see the latch fix below)
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
@@ -748,6 +749,40 @@ foreach ($f in $files) {
             # none of its fields were filled in, and an empty stub must
             # never overwrite a rig's genuinely reported data.
             $planning = Get-Prop $tile 'planningData'
+
+            # Project-complete latch fix (WCGRRT REV 147 handoff, 2026-08-19):
+            # the tool sends an EXPLICIT projectComplete boolean on every
+            # planning export - unticked is false, never omitted. Completion
+            # must therefore be a property of the NEWEST report per rig+BOP,
+            # never a high-water mark. The content gate below deliberately
+            # skips otherwise-empty submissions, which used to make an
+            # "untick" report (false + nothing else filled in) invisible -
+            # so an old ticked report latched Project Complete on the BOP
+            # dashboard with no way for the planner to clear it (the real
+            # West Gemini case). Track the newest explicit value here,
+            # OUTSIDE the content gate; it overrides the displayed panel's
+            # flag after the scan (see the override loop before the payload).
+            # Keyed rig|bopNo: BOP1 completing must not clear/complete BOP2.
+            # Reports predating the explicit boolean (key absent -> $null)
+            # are ignored - they say nothing about completion either way.
+            if ($planning -and $assetRaw) {
+                $pcRaw = Get-Prop $planning 'projectComplete'
+                if ($null -ne $pcRaw) {
+                    $pcDate = [string](Get-Prop $planning 'reportDate')
+                    if (-not $pcDate) { $pcDate = [string](Get-Prop $meta 'date') }
+                    $pcKey = "$assetRaw|$([string](Get-Prop $meta 'bopNo'))"
+                    $pcPrior = $planningCompletion[$pcKey]
+                    if (-not $pcPrior -or ($pcDate -gt [string]$pcPrior.reportDate) -or
+                        (($pcDate -eq [string]$pcPrior.reportDate) -and ($f.LastWriteTime -gt $pcPrior.modified))) {
+                        $planningCompletion[$pcKey] = @{
+                            reportDate = $pcDate
+                            modified   = $f.LastWriteTime
+                            complete   = [bool]$pcRaw
+                        }
+                    }
+                }
+            }
+
             if ($planning -and $assetRaw -and (Test-PlanningHasContent $planning)) {
                 $repDate = [string](Get-Prop $planning 'reportDate')
                 if (-not $repDate) { $repDate = [string](Get-Prop $meta 'date') }
@@ -1548,6 +1583,22 @@ if ($config.PSObject.Properties['bopOutputFile'] -and $config.bopOutputFile) {
 $bwmSortedList = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots | Sort-Object -Property @{ Expression = { [string]$_['reportDate'] } } -Descending |
     ForEach-Object { $bwmSortedList.Add($_) | Out-Null }
+
+# Project-complete override: the displayed panel is the newest CONTENTFUL
+# report per rig, but the completion flag must come from the newest EXPLICIT
+# projectComplete value for that rig+BOP (tracked outside the content gate
+# above) - otherwise an "untick" submission with nothing else filled in can
+# never clear a previously latched Project Complete badge. Only overrides
+# when a tracked value exists for the same rig+bopNo; a different BOP's
+# reports never touch this panel's flag.
+foreach ($prKey in @($planningReports.Keys)) {
+    $pr = $planningReports[$prKey]
+    $ck = "$($pr.rig)|$($pr.bopNo)"
+    if ($planningCompletion.ContainsKey($ck)) {
+        Set-Prop $pr.planning 'projectComplete' $planningCompletion[$ck].complete
+    }
+}
+
 $bopPayload = @{
     generatedAt      = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     snapshots        = $bwmSortedList.ToArray()
