@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.32'
+$ScriptVersion = '2.33'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -182,6 +182,7 @@ function Get-ReportType {
         foreach ($tile in $Tiles) {
             if (Get-Prop $tile 'bwmData')      { return 'BWM Weekly Planning' }
             if (Get-Prop $tile 'planningData') { return 'Planning Report' }
+            if (Get-Prop $tile 'topsetData') { return 'TOPSET Investigation' }
             if (Get-Prop $tile 'r53Data')  { return 'Rapid 53 (S53 Event Report)' }
             if (Get-Prop $tile 'cbmData')  { return 'CBM Inspection' }
             if (Get-Prop $tile 'sbopData') { return 'Surface BOP Testing' }
@@ -502,6 +503,8 @@ $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wi
 $r53Events = New-Object System.Collections.Generic.List[object]
 $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
 $marineEntries = @{}     # keyed rig|date (newest file wins) - Marine Integrity Reports
+$topsetEntries = @{}     # keyed rig|torRef (newest revision wins, torStatus NEVER latched) - TOPSET Investigation ToRs (WCGRRT REV 148)
+$restrictedTopsetFiles = @{}  # filenames whose topsetData cfClass is above 'Seadrill Internal' - kept out of reports[] and the deployed report copies
 $rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
 
@@ -1064,6 +1067,133 @@ foreach ($f in $files) {
                     $marineEntries[$miDedupKey] = @{ modified = $f.LastWriteTime; entry = $miRec }
                 }
             }
+
+            # TOPSET Investigation Terms of Reference (WCGRRT REV 148, see
+            # DASHBOARDTOPSETINVESTIGATIONHANDOFF.md). tiles[].topsetData is
+            # the definitive signal - never meta.type, which users can retype.
+            # One record per INVESTIGATION (rig|torRef): the newest revision
+            # wins by tileDate then file mtime, and torStatus is taken from
+            # that revision verbatim - NEVER latched (Approved -> Draft is a
+            # legitimate transition; same lesson as the projectComplete latch).
+            # This is a Terms of Reference, not findings - the record carries
+            # scope/roster/tracking data only, no causes exist in the payload.
+            # cfClass above 'Seadrill Internal' means the body must not reach
+            # the open dashboard share: such files yield a header-only record,
+            # and the whole file is excluded from reports[] and the deployed
+            # report copies (see $restrictedTopsetFiles at the copy loop).
+            $topset = Get-Prop $tile 'topsetData'
+            if ($topset) {
+                $tsDate = [string](Get-Prop $tile 'tileDate')
+                if (-not $tsDate) { $tsDate = [string](Get-Prop $topset 'reportDate') }
+                if (-not $tsDate) { $tsDate = [string](Get-Prop $meta 'date') }
+                $tsRef = ([string](Get-Prop $topset 'torRef')).Trim()
+                $tsClass = ([string](Get-Prop $topset 'cfClass')).Trim()
+                $tsRestricted = [bool]($tsClass -and $tsClass -ne 'Seadrill Internal')
+                if ($tsRestricted) {
+                    $restrictedTopsetFiles[$f.Name] = $true
+                    Write-Host "TOPSET: $(if ($tsRef) { $tsRef } else { $f.Name }) ($rig) is classified '$tsClass' - body withheld from the dashboard, header row only" -ForegroundColor Yellow
+                }
+                if (-not $tsRef) {
+                    Write-Warning "TOPSET investigation in $($f.Name) has no torRef - using rig|date identity as fallback; an investigation without a reference is a data-quality gap worth fixing at source"
+                }
+                $tsKey = if ($tsRef) { "$rig|$tsRef" } else { "$rig|$tsDate" }
+
+                # Overdue = due date in the past AND status not Complete /
+                # Not applicable. Dates are YYYY-MM-DD so string compare is
+                # safe; rows with a blank or non-date 'due' never go overdue.
+                $tsToday = (Get-Date).ToString('yyyy-MM-dd')
+                $tsLegKeys = @('tech', 'org', 'ppl', 'sim', 'env', 'time')
+                $tsLegCounts = @{}
+                $tsLegRuledOut = @{}
+                $tsOverdue = New-Object System.Collections.Generic.List[object]
+                $tsLegsRaw = Get-Prop $topset 'legs'
+                foreach ($lk in $tsLegKeys) {
+                    $legRows = @()
+                    if ($tsLegsRaw) { $legRows = @(Get-Prop $tsLegsRaw $lk) | Where-Object { $_ } }
+                    $tsLegCounts[$lk] = @($legRows).Count
+                    # Empty leg + populated leg_<key>_note = "considered and
+                    # ruled out" - a decision, not a gap (handoff is explicit).
+                    $legNote = ([string](Get-Prop $topset ('leg_' + $lk + '_note'))).Trim()
+                    $tsLegRuledOut[$lk] = [bool](($tsLegCounts[$lk] -eq 0) -and $legNote)
+                    foreach ($lr in $legRows) {
+                        $lrDue = ([string](Get-Prop $lr 'due')).Trim()
+                        $lrStatus = ([string](Get-Prop $lr 'status')).Trim()
+                        if ($lrDue -match '^\d{4}-\d{2}-\d{2}$' -and $lrDue -lt $tsToday -and
+                            $lrStatus -ne 'Complete' -and $lrStatus -ne 'Not applicable') {
+                            $tsOverdue.Add(@{
+                                kind   = 'evidence'
+                                leg    = $lk
+                                item   = ConvertTo-PlainText ([string](Get-Prop $lr 'enquiry'))
+                                owner  = [string](Get-Prop $lr 'owner')
+                                due    = $lrDue
+                                status = $lrStatus
+                            }) | Out-Null
+                        }
+                    }
+                }
+                foreach ($dl in @(Get-Prop $topset 'deliverables')) {
+                    if (-not $dl) { continue }
+                    $dlDue = ([string](Get-Prop $dl 'due')).Trim()
+                    $dlStatus = ([string](Get-Prop $dl 'status')).Trim()
+                    if ($dlDue -match '^\d{4}-\d{2}-\d{2}$' -and $dlDue -lt $tsToday -and
+                        $dlStatus -ne 'Complete' -and $dlStatus -ne 'Not applicable') {
+                        $tsOverdue.Add(@{
+                            kind   = 'deliverable'
+                            leg    = ''
+                            item   = ConvertTo-PlainText ([string](Get-Prop $dl 'item'))
+                            owner  = [string](Get-Prop $dl 'owner')
+                            due    = $dlDue
+                            status = $dlStatus
+                        }) | Out-Null
+                    }
+                }
+                $tsLeader = ''
+                foreach ($tm in @(Get-Prop $topset 'team')) {
+                    if ($tm -and (([string](Get-Prop $tm 'role')) -match 'Team Leader')) {
+                        $tsLeader = [string](Get-Prop $tm 'name')
+                        break
+                    }
+                }
+                # Plain hashtable (nested dictionaries/arrays) for the same
+                # PS5.1 JavaScriptSerializer reason as the marine records.
+                $tsRec = @{
+                    rig        = [string]$rig
+                    torRef     = $tsRef
+                    torRev     = [string](Get-Prop $topset 'torRev')
+                    torStatus  = [string](Get-Prop $topset 'torStatus')
+                    severity   = [string](Get-Prop $topset 'severity')
+                    invLevel   = [string](Get-Prop $topset 'invLevel')
+                    raisedDate = [string](Get-Prop $topset 'raisedDate')
+                    date       = $tsDate
+                    eqName     = [string](Get-Prop $topset 'eqName')
+                    cfClass    = $tsClass
+                    restricted = $tsRestricted
+                    missingRef = [bool](-not $tsRef)
+                }
+                if (-not $tsRestricted) {
+                    $tsRec['file']           = $f.Name
+                    $tsRec['teamLeader']     = $tsLeader
+                    $tsRec['incDate']        = [string](Get-Prop $topset 'incDate')
+                    $tsRec['operation']      = [string](Get-Prop $topset 'operation')
+                    $tsRec['synCaseTs']      = [string](Get-Prop $topset 'synCaseTs')
+                    $tsRec['incidentNumber'] = [string](Get-Prop $topset 'incidentNumber')
+                    $tsRec['legCounts']      = $tsLegCounts
+                    $tsRec['legRuledOut']    = $tsLegRuledOut
+                    $tsRec['overdue']        = $tsOverdue.ToArray()
+                    $tsRec['quarantine']     = @{
+                        equipment = [string](Get-Prop $topset 'eqQuarantine')
+                        evidence  = [bool](Get-Prop $topset 'evQuarantined')
+                        deadline  = [string](Get-Prop $topset 'evDeadline')
+                        location  = [string](Get-Prop $topset 'evLocation')
+                        custodian = [string](Get-Prop $topset 'evCustodian')
+                    }
+                }
+                $tsExisting = $topsetEntries[$tsKey]
+                if (-not $tsExisting -or ($tsDate -gt [string]$tsExisting.date) -or
+                    (($tsDate -eq [string]$tsExisting.date) -and ($f.LastWriteTime -gt $tsExisting.modified))) {
+                    $topsetEntries[$tsKey] = @{ date = $tsDate; modified = $f.LastWriteTime; entry = $tsRec }
+                }
+            }
         }
     }
 
@@ -1080,7 +1210,10 @@ foreach ($f in $files) {
     # reports list at the source rather than filtering client-side.
     $disciplineVal = [string](Get-Prop $meta 'discipline')
     $isPlanningOnly = ($disciplineVal -eq 'Planning') -or ([bool](Get-Prop $meta 'planningOnly'))
-    if (-not $isPlanningOnly) {
+    # Restricted TOPSET files (cfClass above 'Seadrill Internal') stay out of
+    # the reports list entirely - the header-only record in
+    # topsetInvestigations[] is their sole presence on the dashboard.
+    if (-not $isPlanningOnly -and -not $restrictedTopsetFiles.ContainsKey($f.Name)) {
         $reports.Add([pscustomobject]@{
             file          = $f.Name
             rig           = [string]$rig
@@ -1157,6 +1290,14 @@ $marineSorted = New-Object System.Collections.Generic.List[object]
 $marineList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $marineSorted.Add($_) | Out-Null }
 
+# TOPSET investigations: one record per investigation (rig|torRef), already
+# reduced to the newest revision each - sorted newest-raised first.
+$topsetList = New-Object System.Collections.Generic.List[object]
+foreach ($v in $topsetEntries.Values) { $topsetList.Add($v.entry) | Out-Null }
+$topsetSorted = New-Object System.Collections.Generic.List[object]
+$topsetList | Sort-Object -Property @{ Expression = { [string]$_.raisedDate } }, @{ Expression = { [string]$_.date } } -Descending |
+    ForEach-Object { $topsetSorted.Add($_) | Out-Null }
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = ($existingFolders -join '  |  ')
@@ -1168,6 +1309,7 @@ $payload = [pscustomobject]@{
     cbmGrades    = $cbmGradeSorted.ToArray()
     rigChecks    = $rigCheckSorted.ToArray()
     marineScores = $marineSorted.ToArray()
+    topsetInvestigations = $topsetSorted.ToArray()
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10
@@ -1655,6 +1797,10 @@ elseif ($deployPath) {
         }
         $copied = 0
         foreach ($f in $files) {
+            # Restricted TOPSET bodies must never reach the open share; also
+            # excluded from $expected below so a copy from before the file
+            # became restricted gets cleaned up as stale.
+            if ($restrictedTopsetFiles.ContainsKey($f.Name)) { continue }
             $dest = Join-Path $reportsDir ($f.Name + '.js')
             if (-not (Test-Path -Path $dest) -or ($f.LastWriteTime -gt (Get-Item -Path $dest).LastWriteTime)) {
                 Copy-Item -Path $f.FullName -Destination $dest -Force
@@ -1662,7 +1808,10 @@ elseif ($deployPath) {
             }
         }
         $expected = @{}
-        foreach ($f in $files) { $expected[$f.Name + '.js'] = $true }
+        foreach ($f in $files) {
+            if ($restrictedTopsetFiles.ContainsKey($f.Name)) { continue }
+            $expected[$f.Name + '.js'] = $true
+        }
         foreach ($old in Get-ChildItem -Path $reportsDir -File) {
             if (-not $expected.ContainsKey($old.Name)) {
                 Remove-Item -Path $old.FullName -Force
@@ -1671,7 +1820,7 @@ elseif ($deployPath) {
         }
         # Always report the outcome - silence here previously left it unclear
         # whether this step ran at all.
-        Write-Host "Report copies: $copied new/updated, $($files.Count) total in $reportsDir" -ForegroundColor Green
+        Write-Host "Report copies: $copied new/updated, $($expected.Count) total in $reportsDir$(if ($restrictedTopsetFiles.Count) { " ($($restrictedTopsetFiles.Count) restricted TOPSET file(s) withheld)" })" -ForegroundColor Green
 
         # BOP dashboard data must land in the folder the BOP page is served
         # from (the page loads bop-planning-data.js relative to itself).

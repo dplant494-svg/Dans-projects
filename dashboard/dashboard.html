@@ -346,6 +346,37 @@
 
   /* ── Marine Integrity tab ── */
   .marine-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+
+  /* TOPSET Investigations tab */
+  .ts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .ts-card { border: 1px solid var(--sd-border); border-radius: 8px; padding: 12px 14px; background: #fff; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+  .ts-card:hover { box-shadow: 0 2px 8px rgba(0,32,91,0.15); border-color: var(--sd-light-blue); }
+  .ts-card.locked { cursor: default; background: #f7f8fa; }
+  .ts-card.locked:hover { box-shadow: none; border-color: var(--sd-border); }
+  .ts-card h3 { font-size: 13.5px; margin: 0 0 2px; color: var(--sd-blue); }
+  .ts-ref { font-size: 11.5px; color: var(--sd-text-light); margin-bottom: 6px; }
+  .ts-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 2px 0; }
+  .ts-row .k { color: var(--sd-text-light); }
+  .ts-badge { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 9px; margin: 0 6px 4px 0; }
+  .ts-badge.sev-critical, .ts-badge.sev-high { background: #fdecea; color: #c0392b; }
+  .ts-badge.sev-medium { background: #fff4e0; color: #ad6800; }
+  .ts-badge.sev-low { background: #eef3fb; color: var(--sd-blue); }
+  .ts-badge.st-approved { background: #e6f4ea; color: #1e7d3e; }
+  .ts-badge.st-issued { background: #fff4e0; color: #ad6800; }
+  .ts-badge.st-draft, .ts-badge.st-superseded, .ts-badge.st-closed { background: #eceff3; color: #5b6572; }
+  .ts-badge.overdue { background: #c0392b; color: #fff; }
+  .ts-legs { display: flex; gap: 5px; margin-top: 8px; }
+  .ts-leg { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; border: 1px solid var(--sd-border); color: var(--sd-text-light); background: #fff; }
+  .ts-leg.filled { background: var(--sd-blue); border-color: var(--sd-blue); color: #fff; }
+  .ts-leg.ruled { background: #eceff3; color: #5b6572; }
+  .ts-quar { font-size: 11.5px; margin-top: 7px; color: var(--sd-text-light); }
+  .ts-quar.warn { color: var(--sd-fail); font-weight: 600; }
+  .ts-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 4px 0 10px; }
+  .ts-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .03em; color: var(--sd-text-light); padding: 4px 8px; border-bottom: 1px solid var(--sd-border); }
+  .ts-table td { padding: 4px 8px; border-bottom: 1px solid #eef0f3; vertical-align: top; }
+  .ts-table tr.overdue td { color: var(--sd-fail); }
+  .ts-leg-head { font-size: 11.5px; font-weight: 700; color: var(--sd-blue); margin: 8px 0 2px; }
+  .ts-lock { font-size: 12px; color: var(--sd-text-light); font-style: italic; margin-top: 6px; }
   .mi-card {
     border: 1px solid var(--sd-border); border-radius: 6px; padding: 12px 14px;
     background: var(--sd-white); cursor: pointer; text-align: left; font: inherit; display: block;
@@ -561,6 +592,7 @@
         <button type="button" class="view-tab" id="tab-cbm-btn">CBM Heatmap</button>
         <button type="button" class="view-tab" id="tab-monitoring-btn">Rig Monitoring</button>
         <button type="button" class="view-tab" id="tab-marine-btn">Marine Integrity</button>
+        <button type="button" class="view-tab" id="tab-invest-btn">Investigations</button>
       </div>
 
       <div class="filter-row" id="filter-row">
@@ -655,6 +687,17 @@
           <div class="source-line">Latest Marine Integrity Report per rig, ranked lowest score first so outliers stand out. Minimum target score 3.0. Click a rig for score trends and the action list.</div>
           <div class="rig-mon-empty" id="marine-empty" hidden></div>
           <div class="marine-grid" id="marine-grid"></div>
+        </section>
+      </div>
+
+      <div id="invest-view" hidden>
+        <section class="card">
+          <h2>TOPSET Investigations — Terms of Reference</h2>
+          <div class="source-line">Commissioned equipment-incident investigations (Kelvin TOP-SET methodology). These are Terms of Reference — scope, team and evidence plan only; no findings or causes exist at this stage. Click an investigation for its full ToR.</div>
+          <div class="rig-mon-empty" id="invest-empty" hidden></div>
+          <div id="invest-open"></div>
+          <div id="invest-overdue"></div>
+          <div id="invest-closed"></div>
         </section>
       </div>
     </main>
@@ -2506,6 +2549,231 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     return svg;
   }
 
+  // ---------- TOPSET Investigation (Terms of Reference) — WCGRRT REV 148 ----------
+  // A ToR defines scope, team, authority and the evidence plan. It records no
+  // conclusions and no causes by design — never present it as an outcome.
+  // Legs are identified by key (two legs share the letter T).
+  var TS_LEG_DEFS = [['tech', 'T', 'Technology'], ['org', 'O', 'Organisation'], ['ppl', 'P', 'People'],
+                     ['sim', 'S', 'Similar Events'], ['env', 'E', 'Environment'], ['time', 'T', 'Time']];
+  var TS_METHOD_DEFS = [['mStoryboard', 'Storyboard'], ['mLegs', 'TOP-SET legs'], ['mCause', 'Cause tree'],
+                        ['mWhy', '5 Whys'], ['mInterviews', 'Interviews'], ['mSite', 'Site inspection'],
+                        ['mStrip', 'Strip-down'], ['mLab', 'Lab analysis'], ['mData', 'Data download'],
+                        ['mDocs', 'Document review'], ['mSim', 'Similar-event search'], ['mBarrier', 'Barrier analysis']];
+  var TS_EV_DEFS = [['evQuarantined', 'Evidence quarantined'], ['evNotice', 'Notices posted'], ['evPhotos', 'Photos taken'],
+                    ['evData', 'Data secured'], ['evParts', 'Parts retained'], ['evCustody', 'Chain of custody']];
+  var TS_CLOSED_STATUS = { 'Closed': true, 'Superseded': true };
+
+  function tsTodayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  }
+  function tsIsOverdue(due, status) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(due || '') && due < tsTodayStr() &&
+      status !== 'Complete' && status !== 'Not applicable';
+  }
+  function tsSevClass(sev) {
+    var s = String(sev || '').toLowerCase();
+    if (s.indexOf('crit') >= 0) return 'sev-critical';
+    if (s.indexOf('high') >= 0) return 'sev-high';
+    if (s.indexOf('med') >= 0) return 'sev-medium';
+    return 'sev-low';
+  }
+  function tsStatusClass(st) {
+    var s = String(st || '').toLowerCase();
+    if (s.indexOf('approv') >= 0) return 'st-approved';
+    if (s.indexOf('issued') >= 0) return 'st-issued';
+    if (s.indexOf('supersed') >= 0) return 'st-superseded';
+    if (s.indexOf('closed') >= 0) return 'st-closed';
+    return 'st-draft';
+  }
+  // rows: array of { cells: [...], overdue: bool }
+  function tsTable(headers, rows) {
+    var t = mk('table', 'ts-table');
+    var thr = mk('tr');
+    headers.forEach(function (h) { thr.appendChild(mk('th', '', h)); });
+    t.appendChild(thr);
+    rows.forEach(function (r) {
+      var tr = mk('tr', r.overdue ? 'overdue' : '');
+      r.cells.forEach(function (c) { tr.appendChild(mk('td', '', c == null ? '' : String(c))); });
+      t.appendChild(tr);
+    });
+    return t;
+  }
+  function tsList(items) {
+    var ul = mk('ul', 'rv-notes');
+    ul.style.margin = '0 0 8px';
+    (items || []).forEach(function (it) {
+      if (it && String(it).trim()) ul.appendChild(mk('li', '', String(it)));
+    });
+    return ul.childNodes.length ? ul : null;
+  }
+  function tsHasRows(arr, keys) {
+    return (arr || []).some(function (r) {
+      return r && keys.some(function (k) { return r[k] && String(r[k]).trim(); });
+    });
+  }
+
+  function rvTopset(ts, body) {
+    body.appendChild(mk('div', 'rv-section-label', 'TOPSET Investigation — Terms of Reference'));
+    body.appendChild(mk('div', 'rv-notes',
+      'Commissioning document for a Kelvin TOP-SET investigation: scope, team, authority and the evidence plan. ' +
+      'It contains no findings and no causes — those belong to the later investigation report.'));
+
+    var grid = mk('div', 'rv-grid');
+    [['Reference', ts.torRef], ['Revision', ts.torRev], ['ToR status', ts.torStatus], ['Severity', ts.severity],
+     ['Investigation level', ts.invLevel], ['Raised', ts.raisedDate], ['Commissioned by', ts.commissionedBy],
+     ['Sponsor', ts.sponsor], ['Reports to', ts.reportsTo], ['Escalation', ts.escalation],
+     ['Classification', ts.cfClass], ['Synergi case', ts.synCaseTs], ['RAPID-S53 incident', ts.incidentNumber]
+    ].forEach(function (p) { if (p[1] && String(p[1]).trim()) grid.appendChild(rvField(p[0], String(p[1]))); });
+    body.appendChild(grid);
+
+    body.appendChild(mk('div', 'rv-section-label', 'Incident'));
+    var inc = mk('div', 'rv-grid');
+    [['Date', (ts.incDate || '') + (ts.incTime ? ' ' + ts.incTime : '')], ['Location', ts.incLocation],
+     ['Operation at the time', ts.operation]
+    ].forEach(function (p) { if (p[1] && String(p[1]).trim()) inc.appendChild(rvField(p[0], String(p[1]))); });
+    if (inc.childNodes.length) body.appendChild(inc);
+    if (ts.statement && String(ts.statement).trim()) body.appendChild(mk('div', 'rv-notes', String(ts.statement)));
+    if (ts.consequence && String(ts.consequence).trim()) {
+      body.appendChild(mk('div', 'ts-leg-head', 'Consequence'));
+      body.appendChild(mk('div', 'rv-notes', String(ts.consequence)));
+    }
+
+    body.appendChild(mk('div', 'rv-section-label', 'Equipment involved'));
+    var eq = mk('div', 'rv-grid');
+    [['Equipment', ts.eqName], ['Manufacturer', ts.eqMfr], ['Model', ts.eqModel], ['Serial no.', ts.eqSerial],
+     ['Tag', ts.eqTag], ['Last maintenance', ts.eqLastMaint], ['Running hours', ts.eqHours]
+    ].forEach(function (p) { if (p[1] && String(p[1]).trim()) eq.appendChild(rvField(p[0], String(p[1]))); });
+    if (ts.eqQuarantine) {
+      var qf = rvField('Quarantined', String(ts.eqQuarantine));
+      if (String(ts.eqQuarantine).toLowerCase() === 'yes') qf.lastChild.style.color = 'var(--sd-fail)';
+      eq.appendChild(qf);
+    }
+    if (eq.childNodes.length) body.appendChild(eq);
+
+    var sIn = tsList(ts.scopeIn), sOut = tsList(ts.scopeOut), sObj = tsList(ts.objectives);
+    if (sIn || sOut || sObj || (ts.limitations && String(ts.limitations).trim())) {
+      body.appendChild(mk('div', 'rv-section-label', 'Scope & objectives'));
+      if (sIn) { body.appendChild(mk('div', 'ts-leg-head', 'In scope')); body.appendChild(sIn); }
+      if (sOut) { body.appendChild(mk('div', 'ts-leg-head', 'Out of scope')); body.appendChild(sOut); }
+      if (sObj) { body.appendChild(mk('div', 'ts-leg-head', 'Objectives')); body.appendChild(sObj); }
+      if (ts.limitations && String(ts.limitations).trim()) {
+        body.appendChild(mk('div', 'ts-leg-head', 'Limitations'));
+        body.appendChild(mk('div', 'rv-notes', String(ts.limitations)));
+      }
+    }
+
+    if (tsHasRows(ts.team, ['name', 'role'])) {
+      body.appendChild(mk('div', 'rv-section-label', 'Investigation team'));
+      body.appendChild(tsTable(['Name', 'Role', 'Organisation', 'Contact'], (ts.team || []).filter(function (r) { return r && (r.name || r.role); })
+        .map(function (r) { return { cells: [r.name, r.role, r.org, r.contact] }; })));
+      if (ts.competence && String(ts.competence).trim()) body.appendChild(mk('div', 'rv-notes', String(ts.competence)));
+    }
+    if (ts.authority && String(ts.authority).trim()) {
+      body.appendChild(mk('div', 'ts-leg-head', 'Authority'));
+      body.appendChild(mk('div', 'rv-notes', String(ts.authority)));
+    }
+
+    var methods = TS_METHOD_DEFS.filter(function (m) { return ts[m[0]]; });
+    if (methods.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Methods selected'));
+      var mw = mk('div'); mw.style.marginBottom = '10px';
+      methods.forEach(function (m) { mw.appendChild(mk('span', 'tag', m[1])); });
+      body.appendChild(mw);
+    }
+
+    body.appendChild(mk('div', 'rv-section-label', 'Lines of enquiry — TOP-SET legs'));
+    TS_LEG_DEFS.forEach(function (def) {
+      var key = def[0], rows = ((ts.legs || {})[key] || []).filter(function (r) { return r; });
+      var note = String(ts['leg_' + key + '_note'] || '').trim();
+      body.appendChild(mk('div', 'ts-leg-head', def[1] + ' — ' + def[2] + (rows.length ? ' (' + rows.length + ')' : '')));
+      if (rows.length) {
+        body.appendChild(tsTable(['Line of enquiry', 'Evidence sought', 'Source', 'Owner', 'Due', 'Status'],
+          rows.map(function (r) {
+            return { cells: [r.enquiry, r.evidence, r.source, r.owner, r.due, r.status], overdue: tsIsOverdue(r.due, r.status) };
+          })));
+        if (note) body.appendChild(mk('div', 'rv-notes', note));
+      } else if (note) {
+        // Empty leg + populated note = considered and ruled out - a decision,
+        // not a gap (per the REV 148 handoff). Never render as incomplete.
+        body.appendChild(mk('div', 'rv-notes', 'Considered and ruled out — ' + note));
+      } else {
+        body.appendChild(mk('div', 'rv-notes', 'No lines of enquiry recorded.'));
+      }
+    });
+
+    body.appendChild(mk('div', 'rv-section-label', 'Evidence preservation'));
+    var evFlags = TS_EV_DEFS.filter(function (e) { return ts[e[0]]; });
+    if (evFlags.length) {
+      var ew = mk('div'); ew.style.marginBottom = '8px';
+      evFlags.forEach(function (e) { ew.appendChild(mk('span', 'tag', e[1])); });
+      body.appendChild(ew);
+    }
+    var eg = mk('div', 'rv-grid');
+    [['Location', ts.evLocation], ['Custodian', ts.evCustodian]].forEach(function (p) {
+      if (p[1] && String(p[1]).trim()) eg.appendChild(rvField(p[0], String(p[1])));
+    });
+    if (ts.evDeadline && String(ts.evDeadline).trim()) {
+      var df = rvField('Release deadline', String(ts.evDeadline));
+      if (String(ts.evDeadline) < tsTodayStr()) df.lastChild.style.color = 'var(--sd-fail)';
+      eg.appendChild(df);
+    }
+    if (eg.childNodes.length) body.appendChild(eg);
+    if (tsHasRows(ts.evidence, ['item', 'action'])) {
+      body.appendChild(tsTable(['Item', 'Action', 'Owner', 'Ref'], (ts.evidence || []).filter(function (r) { return r && (r.item || r.action); })
+        .map(function (r) { return { cells: [r.item, r.action, r.owner, r.ref] }; })));
+    }
+
+    if (tsHasRows(ts.interviews, ['name', 'role'])) {
+      body.appendChild(mk('div', 'rv-section-label', 'Interviews planned'));
+      body.appendChild(tsTable(['Name', 'Role', 'Date', 'By', 'Status'], (ts.interviews || []).filter(function (r) { return r && (r.name || r.role); })
+        .map(function (r) { return { cells: [r.name, r.role, r.date, r.by, r.status] }; })));
+    }
+
+    if (tsHasRows(ts.deliverables, ['item'])) {
+      body.appendChild(mk('div', 'rv-section-label', 'Deliverables'));
+      body.appendChild(tsTable(['Deliverable', 'Owner', 'Due', 'Status'], (ts.deliverables || []).filter(function (r) { return r && r.item; })
+        .map(function (r) { return { cells: [r.item, r.owner, r.due, r.status], overdue: tsIsOverdue(r.due, r.status) }; })));
+    }
+
+    var cfFlags = [['cfNoBlame', 'No-blame'], ['cfSeparate', 'Separate process'], ['cfLegal', 'Legal involvement'], ['cfClient', 'Client involvement']]
+      .filter(function (c) { return ts[c[0]]; });
+    if (cfFlags.length || (ts.distribution && String(ts.distribution).trim())) {
+      body.appendChild(mk('div', 'rv-section-label', 'Communications & confidentiality'));
+      if (cfFlags.length) {
+        var cw = mk('div'); cw.style.marginBottom = '8px';
+        cfFlags.forEach(function (c) { cw.appendChild(mk('span', 'tag', c[1])); });
+        body.appendChild(cw);
+      }
+      if (ts.distribution && String(ts.distribution).trim()) body.appendChild(mk('div', 'rv-notes', 'Distribution: ' + String(ts.distribution)));
+    }
+
+    var reg = mk('div', 'rv-grid');
+    [['Regulator notifiable', ts.regNotifiable], ['Regulator', ts.regWho], ['Regulator ref', ts.regRef],
+     ['RAPID ref', ts.regRapid]].forEach(function (p) {
+      if (p[1] && String(p[1]).trim()) reg.appendChild(rvField(p[0], String(p[1])));
+    });
+    if (reg.childNodes.length || (ts.regNotes && String(ts.regNotes).trim())) {
+      body.appendChild(mk('div', 'rv-section-label', 'Regulatory'));
+      if (reg.childNodes.length) body.appendChild(reg);
+      if (ts.regNotes && String(ts.regNotes).trim()) body.appendChild(mk('div', 'rv-notes', String(ts.regNotes)));
+    }
+
+    var res = mk('div', 'rv-grid');
+    [['Travel', ts.resTravel], ['OEM support', ts.resOem], ['Budget', ts.resBudget], ['Approved', ts.resApproved]]
+      .forEach(function (p) { if (p[1] && String(p[1]).trim()) res.appendChild(rvField(p[0], String(p[1]))); });
+    if (res.childNodes.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Resources'));
+      body.appendChild(res);
+    }
+
+    if (tsHasRows(ts.signoff, ['name'])) {
+      body.appendChild(mk('div', 'rv-section-label', 'Sign-off'));
+      body.appendChild(tsTable(['Name', 'Position', 'Role', 'Date'], (ts.signoff || []).filter(function (r) { return r && r.name; })
+        .map(function (r) { return { cells: [r.name, r.position, r.role, r.date] }; })));
+    }
+  }
+
   function rvCbm(cbm, body) {
     body.appendChild(mk('div', 'rv-section-label', 'CBM inspection details'));
     var grid = mk('div', 'rv-grid');
@@ -2919,6 +3187,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (tile.vsrData) rvVsr(tile.vsrData, tb);
       if (tile.cbmData) rvCbm(tile.cbmData, tb);
       if (tile.marineData) rvMarine(tile.marineData, tb);
+      if (tile.topsetData) rvTopset(tile.topsetData, tb);
       if (tile.planningData) rvPlanning(tile.planningData, tb);
       if (tile.r53Data) rvR53(tile.r53Data, tb);
       else if (tile.caData && tile.caData.fields) rvR53(tile.caData, tb);
@@ -3194,6 +3463,111 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   // ---------- render root ----------
 
+  // ---------- Investigations tab: TOPSET ToRs fleet-wide ----------
+  // Reads topsetInvestigations[] (one record per investigation, newest
+  // revision only, scanner-side). Deliberately NOT a ranking: more
+  // investigations usually means better reporting culture, so cards are
+  // listed newest-first with no per-rig scoring of any kind.
+  function renderInvestigations() {
+    var data = window.DASHBOARD_DATA || {};
+    var list = data.topsetInvestigations || [];
+    var openWrap = $('invest-open'), overdueWrap = $('invest-overdue'), closedWrap = $('invest-closed'), empty = $('invest-empty');
+    openWrap.innerHTML = ''; overdueWrap.innerHTML = ''; closedWrap.innerHTML = '';
+    if (!list.length) {
+      empty.hidden = false;
+      empty.textContent = 'No TOPSET investigations recorded yet. Terms of Reference posted from the report tool appear here automatically.';
+      return;
+    }
+    empty.hidden = true;
+    var open = list.filter(function (r) { return !TS_CLOSED_STATUS[r.torStatus]; });
+    var closed = list.filter(function (r) { return TS_CLOSED_STATUS[r.torStatus]; });
+
+    openWrap.appendChild(mk('div', 'rv-section-label', 'Open investigations (' + open.length + ')'));
+    if (!open.length) {
+      openWrap.appendChild(mk('div', 'rv-notes', 'No open investigations.'));
+    } else {
+      var grid = mk('div', 'ts-grid');
+      open.forEach(function (inv) {
+        var card = mk(inv.restricted ? 'div' : 'button', 'ts-card' + (inv.restricted ? ' locked' : ''));
+        if (!inv.restricted) {
+          card.type = 'button';
+          card.addEventListener('click', function () {
+            var rec = (data.reports || []).find(function (r) { return r.file === inv.file; });
+            if (rec) openReportViewer(rec);
+          });
+        }
+        card.appendChild(mk('h3', '', inv.rig + (inv.eqName ? ' — ' + inv.eqName : '')));
+        var ref = mk('div', 'ts-ref', (inv.torRef || 'NO REFERENCE ⚠') + (inv.torRev ? ' · ' + inv.torRev : ''));
+        if (inv.missingRef) ref.style.color = 'var(--sd-fail)';
+        card.appendChild(ref);
+        var badges = mk('div');
+        if (inv.severity) badges.appendChild(mk('span', 'ts-badge ' + tsSevClass(inv.severity), inv.severity));
+        if (inv.torStatus) badges.appendChild(mk('span', 'ts-badge ' + tsStatusClass(inv.torStatus), inv.torStatus));
+        var odCount = (inv.overdue || []).length;
+        if (odCount) badges.appendChild(mk('span', 'ts-badge overdue', odCount + ' overdue'));
+        card.appendChild(badges);
+        function row(k, v) {
+          var r = mk('div', 'ts-row');
+          r.appendChild(mk('span', 'k', k));
+          r.appendChild(mk('span', '', v || '—'));
+          card.appendChild(r);
+        }
+        row('Raised', inv.raisedDate);
+        if (inv.restricted) {
+          card.appendChild(mk('div', 'ts-lock', '🔒 ' + (inv.cfClass || 'Restricted') + ' — details withheld from this dashboard.'));
+        } else {
+          row('Team leader', inv.teamLeader);
+          row('Incident date', inv.incDate);
+          var legs = mk('div', 'ts-legs');
+          TS_LEG_DEFS.forEach(function (def) {
+            var n = (inv.legCounts || {})[def[0]] || 0;
+            var ruled = (inv.legRuledOut || {})[def[0]];
+            var cls = n > 0 ? 'filled' : (ruled ? 'ruled' : '');
+            var dot = mk('span', 'ts-leg' + (cls ? ' ' + cls : ''), def[1]);
+            dot.title = def[2] + ' — ' + (n > 0 ? n + ' line(s) of enquiry' : (ruled ? 'considered and ruled out' : 'no lines of enquiry'));
+            legs.appendChild(dot);
+          });
+          card.appendChild(legs);
+          var q = inv.quarantine || {};
+          if (q.deadline) {
+            var warn = String(q.deadline) <= tsTodayStr();
+            var qd = mk('div', 'ts-quar' + (warn ? ' warn' : ''),
+              'Evidence release deadline ' + q.deadline + (q.location ? ' · ' + q.location : ''));
+            card.appendChild(qd);
+          }
+        }
+        grid.appendChild(card);
+      });
+      openWrap.appendChild(grid);
+    }
+
+    var allOd = [];
+    open.forEach(function (inv) {
+      (inv.overdue || []).forEach(function (o) { allOd.push({ inv: inv, o: o }); });
+    });
+    if (allOd.length) {
+      allOd.sort(function (a, b) { return String(a.o.due).localeCompare(String(b.o.due)); });
+      overdueWrap.appendChild(mk('div', 'rv-section-label', 'Overdue evidence & deliverables (' + allOd.length + ')'));
+      var legName = {};
+      TS_LEG_DEFS.forEach(function (d) { legName[d[0]] = d[2]; });
+      overdueWrap.appendChild(tsTable(['Investigation', 'Rig', 'Type', 'Leg', 'Item', 'Owner', 'Due', 'Status'],
+        allOd.map(function (x) {
+          return {
+            cells: [x.inv.torRef || '(no ref)', x.inv.rig, x.o.kind, legName[x.o.leg] || '', x.o.item, x.o.owner, x.o.due, x.o.status],
+            overdue: true
+          };
+        })));
+    }
+
+    if (closed.length) {
+      closedWrap.appendChild(mk('div', 'rv-section-label', 'Closed / superseded (' + closed.length + ')'));
+      closedWrap.appendChild(tsTable(['Reference', 'Rig', 'Equipment', 'Status', 'Raised'],
+        closed.map(function (inv) {
+          return { cells: [inv.torRef || '(no ref)', inv.rig, inv.eqName, inv.torStatus, inv.raisedDate] };
+        })));
+    }
+  }
+
   function render() {
     var data = window.DASHBOARD_DATA;
     var hasData = data && Array.isArray(data.reports);
@@ -3214,6 +3588,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     renderCbmHeatmap();
     renderRigMonitoring();
     renderMarine();
+    renderInvestigations();
   }
 
   // ---------- auto-refresh: re-load reports-data.js and re-render on change ----------
@@ -3267,25 +3642,30 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var isCbm = name === 'cbm';
     var isMonitoring = name === 'monitoring';
     var isMarine = name === 'marine';
+    var isInvest = name === 'invest';
     $('tab-list-btn').classList.toggle('active', isList);
     $('tab-cbm-btn').classList.toggle('active', isCbm);
     $('tab-monitoring-btn').classList.toggle('active', isMonitoring);
     $('tab-marine-btn').classList.toggle('active', isMarine);
+    $('tab-invest-btn').classList.toggle('active', isInvest);
     $('list-view').hidden = !isList;
     $('cbm-view').hidden = !isCbm;
     $('monitoring-view').hidden = !isMonitoring;
     $('marine-view').hidden = !isMarine;
+    $('invest-view').hidden = !isInvest;
     $('range-group').hidden = !isList;
     $('type-filter').hidden = !isList;
     $('search').hidden = !isList;
-    // The monitoring and marine tabs are deliberately fleet-wide (one
-    // tile/card per rig), so the rig filter has nothing to scope there.
-    $('rig-filter').hidden = isMonitoring || isMarine;
+    // The monitoring, marine and investigations tabs are deliberately
+    // fleet-wide (one tile/card per rig or investigation), so the rig
+    // filter has nothing to scope there.
+    $('rig-filter').hidden = isMonitoring || isMarine || isInvest;
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
   $('tab-monitoring-btn').addEventListener('click', function () { showTab('monitoring'); });
   $('tab-marine-btn').addEventListener('click', function () { showTab('marine'); });
+  $('tab-invest-btn').addEventListener('click', function () { showTab('invest'); });
 
   $('cbm-class-select').addEventListener('change', function () {
     state.cbmClass = this.value;

@@ -158,7 +158,16 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.32** (fixes the Project Complete
+- `scripts/Update-Dashboard.ps1`: **v2.33** (adds TOPSET Investigation
+  support — WCGRRT REV 148 Terms of Reference exports, see
+  `DASHBOARDTOPSETINVESTIGATIONHANDOFF.md`: `topsetInvestigations[]`
+  aggregate keyed rig|torRef, newest revision wins with torStatus NEVER
+  latched, overdue evidence/deliverable derivation, and cfClass
+  confidentiality: anything above 'Seadrill Internal' is published as a
+  header-only record and the file is withheld from `reports[]` and the
+  deployed report copies entirely. The Reports Dashboard gained an
+  "Investigations" tab and a full ToR viewer section to match).
+  v2.32 fixes the Project Complete
   latch — completion now tracked per rig|bopNo from the newest EXPLICIT
   `projectComplete` value, outside the planning content gate, so an
   untick submission clears it; the real West Gemini case, per the WCGRRT
