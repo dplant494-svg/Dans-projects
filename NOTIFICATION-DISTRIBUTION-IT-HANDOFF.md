@@ -38,10 +38,15 @@ Update-Dashboard.ps1 (scheduled on Dan's PC) → static dashboards on IIS
 ```
 
 **Hard rule from Dan: the posting flow and the file transport must not be
-modified.** Build the notification logic as a **separate, new flow**
-triggered by file creation in the PostedReports folder ("When a file is
-created (properties only)" trigger, or equivalent). If the new flow
-breaks, files must still land and dashboards must still build.
+modified.** Build the notification logic in its **own flow, separate from
+the posting flow**. There is already a working starting point: Dan's
+automated flow **"Report Post Test"** (created Aug 2026) already triggers
+on posted reports and sends the current Dan + Lee emails — extending that
+flow (or cloning it) with the classification and matrix/roster lookup
+described below is the natural build path; the trigger and the send
+action exist, what's new is everything in between. Either way the posting
+flow stays untouched: if the notification flow breaks, files must still
+land and dashboards must still build.
 
 ---
 
@@ -209,7 +214,13 @@ send one email per report file
 
 ## 6. What already exists — read before building, to avoid double-sends
 
-1. **The scanner has a basic notifier** (`Update-Dashboard.ps1`,
+0. **The current Dan + Lee emails come from the Power Automate flow
+   "Report Post Test"** (automated, owner Daniel Plant) — this is the
+   flow to extend or clone (§1). Note it currently **runs on the owner's
+   plan** under Dan's personal ownership; before the extended version
+   becomes business-critical, move it into a solution owned by a service
+   account so it doesn't stop when Dan's account or licence changes.
+1. **The scanner also has a basic notifier** (`Update-Dashboard.ps1`,
    config-driven: `notifications` block in `config.json`, optional
    `notification-rules.csv` of ReportType→Email, sends via local Outlook
    or SMTP relay from Dan's PC). It is type-only — no vessel, no
@@ -240,6 +251,7 @@ send one email per report file
 | 3 | Agree the workbook→list re-sync mechanism and who runs it | IT + Dan |
 | 4 | Sending identity: shared mailbox (e.g. `wce-dashboard@seadrill.com`) recommended over a personal account | IT |
 | 5 | Vessel roster names/emails — being filled in by Dan now | Dan |
+| 6 | Re-home the "Report Post Test" flow: it runs on Dan's personal plan/ownership today — move to a solution + service-account owner before go-live | IT |
 
 ---
 

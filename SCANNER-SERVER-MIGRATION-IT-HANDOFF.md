@@ -98,20 +98,18 @@ scanned forever.
    warnings should match (a couple of known warnings about skipped
    daily-checks files with no rig identity are expected and correct).
 
-## 4. Notifications — one thing that will NOT survive the move as-is
+## 4. Notifications — simply turn the scanner's own notifier off
 
-`config.json` currently has `"notifications": { "method": "outlook", ... }`
-— that sends email through the **locally signed-in Outlook on Dan's PC**.
-There is no Outlook on the server, so after migration either:
-
-- switch to `"method": "smtp"` with `smtpServer` set to the internal
-  relay + a shared sending mailbox (this is the same SMTP relay request
-  Dan already has open with IT — this meeting is a good time to close
-  it), or
-- set `"enabled": false` for now. The bigger, position-based notification
-  system is being built separately in Power Automate (see
-  `NOTIFICATION-DISTRIBUTION-IT-HANDOFF.pdf`) — once that flow is live
-  this scanner-side notifier stays off anyway to avoid double emails.
+Email notifications are **already handled by a Power Automate flow**
+("Report Post Test", triggered on posted reports — currently emails Dan +
+Lee, and it is the flow being extended into the full position-based
+distribution system, see `NOTIFICATION-DISTRIBUTION-IT-HANDOFF.pdf`).
+The scanner has its own legacy notifier configured with
+`"method": "outlook"`, which relies on the locally signed-in Outlook on
+Dan's PC and would not work on a server anyway — set
+`"notifications": { "enabled": false }` in the server's `config.json`
+and nothing further is needed. (An SMTP option exists in the script if
+scanner-side email is ever wanted again.)
 
 ## 5. Acceptance checklist
 
