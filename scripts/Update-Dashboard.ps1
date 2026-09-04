@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.33'
+$ScriptVersion = '2.34'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -505,6 +505,7 @@ $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins 
 $marineEntries = @{}     # keyed rig|date (newest file wins) - Marine Integrity Reports
 $topsetEntries = @{}     # keyed rig|torRef (newest revision wins, torStatus NEVER latched) - TOPSET Investigation ToRs (WCGRRT REV 148)
 $restrictedTopsetFiles = @{}  # filenames whose topsetData cfClass is above 'Seadrill Internal' - kept out of reports[] and the deployed report copies
+$complianceEntries = @{}  # keyed rig|date (newest exportedAt wins) - standalone Compliance Checklist reports (WCGRRT REV 151)
 $rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
 
@@ -1197,6 +1198,114 @@ foreach ($f in $files) {
         }
     }
 
+    # Standalone Compliance Checklist (WCGRRT REV 151, see
+    # DASHBOARDCOMPLIANCECHECKLISTHANDOFF.md). Identified by
+    # reportType === 'compliance-checklist' / complianceOnly / the
+    # meta.reporttype - filename prefix is seadrill-compliance-checklist_*
+    # (deliberately NOT seadrill-report_*), but filenames are never
+    # load-bearing here. tiles is ALWAYS [] on these - that's the design,
+    # not a broken report. One record per rig|date (one checklist per rig
+    # per visit date), newest exportedAt wins on a same-day repost.
+    # HISTORIC DATA WARNING (handoff section 1): every save before REV 150
+    # exported checklist.statuses/notes as EMPTY arrays (tool-side selector
+    # bug). Empty statuses = "no data", NEVER "0 compliant" - such records
+    # are flagged incomplete and the dashboard shows a marker, not tallies.
+    # complianceSummary is the tool's own precomputed per-priority tally and
+    # is the ONLY labeled data in the payload (statuses are positional with
+    # no item keys) - it is passed through as the authoritative numbers and
+    # never recomputed here.
+    $ccChecklist = Get-Prop $json 'checklist'
+    $ccType = [string](Get-Prop $json 'reportType')
+    $ccIsCompliance = ($ccType -eq 'compliance-checklist') -or
+                      ([bool](Get-Prop $json 'complianceOnly')) -or
+                      (([string](Get-Prop $meta 'reporttype')) -eq 'Compliance Checklist')
+    if ($ccIsCompliance -and $ccChecklist -and $assetRaw) {
+        $ccDate = [string](Get-Prop $meta 'date')
+        $ccStatuses = @(Get-Prop $ccChecklist 'statuses') | Where-Object { $null -ne $_ }
+        $ccIncomplete = (@($ccStatuses | Where-Object { [string]$_ -ne '' }).Count -eq 0)
+        $ccSummaryRows = New-Object System.Collections.Generic.List[object]
+        $ccActions = New-Object System.Collections.Generic.List[object]
+        $ccTotals = @{ compliant = 0; na = 0; action = 0; blank = 0; total = 0 }
+        foreach ($sr in @(Get-Prop $json 'complianceSummary')) {
+            if (-not $sr) { continue }
+            $row = @{
+                id        = [string](Get-Prop $sr 'id')
+                label     = [string](Get-Prop $sr 'label')
+                compliant = [int](Get-Prop $sr 'compliant')
+                na        = [int](Get-Prop $sr 'na')
+                action    = [int](Get-Prop $sr 'action')
+                blank     = [int](Get-Prop $sr 'blank')
+                total     = [int](Get-Prop $sr 'total')
+            }
+            $ccSummaryRows.Add($row) | Out-Null
+            if (-not $ccIncomplete) {
+                $ccTotals.compliant += $row.compliant; $ccTotals.na += $row.na
+                $ccTotals.action += $row.action; $ccTotals.blank += $row.blank
+                $ccTotals.total += $row.total
+                if ($row.action -gt 0) {
+                    $ccActions.Add(@{ id = $row.id; label = $row.label; action = $row.action }) | Out-Null
+                }
+            }
+        }
+        # Certification registers (Appendix A/B) exported correctly in ALL
+        # revisions - the expiry watch works even on historic files.
+        $ccExpiries = New-Object System.Collections.Generic.List[object]
+        $ccAppendix = Get-Prop $ccChecklist 'appendix'
+        if ($ccAppendix) {
+            foreach ($appPair in @(@('ckl-appa', 'A'), @('ckl-appb', 'B'))) {
+                foreach ($ar in @(Get-Prop $ccAppendix $appPair[0])) {
+                    if (-not $ar) { continue }
+                    $arDesc = [string](Get-Prop $ar 'desc'); $arAsset = [string](Get-Prop $ar 'asset')
+                    $arCert = [string](Get-Prop $ar 'cert'); $arExpiry = [string](Get-Prop $ar 'expiry')
+                    if (-not ($arDesc -or $arAsset -or $arCert -or $arExpiry)) { continue }
+                    $ccExpiries.Add(@{
+                        register = $appPair[1]
+                        ele      = [string](Get-Prop $ar 'ele')
+                        desc     = $arDesc
+                        asset    = $arAsset
+                        cert     = $arCert
+                        expiry   = $arExpiry
+                    }) | Out-Null
+                }
+            }
+        }
+        $ccVrr = @(Get-Prop $json 'vrr') | Where-Object { $null -ne $_ }
+        if (@($ccVrr).Count -eq 0) { $ccVrr = @(Get-Prop $ccChecklist 'vrr') | Where-Object { $null -ne $_ } }
+        $ccAabRaw = Get-Prop $ccChecklist 'aab'
+        $ccRec = @{
+            rig        = [string]$rig
+            date       = $ccDate
+            dateEnd    = [string](Get-Prop $meta 'dateend')
+            file       = $f.Name
+            bopNo      = [string](Get-Prop $meta 'bopNo')
+            synCase    = [string](Get-Prop $meta 'synCase')
+            wce        = [string](Get-Prop $meta 'wce')
+            exportedAt = [string](Get-Prop $json 'exportedAt')
+            incomplete = [bool]$ccIncomplete
+            summary    = $ccSummaryRows.ToArray()
+            totals     = $ccTotals
+            actions    = $ccActions.ToArray()
+            expiries   = $ccExpiries.ToArray()
+            vrr        = @($ccVrr | ForEach-Object { [bool]$_ })
+            aab        = @{
+                reviewed = [string](Get-Prop $ccAabRaw 'reviewed')
+                approved = [string](Get-Prop $ccAabRaw 'approved')
+                returned = [string](Get-Prop $ccAabRaw 'returned')
+                deferred = [string](Get-Prop $ccAabRaw 'deferred')
+            }
+            signoff    = @(Get-Prop $ccChecklist 'signoff' | ForEach-Object { [string]$_ })
+        }
+        if ($ccIncomplete) {
+            Write-Warning "Compliance checklist $($f.Name): statuses array is empty (pre-REV-150 tool bug) - recorded as INCOMPLETE DATA, not as zero compliance"
+        }
+        $ccKey = "$rig|$ccDate"
+        $ccExisting = $complianceEntries[$ccKey]
+        if (-not $ccExisting -or ([string]$ccRec.exportedAt -gt [string]$ccExisting.entry.exportedAt) -or
+            ((-not $ccRec.exportedAt) -and ($f.LastWriteTime -gt $ccExisting.modified))) {
+            $complianceEntries[$ccKey] = @{ modified = $f.LastWriteTime; entry = $ccRec }
+        }
+    }
+
     # Report lead: WCE superintendent for rig-visit exports; SSORT has no WCE
     # field, so fall back to the Subsea Supervisor, then the engineers.
     $lead = [string](Get-Prop $meta 'wce')
@@ -1298,6 +1407,14 @@ $topsetSorted = New-Object System.Collections.Generic.List[object]
 $topsetList | Sort-Object -Property @{ Expression = { [string]$_.raisedDate } }, @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $topsetSorted.Add($_) | Out-Null }
 
+# Compliance checklists: one record per rig|date, all dates kept per rig
+# (AAB trending reads the history), newest first.
+$complianceList = New-Object System.Collections.Generic.List[object]
+foreach ($v in $complianceEntries.Values) { $complianceList.Add($v.entry) | Out-Null }
+$complianceSorted = New-Object System.Collections.Generic.List[object]
+$complianceList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
+    ForEach-Object { $complianceSorted.Add($_) | Out-Null }
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     reportFolder = ($existingFolders -join '  |  ')
@@ -1310,6 +1427,7 @@ $payload = [pscustomobject]@{
     rigChecks    = $rigCheckSorted.ToArray()
     marineScores = $marineSorted.ToArray()
     topsetInvestigations = $topsetSorted.ToArray()
+    complianceChecklists = $complianceSorted.ToArray()
 }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10

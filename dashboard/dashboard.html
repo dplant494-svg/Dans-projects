@@ -593,6 +593,7 @@
         <button type="button" class="view-tab" id="tab-monitoring-btn">Rig Monitoring</button>
         <button type="button" class="view-tab" id="tab-marine-btn">Marine Integrity</button>
         <button type="button" class="view-tab" id="tab-invest-btn">Investigations</button>
+        <button type="button" class="view-tab" id="tab-compliance-btn">Compliance</button>
       </div>
 
       <div class="filter-row" id="filter-row">
@@ -698,6 +699,17 @@
           <div id="invest-open"></div>
           <div id="invest-overdue"></div>
           <div id="invest-closed"></div>
+        </section>
+      </div>
+
+      <div id="compliance-view" hidden>
+        <section class="card">
+          <h2>BWM Compliance Checklists</h2>
+          <div class="source-line">Latest compliance checklist per rig with the P1–P8 tallies. Action counts and not-assessed counts are shown separately — an incomplete checklist is a different problem from a failed item. Click a rig for the full checklist.</div>
+          <div class="rig-mon-empty" id="compliance-empty" hidden></div>
+          <div id="compliance-cards"></div>
+          <div id="compliance-actions"></div>
+          <div id="compliance-expiry"></div>
         </section>
       </div>
     </main>
@@ -2774,6 +2786,86 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
+  // ---------- Compliance Checklist (standalone, WCGRRT REV 151) ----------
+  // statuses/notes are POSITIONAL with no item keys, so complianceSummary
+  // (computed by the tool against the form the user actually saw) is the
+  // only labeled data - it is rendered as-is, never recomputed. Empty
+  // statuses = pre-REV-150 tool bug = NO DATA, never "0 compliant".
+  function ccStatusesEmpty(full) {
+    var st = (full.checklist && full.checklist.statuses) || [];
+    return !st.some(function (s) { return s && String(s).trim(); });
+  }
+  function rvCompliance(full, body) {
+    var ck = full.checklist || {};
+    body.appendChild(mk('div', 'rv-section-label', 'Compliance checklist'));
+    if (ccStatusesEmpty(full)) {
+      var warn = mk('div', 'rv-notes',
+        '⚠ Incomplete data: this checklist was exported by a tool revision (pre-REV-150) that failed to save the ' +
+        'compliance statuses and notes. The blank tallies below mean NO DATA was captured — they are not a finding ' +
+        'and must not be read as non-compliance. Appendix registers, AAB totals, VRR and sign-off were saved correctly.');
+      warn.style.color = 'var(--sd-fail)';
+      body.appendChild(warn);
+    }
+    var sum = full.complianceSummary || [];
+    if (sum.length && !ccStatusesEmpty(full)) {
+      body.appendChild(tsTable(['Priority', 'Compliant', 'N/A', 'Action required', 'Not assessed', 'Total'],
+        sum.map(function (r) {
+          return { cells: [r.label, r.compliant, r.na, r.action, r.blank, r.total], overdue: (r.action || 0) > 0 };
+        })));
+      var blanks = sum.reduce(function (a, r) { return a + (r.blank || 0); }, 0);
+      if (blanks > 0) {
+        var nb = mk('div', 'rv-notes', blanks + ' item(s) not assessed — an incomplete checklist, distinct from a failed item.');
+        nb.style.color = '#ad6800';
+        body.appendChild(nb);
+      }
+    }
+    var notes = (ck.notes || []).map(function (n) { return String(n || '').trim(); });
+    if (notes.some(function (n) { return n; })) {
+      body.appendChild(mk('div', 'rv-section-label', 'Notes'));
+      notes.forEach(function (n, i) {
+        if (!n) return;
+        body.appendChild(mk('div', 'ts-leg-head', 'Note ' + (i + 1)));
+        body.appendChild(mk('div', 'rv-notes', n));
+      });
+    }
+    var app = ck.appendix || {};
+    [['ckl-appa', 'Appendix A — certification register'], ['ckl-appb', 'Appendix B — certification register']].forEach(function (pair) {
+      var rows = (app[pair[0]] || []).filter(function (r) {
+        return r && (String(r.desc || '').trim() || String(r.asset || '').trim() || String(r.cert || '').trim() || String(r.expiry || '').trim());
+      });
+      if (!rows.length) return;
+      body.appendChild(mk('div', 'rv-section-label', pair[1]));
+      body.appendChild(tsTable(['Element', 'Description', 'Asset', 'Certificate', 'Expiry'],
+        rows.map(function (r) {
+          var exp = String(r.expiry || '');
+          return { cells: [r.ele, r.desc, r.asset, r.cert, exp], overdue: /^\d{4}-\d{2}-\d{2}$/.test(exp) && exp < tsTodayStr() };
+        })));
+    });
+    var aab = ck.aab || {};
+    if (aab.reviewed || aab.approved || aab.returned || aab.deferred) {
+      body.appendChild(mk('div', 'rv-section-label', 'Maximo AAB totals'));
+      var ag = mk('div', 'rv-grid');
+      [['Reviewed', aab.reviewed], ['Approved', aab.approved], ['Returned', aab.returned], ['Deferred', aab.deferred]]
+        .forEach(function (p) { if (p[1] !== '' && p[1] != null) ag.appendChild(rvField(p[0], String(p[1]))); });
+      body.appendChild(ag);
+    }
+    var vrr = full.vrr || ck.vrr || [];
+    if (vrr.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'VRR'));
+      var vw = mk('div'); vw.style.marginBottom = '10px';
+      vrr.forEach(function (v, i) { vw.appendChild(mk('span', 'tag' + (v ? '' : ' crit'), 'VRR ' + (i + 1) + (v ? ' ✓' : ' ✗'))); });
+      body.appendChild(vw);
+    }
+    var so = ck.signoff || [];
+    if (so.some(function (s) { return s && String(s).trim(); })) {
+      body.appendChild(mk('div', 'rv-section-label', 'Sign-off'));
+      var sg = mk('div', 'rv-grid');
+      [['Name', so[0]], ['Position', so[1]], ['Date', so[2]], ['Reference', so[3]]]
+        .forEach(function (p) { if (p[1] && String(p[1]).trim()) sg.appendChild(rvField(p[0], String(p[1]))); });
+      body.appendChild(sg);
+    }
+  }
+
   function rvCbm(cbm, body) {
     body.appendChild(mk('div', 'rv-section-label', 'CBM inspection details'));
     var grid = mk('div', 'rv-grid');
@@ -3148,6 +3240,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         body.appendChild(mk('div', 'rv-section-label', 'Alarm photos'));
         body.appendChild(alarmPh);
       }
+    }
+
+    // Standalone Compliance Checklist (REV 151): top-level checklist +
+    // complianceSummary, tiles always [] by design - not a broken report.
+    if (full.checklist && (full.reportType === 'compliance-checklist' || full.complianceOnly || full.complianceSummary)) {
+      rvCompliance(full, body);
     }
 
     var tiles = full.tiles || [];
@@ -3568,6 +3666,108 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
+  // ---------- Compliance tab: latest checklist per rig ----------
+  // No fleet league table (same ethos as marine/investigations): cards are
+  // alphabetical by rig, and "not assessed" is surfaced separately from
+  // "action required" - conflating them hides both problems.
+  function renderCompliance() {
+    var data = window.DASHBOARD_DATA || {};
+    var list = data.complianceChecklists || [];
+    var cardsWrap = $('compliance-cards'), actWrap = $('compliance-actions'), expWrap = $('compliance-expiry'), empty = $('compliance-empty');
+    cardsWrap.innerHTML = ''; actWrap.innerHTML = ''; expWrap.innerHTML = '';
+    if (!list.length) {
+      empty.hidden = false;
+      empty.textContent = 'No compliance checklists received yet. Standalone checklists posted from the report tool (REV 151+) appear here automatically.';
+      return;
+    }
+    empty.hidden = true;
+    // list is newest-first; first record per rig = latest checklist.
+    var latestByRig = {};
+    list.forEach(function (r) { if (!latestByRig[r.rig]) latestByRig[r.rig] = r; });
+    var rigs = Object.keys(latestByRig).sort();
+
+    cardsWrap.appendChild(mk('div', 'rv-section-label', 'Latest checklist per rig (' + rigs.length + ')'));
+    var grid = mk('div', 'ts-grid');
+    rigs.forEach(function (rigName) {
+      var cc = latestByRig[rigName];
+      var card = mk('button', 'ts-card');
+      card.type = 'button';
+      card.addEventListener('click', function () {
+        var rec = (data.reports || []).find(function (r) { return r.file === cc.file; });
+        if (rec) openReportViewer(rec);
+      });
+      card.appendChild(mk('h3', '', cc.rig + (cc.bopNo ? ' — ' + cc.bopNo : '')));
+      card.appendChild(mk('div', 'ts-ref', (cc.date || '') + (cc.synCase ? ' · Synergi #' + cc.synCase : '')));
+      var badges = mk('div');
+      if (cc.incomplete) {
+        badges.appendChild(mk('span', 'ts-badge st-issued', 'Incomplete data'));
+      } else {
+        var t = cc.totals || {};
+        if ((t.action || 0) > 0) badges.appendChild(mk('span', 'ts-badge overdue', t.action + ' action' + (t.action === 1 ? '' : 's')));
+        if ((t.blank || 0) > 0) badges.appendChild(mk('span', 'ts-badge sev-medium', t.blank + ' not assessed'));
+        if ((t.action || 0) === 0 && (t.blank || 0) === 0) badges.appendChild(mk('span', 'ts-badge st-approved', 'All assessed — no actions'));
+      }
+      card.appendChild(badges);
+      if (cc.incomplete) {
+        card.appendChild(mk('div', 'ts-lock',
+          'Pre-REV-150 export: compliance statuses were not saved by the tool. No data — not non-compliance.'));
+      } else {
+        (cc.summary || []).forEach(function (s) {
+          var r = mk('div', 'ts-row');
+          r.appendChild(mk('span', 'k', s.label));
+          var v = mk('span', '', s.compliant + '/' + s.total + (s.action ? ' · ' + s.action + ' action' : '') + (s.blank ? ' · ' + s.blank + ' blank' : ''));
+          if (s.action) v.style.color = 'var(--sd-fail)';
+          r.appendChild(v);
+          card.appendChild(r);
+        });
+        var aab = cc.aab || {};
+        if (aab.reviewed || aab.approved || aab.returned || aab.deferred) {
+          card.appendChild(mk('div', 'ts-quar', 'AAB: ' + (aab.reviewed || '0') + ' reviewed · ' + (aab.approved || '0') +
+            ' approved · ' + (aab.returned || '0') + ' returned · ' + (aab.deferred || '0') + ' deferred'));
+        }
+      }
+      grid.appendChild(card);
+    });
+    cardsWrap.appendChild(grid);
+
+    var allActions = [];
+    rigs.forEach(function (rigName) {
+      var cc = latestByRig[rigName];
+      if (cc.incomplete) return;
+      (cc.actions || []).forEach(function (a) { allActions.push({ cc: cc, a: a }); });
+    });
+    if (allActions.length) {
+      actWrap.appendChild(mk('div', 'rv-section-label', 'Outstanding actions (' + allActions.length + ' priorit' + (allActions.length === 1 ? 'y' : 'ies') + ')'));
+      actWrap.appendChild(tsTable(['Rig', 'Checklist date', 'Priority', 'Items needing action'],
+        allActions.map(function (x) {
+          return { cells: [x.cc.rig, x.cc.date, x.a.label, x.a.action], overdue: true };
+        })));
+    }
+
+    // Certification expiry watch: exported correctly by ALL tool revisions,
+    // so historic (incomplete-status) checklists still contribute here.
+    var today = tsTodayStr();
+    var soon = (function () { var d = new Date(); d.setDate(d.getDate() + 90);
+      return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); })();
+    var expRows = [];
+    rigs.forEach(function (rigName) {
+      var cc = latestByRig[rigName];
+      (cc.expiries || []).forEach(function (e) {
+        var exp = String(e.expiry || '');
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(exp)) return;
+        if (exp <= soon) expRows.push({ cc: cc, e: e, past: exp < today });
+      });
+    });
+    if (expRows.length) {
+      expRows.sort(function (a, b) { return String(a.e.expiry).localeCompare(String(b.e.expiry)); });
+      expWrap.appendChild(mk('div', 'rv-section-label', 'Certification expiry watch — past or within 90 days (' + expRows.length + ')'));
+      expWrap.appendChild(tsTable(['Rig', 'Register', 'Description', 'Asset', 'Certificate', 'Expiry'],
+        expRows.map(function (x) {
+          return { cells: [x.cc.rig, x.e.register, x.e.desc, x.e.asset, x.e.cert, x.e.expiry + (x.past ? '  (EXPIRED)' : '')], overdue: x.past };
+        })));
+    }
+  }
+
   function render() {
     var data = window.DASHBOARD_DATA;
     var hasData = data && Array.isArray(data.reports);
@@ -3589,6 +3789,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     renderRigMonitoring();
     renderMarine();
     renderInvestigations();
+    renderCompliance();
   }
 
   // ---------- auto-refresh: re-load reports-data.js and re-render on change ----------
@@ -3643,29 +3844,33 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var isMonitoring = name === 'monitoring';
     var isMarine = name === 'marine';
     var isInvest = name === 'invest';
+    var isCompliance = name === 'compliance';
     $('tab-list-btn').classList.toggle('active', isList);
     $('tab-cbm-btn').classList.toggle('active', isCbm);
     $('tab-monitoring-btn').classList.toggle('active', isMonitoring);
     $('tab-marine-btn').classList.toggle('active', isMarine);
     $('tab-invest-btn').classList.toggle('active', isInvest);
+    $('tab-compliance-btn').classList.toggle('active', isCompliance);
     $('list-view').hidden = !isList;
     $('cbm-view').hidden = !isCbm;
     $('monitoring-view').hidden = !isMonitoring;
     $('marine-view').hidden = !isMarine;
     $('invest-view').hidden = !isInvest;
+    $('compliance-view').hidden = !isCompliance;
     $('range-group').hidden = !isList;
     $('type-filter').hidden = !isList;
     $('search').hidden = !isList;
-    // The monitoring, marine and investigations tabs are deliberately
-    // fleet-wide (one tile/card per rig or investigation), so the rig
-    // filter has nothing to scope there.
-    $('rig-filter').hidden = isMonitoring || isMarine || isInvest;
+    // The monitoring, marine, investigations and compliance tabs are
+    // deliberately fleet-wide (one tile/card per rig or investigation),
+    // so the rig filter has nothing to scope there.
+    $('rig-filter').hidden = isMonitoring || isMarine || isInvest || isCompliance;
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
   $('tab-monitoring-btn').addEventListener('click', function () { showTab('monitoring'); });
   $('tab-marine-btn').addEventListener('click', function () { showTab('marine'); });
   $('tab-invest-btn').addEventListener('click', function () { showTab('invest'); });
+  $('tab-compliance-btn').addEventListener('click', function () { showTab('compliance'); });
 
   $('cbm-class-select').addEventListener('change', function () {
     state.cbmClass = this.value;

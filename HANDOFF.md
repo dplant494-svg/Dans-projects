@@ -158,7 +158,15 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.33** (adds TOPSET Investigation
+- `scripts/Update-Dashboard.ps1`: **v2.34** (adds standalone Compliance
+  Checklist support — WCGRRT REV 151, see
+  `DASHBOARDCOMPLIANCECHECKLISTHANDOFF.md`: `complianceChecklists[]`
+  aggregate keyed rig|date with exportedAt tiebreak, pre-REV-150
+  empty-statuses records flagged `incomplete` and shown as "no data"
+  (never 0-compliant), certification-expiry watch from the Appendix
+  registers, and a "Compliance" tab + full-checklist viewer section on
+  the Reports Dashboard).
+  v2.33 adds TOPSET Investigation
   support — WCGRRT REV 148 Terms of Reference exports, see
   `DASHBOARDTOPSETINVESTIGATIONHANDOFF.md`: `topsetInvestigations[]`
   aggregate keyed rig|torRef, newest revision wins with torStatus NEVER
