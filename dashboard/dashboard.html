@@ -980,6 +980,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     host.appendChild(svg);
   }
 
+  // Not rigs: fleet/corporate buckets that must never rank in the per-rig
+  // chart. 'SSCE Equipment' is WCGRRT REV 153's deliberate non-rig choice
+  // for vendor-premises work ('SSCE Asset' = its pre-REV-153 label);
+  // 'Unattributed' is the scanner's bucket for files with no rig identity.
+  var NON_RIG_BUCKETS = { 'SSCE Equipment': true, 'SSCE Asset': true, 'Unattributed': true };
+
   function renderRigChart(reports) {
     var host = $('rig-chart');
     host.textContent = '';
@@ -993,8 +999,18 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
 
     var counts = {};
-    reports.forEach(function (r) { counts[r.rig] = (counts[r.rig] || 0) + 1; });
+    reports.forEach(function (r) {
+      if (NON_RIG_BUCKETS[r.rig]) return;  // corporate buckets stay off the fleet ranking
+      counts[r.rig] = (counts[r.rig] || 0) + 1;
+    });
     var rigs = Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); });
+    if (!rigs.length) {
+      var emptyR = document.createElement('div');
+      emptyR.className = 'chart-empty';
+      emptyR.textContent = 'No rig-attributed reports in the selected range.';
+      host.appendChild(emptyR);
+      return;
+    }
 
     var W = Math.max(host.clientWidth || 380, 260);
     var rowH = 26, mT = 4, mB = 4, mL = 4, mR = 30;
@@ -3562,15 +3578,43 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   }
 
   function renderFilterOptions() {
-    var rigs = [], types = [];
+    var rigs = [], buckets = [], types = [];
     (window.DASHBOARD_DATA.reports || []).forEach(function (r) {
       if (r.discipline === 'Marine') return;  // routed to the Marine tab, so no dead filter option here
-      if (r.rig && rigs.indexOf(r.rig) === -1) rigs.push(r.rig);
+      if (r.rig) {
+        if (NON_RIG_BUCKETS[r.rig]) { if (buckets.indexOf(r.rig) === -1) buckets.push(r.rig); }
+        else if (rigs.indexOf(r.rig) === -1) rigs.push(r.rig);
+      }
       if (r.reporttype && types.indexOf(r.reporttype) === -1) types.push(r.reporttype);
     });
     rigs.sort();
+    buckets.sort();
     types.sort();
-    state.rig = renderSelectOptions($('rig-filter'), rigs, state.rig, 'All rigs');
+    // Rig select: real rigs first, non-rig buckets under their own group so
+    // SSCE Equipment / Unattributed never read as fleet units but their
+    // reports stay findable.
+    var sel = $('rig-filter');
+    sel.textContent = '';
+    var all = document.createElement('option');
+    all.value = ''; all.textContent = 'All rigs';
+    sel.appendChild(all);
+    rigs.forEach(function (v) {
+      var o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      sel.appendChild(o);
+    });
+    if (buckets.length) {
+      var grp = document.createElement('optgroup');
+      grp.label = 'Not rig-specific';
+      buckets.forEach(function (v) {
+        var o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        grp.appendChild(o);
+      });
+      sel.appendChild(grp);
+    }
+    sel.value = (rigs.indexOf(state.rig) !== -1 || buckets.indexOf(state.rig) !== -1) ? state.rig : '';
+    state.rig = sel.value;
     state.rtype = renderSelectOptions($('type-filter'), types, state.rtype, 'All types');
   }
 

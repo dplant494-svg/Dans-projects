@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.36'
+$ScriptVersion = '2.37'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -711,6 +711,12 @@ foreach ($f in $files) {
         $rig = 'Unattributed'
         Write-Warning "No rig identity in $($f.Name) (meta.asset blank) - listed under 'Unattributed' instead of inventing a rig from the filename; the posting tool should set meta.asset"
     }
+    # WCGRRT REV 153: 'SSCE Equipment' is the deliberate non-rig choice for
+    # corporate/vendor-premises work (a fleet bucket, not a rig - the
+    # dashboard keeps it out of the fleet chart). 'SSCE Asset' is the same
+    # bucket under its pre-REV-153 label - normalize the alias here so only
+    # one bucket ever exists downstream.
+    if ($rig -eq 'SSCE Asset') { $rig = 'SSCE Equipment' }
 
     # A bare 'meta' block with nothing else recognizable (no tiles, no rig
     # identity, no critical/action rows, no Daily Checks/FLM readings) isn't
