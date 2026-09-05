@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="700" viewBox="0 0 1180 700" font-family="Segoe UI, Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#002C77"/></marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16683a"/></marker>
+    <marker id="arrd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a94a6"/></marker>
+  </defs>
+  <rect width="1180" height="700" fill="#f4f6fa"/>
+  <rect x="0" y="0" width="1180" height="58" fill="#002C77"/>
+  <rect x="0" y="58" width="1180" height="3" fill="#EDB71E"/>
+  <text x="28" y="26" fill="#EDB71E" font-size="11" letter-spacing="2" font-weight="700">SEADRILL TECHNICAL SERVICES — SUBSEA</text>
+  <text x="28" y="47" fill="#fff" font-size="18" font-weight="700">BOP Precharge Request — how a request travels from the rig to Dan's calculator, and back</text>
+
+  <!-- swimlane labels -->
+  <g font-size="11" font-weight="700" fill="#5a6880" letter-spacing="1.5">
+    <text x="28" y="92">RIG</text>
+    <text x="28" y="262">SHAREPOINT / SERVER (automatic)</text>
+    <text x="28" y="432">DAN (behind IIS Windows login)</text>
+  </g>
+  <line x1="20" y1="240" x2="1160" y2="240" stroke="#d0d8e8"/>
+  <line x1="20" y1="410" x2="1160" y2="410" stroke="#d0d8e8"/>
+
+  <!-- RIG lane -->
+  <g>
+    <rect x="40" y="110" width="220" height="96" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="150" y="136" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">1. Rig fills the request form</text>
+    <text x="150" y="156" text-anchor="middle" font-size="11" fill="#0a1530">SSORT · form Rev 2</text>
+    <text x="150" y="172" text-anchor="middle" font-size="11" fill="#5a6880">rig, well, BOP, shear pressure, MAWHP,</text>
+    <text x="150" y="187" text-anchor="middle" font-size="11" fill="#5a6880">water depth, temps, stack changes</text>
+
+    <rect x="330" y="110" width="200" height="96" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="430" y="136" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">2. "Post to Dashboard"</text>
+    <text x="430" y="156" text-anchor="middle" font-size="11" fill="#0a1530">seadrill-request_&lt;rig&gt;_&lt;well&gt;_</text>
+    <text x="430" y="171" text-anchor="middle" font-size="11" fill="#0a1530">&lt;date&gt;_precharge.json</text>
+    <text x="430" y="190" text-anchor="middle" font-size="10.5" fill="#5a6880">same transport as every other post</text>
+
+    <rect x="600" y="122" width="190" height="72" rx="8" fill="#fff" stroke="#8a94a6" stroke-width="1.2" stroke-dasharray="5 3"/>
+    <text x="695" y="147" text-anchor="middle" font-size="12" font-weight="700" fill="#5a6880">No connection?</text>
+    <text x="695" y="165" text-anchor="middle" font-size="11" fill="#5a6880">"Create request file" → email it;</text>
+    <text x="695" y="180" text-anchor="middle" font-size="11" fill="#5a6880">Dan drops it in the report folder</text>
+  </g>
+
+  <!-- SERVER lane -->
+  <g>
+    <rect x="40" y="280" width="200" height="96" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="140" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">3. Power Automate flow</text>
+    <text x="140" y="326" text-anchor="middle" font-size="11" fill="#0a1530">writes the file into the</text>
+    <text x="140" y="341" text-anchor="middle" font-size="11" fill="#0a1530">SharePoint PostedReports library</text>
+    <text x="140" y="360" text-anchor="middle" font-size="10.5" fill="#5a6880">(existing — untouched)</text>
+
+    <rect x="310" y="280" width="200" height="96" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="410" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">4. Sync to the server</text>
+    <text x="410" y="326" text-anchor="middle" font-size="11" fill="#0a1530">the report folder the scanner</text>
+    <text x="410" y="341" text-anchor="middle" font-size="11" fill="#0a1530">already reads</text>
+    <text x="410" y="360" text-anchor="middle" font-size="10.5" fill="#5a6880">(OneDrive / IT sync — existing)</text>
+
+    <rect x="580" y="268" width="290" height="120" rx="8" fill="#eef3fb" stroke="#002C77" stroke-width="2"/>
+    <text x="725" y="294" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">5. Scanner — every 10 minutes (v2.38)</text>
+    <text x="725" y="314" text-anchor="middle" font-size="11" fill="#0a1530">recognises a precharge REQUEST (not a report)</text>
+    <text x="725" y="330" text-anchor="middle" font-size="11" fill="#0a1530">builds id: capella_DAL-795_20260905_BOP2</text>
+    <text x="725" y="346" text-anchor="middle" font-size="11" fill="#0a1530">copies payload verbatim → requests/&lt;id&gt;.json</text>
+    <text x="725" y="362" text-anchor="middle" font-size="11" fill="#0a1530">writes requests/index.json (status new / issued)</text>
+    <text x="725" y="379" text-anchor="middle" font-size="10.5" fill="#5a6880">keeps it OUT of the report list, chart and copies</text>
+
+    <rect x="920" y="280" width="220" height="96" rx="8" fill="#fff" stroke="#E25303" stroke-width="1.5"/>
+    <text x="1030" y="306" text-anchor="middle" font-size="13" font-weight="700" fill="#E25303">/sacred/precharge/</text>
+    <text x="1030" y="326" text-anchor="middle" font-size="11" fill="#0a1530">inbox.html · calculator.html</text>
+    <text x="1030" y="341" text-anchor="middle" font-size="11" fill="#0a1530">requests/index.json · requests/*.json</text>
+    <text x="1030" y="361" text-anchor="middle" font-size="10.5" font-weight="700" fill="#E25303">IIS Windows Authentication — IT to enable</text>
+  </g>
+
+  <!-- DAN lane -->
+  <g>
+    <rect x="40" y="450" width="230" height="110" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="155" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">6. Dan opens inbox.html</text>
+    <text x="155" y="496" text-anchor="middle" font-size="11" fill="#0a1530">NEW requests at the top,</text>
+    <text x="155" y="511" text-anchor="middle" font-size="11" fill="#0a1530">amber if waiting &gt; 48 h,</text>
+    <text x="155" y="526" text-anchor="middle" font-size="11" fill="#0a1530">shear / MAWHP / depth at a glance</text>
+    <text x="155" y="546" text-anchor="middle" font-size="10.5" fill="#5a6880">click a row →</text>
+
+    <rect x="340" y="450" width="250" height="110" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="465" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">7. Calculator opens pre-filled</text>
+    <text x="465" y="496" text-anchor="middle" font-size="11" fill="#0a1530">calculator.html?req=&lt;id&gt;</text>
+    <text x="465" y="511" text-anchor="middle" font-size="11" fill="#0a1530">reads requests/&lt;id&gt;.json itself —</text>
+    <text x="465" y="526" text-anchor="middle" font-size="11" fill="#0a1530">right rig, all figures, checks already run</text>
+    <text x="465" y="546" text-anchor="middle" font-size="10.5" fill="#5a6880">no retyping, nothing lost</text>
+
+    <rect x="660" y="450" width="220" height="110" rx="8" fill="#fff" stroke="#002C77" stroke-width="1.5"/>
+    <text x="770" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#002C77">8. Dan issues the sheet</text>
+    <text x="770" y="496" text-anchor="middle" font-size="11" fill="#0a1530">precharge table per BOP,</text>
+    <text x="770" y="511" text-anchor="middle" font-size="11" fill="#0a1530">emailed to the rig as today,</text>
+    <text x="770" y="526" text-anchor="middle" font-size="11" fill="#0a1530">+ "Post to Dashboard" from the calculator</text>
+    <text x="770" y="546" text-anchor="middle" font-size="10.5" fill="#5a6880">seadrill-report_&lt;rig&gt;_&lt;date&gt;_precharge.json</text>
+
+    <rect x="950" y="450" width="190" height="110" rx="8" fill="#e3f5e8" stroke="#16683a" stroke-width="1.5"/>
+    <text x="1045" y="476" text-anchor="middle" font-size="13" font-weight="700" fill="#16683a">9. Loop closes itself</text>
+    <text x="1045" y="496" text-anchor="middle" font-size="11" fill="#0a1530">next scan matches the issued</text>
+    <text x="1045" y="511" text-anchor="middle" font-size="11" fill="#0a1530">sheet to the request on</text>
+    <text x="1045" y="526" text-anchor="middle" font-size="11" fill="#0a1530">rig + well + BOP →</text>
+    <text x="1045" y="546" text-anchor="middle" font-size="11" font-weight="700" fill="#16683a">inbox row turns ISSUED</text>
+  </g>
+
+  <!-- arrows -->
+  <g stroke="#002C77" stroke-width="2" fill="none" marker-end="url(#arr)">
+    <path d="M260,158 L330,158"/>
+    <path d="M430,206 C430,240 140,244 140,280"/>
+    <path d="M240,328 L310,328"/>
+    <path d="M510,328 L580,328"/>
+    <path d="M870,328 L920,328"/>
+    <path d="M1030,376 C1030,420 155,420 155,450"/>
+    <path d="M270,505 L340,505"/>
+    <path d="M590,505 L660,505"/>
+  </g>
+  <g stroke="#8a94a6" stroke-width="1.6" fill="none" stroke-dasharray="5 3" marker-end="url(#arrd)">
+    <path d="M530,140 L600,140"/>
+    <path d="M695,194 C695,230 430,236 410,280"/>
+  </g>
+  <g stroke="#16683a" stroke-width="2" fill="none" marker-end="url(#arrg)">
+    <path d="M880,505 L950,505"/>
+    <path d="M770,450 C770,420 430,412 430,206"/>
+  </g>
+  <text x="600" y="404" font-size="10.5" fill="#16683a" font-weight="700">issued sheet goes back through the SAME posting route (steps 2 → 5)</text>
+
+  <!-- legend -->
+  <g font-size="11" fill="#5a6880">
+    <text x="40" y="604">Legend:</text>
+    <line x1="100" y1="600" x2="140" y2="600" stroke="#002C77" stroke-width="2"/><text x="148" y="604">request leg (rig → Dan)</text>
+    <line x1="310" y1="600" x2="350" y2="600" stroke="#16683a" stroke-width="2"/><text x="358" y="604">return leg (Dan → rig, closes the request)</text>
+    <line x1="600" y1="600" x2="640" y2="600" stroke="#8a94a6" stroke-width="1.6" stroke-dasharray="5 3"/><text x="648" y="604">email fallback when the rig has no connection</text>
+    <text x="40" y="632">What is new: steps 5 (routing + index), 6 (inbox page) and 9 (auto-close) — built in scanner v2.38. Steps 1–2 and 7 are the reporting-tools session's (form Rev 2, calculator Rev 72). Steps 3–4 are the existing pipeline, unchanged.</text>
+    <text x="40" y="652">Rules kept: one writer (the scanner) for the requests folder · payload copied byte-for-byte · a re-post never resets ISSUED (shows REVISED) · transport untouched · email route still works.</text>
+    <text x="40" y="678" fill="#E25303" font-weight="700">Before go-live: IT enables Windows Authentication on /sacred/precharge/ (the files carry MASP, water depth and shear figures), and calculator.html is placed in that folder beside inbox.html.</text>
+  </g>
+</svg>

@@ -152,13 +152,24 @@ paths with credentials, but this shape is fine to document)
   "deployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred\\dashboard",
   "bopDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred",
   "bopPageName": "BOP Fleet Planning Dashboard.html",
+  "prechargeDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred\\precharge",
   "notifications": { "enabled": true, "method": "outlook", "rules": "..." }
 }
 ```
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.35** (daily-log distribution fixes
+- `scripts/Update-Dashboard.ps1`: **v2.38** (BOP Precharge Request inbox
+  per `PRECHARGE-INBOX-1-FOR-DASHBOARD-SESSION.md`: request files are
+  routed OUT of the report pipeline into `<prechargeDeployPath>\requests\`
+  as verbatim copies plus an `index.json` with new/issued status, the
+  return leg auto-matches issued sheets on rig|well|BOP, and a new
+  `precharge/inbox.html` page reads the index. `Deploy-Dashboard.ps1`
+  publishes the inbox when `prechargeDeployPath` is set. v2.37 added the
+  SSCE Equipment fleet bucket + 'SSCE Asset' alias; v2.36 the
+  Unattributed guard (no rig ever invented from a filename).
+  See `PRECHARGE-INBOX-DASHBOARD-REPLY.md` for the review + open points.)
+  Earlier: **v2.35** (daily-log distribution fixes
   per the SSORT REV 139 handoff `DASHBOARDMONTHLYLOGDISTRIBUTIONHANDOFF.md`:
   dedup key now rig|date|shift|equip so same-day entries for different
   equipment both survive; per-entry posts ingest only `meta.dayLogEntry`

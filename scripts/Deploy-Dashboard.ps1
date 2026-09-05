@@ -97,6 +97,24 @@ else {
 }
 
 
+# BOP Precharge Request inbox page. 'prechargeDeployPath' names the folder
+# the inbox and the calculator are served from (the scanner writes its
+# requests\ subfolder there). The page is only published when that path
+# is configured - the request payloads carry well data and the folder
+# should sit behind IIS Windows Authentication, not in the open share.
+$prechargeSrc = Join-Path $repoRoot 'precharge\inbox.html'
+if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config.prechargeDeployPath) {
+    $prechargeDeployDir = [Environment]::ExpandEnvironmentVariables($config.prechargeDeployPath)
+    if (-not (Test-Path -Path $prechargeSrc)) {
+        Write-Warning "No precharge\inbox.html found next to this project - Precharge inbox NOT published."
+    }
+    else {
+        if (-not (Test-Path -Path $prechargeDeployDir)) { New-Item -ItemType Directory -Path $prechargeDeployDir -Force | Out-Null }
+        Copy-Item -Path $prechargeSrc -Destination (Join-Path $prechargeDeployDir 'inbox.html') -Force
+        Write-Host "Published precharge inbox.html to $prechargeDeployDir" -ForegroundColor Green
+    }
+}
+
 # SSCE Requests Dashboard: page + current data file. Source file is named
 # requests-dashboard.html (not dashboard.html - this project already had
 # two identically-named dashboard.html files in different folders, which

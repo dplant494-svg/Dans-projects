@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.37'
+$ScriptVersion = '2.38'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -506,6 +506,20 @@ $marineEntries = @{}     # keyed rig|date (newest file wins) - Marine Integrity 
 $topsetEntries = @{}     # keyed rig|torRef (newest revision wins, torStatus NEVER latched) - TOPSET Investigation ToRs (WCGRRT REV 148)
 $restrictedTopsetFiles = @{}  # filenames whose topsetData cfClass is above 'Seadrill Internal' - kept out of reports[] and the deployed report copies
 $complianceEntries = @{}  # keyed rig|date (newest exportedAt wins) - standalone Compliance Checklist reports (WCGRRT REV 151)
+# BOP Precharge REQUESTS (SSORT request form -> calculator inbox; see
+# PRECHARGE-INBOX-1 handoff). Keyed by the request id, newest meta.saved
+# wins. These are requests, not reports: kept out of reports[], the
+# report copies and every fleet view - they exist only in the inbox index.
+$prechargeRequests = @{}
+$prechargeRequestFiles = @{}   # source filenames, so the report-copy loop never publishes them to the open share
+$prechargeIssued = @{}         # rigKey|well|bop -> newest meta.saved of an ISSUED precharge sheet (calculator post) - the return leg
+$PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta.asset is preferred (form Rev 2 ships it)
+    nov = 'West Neptune'; auriga = 'West Auriga'; vela = 'West Vela'; saturn = 'West Saturn'
+    jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'
+    libongos = 'Sonangol Libongos'; quenguela = 'Sonangol Quenguela'; gemini = 'West Gemini'
+    capella = 'West Capella'; cam = 'Sevan Louisiana'
+}
+function Get-PrechargeWellKey { param([string]$Well) if (-not $Well) { return 'well' }; return ($Well -replace '[^A-Za-z0-9._-]', '-') }
 $rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
 
@@ -637,6 +651,75 @@ foreach ($f in $files) {
         Write-Warning "Skipping $($f.Name): no 'meta' block - not a TSC Rig Reporting Tool export?"
         $skipped++
         continue
+    }
+
+    # BOP Precharge REQUEST vs ISSUED sheet - both are the calculator's own
+    # save schema (meta.tool 'Seadrill BOP Precharge Calculator'). A request
+    # says so in meta.source ('BOP Precharge Request form ...') and/or the
+    # seadrill-request_ filename; an issued sheet is the calculator's own
+    # "Post to Dashboard" (seadrill-report_*_precharge.json, reporttype
+    # 'Precharge') and stays a normal report. Requests are routed to the
+    # inbox index ONLY and never reach the report pipeline below.
+    $pcTool   = [string](Get-Prop $meta 'tool')
+    $pcSource = [string](Get-Prop $meta 'source')
+    $pcConfig = ([string](Get-Prop $json 'config')).Trim()
+    $pcFields = Get-Prop $json 'fields'
+    $pcWellV  = ''
+    if ($pcFields) { $pcW = Get-Prop $pcFields 'well'; if ($pcW) { $pcWellV = ([string](Get-Prop $pcW 'v')).Trim() } }
+    $pcBop = ([string](Get-Prop $meta 'bop')).Trim()
+    if (-not $pcBop -and $pcFields) { $pcB = Get-Prop $pcFields 'bopSel'; if ($pcB) { $pcBop = ([string](Get-Prop $pcB 'v')).Trim() } }
+    if (-not $pcBop) { $pcBop = '1' }
+    $pcSaved = [string](Get-Prop $meta 'saved')
+    $isPrechargeRequest = (($pcTool -eq 'Seadrill BOP Precharge Calculator') -and ($pcSource -like 'BOP Precharge Request form*')) -or
+                          ($f.Name -like 'seadrill-request_*_precharge.json') -or
+                          ((([string](Get-Prop $meta 'schema')) -eq '1') -and $PrechargeRigKeys.ContainsKey($pcConfig) -and
+                           -not [string](Get-Prop $meta 'reporttype') -and -not (Get-Prop $json 'tiles'))
+    if ($isPrechargeRequest) {
+        $pcRig = ([string](Get-Prop $meta 'asset')).Trim()
+        if (-not $pcRig -and $PrechargeRigKeys.ContainsKey($pcConfig)) { $pcRig = $PrechargeRigKeys[$pcConfig] }
+        if (-not $pcRig) { $pcRig = 'Unattributed'; Write-Warning "Precharge request $($f.Name): no meta.asset and unknown config '$pcConfig' - listed as Unattributed" }
+        $pcDate = ''
+        if ($pcSaved) { try { $pcDate = ([DateTimeOffset]::Parse($pcSaved, [Globalization.CultureInfo]::InvariantCulture)).UtcDateTime.ToString('yyyyMMdd') } catch { $pcDate = '' } }
+        if (-not $pcDate -and ($f.Name -match '_(\d{8})_precharge\.json$')) { $pcDate = $Matches[1] }
+        if (-not $pcDate) { $pcDate = $f.LastWriteTimeUtc.ToString('yyyyMMdd') }
+        $pcRigKey = if ($pcConfig) { $pcConfig } else { 'rig' }
+        $pcId = "$pcRigKey`_$(Get-PrechargeWellKey $pcWellV)`_$pcDate`_BOP$pcBop"
+        function Get-PcField { param($Name) if (-not $pcFields) { return '' }; $o = Get-Prop $pcFields $Name; if ($o) { return [string](Get-Prop $o 'v') }; return '' }
+        $pcHops = @(Get-Prop $json 'hops') | Where-Object { $_ }
+        $pcRec = @{
+            id         = $pcId
+            rig        = $pcRig
+            rigKey     = $pcRigKey
+            well       = $pcWellV
+            bop        = $pcBop
+            raisedBy   = [string](Get-Prop $meta 'raisedBy')
+            email      = [string](Get-Prop $meta 'email')
+            workOrder  = [string](Get-Prop $meta 'workOrder')
+            saved      = $pcSaved
+            received   = $f.LastWriteTimeUtc.ToString('yyyy-MM-ddTHH:mm:ssZ')
+            shearReq   = Get-PcField 'shReqTop'
+            mawhp      = Get-PcField 'mawhpTop'
+            waterDepth = Get-PcField 'wd'
+            hops       = @($pcHops).Count
+            matchKey   = "$pcRigKey|$(Get-PrechargeWellKey $pcWellV)|$pcBop"
+            path       = $f.FullName
+            modified   = $f.LastWriteTime
+        }
+        $prechargeRequestFiles[$f.Name] = $true
+        $pcPrior = $prechargeRequests[$pcId]
+        if (-not $pcPrior -or ([string]$pcSaved -gt [string]$pcPrior.saved) -or
+            (([string]$pcSaved -eq [string]$pcPrior.saved) -and ($f.LastWriteTime -gt $pcPrior.modified))) {
+            $prechargeRequests[$pcId] = $pcRec
+        }
+        continue
+    }
+    if (($pcTool -eq 'Seadrill BOP Precharge Calculator') -or (([string](Get-Prop $meta 'reporttype')) -eq 'Precharge')) {
+        # Issued sheet: remember the newest one per rig|well|BOP for the
+        # return leg (flips the matching request to 'issued'). It still
+        # flows through as a normal report below.
+        $isKey = "$(if ($pcConfig) { $pcConfig } else { 'rig' })|$(Get-PrechargeWellKey $pcWellV)|$pcBop"
+        $isSaved = if ($pcSaved) { $pcSaved } else { [string](Get-Prop $meta 'date') }
+        if (-not $prechargeIssued.ContainsKey($isKey) -or ([string]$isSaved -gt [string]$prechargeIssued[$isKey])) { $prechargeIssued[$isKey] = $isSaved }
     }
 
     try {
@@ -1788,6 +1871,93 @@ catch {
 # replaces the live one, same manual-redistribution step that dashboard's
 # own "Download updated dashboard" button already requires). Skipped
 # entirely (with one visible warning) until 'cocDashboardPath' is set.
+# ---------------------------------------------------------------------------
+# BOP Precharge Request inbox (PRECHARGE-INBOX-1 handoff, 2026-09-05).
+# Writes <prechargeDeployPath>\requests\<id>.json (payload copied VERBATIM -
+# it is fed straight into the calculator's loadState()) and index.json,
+# the list the inbox page reads. This scanner is the ONLY writer of that
+# folder; the calculator and inbox page only read it. Status rules:
+#   new    - id never seen before
+#   issued - preserved from the previous index, or set automatically when
+#            an issued precharge sheet for the same rig|well|BOP has been
+#            posted at/after the request (the return leg)
+#   opened - recorded by the inbox page in the browser only (no server)
+# A re-post of a known id NEVER resets an 'issued' status; it sets
+# resubmitted=true so it is visibly a revision. Skipped entirely (with a
+# warning) until 'prechargeDeployPath' is set in config.json - the payloads
+# carry well data (MASP, water depth, shear) and belong behind IIS auth.
+# ---------------------------------------------------------------------------
+$prechargeDeployPath = ''
+if ($config.PSObject.Properties['prechargeDeployPath'] -and $config.prechargeDeployPath) {
+    $prechargeDeployPath = [Environment]::ExpandEnvironmentVariables($config.prechargeDeployPath)
+}
+if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
+    if (-not $prechargeDeployPath) {
+        Write-Warning "Precharge inbox skipped: $($prechargeRequests.Count) request(s) seen but 'prechargeDeployPath' is not set in config.json"
+    }
+    elseif (-not (Test-Path -Path $prechargeDeployPath)) {
+        Write-Warning "Precharge inbox skipped: prechargeDeployPath not reachable: $prechargeDeployPath"
+    }
+    else {
+        try {
+            $pcReqDir = Join-Path $prechargeDeployPath 'requests'
+            if (-not (Test-Path -Path $pcReqDir)) { New-Item -ItemType Directory -Path $pcReqDir -Force | Out-Null }
+            $pcIndexPath = Join-Path $pcReqDir 'index.json'
+            $pcPrev = @{}
+            if (Test-Path -Path $pcIndexPath) {
+                try {
+                    $pcPrevIdx = Get-Content -Path $pcIndexPath -Raw | ConvertFrom-Json
+                    foreach ($pr in @($pcPrevIdx.requests)) {
+                        if ($pr -and $pr.id) { $pcPrev[[string]$pr.id] = @{ status = [string]$pr.status; saved = [string]$pr.saved } }
+                    }
+                }
+                catch { Write-Warning "Precharge inbox: previous index.json unreadable - statuses start fresh ($($_.Exception.Message))" }
+            }
+            $pcRows = New-Object System.Collections.Generic.List[object]
+            $pcExpected = @{}
+            $pcNew = 0; $pcIssued = 0
+            foreach ($pcKey in $prechargeRequests.Keys) {
+                $r = $prechargeRequests[$pcKey]
+                $status = 'new'; $resub = $false
+                $prev = $pcPrev[$pcKey]
+                if ($prev) {
+                    if ($prev.status) { $status = $prev.status }
+                    if ($prev.saved -and ([string]$r.saved -gt [string]$prev.saved)) { $resub = $true }
+                }
+                if ($prechargeIssued.ContainsKey($r.matchKey) -and ([string]$prechargeIssued[$r.matchKey] -ge [string]$r.saved)) { $status = 'issued' }
+                if ($status -eq 'new') { $pcNew++ } elseif ($status -eq 'issued') { $pcIssued++ }
+                $pcDest = Join-Path $pcReqDir ($pcKey + '.json')
+                if (-not (Test-Path -Path $pcDest) -or ($r.modified -gt (Get-Item -Path $pcDest).LastWriteTime)) {
+                    Copy-Item -Path $r.path -Destination $pcDest -Force
+                }
+                $pcExpected[$pcKey + '.json'] = $true
+                $pcRows.Add(@{
+                    id = $pcKey; rig = $r.rig; rigKey = $r.rigKey; well = $r.well; bop = $r.bop
+                    raisedBy = $r.raisedBy; email = $r.email; workOrder = $r.workOrder
+                    saved = $r.saved; received = $r.received
+                    shearReq = $r.shearReq; mawhp = $r.mawhp; waterDepth = $r.waterDepth; hops = $r.hops
+                    status = $status; resubmitted = $resub
+                    file = "requests/$pcKey.json"
+                }) | Out-Null
+            }
+            foreach ($old in Get-ChildItem -Path $pcReqDir -File -Filter '*.json') {
+                if ($old.Name -ne 'index.json' -and -not $pcExpected.ContainsKey($old.Name)) {
+                    Remove-Item -Path $old.FullName -Force
+                    Write-Host "Removed stale precharge request copy: $($old.Name)"
+                }
+            }
+            $pcSorted = New-Object System.Collections.Generic.List[object]
+            $pcRows | Sort-Object -Property @{ Expression = { [string]$_.saved } } -Descending | ForEach-Object { $pcSorted.Add($_) | Out-Null }
+            $pcIdx = @{ generated = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); requests = $pcSorted.ToArray() }
+            [System.IO.File]::WriteAllText($pcIndexPath, (ConvertTo-Json $pcIdx -Depth 6), (New-Object System.Text.UTF8Encoding($false)))
+            Write-Host "Precharge inbox: $($pcRows.Count) request(s) indexed ($pcNew new, $pcIssued issued) to $pcIndexPath" -ForegroundColor Green
+        }
+        catch {
+            Write-Warning "Precharge inbox failed (scan unaffected): $($_.Exception.Message)"
+        }
+    }
+}
+
 $cocDashboardPath = ''
 if ($config.PSObject.Properties['cocDashboardPath'] -and $config.cocDashboardPath) {
     $cocDashboardPath = [Environment]::ExpandEnvironmentVariables($config.cocDashboardPath)
@@ -1946,7 +2116,7 @@ elseif ($deployPath) {
             # Restricted TOPSET bodies must never reach the open share; also
             # excluded from $expected below so a copy from before the file
             # became restricted gets cleaned up as stale.
-            if ($restrictedTopsetFiles.ContainsKey($f.Name)) { continue }
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name)) { continue }
             $dest = Join-Path $reportsDir ($f.Name + '.js')
             if (-not (Test-Path -Path $dest) -or ($f.LastWriteTime -gt (Get-Item -Path $dest).LastWriteTime)) {
                 Copy-Item -Path $f.FullName -Destination $dest -Force
@@ -1955,7 +2125,7 @@ elseif ($deployPath) {
         }
         $expected = @{}
         foreach ($f in $files) {
-            if ($restrictedTopsetFiles.ContainsKey($f.Name)) { continue }
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name)) { continue }
             $expected[$f.Name + '.js'] = $true
         }
         foreach ($old in Get-ChildItem -Path $reportsDir -File) {
