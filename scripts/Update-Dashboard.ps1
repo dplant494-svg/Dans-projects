@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.35'
+$ScriptVersion = '2.36'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -701,7 +701,16 @@ foreach ($f in $files) {
     $assetRaw = [string](Get-Prop $meta 'asset')
     $rig = $assetRaw
     if (-not $rig) { $rig = $checksRigRaw }
-    if (-not $rig) { $rig = $f.BaseName }
+    if (-not $rig) {
+        # v2.36: never invent a "rig" from the filename - real files posted
+        # with no meta.asset (seen live: vendor-audit / vendor-surveillance /
+        # DIAGNOSTIC exports, 2026-09) were each becoming their own fake rig
+        # in the fleet chart and rig filter. One explicit bucket + a loud
+        # per-file warning instead; the fix at source is meta.asset (see
+        # DASHBOARD-UNKNOWN-FILES-HANDOFF-REQUEST.md).
+        $rig = 'Unattributed'
+        Write-Warning "No rig identity in $($f.Name) (meta.asset blank) - listed under 'Unattributed' instead of inventing a rig from the filename; the posting tool should set meta.asset"
+    }
 
     # A bare 'meta' block with nothing else recognizable (no tiles, no rig
     # identity, no critical/action rows, no Daily Checks/FLM readings) isn't
