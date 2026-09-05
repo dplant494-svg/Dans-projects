@@ -1,5 +1,12 @@
 # Handoff — how the Daily Log and Monthly Log reach the dashboard
 
+> **Dashboard-side status (2026-09-05):** all six asks implemented in
+> scanner v2.35 — see `HANDOFF.md` / `INTEGRATION-CONTRACT.md`.
+> **§7 fallback fix: APPROVED by Dan Plant (2026-09-05)** — fix the
+> `sdWriteToReportFolder` argument order as its own revision, nothing
+> else in it. Q6: no distinct monthly filename prefix needed (the
+> dashboard never routes on filenames); leave posting unchanged.
+
 **To:** the dashboard / scanner session
 **From:** the reporting-tools session (SSORT **REV 139**)
 **Date:** 2026-09-03
