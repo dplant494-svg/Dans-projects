@@ -158,7 +158,14 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.34** (adds standalone Compliance
+- `scripts/Update-Dashboard.ps1`: **v2.35** (daily-log distribution fixes
+  per the SSORT REV 139 handoff `DASHBOARDMONTHLYLOGDISTRIBUTIONHANDOFF.md`:
+  dedup key now rig|date|shift|equip so same-day entries for different
+  equipment both survive; per-entry posts ingest only `meta.dayLogEntry`
+  and their ride-along month arrays are ignored; individual entries
+  outrank the monthly roll-up snapshot regardless of file times. The
+  full-report viewer mirrors the entry-only rule for route-1 files).
+  v2.34 adds standalone Compliance
   Checklist support — WCGRRT REV 151, see
   `DASHBOARDCOMPLIANCECHECKLISTHANDOFF.md`: `complianceChecklists[]`
   aggregate keyed rig|date with exportedAt tiebreak, pre-REV-150

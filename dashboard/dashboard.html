@@ -3156,9 +3156,16 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // actual content still in the legacy dayLog - so `||` on the arrays
     // themselves is wrong (a [] is truthy in JS and would win, discarding
     // real data); prefer whichever one actually has entries.
-    var dayLog = ((meta.dayLogMonth && meta.dayLogMonth.length) ? meta.dayLogMonth : meta.dayLog) || [];
-    dayLog = dayLog.slice();
-    if (meta.dayLogEntry) dayLog = dayLog.concat([meta.dayLogEntry]);
+    // REV 139 distribution handoff: a per-entry post (dayLogEntry present)
+    // ALSO carries the entire month in dayLog/dayLogMonth - when opening
+    // such a file, show only the entry that was posted, not the month it
+    // happened to ride along with (the month has its own roll-up report).
+    var dayLog;
+    if (meta.dayLogEntry) {
+      dayLog = [meta.dayLogEntry];
+    } else {
+      dayLog = (((meta.dayLogMonth && meta.dayLogMonth.length) ? meta.dayLogMonth : meta.dayLog) || []).slice();
+    }
     if (dayLog.length) {
       body.appendChild(mk('div', 'rv-section-label', 'Daily log'));
       dayLog.forEach(function (d) {

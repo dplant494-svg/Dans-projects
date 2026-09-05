@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.34'
+$ScriptVersion = '2.35'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -817,24 +817,35 @@ foreach ($f in $files) {
     }
 
     # Daily Log entries: text-only search index - photos stay in the full
-    # report copy the viewer fetches. SSORT posts these three ways (REV 95):
-    # meta.dayLog (legacy) / meta.dayLogMonth - both an array, the monthly
-    # roll-up; meta.dayLogEntry - a single entry, posted immediately per day
-    # or lesson-learned. Every entry, from any of the three, is deduped into
-    # one flat index keyed by rig|date|shift so the same day never double-
-    # counts whether it arrived as an individual post or inside the month's
-    # consolidated file - newest file for that key wins.
+    # report copy the viewer fetches. Per the SSORT REV 139 distribution
+    # handoff (DASHBOARDMONTHLYLOGDISTRIBUTIONHANDOFF.md) the same day can
+    # arrive by FOUR routes, and a per-entry post (route 1/2/3) carries
+    # meta.dayLogEntry AND the entire month in dayLog/dayLogMonth - so:
+    #   - a file with meta.dayLogEntry ingests ONLY that entry (never its
+    #     month arrays, or every entry post re-ingests the whole month);
+    #   - dayLog/dayLogMonth are read only from monthly roll-ups / legacy
+    #     files that have no dayLogEntry;
+    #   - dedup key is rig|date|shift|EQUIP - date+shift alone is NOT
+    #     unique (several entries per day for different equipment);
+    #   - an individual-entry record OUTRANKS a monthly-roll-up record for
+    #     the same key regardless of file times (the roll-up is a manual
+    #     snapshot, only as current as the last button press); within the
+    #     same source rank, newest file wins (re-posts are normal).
     $logMonth = [string](Get-Prop $meta 'logMonth')
     $logDate  = [string](Get-Prop $meta 'logDate')
     $hasLL    = [bool](Get-Prop $meta 'hasLessonLearned')
 
     $rawDayLogEntries = New-Object System.Collections.Generic.List[object]
-    foreach ($fieldName in @('dayLog', 'dayLogMonth')) {
-        $arr = Get-Prop $meta $fieldName
-        if ($arr) { foreach ($e in $arr) { $rawDayLogEntries.Add(@{ entry = $e; fallbackDate = $logMonth }) | Out-Null } }
-    }
     $singleDayLogEntry = Get-Prop $meta 'dayLogEntry'
-    if ($singleDayLogEntry) { $rawDayLogEntries.Add(@{ entry = $singleDayLogEntry; fallbackDate = $logDate }) | Out-Null }
+    if ($singleDayLogEntry) {
+        $rawDayLogEntries.Add(@{ entry = $singleDayLogEntry; fallbackDate = $logDate; rank = 1 }) | Out-Null
+    }
+    else {
+        foreach ($fieldName in @('dayLog', 'dayLogMonth')) {
+            $arr = Get-Prop $meta $fieldName
+            if ($arr) { foreach ($e in $arr) { $rawDayLogEntries.Add(@{ entry = $e; fallbackDate = $logMonth; rank = 0 }) | Out-Null } }
+        }
+    }
 
     foreach ($item in $rawDayLogEntries) {
         $entry = $item.entry
@@ -858,10 +869,12 @@ foreach ($f in $files) {
             photos    = $photoCount
             file      = $f.Name
         }
-        $key = if ($entryDate) { "$rig|$entryDate|$shift" } else { "file|$($f.Name)|$($dayLogEntries.Count)" }
+        $equipKey = ([string](Get-Prop $entry 'equip')).Trim()
+        $key = if ($entryDate) { "$rig|$entryDate|$shift|$equipKey" } else { "file|$($f.Name)|$($dayLogEntries.Count)" }
         $existing = $dayLogEntries[$key]
-        if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {
-            $dayLogEntries[$key] = @{ modified = $f.LastWriteTime; entry = $rec }
+        if (-not $existing -or ($item.rank -gt $existing.rank) -or
+            (($item.rank -eq $existing.rank) -and ($f.LastWriteTime -gt $existing.modified))) {
+            $dayLogEntries[$key] = @{ modified = $f.LastWriteTime; rank = $item.rank; entry = $rec }
         }
     }
 
