@@ -3165,6 +3165,14 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       dayLog = [meta.dayLogEntry];
     } else {
       dayLog = (((meta.dayLogMonth && meta.dayLogMonth.length) ? meta.dayLogMonth : meta.dayLog) || []).slice();
+      // Guarantee chronological display: the month array is stored in the
+      // order entries were added, and a re-posted day can sit out of
+      // sequence - sort by date then shift (Day before Night, which plain
+      // string order happens to give us).
+      dayLog.sort(function (a, b) {
+        return String(a.date || '').localeCompare(String(b.date || '')) ||
+               String(a.shift || '').localeCompare(String(b.shift || ''));
+      });
     }
     if (dayLog.length) {
       body.appendChild(mk('div', 'rv-section-label', 'Daily log'));
