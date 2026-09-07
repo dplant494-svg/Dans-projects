@@ -170,8 +170,9 @@ paths with credentials, but this shape is fine to document)
   by the calculator session** (`calculator.html` gated with Requests +
   Calculator tabs, `set-password.html`); this repo owns the scanner, the
   index, the deploy script and the two fragments they build from
-  (`precharge/gate-fragment.html`, `precharge/inbox-fragment.html`), plus
-  the standalone fallback `precharge/inbox.html`. Dan drops their
+  (`precharge/gate-fragment.html`, `precharge/inbox-fragment.html`). The
+  standalone `precharge/inbox.html` was retired the same day (one page
+  only, Dan's call). Dan drops their
   `calculator.html` and `set-password.html` into `precharge\` and
   `Deploy-Dashboard.ps1` publishes them as-is (both gitignored); it also
   removes the superseded dashboard-side hub `index.html` from the server.

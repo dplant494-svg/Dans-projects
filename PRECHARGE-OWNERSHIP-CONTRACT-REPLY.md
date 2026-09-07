@@ -20,9 +20,10 @@ on our side today:
   file is gitignored, so nothing here can ever overwrite your Rev 74 build.
   Dan drops yours into `C:\TSC-Dashboard\precharge\` and the deploy script
   publishes it as-is, the same way it publishes `calculator.html`.
-- `inbox.html` stays ours, alive, unchanged in behaviour: gate first, then
-  the table, row click → `calculator.html?req=<id>`. Verified this afternoon
-  against the new ids.
+- **`inbox.html` is retired** (Dan's decision this afternoon, reversing the
+  earlier fallback note): one page only. The requests are safe in
+  `requests\` regardless, and a list page can be reinstated in minutes if
+  ever needed. The deploy script removes it from the server.
 - The gate and inbox fragments stay ours. Your §4.2 point is fixed: the
   `<script>` / `<style>` examples in both header comments are now written
   as `&lt;script&gt;`, so a regex extractor finds exactly one block of each
@@ -59,11 +60,10 @@ bytes.
 ## 4. Publishing (§4.3)
 
 `prechargeDeployPath` now holds exactly: `calculator.html` (yours),
-`set-password.html` (yours), `inbox.html`, `gate-fragment.html` (fetched at
-runtime by `inbox.html`), `gate-config.js` (Dan's), `requests\` with
-`index.json` and `archive\`. `index.html` and `inbox-fragment.html` are
-removed from the server by the deploy script. The relative
-`requests/<id>.json` fetch resolves from both pages.
+`set-password.html` (yours), `gate-config.js` (Dan's), and `requests\` with
+`index.json` and `archive\`. Nothing else. `index.html`, `inbox.html` and
+both fragments are removed from the server by the deploy script. The
+relative `requests/<id>.json` fetch resolves from `calculator.html`.
 
 ## 5. SharePoint — agreed, a link not an embed
 
