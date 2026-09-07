@@ -37,6 +37,20 @@
 </style>
 </head>
 <body>
+<script src="gate-config.js"></script>
+<div id="pcgate-host"></div>
+<script>
+// Standalone inbox: pull in the same password gate the calculator uses, so
+// one password covers both. The gate fragment is served from this folder.
+(function () {
+  fetch('gate-fragment.html', { cache: 'no-store' }).then(function (r) { return r.text(); }).then(function (html) {
+    var host = document.getElementById('pcgate-host');
+    host.innerHTML = html.replace(/<script>[\s\S]*?<\/script>/, '');
+    var m = html.match(/<script>([\s\S]*?)<\/script>/);
+    if (m) new Function(m[1])();
+  }).catch(function () { /* no gate file - page stays open (sandbox) */ });
+})();
+</script>
 <header>
   <div><div class="t">Seadrill Technical Services — Subsea</div><h1>BOP Precharge Requests</h1></div>
   <div class="stamp" id="stamp">Loading…</div>

@@ -62,19 +62,16 @@ one-line confirmation is enough.
 
 ---
 
-## 4. Location and "behind the login" — the honest position
+## 4. Location and "behind the login" — DECIDED (2026-09-07): password gate, no IT
 
-There is **no application login anywhere in this estate** — every dashboard is
-open to anyone on the intranet. So §6 rule 2 cannot be met by anything I
-build; it can only be met by IIS. The plan, for Dan/IT:
+Dan's decision: this is the SACRED sandbox, in use but not production, and
+IT is not involved. So:
 
-- New `config.json` key **`prechargeDeployPath`** → e.g. `\\sdrlazneuiis01d.corp.local\sacred\precharge`, served as `http://…:8080/sacred/precharge/`. The scanner writes `requests\` there; `Deploy-Dashboard.ps1` publishes `inbox.html` there.
-- **IT enables Windows Authentication and disables Anonymous on that one folder** in IIS. Domain users get it transparently in Edge/Chrome; nobody else gets the well data. No code changes on any side — same-origin `fetch` from the inbox and the calculator's `?req=` loader both work under Windows auth.
-- **`calculator.html` must sit in that same folder**, next to `inbox.html`, so the inbox link `calculator.html?req=<id>` and the calculator's relative `requests/<id>.json` fetch both resolve. That file is yours — please deliver it to Dan for that location.
-
-Until IT does the auth step, nothing is written: the scanner skips the inbox with a warning while `prechargeDeployPath` is unset.
-
----
+- New `config.json` key **`prechargeDeployPath`** → e.g. `\\sdrlazneuiis01d.corp.local\sacred\precharge`, served as `http://…:8080/sacred/precharge/`. The scanner writes `requests\` there; `Deploy-Dashboard.ps1` publishes `inbox.html`, the gate files and `gate-config.js` there.
+- **One shared password**, chosen by Dan on `set-password.html`, enforced by a drop-in gate in front of the calculator (and the standalone inbox). See `PRECHARGE-CALCULATOR-EMBED-HANDOFF.md` for the ten-line embed.
+- **The inbox is a tab inside the calculator** (`inbox-fragment.html`), calling your loader directly; `inbox.html` remains as a standalone fallback.
+- Stated plainly to Dan and accepted: the gate is a curtain, not a lock — direct file URLs on the open share still work. Server-side auth or encrypted payloads before production.
+- **`calculator.html` must sit in that same folder**, next to `inbox.html`, so the relative `requests/<id>.json` fetch resolves. That file is yours — please deliver it to Dan for that location.
 
 ## 5. One design point I'd like you to decide: the date in the id
 

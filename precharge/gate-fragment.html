@@ -1,0 +1,123 @@
+<!-- ===== SEADRILL PRECHARGE - password gate (drop-in, single shared password) =====
+     Paste this block immediately after <body> in calculator.html (and any
+     other page that should sit behind the same password). It covers the
+     page with a login overlay until the password is entered, then remembers
+     the login for the browser session.
+     Password is set by precharge/set-password.html, which writes
+     gate-config.js (window.PCGATE = { hash, hint }) - include that file:
+       <script src="gate-config.js"></script>   (BEFORE this block)
+     HONEST NOTE: this is a curtain, not a lock. It stops people using the
+     page; it does not stop a direct URL to requests/*.json on an open share.
+     Real protection = IIS authentication or encrypted payloads.
+     Pure JS (no crypto.subtle - that is unavailable on plain http://).
+======================================================================= -->
+<style>
+#pcgate{position:fixed;inset:0;z-index:100000;background:#002C77;display:flex;align-items:center;justify-content:center;font:14px/1.45 "Segoe UI",Arial,Helvetica,sans-serif}
+#pcgate[hidden]{display:none}
+#pcgate .box{background:#fff;border-radius:10px;width:min(420px,92vw);padding:26px 28px 22px;box-shadow:0 12px 40px rgba(0,0,0,.35);border-top:5px solid #EDB71E}
+#pcgate .t{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#E25303;font-weight:700}
+#pcgate h1{font-size:20px;margin:4px 0 14px;color:#002C77}
+#pcgate label{display:block;font-size:12px;font-weight:600;color:#5a6880;margin-bottom:4px}
+#pcgate input{width:100%;padding:10px 12px;border:1px solid #d0d8e8;border-radius:5px;font-size:16px;box-sizing:border-box}
+#pcgate input:focus{outline:2px solid #EDB71E;outline-offset:-1px}
+#pcgate .row{display:flex;gap:10px;align-items:center;margin-top:12px}
+#pcgate button{background:#002C77;color:#fff;border:0;border-radius:5px;padding:10px 18px;font:600 14px inherit;cursor:pointer}
+#pcgate button:hover{background:#00205a}
+#pcgate .rem{font-size:12px;color:#5a6880;display:flex;align-items:center;gap:6px}
+#pcgate .rem input{width:auto}
+#pcgate .err{color:#c0392b;font-size:13px;margin-top:10px;min-height:18px}
+#pcgate .hint{font-size:12px;color:#5a6880;margin-top:14px;border-top:1px solid #eef0f3;padding-top:10px}
+</style>
+<div id="pcgate">
+  <form class="box" id="pcgate-form" autocomplete="off">
+    <div class="t">Seadrill Technical Services — Subsea</div>
+    <h1>BOP Precharge Calculator</h1>
+    <label for="pcgate-pw">Password</label>
+    <input id="pcgate-pw" type="password" autofocus>
+    <div class="row">
+      <button type="submit">Open</button>
+      <label class="rem"><input type="checkbox" id="pcgate-rem"> remember on this computer</label>
+    </div>
+    <div class="err" id="pcgate-err"></div>
+    <div class="hint" id="pcgate-hint"></div>
+  </form>
+</div>
+<script>
+(function () {
+  // Compact SHA-256 (public-domain style implementation) - crypto.subtle is
+  // not available on plain http:// intranet pages, so hashing is done here.
+  function sha256(str) {
+    var K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+    var H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+    var bytes = unescape(encodeURIComponent(str)), l = bytes.length;
+    var words = [], i;
+    for (i = 0; i < l; i++) words[i >> 2] |= (bytes.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
+    words[l >> 2] |= 0x80 << (24 - (l % 4) * 8);
+    words[(((l + 8) >> 6) << 4) + 15] = l * 8;
+    var w = new Array(64);
+    function rotr(x, n) { return (x >>> n) | (x << (32 - n)); }
+    for (var j = 0; j < words.length; j += 16) {
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        if (i < 16) w[i] = words[j + i] | 0;
+        else {
+          var s0 = rotr(w[i-15], 7) ^ rotr(w[i-15], 18) ^ (w[i-15] >>> 3);
+          var s1 = rotr(w[i-2], 17) ^ rotr(w[i-2], 19) ^ (w[i-2] >>> 10);
+          w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0;
+        }
+        var S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+        var ch = (e & f) ^ (~e & g);
+        var t1 = (h + S1 + ch + K[i] + w[i]) | 0;
+        var S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+        var mj = (a & b) ^ (a & c) ^ (b & c);
+        var t2 = (S0 + mj) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    }
+    var out = '';
+    for (i = 0; i < 8; i++) out += ('00000000' + (H[i] >>> 0).toString(16)).slice(-8);
+    return out;
+  }
+  window.pcSha256 = sha256;   // reused by set-password.html
+
+  var SALT = 'seadrill-precharge-gate|';
+  var gate = document.getElementById('pcgate'), form = document.getElementById('pcgate-form');
+  var pw = document.getElementById('pcgate-pw'), err = document.getElementById('pcgate-err');
+  var rem = document.getElementById('pcgate-rem'), hint = document.getElementById('pcgate-hint');
+  var cfg = window.PCGATE || {};
+  var KEY = 'pcgate-unlocked:' + String(cfg.hash || '').slice(0, 12);
+
+  // Login carries across tabs: a localStorage token with an expiry
+  // (12 h), or no expiry when "remember on this computer" is ticked.
+  function unlocked() {
+    try {
+      var v = localStorage.getItem(KEY); if (!v) return false;
+      var exp = Number(v); return exp === 0 || exp > Date.now();
+    } catch (e) { return false; }
+  }
+  function open() { gate.hidden = true; document.dispatchEvent(new Event('pcgate-unlocked')); }
+
+  if (!cfg.hash) {
+    err.textContent = 'No password has been set yet.';
+    hint.textContent = 'Open set-password.html, choose a password, and place the gate-config.js it creates next to this page.';
+    pw.disabled = true; form.querySelector('button').disabled = true;
+    return;
+  }
+  if (cfg.hint) hint.textContent = cfg.hint;
+  if (unlocked()) { open(); return; }
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (sha256(SALT + pw.value) === cfg.hash) {
+      try { localStorage.setItem(KEY, rem.checked ? '0' : String(Date.now() + 12 * 3600 * 1000)); } catch (e) {}
+      pw.value = '';
+      open();
+    } else {
+      err.textContent = 'Incorrect password.';
+      pw.select();
+    }
+  });
+})();
+</script>

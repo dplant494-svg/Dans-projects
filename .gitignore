@@ -1,0 +1,3 @@
+# gate-config.js and the requests folder are per-installation, never committed
+precharge/gate-config.js
+precharge/requests/

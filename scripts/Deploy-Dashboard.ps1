@@ -112,6 +112,18 @@ if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config
         if (-not (Test-Path -Path $prechargeDeployDir)) { New-Item -ItemType Directory -Path $prechargeDeployDir -Force | Out-Null }
         Copy-Item -Path $prechargeSrc -Destination (Join-Path $prechargeDeployDir 'inbox.html') -Force
         Write-Host "Published precharge inbox.html to $prechargeDeployDir" -ForegroundColor Green
+        # Password gate + the page that creates gate-config.js. gate-config.js
+        # itself is only copied when Dan has generated one (set-password.html).
+        foreach ($name in @('gate-fragment.html', 'set-password.html', 'inbox-fragment.html', 'gate-config.js')) {
+            $src = Join-Path $repoRoot ('precharge\' + $name)
+            if (Test-Path -Path $src) {
+                Copy-Item -Path $src -Destination (Join-Path $prechargeDeployDir $name) -Force
+                Write-Host "Published $name alongside it" -ForegroundColor Green
+            }
+            elseif ($name -eq 'gate-config.js') {
+                Write-Warning "No precharge\gate-config.js yet - the calculator/inbox gate will refuse entry until you create one with set-password.html"
+            }
+        }
     }
 }
 
