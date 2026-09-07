@@ -5,7 +5,7 @@
      the login for the browser session.
      Password is set by precharge/set-password.html, which writes
      gate-config.js (window.PCGATE = { hash, hint }) - include that file:
-       <script src="gate-config.js"></script>   (BEFORE this block)
+       &lt;script src="gate-config.js">&lt;/script&gt;   (BEFORE this block)
      HONEST NOTE: this is a curtain, not a lock. It stops people using the
      page; it does not stop a direct URL to requests/*.json on an open share.
      Real protection = IIS authentication or encrypted payloads.

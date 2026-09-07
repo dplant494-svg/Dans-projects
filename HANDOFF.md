@@ -159,16 +159,25 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.38** (BOP Precharge Request inbox
-  per `PRECHARGE-INBOX-1-FOR-DASHBOARD-SESSION.md`: request files are
-  routed OUT of the report pipeline into `<prechargeDeployPath>\requests\`
-  as verbatim copies plus an `index.json` with new/issued status, the
-  return leg auto-matches issued sheets on rig|well|BOP, and a new
-  `precharge/inbox.html` page reads the index. `Deploy-Dashboard.ps1`
-  publishes the inbox when `prechargeDeployPath` is set, plus the hub
-  `precharge/index.html` (password gate + Requests tab + Calculator tab
-  framing `calculator.html`, which is published untouched), the gate and
-  inbox fragments, `set-password.html` and Dan's `gate-config.js`. v2.37 added the
+- `scripts/Update-Dashboard.ps1`: **v2.39** (precharge data contract per
+  `PRECHARGE-OWNERSHIP-AND-DATA-CONTRACT.md`: request id is now
+  `<rigKey>_<well>_BOP<bop>` with no date; superseded payloads are kept
+  verbatim in `<prechargeDeployPath>\requests\archive\` (F-23a); the
+  return leg matches issued sheets on `meta.rigKey` + `meta.well`, `bop`
+  only when both sides carry one; `saved` values are normalised to ISO
+  UTC so PowerShell's date parsing can never break the newest-wins sort).
+  **Ownership split from 2026-09-07: every HTML page the user sees is built
+  by the calculator session** (`calculator.html` gated with Requests +
+  Calculator tabs, `set-password.html`); this repo owns the scanner, the
+  index, the deploy script and the two fragments they build from
+  (`precharge/gate-fragment.html`, `precharge/inbox-fragment.html`), plus
+  the standalone fallback `precharge/inbox.html`. Dan drops their
+  `calculator.html` and `set-password.html` into `precharge\` and
+  `Deploy-Dashboard.ps1` publishes them as-is (both gitignored); it also
+  removes the superseded dashboard-side hub `index.html` from the server.
+  v2.38 introduced the request inbox (`PRECHARGE-INBOX-1-FOR-DASHBOARD-SESSION.md`:
+  request files routed OUT of the report pipeline into `requests\` as
+  verbatim copies plus `index.json` with new/issued status). v2.37 added the
   SSCE Equipment fleet bucket + 'SSCE Asset' alias; v2.36 the
   Unattributed guard (no rig ever invented from a filename).
   See `PRECHARGE-INBOX-DASHBOARD-REPLY.md` for the review + open points.)

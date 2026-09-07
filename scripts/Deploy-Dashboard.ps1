@@ -112,9 +112,11 @@ if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config
         if (-not (Test-Path -Path $prechargeDeployDir)) { New-Item -ItemType Directory -Path $prechargeDeployDir -Force | Out-Null }
         Copy-Item -Path $prechargeSrc -Destination (Join-Path $prechargeDeployDir 'inbox.html') -Force
         Write-Host "Published precharge inbox.html to $prechargeDeployDir" -ForegroundColor Green
-        # Password gate + the page that creates gate-config.js. gate-config.js
-        # itself is only copied when Dan has generated one (set-password.html).
-        foreach ($name in @('index.html', 'gate-fragment.html', 'set-password.html', 'inbox-fragment.html', 'gate-config.js', 'calculator.html')) {
+        # Pages built by the calculator session (calculator.html, set-password.html)
+        # are dropped into precharge\ by Dan and published AS-IS. gate-fragment.html
+        # is fetched at runtime by inbox.html; gate-config.js is only copied once
+        # Dan has generated one (set-password.html).
+        foreach ($name in @('calculator.html', 'set-password.html', 'gate-fragment.html', 'gate-config.js')) {
             $src = Join-Path $repoRoot ('precharge\' + $name)
             if (Test-Path -Path $src) {
                 Copy-Item -Path $src -Destination (Join-Path $prechargeDeployDir $name) -Force
@@ -124,8 +126,14 @@ if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config
                 Write-Warning "No precharge\gate-config.js yet - the precharge gate will refuse entry until you create one with set-password.html"
             }
             elseif ($name -eq 'calculator.html') {
-                Write-Warning "No precharge\calculator.html yet - copy the Precharge Calculator HTML into C:\TSC-Dashboard\precharge\calculator.html (it is published as-is, never modified)"
+                Write-Warning "No precharge\calculator.html yet - copy the Precharge Calculator HTML (Rev 74+, gated, two tabs) into C:\TSC-Dashboard\precharge\calculator.html (it is published as-is, never modified)"
             }
+        }
+        # Superseded by calculator.html (2026-09-07 ownership contract): the
+        # dashboard-side hub page and the inbox fragment copy come off the server.
+        foreach ($name in @('index.html', 'inbox-fragment.html')) {
+            $gone = Join-Path $prechargeDeployDir $name
+            if (Test-Path -Path $gone) { Remove-Item -Path $gone -Force; Write-Host "Removed superseded precharge\$name from the server" -ForegroundColor Yellow }
         }
     }
 }

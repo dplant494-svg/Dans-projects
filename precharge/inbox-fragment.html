@@ -3,13 +3,13 @@
      which the dashboard scanner (Update-Dashboard.ps1 v2.38+) writes.
      Mount it inside whatever tab/panel element the calculator gives it:
 
-        <div id="pcinbox"></div>          <!-- your tab body -->
-        ...this file's <style> + <script> pasted once...
-        <script>
+        &lt;div id="pcinbox"&gt;&lt;/div&gt;          (your tab body)
+        ...this file's &lt;style&gt; + &lt;script&gt; pasted once...
+        &lt;script&gt;
           PrechargeInbox.mount(document.getElementById('pcinbox'), {
             onOpen: function (id) { /* call your ?req= loader directly, e.g. */ loadRequestById(id); }
           });
-        </script>
+        &lt;/script&gt;
 
      If onOpen is omitted the row click navigates to  ?req=<id>  which the
      Rev 72 loader already handles - so it works with zero wiring, just

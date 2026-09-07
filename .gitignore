@@ -1,3 +1,6 @@
 # gate-config.js and the requests folder are per-installation, never committed
 precharge/gate-config.js
 precharge/requests/
+# built by the calculator session (PRECHARGE-OWNERSHIP-AND-DATA-CONTRACT): Dan drops them in, Deploy publishes them as-is
+precharge/calculator.html
+precharge/set-password.html

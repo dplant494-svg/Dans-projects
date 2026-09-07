@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.38'
+$ScriptVersion = '2.39'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -512,7 +512,8 @@ $complianceEntries = @{}  # keyed rig|date (newest exportedAt wins) - standalone
 # report copies and every fleet view - they exist only in the inbox index.
 $prechargeRequests = @{}
 $prechargeRequestFiles = @{}   # source filenames, so the report-copy loop never publishes them to the open share
-$prechargeIssued = @{}         # rigKey|well|bop -> newest meta.saved of an ISSUED precharge sheet (calculator post) - the return leg
+$prechargeSuperseded = New-Object System.Collections.Generic.List[object]  # older payloads for an id (F-23a) -> requests\archive\<id>_<saved>.json
+$prechargeIssued = @{}         # rigKey|well -> list of @{bop; saved} of ISSUED precharge sheets (calculator post) - the return leg
 $PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta.asset is preferred (form Rev 2 ships it)
     nov = 'West Neptune'; auriga = 'West Auriga'; vela = 'West Vela'; saturn = 'West Saturn'
     jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'
@@ -520,6 +521,17 @@ $PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta
     capella = 'West Capella'; cam = 'Sevan Louisiana'
 }
 function Get-PrechargeWellKey { param([string]$Well) if (-not $Well) { return 'well' }; return ($Well -replace '[^A-Za-z0-9._-]', '-') }
+function ConvertTo-PcIso { param($Value)   # ConvertFrom-Json turns ISO dates into [datetime]; keep saved/issued as sortable ISO UTC strings
+    if ($null -eq $Value) { return '' }
+    if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }
+    $t = [string]$Value
+    if ($t -match '^\d{4}-\d{2}-\d{2}T') { return $t }
+    try { return ([DateTimeOffset]::Parse($t, [Globalization.CultureInfo]::InvariantCulture)).UtcDateTime.ToString('yyyy-MM-ddTHH:mm:ssZ') } catch { return $t }
+}
+function Get-PrechargeStamp { param([string]$Saved, [datetime]$Fallback)   # meta.saved -> yyyyMMddTHHmmssZ for archive filenames
+    if ($Saved) { try { return ([DateTimeOffset]::Parse($Saved, [Globalization.CultureInfo]::InvariantCulture)).UtcDateTime.ToString('yyyyMMddTHHmmssZ') } catch {} }
+    return $Fallback.ToUniversalTime().ToString('yyyyMMddTHHmmssZ')
+}
 $rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
 
@@ -669,7 +681,7 @@ foreach ($f in $files) {
     $pcBop = ([string](Get-Prop $meta 'bop')).Trim()
     if (-not $pcBop -and $pcFields) { $pcB = Get-Prop $pcFields 'bopSel'; if ($pcB) { $pcBop = ([string](Get-Prop $pcB 'v')).Trim() } }
     if (-not $pcBop) { $pcBop = '1' }
-    $pcSaved = [string](Get-Prop $meta 'saved')
+    $pcSaved = ConvertTo-PcIso (Get-Prop $meta 'saved')
     $isPrechargeRequest = (($pcTool -eq 'Seadrill BOP Precharge Calculator') -and ($pcSource -like 'BOP Precharge Request form*')) -or
                           ($f.Name -like 'seadrill-request_*_precharge.json') -or
                           ((([string](Get-Prop $meta 'schema')) -eq '1') -and $PrechargeRigKeys.ContainsKey($pcConfig) -and
@@ -678,12 +690,13 @@ foreach ($f in $files) {
         $pcRig = ([string](Get-Prop $meta 'asset')).Trim()
         if (-not $pcRig -and $PrechargeRigKeys.ContainsKey($pcConfig)) { $pcRig = $PrechargeRigKeys[$pcConfig] }
         if (-not $pcRig) { $pcRig = 'Unattributed'; Write-Warning "Precharge request $($f.Name): no meta.asset and unknown config '$pcConfig' - listed as Unattributed" }
-        $pcDate = ''
-        if ($pcSaved) { try { $pcDate = ([DateTimeOffset]::Parse($pcSaved, [Globalization.CultureInfo]::InvariantCulture)).UtcDateTime.ToString('yyyyMMdd') } catch { $pcDate = '' } }
-        if (-not $pcDate -and ($f.Name -match '_(\d{8})_precharge\.json$')) { $pcDate = $Matches[1] }
-        if (-not $pcDate) { $pcDate = $f.LastWriteTimeUtc.ToString('yyyyMMdd') }
-        $pcRigKey = if ($pcConfig) { $pcConfig } else { 'rig' }
-        $pcId = "$pcRigKey`_$(Get-PrechargeWellKey $pcWellV)`_$pcDate`_BOP$pcBop"
+        # id = <rigKey>_<well>_BOP<bop> - NO date (PRECHARGE-OWNERSHIP-AND-DATA-
+        # CONTRACT 3.3): a re-issued precharge for the same well and stack is
+        # the same job, one row showing its current state. Older payloads
+        # for the id are kept in requests\archive\ (3.4 / F-23a).
+        $pcRigKey = ([string](Get-Prop $meta 'rigKey')).Trim()
+        if (-not $pcRigKey) { $pcRigKey = if ($pcConfig) { $pcConfig } else { 'rig' } }
+        $pcId = "$pcRigKey`_$(Get-PrechargeWellKey $pcWellV)`_BOP$pcBop"
         function Get-PcField { param($Name) if (-not $pcFields) { return '' }; $o = Get-Prop $pcFields $Name; if ($o) { return [string](Get-Prop $o 'v') }; return '' }
         $pcHops = @(Get-Prop $json 'hops') | Where-Object { $_ }
         $pcRec = @{
@@ -701,7 +714,7 @@ foreach ($f in $files) {
             mawhp      = Get-PcField 'mawhpTop'
             waterDepth = Get-PcField 'wd'
             hops       = @($pcHops).Count
-            matchKey   = "$pcRigKey|$(Get-PrechargeWellKey $pcWellV)|$pcBop"
+            matchKey   = "$pcRigKey|$(Get-PrechargeWellKey $pcWellV)"
             path       = $f.FullName
             modified   = $f.LastWriteTime
         }
@@ -709,17 +722,28 @@ foreach ($f in $files) {
         $pcPrior = $prechargeRequests[$pcId]
         if (-not $pcPrior -or ([string]$pcSaved -gt [string]$pcPrior.saved) -or
             (([string]$pcSaved -eq [string]$pcPrior.saved) -and ($f.LastWriteTime -gt $pcPrior.modified))) {
+            if ($pcPrior) { $prechargeSuperseded.Add($pcPrior) | Out-Null }
             $prechargeRequests[$pcId] = $pcRec
         }
+        else { $prechargeSuperseded.Add($pcRec) | Out-Null }
         continue
     }
     if (($pcTool -eq 'Seadrill BOP Precharge Calculator') -or (([string](Get-Prop $meta 'reporttype')) -eq 'Precharge')) {
-        # Issued sheet: remember the newest one per rig|well|BOP for the
-        # return leg (flips the matching request to 'issued'). It still
-        # flows through as a normal report below.
-        $isKey = "$(if ($pcConfig) { $pcConfig } else { 'rig' })|$(Get-PrechargeWellKey $pcWellV)|$pcBop"
-        $isSaved = if ($pcSaved) { $pcSaved } else { [string](Get-Prop $meta 'date') }
-        if (-not $prechargeIssued.ContainsKey($isKey) -or ([string]$isSaved -gt [string]$prechargeIssued[$isKey])) { $prechargeIssued[$isKey] = $isSaved }
+        # Issued sheet (the version:3 seadrill-report envelope): remember it
+        # for the return leg, keyed rigKey|well from meta.rigKey / meta.well
+        # (contract 3.4; top-level 'config' is only a fallback for pre-Rev 73
+        # sheets). meta.bop is EMPTY on single-stack rigs by design, so bop
+        # only disambiguates when both the sheet and the request carry one.
+        # The sheet still flows through as a normal report below.
+        $isRigKey = ([string](Get-Prop $meta 'rigKey')).Trim()
+        if (-not $isRigKey) { $isRigKey = if ($pcConfig) { $pcConfig } else { 'rig' } }
+        $isWell = ([string](Get-Prop $meta 'well')).Trim()
+        if (-not $isWell) { $isWell = $pcWellV }
+        $isBop = ([string](Get-Prop $meta 'bop')).Trim()
+        $isKey = "$isRigKey|$(Get-PrechargeWellKey $isWell)"
+        $isSaved = if ($pcSaved) { $pcSaved } else { ConvertTo-PcIso (Get-Prop $meta 'date') }
+        if (-not $prechargeIssued.ContainsKey($isKey)) { $prechargeIssued[$isKey] = New-Object System.Collections.Generic.List[object] }
+        $prechargeIssued[$isKey].Add(@{ bop = $isBop; saved = [string]$isSaved }) | Out-Null
     }
 
     try {
@@ -1879,11 +1903,13 @@ catch {
 # folder; the calculator and inbox page only read it. Status rules:
 #   new    - id never seen before
 #   issued - preserved from the previous index, or set automatically when
-#            an issued precharge sheet for the same rig|well|BOP has been
-#            posted at/after the request (the return leg)
+#            an issued precharge sheet for the same rigKey|well (bop only
+#            when both sides carry one) has been posted at/after the request
 #   opened - recorded by the inbox page in the browser only (no server)
 # A re-post of a known id NEVER resets an 'issued' status; it sets
-# resubmitted=true so it is visibly a revision. Skipped entirely (with a
+# resubmitted=true so it is visibly a revision, and the payload it replaced
+# is kept as requests\archive\<id>_<saved>.json (F-23a) - archive\ is never
+# pruned by this script. id = <rigKey>_<well>_BOP<bop>, no date (contract 3.3). Skipped entirely (with a
 # warning) until 'prechargeDeployPath' is set in config.json - the payloads
 # carry well data (MASP, water depth, shear) and belong behind IIS auth.
 # ---------------------------------------------------------------------------
@@ -1908,14 +1934,22 @@ if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
                 try {
                     $pcPrevIdx = Get-Content -Path $pcIndexPath -Raw | ConvertFrom-Json
                     foreach ($pr in @($pcPrevIdx.requests)) {
-                        if ($pr -and $pr.id) { $pcPrev[[string]$pr.id] = @{ status = [string]$pr.status; saved = [string]$pr.saved } }
+                        if ($pr -and $pr.id) { $pcPrev[[string]$pr.id] = @{ status = [string]$pr.status; saved = (ConvertTo-PcIso $pr.saved) } }
                     }
                 }
                 catch { Write-Warning "Precharge inbox: previous index.json unreadable - statuses start fresh ($($_.Exception.Message))" }
             }
+            $pcArcDir = Join-Path $pcReqDir 'archive'
+            if (-not (Test-Path -Path $pcArcDir)) { New-Item -ItemType Directory -Path $pcArcDir -Force | Out-Null }
             $pcRows = New-Object System.Collections.Generic.List[object]
             $pcExpected = @{}
-            $pcNew = 0; $pcIssued = 0
+            $pcNew = 0; $pcIssued = 0; $pcArchived = 0
+            # F-23a: every payload that lost the newest-wins choice for its id
+            # is kept verbatim as archive\<id>_<saved>.json. Never deleted here.
+            foreach ($sup in $prechargeSuperseded) {
+                $pcArc = Join-Path $pcArcDir ($sup.id + '_' + (Get-PrechargeStamp $sup.saved $sup.modified) + '.json')
+                if (-not (Test-Path -Path $pcArc)) { Copy-Item -Path $sup.path -Destination $pcArc -Force; $pcArchived++ }
+            }
             foreach ($pcKey in $prechargeRequests.Keys) {
                 $r = $prechargeRequests[$pcKey]
                 $status = 'new'; $resub = $false
@@ -1924,10 +1958,27 @@ if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
                     if ($prev.status) { $status = $prev.status }
                     if ($prev.saved -and ([string]$r.saved -gt [string]$prev.saved)) { $resub = $true }
                 }
-                if ($prechargeIssued.ContainsKey($r.matchKey) -and ([string]$prechargeIssued[$r.matchKey] -ge [string]$r.saved)) { $status = 'issued' }
+                if ($prechargeIssued.ContainsKey($r.matchKey)) {
+                    foreach ($is in $prechargeIssued[$r.matchKey]) {
+                        if ($is.bop -and $r.bop -and ($is.bop -ne $r.bop)) { continue }   # both carry a stack number and they differ
+                        if ([string]$is.saved -ge [string]$r.saved) { $status = 'issued'; break }
+                    }
+                }
                 if ($status -eq 'new') { $pcNew++ } elseif ($status -eq 'issued') { $pcIssued++ }
                 $pcDest = Join-Path $pcReqDir ($pcKey + '.json')
                 if (-not (Test-Path -Path $pcDest) -or ($r.modified -gt (Get-Item -Path $pcDest).LastWriteTime)) {
+                    # F-23a: the copy being replaced is evidence of what the rig
+                    # first asked for - keep it in archive\ before overwriting.
+                    if (Test-Path -Path $pcDest) {
+                        try {
+                            $oldSaved = ConvertTo-PcIso (Get-Prop (Get-Prop (Get-Content -Path $pcDest -Raw | ConvertFrom-Json) 'meta') 'saved')
+                            if ($oldSaved -ne [string]$r.saved) {
+                                $pcArc = Join-Path $pcArcDir ($pcKey + '_' + (Get-PrechargeStamp $oldSaved (Get-Item -Path $pcDest).LastWriteTime) + '.json')
+                                if (-not (Test-Path -Path $pcArc)) { Copy-Item -Path $pcDest -Destination $pcArc -Force; $pcArchived++ }
+                            }
+                        }
+                        catch { Write-Warning "Precharge inbox: could not archive the previous copy of $pcKey ($($_.Exception.Message))" }
+                    }
                     Copy-Item -Path $r.path -Destination $pcDest -Force
                 }
                 $pcExpected[$pcKey + '.json'] = $true
@@ -1950,7 +2001,7 @@ if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
             $pcRows | Sort-Object -Property @{ Expression = { [string]$_.saved } } -Descending | ForEach-Object { $pcSorted.Add($_) | Out-Null }
             $pcIdx = @{ generated = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); requests = $pcSorted.ToArray() }
             [System.IO.File]::WriteAllText($pcIndexPath, (ConvertTo-Json $pcIdx -Depth 6), (New-Object System.Text.UTF8Encoding($false)))
-            Write-Host "Precharge inbox: $($pcRows.Count) request(s) indexed ($pcNew new, $pcIssued issued) to $pcIndexPath" -ForegroundColor Green
+            Write-Host "Precharge inbox: $($pcRows.Count) request(s) indexed ($pcNew new, $pcIssued issued, $pcArchived superseded payload(s) archived) to $pcIndexPath" -ForegroundColor Green
         }
         catch {
             Write-Warning "Precharge inbox failed (scan unaffected): $($_.Exception.Message)"
