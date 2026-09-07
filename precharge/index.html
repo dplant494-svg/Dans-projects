@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOP Precharge &mdash; Requests &amp; Calculator</title>
+<!-- ================================================================
+     PRECHARGE HUB. One password (gate-config.js, made by set-password.html),
+     then two tabs:
+       Requests   - the inbox the scanner writes (requests/index.json)
+       Calculator - calculator.html shown UNTOUCHED in a frame; a request
+                    click opens calculator.html?req=<id> (its own Rev 72
+                    loader fills the form), "New precharge" opens it blank.
+     The calculator file is never modified by anything here.
+     The gate is a curtain, not a lock (sandbox decision, 2026-09-07).
+     Generated from gate-fragment.html + inbox-fragment.html - edit those
+     and rebuild rather than editing the copied blocks below.
+     ================================================================ -->
+<style>
+  html,body{height:100%}
+  body{margin:0;background:#f4f6fa;color:#0a1530;font:14px/1.45 "Segoe UI",Arial,Helvetica,sans-serif;display:flex;flex-direction:column}
+  header{background:#002C77;border-bottom:3px solid #EDB71E;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:10px 24px;color:#fff;flex:0 0 auto}
+  header .t{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#EDB71E;font-weight:700}
+  header h1{font-size:18px;margin:2px 0 0}
+  nav{display:flex;gap:6px;align-items:center}
+  nav button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:6px;padding:8px 16px;font:600 13px inherit;cursor:pointer}
+  nav button:hover{background:rgba(255,255,255,.22)}
+  nav button.active{background:#EDB71E;color:#1a1a1a;border-color:#EDB71E}
+  nav .cnt{display:inline-block;min-width:18px;padding:0 6px;margin-left:6px;border-radius:9px;background:#E25303;color:#fff;font-size:11px;line-height:18px;text-align:center}
+  nav .cnt[hidden]{display:none}
+  nav .sep{width:1px;height:26px;background:rgba(255,255,255,.3);margin:0 4px}
+  main{flex:1 1 auto;min-height:0;position:relative}
+  #tab-requests{padding:18px 24px 40px;overflow:auto;height:100%;box-sizing:border-box}
+  #tab-calc{height:100%}
+  #tab-calc iframe{width:100%;height:100%;border:0;background:#fff;display:block}
+  [hidden]{display:none !important}
+  .calc-missing{padding:40px;text-align:center;color:#5a6880}
+  .calc-missing code{background:#eef3fb;padding:1px 6px;border-radius:3px}
+/* ---- gate (from gate-fragment.html) ---- */
+#pcgate{position:fixed;inset:0;z-index:100000;background:#002C77;display:flex;align-items:center;justify-content:center;font:14px/1.45 "Segoe UI",Arial,Helvetica,sans-serif}
+#pcgate[hidden]{display:none}
+#pcgate .box{background:#fff;border-radius:10px;width:min(420px,92vw);padding:26px 28px 22px;box-shadow:0 12px 40px rgba(0,0,0,.35);border-top:5px solid #EDB71E}
+#pcgate .t{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#E25303;font-weight:700}
+#pcgate h1{font-size:20px;margin:4px 0 14px;color:#002C77}
+#pcgate label{display:block;font-size:12px;font-weight:600;color:#5a6880;margin-bottom:4px}
+#pcgate input{width:100%;padding:10px 12px;border:1px solid #d0d8e8;border-radius:5px;font-size:16px;box-sizing:border-box}
+#pcgate input:focus{outline:2px solid #EDB71E;outline-offset:-1px}
+#pcgate .row{display:flex;gap:10px;align-items:center;margin-top:12px}
+#pcgate button{background:#002C77;color:#fff;border:0;border-radius:5px;padding:10px 18px;font:600 14px inherit;cursor:pointer}
+#pcgate button:hover{background:#00205a}
+#pcgate .rem{font-size:12px;color:#5a6880;display:flex;align-items:center;gap:6px}
+#pcgate .rem input{width:auto}
+#pcgate .err{color:#c0392b;font-size:13px;margin-top:10px;min-height:18px}
+#pcgate .hint{font-size:12px;color:#5a6880;margin-top:14px;border-top:1px solid #eef0f3;padding-top:10px}
+/* ---- inbox (from inbox-fragment.html) ---- */
+#pcinbox{--navy:#002C77;--yellow:#EDB71E;--orange:#E25303;--ink:#0a1530;--mut:#5a6880;--line:#d0d8e8;--tint:#eef3fb;--amber:#b8860b;--amberbg:#fff7e6;--newbg:#e8f0ff;--ok:#16683a;--okbg:#e3f5e8;font:14px/1.45 "Segoe UI",Arial,Helvetica,sans-serif;color:var(--ink)}
+#pcinbox *{box-sizing:border-box}
+#pcinbox .pci-kpis{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+#pcinbox .pci-kpi{background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);border-radius:6px;padding:8px 14px;min-width:140px}
+#pcinbox .pci-kpi .l{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:700}
+#pcinbox .pci-kpi .v{font-size:22px;font-weight:700;color:var(--navy)}
+#pcinbox .pci-kpi.warn{border-top-color:var(--orange)} #pcinbox .pci-kpi.warn .v{color:var(--orange)}
+#pcinbox .pci-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:12px;color:var(--mut)}
+#pcinbox .pci-bar button{background:#fff;color:var(--navy);border:1.5px solid var(--navy);border-radius:5px;padding:5px 12px;font:600 12px inherit;cursor:pointer}
+#pcinbox table{width:100%;border-collapse:collapse;font-size:13px;background:#fff;border:1px solid var(--line);border-radius:8px}
+#pcinbox th,#pcinbox td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+#pcinbox th{background:var(--tint);color:var(--navy);font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+#pcinbox tr.req{cursor:pointer} #pcinbox tr.req:hover td{background:#f7f9fd}
+#pcinbox tr.new td{background:var(--newbg)} #pcinbox tr.new:hover td{background:#dde8ff}
+#pcinbox tr.stale td{background:var(--amberbg)} #pcinbox tr.stale:hover td{background:#ffefc7}
+#pcinbox .rig{font-weight:700;color:var(--navy)} #pcinbox .sub{font-size:11.5px;color:var(--mut)}
+#pcinbox .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:9px;letter-spacing:.03em}
+#pcinbox .b-new{background:var(--navy);color:#fff} #pcinbox .b-opened{background:#eceff3;color:#5b6572} #pcinbox .b-issued{background:var(--okbg);color:var(--ok)}
+#pcinbox .b-stale{background:var(--orange);color:#fff;margin-left:6px} #pcinbox .b-resub{background:var(--amberbg);color:var(--amber);margin-left:6px;border:1px solid var(--amber)}
+#pcinbox .num{font-variant-numeric:tabular-nums;text-align:right}
+#pcinbox .empty{padding:26px;text-align:center;color:var(--mut)}
+#pcinbox .err{background:#fbe4e2;border:1px solid #c0392b;color:#8c2a20;border-radius:6px;padding:10px 12px;margin-bottom:12px}
+#pcinbox .foot{font-size:11px;color:var(--mut);margin-top:10px}
+</style>
+</head>
+<body>
+<script src="gate-config.js"></script>
+<div id="pcgate">
+  <form class="box" id="pcgate-form" autocomplete="off">
+    <div class="t">Seadrill Technical Services &mdash; Subsea</div>
+    <h1>BOP Precharge Calculator</h1>
+    <label for="pcgate-pw">Password</label>
+    <input id="pcgate-pw" type="password" autofocus>
+    <div class="row">
+      <button type="submit">Open</button>
+      <label class="rem"><input type="checkbox" id="pcgate-rem"> remember on this computer</label>
+    </div>
+    <div class="err" id="pcgate-err"></div>
+    <div class="hint" id="pcgate-hint"></div>
+  </form>
+</div>
+<header>
+  <div><div class="t">Seadrill Technical Services &mdash; Subsea</div><h1>BOP Precharge</h1></div>
+  <nav>
+    <button type="button" id="btn-requests" class="active">Requests <span class="cnt" id="cnt-new" hidden>0</span></button>
+    <button type="button" id="btn-calc">Calculator</button>
+    <span class="sep"></span>
+    <button type="button" id="btn-new" title="Open the calculator empty, for a precharge nobody requested">+ New precharge</button>
+  </nav>
+</header>
+<main>
+  <div id="tab-requests"><div id="pcinbox"></div></div>
+  <div id="tab-calc" hidden>
+    <div class="calc-missing" id="calc-missing" hidden>The calculator is not published here yet &mdash; <code>calculator.html</code> must sit in this folder (C:\TSC-Dashboard\precharge\ locally, then run Deploy-Dashboard.ps1).</div>
+    <iframe id="calc" title="BOP Precharge Calculator"></iframe>
+  </div>
+</main>
+<script>
+/* ---- gate (from gate-fragment.html) ---- */
+(function () {
+  // Compact SHA-256 (public-domain style implementation) - crypto.subtle is
+  // not available on plain http:// intranet pages, so hashing is done here.
+  function sha256(str) {
+    var K = [0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+    var H = [0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+    var bytes = unescape(encodeURIComponent(str)), l = bytes.length;
+    var words = [], i;
+    for (i = 0; i < l; i++) words[i >> 2] |= (bytes.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
+    words[l >> 2] |= 0x80 << (24 - (l % 4) * 8);
+    words[(((l + 8) >> 6) << 4) + 15] = l * 8;
+    var w = new Array(64);
+    function rotr(x, n) { return (x >>> n) | (x << (32 - n)); }
+    for (var j = 0; j < words.length; j += 16) {
+      var a = H[0], b = H[1], c = H[2], d = H[3], e = H[4], f = H[5], g = H[6], h = H[7];
+      for (i = 0; i < 64; i++) {
+        if (i < 16) w[i] = words[j + i] | 0;
+        else {
+          var s0 = rotr(w[i-15], 7) ^ rotr(w[i-15], 18) ^ (w[i-15] >>> 3);
+          var s1 = rotr(w[i-2], 17) ^ rotr(w[i-2], 19) ^ (w[i-2] >>> 10);
+          w[i] = (w[i-16] + s0 + w[i-7] + s1) | 0;
+        }
+        var S1 = rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25);
+        var ch = (e & f) ^ (~e & g);
+        var t1 = (h + S1 + ch + K[i] + w[i]) | 0;
+        var S0 = rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22);
+        var mj = (a & b) ^ (a & c) ^ (b & c);
+        var t2 = (S0 + mj) | 0;
+        h = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      H[0] = (H[0] + a) | 0; H[1] = (H[1] + b) | 0; H[2] = (H[2] + c) | 0; H[3] = (H[3] + d) | 0;
+      H[4] = (H[4] + e) | 0; H[5] = (H[5] + f) | 0; H[6] = (H[6] + g) | 0; H[7] = (H[7] + h) | 0;
+    }
+    var out = '';
+    for (i = 0; i < 8; i++) out += ('00000000' + (H[i] >>> 0).toString(16)).slice(-8);
+    return out;
+  }
+  window.pcSha256 = sha256;   // reused by set-password.html
+
+  var SALT = 'seadrill-precharge-gate|';
+  var gate = document.getElementById('pcgate'), form = document.getElementById('pcgate-form');
+  var pw = document.getElementById('pcgate-pw'), err = document.getElementById('pcgate-err');
+  var rem = document.getElementById('pcgate-rem'), hint = document.getElementById('pcgate-hint');
+  var cfg = window.PCGATE || {};
+  var KEY = 'pcgate-unlocked:' + String(cfg.hash || '').slice(0, 12);
+
+  // Login carries across tabs: a localStorage token with an expiry
+  // (12 h), or no expiry when "remember on this computer" is ticked.
+  function unlocked() {
+    try {
+      var v = localStorage.getItem(KEY); if (!v) return false;
+      var exp = Number(v); return exp === 0 || exp > Date.now();
+    } catch (e) { return false; }
+  }
+  function open() { gate.hidden = true; document.dispatchEvent(new Event('pcgate-unlocked')); }
+
+  if (!cfg.hash) {
+    err.textContent = 'No password file found (gate-config.js is missing next to this page).';
+    hint.textContent = 'Open index.html from the server (not this file on its own). If it still says this, run set-password.html, save gate-config.js into C:\\TSC-Dashboard\\precharge\\ and run Deploy-Dashboard.ps1.';
+    pw.disabled = true; form.querySelector('button').disabled = true;
+    return;
+  }
+  if (cfg.hint) hint.textContent = cfg.hint;
+  if (unlocked()) { open(); return; }
+
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (sha256(SALT + pw.value) === cfg.hash) {
+      try { localStorage.setItem(KEY, rem.checked ? '0' : String(Date.now() + 12 * 3600 * 1000)); } catch (e) {}
+      pw.value = '';
+      open();
+    } else {
+      err.textContent = 'Incorrect password.';
+      pw.select();
+    }
+  });
+})();
+</script>
+<script>
+/* ---- inbox (from inbox-fragment.html) ---- */
+window.PrechargeInbox = (function () {
+  var STALE_MS = 48 * 3600 * 1000;
+  function openedSet() { try { return JSON.parse(localStorage.getItem('pc-opened') || '{}'); } catch (e) { return {}; } }
+  function markOpened(id) { try { var s = openedSet(); s[id] = new Date().toISOString(); localStorage.setItem('pc-opened', JSON.stringify(s)); } catch (e) {} }
+  function fmt(iso) { if (!iso) return '\u2014'; var d = new Date(iso); if (isNaN(d)) return iso;
+    return d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  function ago(iso) { var d = new Date(iso); if (isNaN(d)) return ''; var h = Math.round((Date.now() - d.getTime()) / 3600000);
+    return h < 1 ? 'just now' : h < 48 ? h + ' h ago' : Math.round(h / 24) + ' d ago'; }
+  function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = String(text); return n; }
+
+  function mount(host, opts) {
+    opts = opts || {};
+    var indexUrl = opts.indexUrl || 'requests/index.json';
+    var refreshMs = opts.refreshMs == null ? 60000 : opts.refreshMs;
+    host.id = host.id || 'pcinbox';
+    if (host.id !== 'pcinbox') host.classList.add('pcinbox');
+    host.innerHTML = '';
+    var kpis = el('div', 'pci-kpis');
+    var k = {};
+    [['new', 'Awaiting action', ''], ['stale', 'New for > 48 h', 'warn'], ['issued', 'Issued', ''], ['total', 'Total', '']].forEach(function (d) {
+      var box = el('div', 'pci-kpi' + (d[2] ? ' ' + d[2] : '')); box.appendChild(el('div', 'l', d[1]));
+      k[d[0]] = el('div', 'v', '\u2013'); box.appendChild(k[d[0]]); kpis.appendChild(box);
+    });
+    host.appendChild(kpis);
+    var bar = el('div', 'pci-bar'); var stamp = el('span', '', 'Loading\u2026'); var btn = el('button', '', '\u21bb Refresh'); btn.type = 'button';
+    bar.appendChild(stamp); bar.appendChild(btn); host.appendChild(bar);
+    var err = el('div', 'err'); err.hidden = true; host.appendChild(err);
+    var table = el('table'); var thead = el('thead'); var hr = el('tr');
+    [['Rig \u00b7 well \u00b7 BOP', ''], ['Raised by', ''], ['Received', ''], ['Shear req (PSIG)', 'num'], ['MAWHP (psi)', 'num'], ['Water depth', 'num'], ['Status', '']]
+      .forEach(function (h) { hr.appendChild(el('th', h[1], h[0])); });
+    thead.appendChild(hr); table.appendChild(thead);
+    var tbody = el('tbody'); table.appendChild(tbody); host.appendChild(table);
+    host.appendChild(el('div', 'foot', 'Click a request to load it into the calculator. NEW at the top; amber after 48 hours. A request re-posted after being issued keeps its status and is marked REVISED.'));
+
+    function openRequest(id) {
+      markOpened(id);
+      if (typeof opts.onOpen === 'function') { opts.onOpen(id); }
+      else { window.location.href = window.location.pathname + '?req=' + encodeURIComponent(id); }
+    }
+
+    function render(data) {
+      var reqs = (data && data.requests) || [], opened = openedSet();
+      tbody.innerHTML = '';
+      var now = Date.now(), nNew = 0, nStale = 0, nIssued = 0;
+      if (!reqs.length) { var e = el('tr'); var c = el('td', 'empty', 'No precharge requests received yet.'); c.colSpan = 7; e.appendChild(c); tbody.appendChild(e); }
+      reqs.forEach(function (r) {
+        var status = r.status || 'new';
+        if (status === 'new' && opened[r.id]) status = 'opened';
+        var stale = status === 'new' && r.received && (now - new Date(r.received).getTime()) > STALE_MS;
+        if (status === 'new' || status === 'opened') nNew++;
+        if (stale) nStale++;
+        if (status === 'issued') nIssued++;
+        var tr = el('tr', 'req' + (status === 'new' ? ' new' : '') + (stale ? ' stale' : ''));
+        tr.title = 'Load into the calculator (' + r.id + ')';
+        var c1 = el('td'); c1.appendChild(el('div', 'rig', (r.rig || r.rigKey || '?') + ' \u00b7 ' + (r.well || '\u2014') + ' \u00b7 BOP ' + (r.bop || '1')));
+        c1.appendChild(el('div', 'sub', r.id + (r.workOrder ? ' \u00b7 ' + r.workOrder : '') + (r.hops ? ' \u00b7 ' + r.hops + ' hop(s)' : ''))); tr.appendChild(c1);
+        var c2 = el('td', '', r.raisedBy || '\u2014'); if (r.email) c2.appendChild(el('div', 'sub', r.email)); tr.appendChild(c2);
+        var c3 = el('td', '', fmt(r.received)); c3.appendChild(el('div', 'sub', ago(r.received) + (r.saved ? ' \u00b7 saved ' + fmt(r.saved) : ''))); tr.appendChild(c3);
+        tr.appendChild(el('td', 'num', r.shearReq || '\u2014')); tr.appendChild(el('td', 'num', r.mawhp || '\u2014')); tr.appendChild(el('td', 'num', r.waterDepth || '\u2014'));
+        var c7 = el('td'); c7.appendChild(el('span', 'badge b-' + status, status.toUpperCase()));
+        if (stale) c7.appendChild(el('span', 'badge b-stale', '> 48 H'));
+        if (r.resubmitted) c7.appendChild(el('span', 'badge b-resub', 'REVISED'));
+        tr.appendChild(c7);
+        tr.addEventListener('click', function () { openRequest(r.id); });
+        tbody.appendChild(tr);
+      });
+      k.new.textContent = nNew; k.stale.textContent = nStale; k.issued.textContent = nIssued; k.total.textContent = reqs.length;
+      stamp.textContent = 'Index generated ' + fmt(data && data.generated) + ' \u00b7 ' + reqs.length + ' request(s)';
+    }
+    function load() {
+      fetch(indexUrl, { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (d) { err.hidden = true; render(d); })
+        .catch(function (e) { err.hidden = false; err.textContent = 'Could not load ' + indexUrl + ' (' + e.message + '). The scanner writes it on every run once prechargeDeployPath is configured.'; stamp.textContent = 'Index unavailable'; });
+    }
+    btn.addEventListener('click', load);
+    load();
+    var timer = refreshMs > 0 ? setInterval(load, refreshMs) : null;
+    return { refresh: load, destroy: function () { if (timer) clearInterval(timer); host.innerHTML = ''; } };
+  }
+  return { mount: mount };
+})();
+</script>
+<script>
+(function () {
+  var CALC = 'calculator.html';
+  var $ = function (id) { return document.getElementById(id); };
+  var frame = $('calc'), calcLoaded = false;
+
+  function showTab(name) {
+    var isReq = name === 'requests';
+    $('tab-requests').hidden = !isReq; $('tab-calc').hidden = isReq;
+    $('btn-requests').classList.toggle('active', isReq); $('btn-calc').classList.toggle('active', !isReq);
+    if (!isReq && !calcLoaded) openCalc('');
+  }
+  function openCalc(query) {
+    var url = CALC + (query || '');
+    calcLoaded = true;
+    fetch(CALC, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+      $('calc-missing').hidden = r.ok; frame.hidden = !r.ok;
+      if (r.ok) frame.src = url;
+    }).catch(function () { $('calc-missing').hidden = false; frame.hidden = true; });
+  }
+  $('btn-requests').addEventListener('click', function () { showTab('requests'); });
+  $('btn-calc').addEventListener('click', function () { showTab('calc'); });
+  $('btn-new').addEventListener('click', function () { openCalc(''); showTab('calc'); });
+
+  PrechargeInbox.mount($('pcinbox'), {
+    onOpen: function (id) { openCalc('?req=' + encodeURIComponent(id)); showTab('calc'); }
+  });
+  function badge() {
+    fetch('requests/index.json', { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      var n = ((d && d.requests) || []).filter(function (r) { return (r.status || 'new') === 'new'; }).length;
+      $('cnt-new').textContent = n; $('cnt-new').hidden = !n;
+    }).catch(function () {});
+  }
+  badge(); setInterval(badge, 60000);
+})();
+</script>
+</body>
+</html>

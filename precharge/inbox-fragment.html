@@ -46,7 +46,7 @@ window.PrechargeInbox = (function () {
   var STALE_MS = 48 * 3600 * 1000;
   function openedSet() { try { return JSON.parse(localStorage.getItem('pc-opened') || '{}'); } catch (e) { return {}; } }
   function markOpened(id) { try { var s = openedSet(); s[id] = new Date().toISOString(); localStorage.setItem('pc-opened', JSON.stringify(s)); } catch (e) {} }
-  function fmt(iso) { if (!iso) return '—'; var d = new Date(iso); if (isNaN(d)) return iso;
+  function fmt(iso) { if (!iso) return '\u2014'; var d = new Date(iso); if (isNaN(d)) return iso;
     return d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
   function ago(iso) { var d = new Date(iso); if (isNaN(d)) return ''; var h = Math.round((Date.now() - d.getTime()) / 3600000);
     return h < 1 ? 'just now' : h < 48 ? h + ' h ago' : Math.round(h / 24) + ' d ago'; }
@@ -63,14 +63,14 @@ window.PrechargeInbox = (function () {
     var k = {};
     [['new', 'Awaiting action', ''], ['stale', 'New for > 48 h', 'warn'], ['issued', 'Issued', ''], ['total', 'Total', '']].forEach(function (d) {
       var box = el('div', 'pci-kpi' + (d[2] ? ' ' + d[2] : '')); box.appendChild(el('div', 'l', d[1]));
-      k[d[0]] = el('div', 'v', '–'); box.appendChild(k[d[0]]); kpis.appendChild(box);
+      k[d[0]] = el('div', 'v', '\u2013'); box.appendChild(k[d[0]]); kpis.appendChild(box);
     });
     host.appendChild(kpis);
-    var bar = el('div', 'pci-bar'); var stamp = el('span', '', 'Loading…'); var btn = el('button', '', '↻ Refresh'); btn.type = 'button';
+    var bar = el('div', 'pci-bar'); var stamp = el('span', '', 'Loading\u2026'); var btn = el('button', '', '\u21bb Refresh'); btn.type = 'button';
     bar.appendChild(stamp); bar.appendChild(btn); host.appendChild(bar);
     var err = el('div', 'err'); err.hidden = true; host.appendChild(err);
     var table = el('table'); var thead = el('thead'); var hr = el('tr');
-    [['Rig · well · BOP', ''], ['Raised by', ''], ['Received', ''], ['Shear req (PSIG)', 'num'], ['MAWHP (psi)', 'num'], ['Water depth', 'num'], ['Status', '']]
+    [['Rig \u00b7 well \u00b7 BOP', ''], ['Raised by', ''], ['Received', ''], ['Shear req (PSIG)', 'num'], ['MAWHP (psi)', 'num'], ['Water depth', 'num'], ['Status', '']]
       .forEach(function (h) { hr.appendChild(el('th', h[1], h[0])); });
     thead.appendChild(hr); table.appendChild(thead);
     var tbody = el('tbody'); table.appendChild(tbody); host.appendChild(table);
@@ -96,11 +96,11 @@ window.PrechargeInbox = (function () {
         if (status === 'issued') nIssued++;
         var tr = el('tr', 'req' + (status === 'new' ? ' new' : '') + (stale ? ' stale' : ''));
         tr.title = 'Load into the calculator (' + r.id + ')';
-        var c1 = el('td'); c1.appendChild(el('div', 'rig', (r.rig || r.rigKey || '?') + ' · ' + (r.well || '—') + ' · BOP ' + (r.bop || '1')));
-        c1.appendChild(el('div', 'sub', r.id + (r.workOrder ? ' · ' + r.workOrder : '') + (r.hops ? ' · ' + r.hops + ' hop(s)' : ''))); tr.appendChild(c1);
-        var c2 = el('td', '', r.raisedBy || '—'); if (r.email) c2.appendChild(el('div', 'sub', r.email)); tr.appendChild(c2);
-        var c3 = el('td', '', fmt(r.received)); c3.appendChild(el('div', 'sub', ago(r.received) + (r.saved ? ' · saved ' + fmt(r.saved) : ''))); tr.appendChild(c3);
-        tr.appendChild(el('td', 'num', r.shearReq || '—')); tr.appendChild(el('td', 'num', r.mawhp || '—')); tr.appendChild(el('td', 'num', r.waterDepth || '—'));
+        var c1 = el('td'); c1.appendChild(el('div', 'rig', (r.rig || r.rigKey || '?') + ' \u00b7 ' + (r.well || '\u2014') + ' \u00b7 BOP ' + (r.bop || '1')));
+        c1.appendChild(el('div', 'sub', r.id + (r.workOrder ? ' \u00b7 ' + r.workOrder : '') + (r.hops ? ' \u00b7 ' + r.hops + ' hop(s)' : ''))); tr.appendChild(c1);
+        var c2 = el('td', '', r.raisedBy || '\u2014'); if (r.email) c2.appendChild(el('div', 'sub', r.email)); tr.appendChild(c2);
+        var c3 = el('td', '', fmt(r.received)); c3.appendChild(el('div', 'sub', ago(r.received) + (r.saved ? ' \u00b7 saved ' + fmt(r.saved) : ''))); tr.appendChild(c3);
+        tr.appendChild(el('td', 'num', r.shearReq || '\u2014')); tr.appendChild(el('td', 'num', r.mawhp || '\u2014')); tr.appendChild(el('td', 'num', r.waterDepth || '\u2014'));
         var c7 = el('td'); c7.appendChild(el('span', 'badge b-' + status, status.toUpperCase()));
         if (stale) c7.appendChild(el('span', 'badge b-stale', '> 48 H'));
         if (r.resubmitted) c7.appendChild(el('span', 'badge b-resub', 'REVISED'));
@@ -109,7 +109,7 @@ window.PrechargeInbox = (function () {
         tbody.appendChild(tr);
       });
       k.new.textContent = nNew; k.stale.textContent = nStale; k.issued.textContent = nIssued; k.total.textContent = reqs.length;
-      stamp.textContent = 'Index generated ' + fmt(data && data.generated) + ' · ' + reqs.length + ' request(s)';
+      stamp.textContent = 'Index generated ' + fmt(data && data.generated) + ' \u00b7 ' + reqs.length + ' request(s)';
     }
     function load() {
       fetch(indexUrl, { cache: 'no-store' })

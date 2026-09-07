@@ -30,7 +30,7 @@
 </style>
 <div id="pcgate">
   <form class="box" id="pcgate-form" autocomplete="off">
-    <div class="t">Seadrill Technical Services — Subsea</div>
+    <div class="t">Seadrill Technical Services &mdash; Subsea</div>
     <h1>BOP Precharge Calculator</h1>
     <label for="pcgate-pw">Password</label>
     <input id="pcgate-pw" type="password" autofocus>
@@ -100,8 +100,8 @@
   function open() { gate.hidden = true; document.dispatchEvent(new Event('pcgate-unlocked')); }
 
   if (!cfg.hash) {
-    err.textContent = 'No password has been set yet.';
-    hint.textContent = 'Open set-password.html, choose a password, and place the gate-config.js it creates next to this page.';
+    err.textContent = 'No password file found (gate-config.js is missing next to this page).';
+    hint.textContent = 'Open index.html from the server (not this file on its own). If it still says this, run set-password.html, save gate-config.js into C:\\TSC-Dashboard\\precharge\\ and run Deploy-Dashboard.ps1.';
     pw.disabled = true; form.querySelector('button').disabled = true;
     return;
   }

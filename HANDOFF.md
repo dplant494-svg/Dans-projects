@@ -165,7 +165,10 @@ paths with credentials, but this shape is fine to document)
   as verbatim copies plus an `index.json` with new/issued status, the
   return leg auto-matches issued sheets on rig|well|BOP, and a new
   `precharge/inbox.html` page reads the index. `Deploy-Dashboard.ps1`
-  publishes the inbox when `prechargeDeployPath` is set. v2.37 added the
+  publishes the inbox when `prechargeDeployPath` is set, plus the hub
+  `precharge/index.html` (password gate + Requests tab + Calculator tab
+  framing `calculator.html`, which is published untouched), the gate and
+  inbox fragments, `set-password.html` and Dan's `gate-config.js`. v2.37 added the
   SSCE Equipment fleet bucket + 'SSCE Asset' alias; v2.36 the
   Unattributed guard (no rig ever invented from a filename).
   See `PRECHARGE-INBOX-DASHBOARD-REPLY.md` for the review + open points.)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BOP Precharge Requests — Inbox</title>
+<title>BOP Precharge Requests &mdash; Inbox</title>
 <style>
   :root{--navy:#002C77;--yellow:#EDB71E;--orange:#E25303;--ink:#0a1530;--mut:#5a6880;--line:#d0d8e8;--bg:#f4f6fa;--tint:#eef3fb;--amber:#b8860b;--amberbg:#fff7e6;--newbg:#e8f0ff;--ok:#16683a;--okbg:#e3f5e8}
   *{box-sizing:border-box}
@@ -52,24 +52,24 @@
 })();
 </script>
 <header>
-  <div><div class="t">Seadrill Technical Services — Subsea</div><h1>BOP Precharge Requests</h1></div>
-  <div class="stamp" id="stamp">Loading…</div>
+  <div><div class="t">Seadrill Technical Services &mdash; Subsea</div><h1>BOP Precharge Requests</h1></div>
+  <div class="stamp" id="stamp">Loading&hellip;</div>
 </header>
 <div class="wrap">
   <div class="kpis">
-    <div class="kpi"><div class="l">Awaiting action</div><div class="v" id="k-new">–</div></div>
-    <div class="kpi warn"><div class="l">New for &gt; 48 h</div><div class="v" id="k-stale">–</div></div>
-    <div class="kpi"><div class="l">Issued</div><div class="v" id="k-issued">–</div></div>
-    <div class="kpi"><div class="l">Total</div><div class="v" id="k-total">–</div></div>
+    <div class="kpi"><div class="l">Awaiting action</div><div class="v" id="k-new">\u2013</div></div>
+    <div class="kpi warn"><div class="l">New for &gt; 48 h</div><div class="v" id="k-stale">\u2013</div></div>
+    <div class="kpi"><div class="l">Issued</div><div class="v" id="k-issued">\u2013</div></div>
+    <div class="kpi"><div class="l">Total</div><div class="v" id="k-total">\u2013</div></div>
   </div>
   <div id="err" class="err" hidden></div>
   <div class="card">
     <table>
       <thead><tr>
-        <th>Rig · well · BOP</th><th>Raised by</th><th>Received</th>
+        <th>Rig &middot; well &middot; BOP</th><th>Raised by</th><th>Received</th>
         <th class="num">Shear req (PSIG)</th><th class="num">MAWHP (psi)</th><th class="num">Water depth</th><th>Status</th>
       </tr></thead>
-      <tbody id="rows"><tr><td colspan="7" class="empty">Loading…</td></tr></tbody>
+      <tbody id="rows"><tr><td colspan="7" class="empty">Loading&hellip;</td></tr></tbody>
     </table>
     <div class="foot">Click a request to open it in the Precharge Calculator, already filled in. New requests sit at the top; anything new for more than 48 hours turns amber.
       A request re-posted after being issued keeps its status and is marked <b>revised</b>. Index refreshes every minute; the scanner rebuilds it every 10 minutes from <code>seadrill-request_*_precharge.json</code> posts.</div>
@@ -88,7 +88,7 @@
   function markOpened(id) { try { var s = openedSet(); s[id] = new Date().toISOString(); localStorage.setItem('pc-opened', JSON.stringify(s)); } catch (e) {} }
 
   function fmt(iso) {
-    if (!iso) return '—';
+    if (!iso) return '\u2014';
     var d = new Date(iso); if (isNaN(d)) return iso;
     return d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
@@ -119,14 +119,14 @@
       var tr = document.createElement('tr');
       tr.className = 'req' + (status === 'new' ? ' new' : '') + (stale ? ' stale' : '');
       tr.title = 'Open in the Precharge Calculator (' + r.id + ')';
-      var c1 = td(''); var rig = document.createElement('div'); rig.className = 'rig'; rig.textContent = (r.rig || r.rigKey || '?') + ' · ' + (r.well || '—') + ' · BOP ' + (r.bop || '1');
-      var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = r.id + (r.workOrder ? ' · ' + r.workOrder : '') + (r.hops ? ' · ' + r.hops + ' hop(s)' : '');
+      var c1 = td(''); var rig = document.createElement('div'); rig.className = 'rig'; rig.textContent = (r.rig || r.rigKey || '?') + ' \u00b7 ' + (r.well || '\u2014') + ' \u00b7 BOP ' + (r.bop || '1');
+      var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = r.id + (r.workOrder ? ' \u00b7 ' + r.workOrder : '') + (r.hops ? ' \u00b7 ' + r.hops + ' hop(s)' : '');
       c1.appendChild(rig); c1.appendChild(sub); tr.appendChild(c1);
-      var c2 = td(r.raisedBy || '—'); if (r.email) { var em = document.createElement('div'); em.className = 'sub'; em.textContent = r.email; c2.appendChild(em); } tr.appendChild(c2);
-      var c3 = td(fmt(r.received)); var ag = document.createElement('div'); ag.className = 'sub'; ag.textContent = ago(r.received) + (r.saved ? ' · saved ' + fmt(r.saved) : ''); c3.appendChild(ag); tr.appendChild(c3);
-      tr.appendChild(td(r.shearReq || '—', 'num'));
-      tr.appendChild(td(r.mawhp || '—', 'num'));
-      tr.appendChild(td(r.waterDepth || '—', 'num'));
+      var c2 = td(r.raisedBy || '\u2014'); if (r.email) { var em = document.createElement('div'); em.className = 'sub'; em.textContent = r.email; c2.appendChild(em); } tr.appendChild(c2);
+      var c3 = td(fmt(r.received)); var ag = document.createElement('div'); ag.className = 'sub'; ag.textContent = ago(r.received) + (r.saved ? ' \u00b7 saved ' + fmt(r.saved) : ''); c3.appendChild(ag); tr.appendChild(c3);
+      tr.appendChild(td(r.shearReq || '\u2014', 'num'));
+      tr.appendChild(td(r.mawhp || '\u2014', 'num'));
+      tr.appendChild(td(r.waterDepth || '\u2014', 'num'));
       var c7 = td(''); var b = document.createElement('span'); b.className = 'badge b-' + status; b.textContent = status.toUpperCase(); c7.appendChild(b);
       if (stale) { var s = document.createElement('span'); s.className = 'badge b-stale'; s.textContent = '> 48 H'; c7.appendChild(s); }
       if (r.resubmitted) { var rs = document.createElement('span'); rs.className = 'badge b-resub'; rs.textContent = 'REVISED'; c7.appendChild(rs); }
@@ -135,7 +135,7 @@
       rows.appendChild(tr);
     });
     $('k-new').textContent = nNew; $('k-stale').textContent = nStale; $('k-issued').textContent = nIssued; $('k-total').textContent = reqs.length;
-    $('stamp').textContent = 'Index generated ' + fmt(data && data.generated) + ' · ' + reqs.length + ' request(s)';
+    $('stamp').textContent = 'Index generated ' + fmt(data && data.generated) + ' \u00b7 ' + reqs.length + ' request(s)';
   }
 
   function load() {

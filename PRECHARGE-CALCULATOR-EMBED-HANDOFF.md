@@ -20,6 +20,19 @@ own `reqform_inline_fragment.html`:
 published by the dashboard deploy script. **Never commit it, never hard-code
 a password** — the fragment fails closed with an instruction if it is absent.
 
+> **UPDATE 2026-09-07 (supersedes §1 below):** you no longer need to paste
+> anything into `calculator.html`. The dashboard side now publishes a hub
+> page, `precharge/index.html`, that carries the password gate itself and
+> shows two tabs: **Requests** (the inbox) and **Calculator** (your
+> `calculator.html`, loaded untouched in a frame; a request click opens
+> `calculator.html?req=<id>`, which your Rev 72 loader already handles;
+> "+ New precharge" opens it blank). All Dan has to do is copy your
+> calculator file to `C:\TSC-Dashboard\precharge\calculator.html` — it is
+> published as-is and never modified. The only things still needed from
+> your side: (a) the `?req=` loader must keep working when the page is
+> inside an iframe (no `top`/`window.parent` assumptions), (b) confirm the
+> Post-to-Dashboard payload fields in §3, (c) the id-date decision in §4.
+
 ---
 
 ## 1. Embedding — about ten lines on your side
