@@ -514,7 +514,7 @@ $prechargeRequests = @{}
 $prechargeRequestFiles = @{}   # source filenames, so the report-copy loop never publishes them to the open share
 $prechargeSuperseded = New-Object System.Collections.Generic.List[object]  # older payloads for an id (F-23a) -> requests\archive\<id>_<saved>.json
 $prechargeIssued = @{}         # rigKey|well -> list of @{bop; saved} of ISSUED precharge sheets (calculator post) - the return leg
-$PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta.asset is preferred (form Rev 2 ships it)
+$PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta.asset is preferred (form Rev 2+ ships it; Rev 3 is the live, frozen build)
     nov = 'West Neptune'; auriga = 'West Auriga'; vela = 'West Vela'; saturn = 'West Saturn'
     jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'
     libongos = 'Sonangol Libongos'; quenguela = 'Sonangol Quenguela'; gemini = 'West Gemini'

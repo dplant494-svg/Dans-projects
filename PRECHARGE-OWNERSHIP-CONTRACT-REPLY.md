@@ -80,4 +80,4 @@ in a new tab. Dan has the steps.
   yours (it renders); nothing on our side changes — the folder stays
   `precharge` and `prechargeDeployPath` is untouched. If you ever want the URL
   to say `deepcharge`, it is one line in `config.json` and a re-deploy.
-- The request form (Rev 2) is kept exactly as it is, by Dan's decision.
+- The request form (**Rev 3** — corrected; Rev 2 is the broken build) is kept exactly as it is, by Dan's decision.

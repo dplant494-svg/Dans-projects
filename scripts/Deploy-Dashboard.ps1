@@ -107,7 +107,9 @@ else {
 if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config.prechargeDeployPath) {
     $prechargeDeployDir = [Environment]::ExpandEnvironmentVariables($config.prechargeDeployPath)
     if (-not (Test-Path -Path $prechargeDeployDir)) { New-Item -ItemType Directory -Path $prechargeDeployDir -Force | Out-Null }
-    foreach ($name in @('calculator.html', 'set-password.html', 'gate-config.js')) {
+    # gate-fragment.html is published too: calculator.html inlines it at build
+    # time and the calculator session diffs the share copy against theirs (F-41).
+    foreach ($name in @('calculator.html', 'set-password.html', 'gate-config.js', 'gate-fragment.html')) {
         $src = Join-Path $repoRoot ('precharge\' + $name)
         if (Test-Path -Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $prechargeDeployDir $name) -Force
@@ -122,7 +124,7 @@ if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config
     }
     # Superseded (2026-09-07 ownership contract, one page only): the old
     # dashboard-side hub, the standalone inbox and the fragments come off the server.
-    foreach ($name in @('index.html', 'inbox.html', 'inbox-fragment.html', 'gate-fragment.html')) {
+    foreach ($name in @('index.html', 'inbox.html', 'inbox-fragment.html')) {
         $gone = Join-Path $prechargeDeployDir $name
         if (Test-Path -Path $gone) { Remove-Item -Path $gone -Force; Write-Host "Removed superseded precharge\$name from the server" -ForegroundColor Yellow }
     }

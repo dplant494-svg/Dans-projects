@@ -176,6 +176,12 @@ paths with credentials, but this shape is fine to document)
   `calculator.html` and `set-password.html` into `precharge\` and
   `Deploy-Dashboard.ps1` publishes them as-is (both gitignored); it also
   removes the superseded dashboard-side hub `index.html` from the server.
+  **Standing rule F-41:** `calculator.html` inlines `precharge/gate-fragment.html`
+  at build time, so any change to that fragment must be sent to the
+  calculator session in the same piece of work (and `SALT` / `sha256()`
+  must never change - that would lock everyone out). The fragment is also
+  published to the share so their gate check can diff it. The rig-facing
+  request form is **Rev 3** (frozen; Rev 2 is the broken build).
   v2.38 introduced the request inbox (`PRECHARGE-INBOX-1-FOR-DASHBOARD-SESSION.md`:
   request files routed OUT of the report pipeline into `requests\` as
   verbatim copies plus `index.json` with new/issued status). v2.37 added the

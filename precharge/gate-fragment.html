@@ -10,6 +10,10 @@
      page; it does not stop a direct URL to requests/*.json on an open share.
      Real protection = IIS authentication or encrypted payloads.
      Pure JS (no crypto.subtle - that is unavailable on plain http://).
+     STANDING RULE (F-41): calculator.html INLINES this file at build time.
+     Any change here = send this file to the calculator session in the same
+     piece of work; SALT and sha256() must never change (password lockout).
+     It is also published to the share so their gate check can diff it.
 ======================================================================= -->
 <style>
 #pcgate{position:fixed;inset:0;z-index:100000;background:#002C77;display:flex;align-items:center;justify-content:center;font:14px/1.45 "Segoe UI",Arial,Helvetica,sans-serif}
@@ -100,8 +104,8 @@
   function open() { gate.hidden = true; document.dispatchEvent(new Event('pcgate-unlocked')); }
 
   if (!cfg.hash) {
-    err.textContent = 'No password file found (gate-config.js is missing next to this page).';
-    hint.textContent = 'Open index.html from the server (not this file on its own). If it still says this, run set-password.html, save gate-config.js into C:\\TSC-Dashboard\\precharge\\ and run Deploy-Dashboard.ps1.';
+    err.textContent = 'This page has not been set up yet.';
+    hint.textContent = 'Contact Technical Services - Subsea to have the password set.';
     pw.disabled = true; form.querySelector('button').disabled = true;
     return;
   }
