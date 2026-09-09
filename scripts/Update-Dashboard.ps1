@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.39'
+$ScriptVersion = '2.40'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -534,6 +534,16 @@ function Get-PrechargeStamp { param([string]$Saved, [datetime]$Fallback)   # met
 }
 $rigCheckEntries = @{}   # keyed rig|logDate|shift|itemKey (Daily Checks) or rig|logDate|itemKey (FLM, shift always blank)
 $skipped = 0
+# Files the scan could not use, surfaced ON the dashboard (DASHBOARD-ROLLING-
+# HANDOFF entry 3: "fail loudly" - a truncated or unreadable post must never
+# look like a quietly empty report). kind: unreadable (not valid JSON -
+# the truncation signature) | unrecognised | no-rig | error | large (still
+# ingested; over the size ceiling the transport and viewer are comfortable with).
+$problems = New-Object System.Collections.Generic.List[object]
+$LargeReportBytes = 10MB
+function Add-Problem { param($File, [string]$Kind, [string]$Why)
+    $problems.Add(@{ file = $File.Name; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
+}
 
 foreach ($xf in $excelFiles) {
     try {
@@ -649,11 +659,16 @@ $ssceRequestRecords | Sort-Object -Property @{ Expression = { [string]$_.submitt
 $ssceRequestsSorted = $ssceRequestsSortedList.ToArray()
 
 foreach ($f in $files) {
+    if ($f.Length -gt $LargeReportBytes) {
+        Write-Warning "Large report: $($f.Name) is $([math]::Round($f.Length / 1MB, 1)) MB ($($f.Length) bytes) - over the $([int]($LargeReportBytes / 1MB)) MB ceiling; ingested, but photos should be downscaled at source (WCGRRT REV 157+)"
+        Add-Problem $f 'large' "$([math]::Round($f.Length / 1MB, 1)) MB - over the $([int]($LargeReportBytes / 1MB)) MB ceiling (still shown)"
+    }
     try {
         $json = Read-ReportJson -Path $f.FullName
     }
     catch {
-        Write-Warning "Skipping $($f.Name): not valid JSON ($($_.Exception.Message))"
+        Write-Warning "Skipping $($f.Name): not valid JSON ($($_.Exception.Message)) - $($f.Length) bytes; a file cut short in transit fails exactly like this"
+        Add-Problem $f 'unreadable' "not valid JSON - the file may have been cut short in transit ($($f.Length) bytes)"
         $skipped++
         continue
     }
@@ -661,6 +676,7 @@ foreach ($f in $files) {
     $meta = Get-Prop $json 'meta'
     if ($null -eq $meta) {
         Write-Warning "Skipping $($f.Name): no 'meta' block - not a TSC Rig Reporting Tool export?"
+        Add-Problem $f 'unrecognised' "no 'meta' block - not a report export"
         $skipped++
         continue
     }
@@ -775,13 +791,15 @@ foreach ($f in $files) {
         foreach ($row in $actRows) {
             $left = [bool](Get-Prop $row 'leftWithRig')
             if ($left) { $actionsLeftWithRig++ }
+            $rowSys = [string](Get-Prop $row 'sys'); if (-not $rowSys) { $rowSys = [string](Get-Prop $row 'system') }
             $actionItems.Add([pscustomobject]@{
                 desc        = [string](Get-Prop $row 'desc')
-                sys         = [string](Get-Prop $row 'sys')
+                sys         = $rowSys
                 resp        = [string](Get-Prop $row 'resp')
                 target      = [string](Get-Prop $row 'target')
                 deadline    = [string](Get-Prop $row 'deadline')
                 leftWithRig = $left
+                hasPhoto    = ([string](Get-Prop $row 'photo')).Length -gt 0   # REV 158: blob stays in the full file copy, never here
             }) | Out-Null
         }
     }
@@ -835,6 +853,7 @@ foreach ($f in $files) {
     # below, not lumped in with "not a recognized export" at all.
     if ($tileCount -eq 0 -and -not $assetRaw -and $criticalItems.Count -eq 0 -and $actionItems.Count -eq 0 -and -not $checksHasValues) {
         Write-Warning "Skipping $($f.Name): has a 'meta' block but no tiles, rig identity, or critical/action rows - not a recognized report export"
+        Add-Problem $f 'unrecognised' "has a 'meta' block but no tiles, rig identity or rows - not a recognised report export"
         $skipped++
         continue
     }
@@ -850,6 +869,7 @@ foreach ($f in $files) {
     # tool," not "this file is junk."
     if ($checksHasValues -and -not $assetRaw -and -not $checksRigRaw) {
         Write-Warning "Skipping $($f.Name): Daily Checks/FLM export has no rig identity (meta.asset and meta.checks.rig both blank) - needs a fix on the report tool side, not the dashboard scanner"
+        Add-Problem $f 'no-rig' "Daily Checks/FLM export with no rig identity (meta.asset and meta.checks.rig blank) - report tool fix needed"
         $skipped++
         continue
     }
@@ -1404,6 +1424,30 @@ foreach ($f in $files) {
                 }
             }
         }
+        # Actions Raised During Visit (WCGRRT REV 156, rolling handoff entry 2):
+        # top-level actions[] on the compliance payload. Text only here - the
+        # REV 158 photo blob stays in the full file copy (hasPhoto + idx let
+        # the dashboard fetch it on demand). They belong to THIS report and are
+        # replaced wholesale with it (newest rig|date wins) - never merged.
+        $ccRaised = New-Object System.Collections.Generic.List[object]
+        $ccRaisedIdx = 0
+        foreach ($ra in @(Get-Prop $json 'actions')) {
+            if ($ra) {
+                $raSys = [string](Get-Prop $ra 'system'); if (-not $raSys) { $raSys = [string](Get-Prop $ra 'sys') }
+                $ccRaised.Add(@{
+                    idx         = $ccRaisedIdx
+                    desc        = [string](Get-Prop $ra 'desc')
+                    system      = $raSys
+                    resp        = [string](Get-Prop $ra 'resp')
+                    target      = [string](Get-Prop $ra 'target')
+                    deadline    = [string](Get-Prop $ra 'deadline')
+                    leftWithRig = [bool](Get-Prop $ra 'leftWithRig')
+                    hasPhoto    = ([string](Get-Prop $ra 'photo')).Length -gt 0
+                }) | Out-Null
+            }
+            $ccRaisedIdx++
+        }
+        $ccPhotoCount = @(@(Get-Prop $json 'photos') | Where-Object { $_ }).Count
         $ccVrr = @(Get-Prop $json 'vrr') | Where-Object { $null -ne $_ }
         if (@($ccVrr).Count -eq 0) { $ccVrr = @(Get-Prop $ccChecklist 'vrr') | Where-Object { $null -ne $_ } }
         $ccAabRaw = Get-Prop $ccChecklist 'aab'
@@ -1420,6 +1464,8 @@ foreach ($f in $files) {
             summary    = $ccSummaryRows.ToArray()
             totals     = $ccTotals
             actions    = $ccActions.ToArray()
+            raisedActions = $ccRaised.ToArray()
+            photoCount = $ccPhotoCount
             expiries   = $ccExpiries.ToArray()
             vrr        = @($ccVrr | ForEach-Object { [bool]$_ })
             aab        = @{
@@ -1486,6 +1532,7 @@ foreach ($f in $files) {
     catch {
         # One malformed report must not stop the whole scan.
         Write-Warning "Skipping $($f.Name): could not extract summary ($($_.Exception.Message))"
+        Add-Problem $f 'error' "could not extract summary: $($_.Exception.Message)"
         $skipped++
     }
 }
@@ -1563,7 +1610,13 @@ $payload = [pscustomobject]@{
     marineScores = $marineSorted.ToArray()
     topsetInvestigations = $topsetSorted.ToArray()
     complianceChecklists = $complianceSorted.ToArray()
+    problems     = $problems.ToArray()
 }
+# Marine Integrity was retired from WCGRRT at REV 155 (2026-09-09): the view
+# is a read-only archive; files that still arrive are ingested as before and
+# their absence is never a fault. The count answers the tool session's question.
+$marineRigCount = @($marineSorted | ForEach-Object { $_.rig } | Where-Object { $_ } | Sort-Object -Unique).Count
+if ($marineSorted.Count -gt 0) { Write-Host "Marine Integrity (archived, retired at WCGRRT REV 155): $($marineSorted.Count) record(s) across $marineRigCount rig(s)" -ForegroundColor Cyan }
 
 $jsonOut = $payload | ConvertTo-Json -Depth 10
 $content = "window.DASHBOARD_DATA = $jsonOut;`n"
@@ -1577,7 +1630,7 @@ if (-not (Test-Path -Path $outDir)) {
 [System.IO.File]::WriteAllText($outputFile, $content, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Host "Wrote $($reports.Count) report(s) to $outputFile" -ForegroundColor Green
-if ($skipped -gt 0) { Write-Host "Skipped $skipped file(s)." -ForegroundColor Yellow }
+if ($skipped -gt 0) { Write-Host "Skipped $skipped file(s) - listed on the dashboard under 'Files that could not be read'." -ForegroundColor Yellow }
 
 # ---------------------------------------------------------------------------
 # Notifications: email discipline owners when NEW reports of their type arrive.

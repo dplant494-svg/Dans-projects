@@ -159,7 +159,17 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.39** (precharge data contract per
+- `scripts/Update-Dashboard.ps1`: **v2.40** (`DASHBOARD-ROLLING-HANDOFF.md`
+  entries 1–4, 2026-09-09: `problems[]` in the payload + a red banner on the
+  dashboard for every file the scan could not read — truncated posts fail
+  loudly, never quietly; a 10 MB size ceiling with a warning (still ingested);
+  compliance `raisedActions[]` (REV 156) with `hasPhoto`/`idx` (REV 158) and
+  a fleet-wide Actions Raised During Visits table on the Compliance tab with
+  overdue / not-left-with-rig derived on the dashboard; action photos and the
+  compliance photo dump rendered in the full-report viewer; `actionItems[].hasPhoto`;
+  Marine Integrity tab relabelled a read-only archive after WCGRRT REV 155
+  retired the section — nothing deleted, ingestion unchanged, absence never a
+  fault, and the scan prints the record/rig count). v2.39 (precharge data contract per
   `PRECHARGE-OWNERSHIP-AND-DATA-CONTRACT.md`: request id is now
   `<rigKey>_<well>_BOP<bop>` with no date; superseded payloads are kept
   verbatim in `<prechargeDeployPath>\requests\archive\` (F-23a); the

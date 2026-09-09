@@ -79,6 +79,17 @@
     margin-bottom: 10px;
   }
   .source-line { color: var(--sd-text-light); font-size: 11px; margin: -4px 0 16px; }
+  .problems { background: #fdecea; border: 1px solid #c0392b; border-left: 5px solid #c0392b; color: #7a1f16; border-radius: 6px; padding: 10px 14px; margin: 0 0 16px; font-size: 12.5px; }
+  .problems.warn { background: #fff4e0; border-color: #ad6800; color: #5c3a00; }
+  .problems summary { cursor: pointer; font-weight: 700; }
+  .problems ul { margin: 6px 0 0; padding-left: 18px; }
+  .problems li { margin: 2px 0; }
+  .problems code { font-family: Consolas, monospace; font-size: 11.5px; }
+  .archived-note { background: #eceff3; color: #5b6572; border-radius: 6px; padding: 8px 12px; font-size: 12px; margin: -6px 0 14px; }
+  .act-photo { display: inline-block; width: 64px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid var(--sd-border); cursor: zoom-in; vertical-align: middle; }
+  .act-photo-btn { font-size: 11.5px; padding: 3px 8px; border: 1px solid var(--sd-blue); background: #fff; color: var(--sd-blue); border-radius: 4px; cursor: pointer; }
+  .act-photo-btn:disabled { opacity: .5; cursor: default; }
+  .act-notleft { color: #ad6800; font-weight: 700; }
 
   /* ── Filter row — one row, above everything it scopes ── */
   .filter-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
@@ -586,12 +597,13 @@
 
     <main id="app" hidden>
       <div class="source-line" id="folder-line"></div>
+      <div id="problems-banner" hidden></div>
 
       <div class="view-tabs">
         <button type="button" class="view-tab active" id="tab-list-btn">Report List</button>
         <button type="button" class="view-tab" id="tab-cbm-btn">CBM Heatmap</button>
         <button type="button" class="view-tab" id="tab-monitoring-btn">Rig Monitoring</button>
-        <button type="button" class="view-tab" id="tab-marine-btn">Marine Integrity</button>
+        <button type="button" class="view-tab" id="tab-marine-btn">Marine (archived)</button>
         <button type="button" class="view-tab" id="tab-invest-btn">Investigations</button>
         <button type="button" class="view-tab" id="tab-compliance-btn">Compliance</button>
       </div>
@@ -684,7 +696,8 @@
 
       <div id="marine-view" hidden>
         <section class="card">
-          <h2>Marine Integrity — Compliance Scores</h2>
+          <h2>Marine Integrity — Compliance Scores (archived)</h2>
+          <div class="archived-note">Read-only archive. Marine Integrity reporting was retired from the Well Control reporting tool at WCGRRT REV 155 on 9 September 2026 (Dan Plant's decision). No new reports are expected; every record received before that date is kept here unchanged, and any file that still arrives from an older tool revision is ingested as before. Nothing has been deleted.</div>
           <div class="source-line">Latest Marine Integrity Report per rig, ranked lowest score first so outliers stand out. Minimum target score 3.0. Click a rig for score trends and the action list.</div>
           <div class="rig-mon-empty" id="marine-empty" hidden></div>
           <div class="marine-grid" id="marine-grid"></div>
@@ -708,6 +721,7 @@
           <div class="source-line">Latest compliance checklist per rig with the P1–P8 tallies. Action counts and not-assessed counts are shown separately — an incomplete checklist is a different problem from a failed item. Click a rig for the full checklist.</div>
           <div class="rig-mon-empty" id="compliance-empty" hidden></div>
           <div id="compliance-cards"></div>
+          <div id="compliance-raised"></div>
           <div id="compliance-actions"></div>
           <div id="compliance-expiry"></div>
         </section>
@@ -1363,6 +1377,68 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       count++;
     });
     return count ? wrap : null;
+  }
+
+  // Action photos (WCGRRT REV 158): the aggregate carries only hasPhoto; the
+  // blob lives in the full report copy on the server and is fetched on demand,
+  // so list views never load base64 (the data rule: counts in lists, blobs on
+  // the record). Cached per file for the page session.
+  var fullReportCache = {};
+  function fetchFullReport(file) {
+    if (fullReportCache[file]) return fullReportCache[file];
+    fullReportCache[file] = fetch('reports/' + encodeURIComponent(file) + '.js?v=' + Date.now())
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function (t) { return JSON.parse(t); })
+      .catch(function (e) { delete fullReportCache[file]; throw e; });
+    return fullReportCache[file];
+  }
+  function actionPhotoButton(file, pick) {
+    var btn = mk('button', 'act-photo-btn', '📷 View');
+    btn.type = 'button';
+    btn.title = 'Photo attached to this action - loads from the full report';
+    btn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      btn.disabled = true; btn.textContent = 'Loading…';
+      fetchFullReport(file).then(function (full) {
+        var src = pick(full) || '';
+        btn.disabled = false; btn.textContent = '📷 View';
+        if (src.indexOf('data:image') === 0) openLightbox(src);
+        else { btn.textContent = 'No photo'; btn.disabled = true; }
+      }).catch(function (e) { btn.textContent = 'Unavailable (' + e.message + ')'; });
+    });
+    return btn;
+  }
+  // Table of raised actions with inline thumbnails (full-report viewer, where
+  // the blob is already in hand). rows: {desc, system|sys, resp, target, deadline, leftWithRig, photo}
+  function actionsTable(rows) {
+    var today = tsTodayStr();
+    var t = mk('table', 'ts-table');
+    var thr = mk('tr');
+    ['Action', 'System', 'Responsible', 'Target', 'Deadline', 'Left with rig', 'Photo'].forEach(function (h) { thr.appendChild(mk('th', '', h)); });
+    t.appendChild(thr);
+    rows.forEach(function (a) {
+      var dl = String(a.deadline || '');
+      var over = /^\d{4}-\d{2}-\d{2}$/.test(dl) && dl < today;
+      var tr = mk('tr', over ? 'overdue' : '');
+      tr.appendChild(mk('td', '', a.desc || ''));
+      tr.appendChild(mk('td', '', a.system || a.sys || ''));
+      tr.appendChild(mk('td', '', a.resp || ''));
+      tr.appendChild(mk('td', '', a.target || ''));
+      tr.appendChild(mk('td', '', dl + (over ? '  (OVERDUE)' : '')));
+      var left = mk('td', '', a.leftWithRig ? 'Yes' : 'NOT confirmed');
+      if (!a.leftWithRig) left.className = 'act-notleft';
+      tr.appendChild(left);
+      var pc = mk('td');
+      var src = String(a.photo || '');
+      if (src.indexOf('data:image') === 0) {
+        var img = document.createElement('img'); img.className = 'act-photo'; img.loading = 'lazy'; img.src = src; img.alt = 'Action photo';
+        img.addEventListener('click', function () { openLightbox(src); });
+        pc.appendChild(img);
+      } else pc.textContent = '—';
+      tr.appendChild(pc);
+      t.appendChild(tr);
+    });
+    return t;
   }
 
   function rvStatusChip(statusText) {
@@ -2349,7 +2425,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var scores = window.DASHBOARD_DATA.marineScores || [];
     if (!scores.length) {
       msg.hidden = false; grid.hidden = true;
-      msg.textContent = 'No Marine Integrity Reports received yet.';
+      msg.textContent = 'No Marine Integrity Reports were received before the section was retired (WCGRRT REV 155, 9 September 2026).';
       return;
     }
     msg.hidden = true; grid.hidden = false;
@@ -2835,6 +2911,19 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         body.appendChild(nb);
       }
     }
+    // Actions Raised During Visit (REV 156) with their photos (REV 158) -
+    // placed straight after the summary, as in the printed report.
+    var raised = (full.actions || []).filter(function (a) { return a && (String(a.desc || '').trim() || a.photo); });
+    if (raised.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Actions raised during visit (' + raised.length + ')'));
+      var notLeft = raised.filter(function (a) { return !a.leftWithRig; }).length;
+      if (notLeft) {
+        var nl = mk('div', 'rv-notes', notLeft + ' action(s) not marked as left with the rig — the handover was not confirmed.');
+        nl.style.color = '#ad6800';
+        body.appendChild(nl);
+      }
+      body.appendChild(actionsTable(raised));
+    }
     var notes = (ck.notes || []).map(function (n) { return String(n || '').trim(); });
     if (notes.some(function (n) { return n; })) {
       body.appendChild(mk('div', 'rv-section-label', 'Notes'));
@@ -2871,6 +2960,13 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var vw = mk('div'); vw.style.marginBottom = '10px';
       vrr.forEach(function (v, i) { vw.appendChild(mk('span', 'tag' + (v ? '' : ' crit'), 'VRR ' + (i + 1) + (v ? ' ✓' : ' ✗'))); });
       body.appendChild(vw);
+    }
+    // Compliance photo dump (REV 158): its own grid, separate from the daily
+    // report's photoDump - the two reports never share photographs.
+    var ccPhotos = rvPhotos(full.photos || [], []);
+    if (ccPhotos) {
+      body.appendChild(mk('div', 'rv-section-label', 'Photo dump (' + (full.photos || []).filter(function (p) { return p && p.src; }).length + ')'));
+      body.appendChild(ccPhotos);
     }
     var so = ck.signoff || [];
     if (so.some(function (s) { return s && String(s).trim(); })) {
@@ -3361,9 +3457,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
     var actRows = full.actionRows || [];
     if (actRows.length) {
-      body.appendChild(mk('div', 'rv-section-label', 'Action items'));
-      body.appendChild(detailKeyTable('', ['Action', 'System', 'Responsible', 'Target', 'Deadline', 'Left with rig'],
-        actRows.map(function (a) { return [a.desc, a.sys, a.resp, a.target, a.deadline, a.leftWithRig ? 'Yes' : '—']; })));
+      body.appendChild(mk('div', 'rv-section-label', 'Action items (' + actRows.length + ')'));
+      body.appendChild(actionsTable(actRows));   // REV 158: actionRows[].photo shown as a thumbnail
     }
   }
 
@@ -3789,6 +3884,58 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     });
     cardsWrap.appendChild(grid);
 
+    // Actions Raised During Visit, fleet-wide (REV 156/158). Latest checklist
+    // per rig only - an action list is part of its parent report and is
+    // replaced wholesale by the next checklist for that rig. Overdue and
+    // "not left with rig" are derived here, never precomputed at source.
+    var raisedWrap = $('compliance-raised'); raisedWrap.innerHTML = '';
+    var raised = [];
+    rigs.forEach(function (rigName) {
+      var cc = latestByRig[rigName];
+      (cc.raisedActions || []).forEach(function (a) { raised.push({ cc: cc, a: a }); });
+    });
+    if (raised.length) {
+      var todayR = tsTodayStr();
+      raised.forEach(function (x) { var dl = String(x.a.deadline || ''); x.overdue = /^\d{4}-\d{2}-\d{2}$/.test(dl) && dl < todayR; });
+      raised.sort(function (p, q) {
+        if (p.overdue !== q.overdue) return p.overdue ? -1 : 1;
+        return String(p.a.deadline || '9999').localeCompare(String(q.a.deadline || '9999')) || p.cc.rig.localeCompare(q.cc.rig);
+      });
+      var nOver = raised.filter(function (x) { return x.overdue; }).length;
+      var nNotLeft = raised.filter(function (x) { return !x.a.leftWithRig; }).length;
+      raisedWrap.appendChild(mk('div', 'rv-section-label', 'Actions raised during visits — open across the fleet (' + raised.length +
+        (nOver ? ' · ' + nOver + ' past deadline' : '') + (nNotLeft ? ' · ' + nNotLeft + ' not confirmed left with rig' : '') + ')'));
+      var rt = mk('table', 'ts-table');
+      var rh = mk('tr');
+      ['Rig', 'Checklist', 'Action', 'System', 'Responsible', 'Target', 'Deadline', 'Left with rig', 'Photo'].forEach(function (h) { rh.appendChild(mk('th', '', h)); });
+      rt.appendChild(rh);
+      raised.forEach(function (x) {
+        var a = x.a, cc = x.cc;
+        var tr = mk('tr', x.overdue ? 'overdue' : '');
+        var rigCell = mk('td', '', cc.rig); rigCell.style.cursor = 'pointer'; rigCell.title = 'Open the checklist';
+        rigCell.addEventListener('click', function () {
+          var rec = (data.reports || []).find(function (r) { return r.file === cc.file; });
+          if (rec) openReportViewer(rec);
+        });
+        tr.appendChild(rigCell);
+        tr.appendChild(mk('td', '', cc.date || ''));
+        tr.appendChild(mk('td', '', a.desc || ''));
+        tr.appendChild(mk('td', '', a.system || ''));
+        tr.appendChild(mk('td', '', a.resp || ''));
+        tr.appendChild(mk('td', '', a.target || ''));
+        tr.appendChild(mk('td', '', (a.deadline || '') + (x.overdue ? '  (OVERDUE)' : '')));
+        var left = mk('td', '', a.leftWithRig ? 'Yes' : 'NOT confirmed');
+        if (!a.leftWithRig) left.className = 'act-notleft';
+        tr.appendChild(left);
+        var pc = mk('td');
+        if (a.hasPhoto) pc.appendChild(actionPhotoButton(cc.file, function (full) { var arr = full.actions || []; return arr[a.idx] && arr[a.idx].photo; }));
+        else pc.textContent = '—';
+        tr.appendChild(pc);
+        rt.appendChild(tr);
+      });
+      raisedWrap.appendChild(rt);
+    }
+
     var allActions = [];
     rigs.forEach(function (rigName) {
       var cc = latestByRig[rigName];
@@ -3796,7 +3943,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       (cc.actions || []).forEach(function (a) { allActions.push({ cc: cc, a: a }); });
     });
     if (allActions.length) {
-      actWrap.appendChild(mk('div', 'rv-section-label', 'Outstanding actions (' + allActions.length + ' priorit' + (allActions.length === 1 ? 'y' : 'ies') + ')'));
+      actWrap.appendChild(mk('div', 'rv-section-label', 'Checklist priorities needing action (' + allActions.length + ' priorit' + (allActions.length === 1 ? 'y' : 'ies') + ')'));
       actWrap.appendChild(tsTable(['Rig', 'Checklist date', 'Priority', 'Items needing action'],
         allActions.map(function (x) {
           return { cells: [x.cc.rig, x.cc.date, x.a.label, x.a.action], overdue: true };
@@ -3827,6 +3974,34 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
+  // Files the scanner could not use (v2.40+): shown here so a truncated or
+  // unreadable post never passes for a quietly empty report.
+  function renderProblems(problems) {
+    var box = $('problems-banner');
+    box.innerHTML = '';
+    var bad = problems.filter(function (p) { return p.kind !== 'large'; });
+    var large = problems.filter(function (p) { return p.kind === 'large'; });
+    if (!bad.length && !large.length) { box.hidden = true; return; }
+    box.hidden = false;
+    box.className = 'problems' + (bad.length ? '' : ' warn');
+    var det = document.createElement('details');
+    var sum = document.createElement('summary');
+    sum.textContent = (bad.length ? bad.length + ' posted file(s) could not be read and are NOT on this dashboard' : '') +
+      (bad.length && large.length ? ' · ' : '') +
+      (large.length ? large.length + ' oversized report(s) (over 10 MB - photos need downscaling at source)' : '') +
+      ' — click for the list';
+    det.appendChild(sum);
+    var ul = document.createElement('ul');
+    bad.concat(large).forEach(function (p) {
+      var li = document.createElement('li');
+      var c = document.createElement('code'); c.textContent = p.file; li.appendChild(c);
+      li.appendChild(document.createTextNode(' — ' + p.why + (p.bytes != null ? ' (' + Number(p.bytes).toLocaleString() + ' bytes)' : '')));
+      ul.appendChild(li);
+    });
+    det.appendChild(ul);
+    box.appendChild(det);
+  }
+
   function render() {
     var data = window.DASHBOARD_DATA;
     var hasData = data && Array.isArray(data.reports);
@@ -3836,6 +4011,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     if (!hasData) return;
 
     $('folder-line').textContent = data.reportFolder ? ('Source: ' + data.reportFolder) : '';
+    renderProblems(data.problems || []);
     renderFilterOptions();
 
     var reports = filteredReports();
