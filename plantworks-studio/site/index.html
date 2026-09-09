@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plantworks Studio — Bilingual websites for Costa del Sol businesses</title>
+<meta name="description" content="Fast, bilingual English/Spanish websites for restaurants, property, wellness and trades businesses on the Costa del Sol. Built in Marbella by an engineer who spent two decades keeping offshore systems running.">
+<link rel="canonical" href="https://plantworks.studio/">
+<link rel="alternate" hreflang="en" href="https://plantworks.studio/">
+<link rel="alternate" hreflang="es" href="https://plantworks.studio/es/">
+<link rel="alternate" hreflang="x-default" href="https://plantworks.studio/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Plantworks Studio">
+<meta property="og:title" content="Plantworks Studio — Bilingual websites for Costa del Sol businesses">
+<meta property="og:description" content="Fast, bilingual EN/ES websites for restaurants, property, wellness and trades businesses on the Costa del Sol. Engineered not to fail.">
+<meta property="og:url" content="https://plantworks.studio/">
+<meta property="og:locale" content="en_GB">
+<meta property="og:locale:alternate" content="es_ES">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#1B2A38">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 56 18v28L32 60 8 46V18z' fill='%231B2A38'/%3E%3Cpath d='M32 46V26M32 34c-6 0-10-4-11-10 6 0 10 4 11 10zm0-4c1-6 5-10 11-10-1 6-5 10-11 10z' fill='none' stroke='%23E0762E' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "name": "Plantworks Studio",
+  "url": "https://plantworks.studio/",
+  "description": "Bilingual English/Spanish websites for small businesses on the Costa del Sol.",
+  "email": "hello@plantworks.studio",
+  "address": {"@type": "PostalAddress", "addressLocality": "Marbella", "addressRegion": "Málaga", "addressCountry": "ES"},
+  "areaServed": ["Marbella", "Estepona", "Fuengirola", "Mijas", "Benalmádena", "Costa del Sol", "Málaga"],
+  "availableLanguage": ["en", "es"],
+  "priceRange": "€€",
+  "founder": {"@type": "Person", "name": "Dan Plant"},
+  "makesOffer": [
+    {"@type": "Offer", "name": "One-page website", "priceCurrency": "EUR", "price": "500", "priceSpecification": {"@type": "PriceSpecification", "minPrice": "500", "maxPrice": "800", "priceCurrency": "EUR"}},
+    {"@type": "Offer", "name": "Multi-page bilingual website", "priceCurrency": "EUR", "price": "1200", "priceSpecification": {"@type": "PriceSpecification", "minPrice": "1200", "maxPrice": "2000", "priceCurrency": "EUR"}},
+    {"@type": "Offer", "name": "Care plan", "priceCurrency": "EUR", "price": "30", "priceSpecification": {"@type": "UnitPriceSpecification", "minPrice": "30", "maxPrice": "50", "priceCurrency": "EUR", "unitText": "month"}}
+  ]
+}
+</script>
+<style>
+  :root{
+    --steel:#1B2A38;
+    --steel-deep:#111C27;
+    --steel-line:#2E4256;
+    --sol:#E0762E;
+    --sol-light:#F3A96A;
+    --leaf:#7A9A5A;
+    --sand:#F5EFE6;
+    --sand-dim:#EBE2D3;
+    --ink:#1E2730;
+    --ink-soft:#5B6672;
+    --paper:#FFFDF9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    font-size:1.0625rem;line-height:1.6;color:var(--ink);background:var(--sand);
+  }
+  h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1.12;letter-spacing:-.01em}
+  a{color:var(--sol)}
+  a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--sol);outline-offset:3px}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,Menlo,monospace;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}
+  .tag{color:var(--sol);display:inline-flex;align-items:center;gap:.6rem}
+  .tag::before{content:"";width:1.6rem;height:1px;background:var(--sol)}
+  .container{max-width:70rem;margin:0 auto;padding:0 1.4rem}
+  section{padding:5.5rem 0}
+  section h2{font-size:clamp(1.9rem,4vw,2.7rem);max-width:30ch;margin-top:.8rem}
+  .lede{max-width:40rem;font-size:1.15rem;color:var(--ink-soft);margin-top:1.1rem}
+  .btn{
+    display:inline-block;font-weight:600;text-decoration:none;padding:.85rem 1.6rem;
+    border:1.5px solid var(--sol);border-radius:3px;font-size:1rem;
+  }
+  .btn-solid{background:var(--sol);color:var(--steel-deep)}
+  .btn-solid:hover{background:var(--sol-light);border-color:var(--sol-light)}
+  .btn-line{color:var(--sand)}
+  .btn-line:hover{background:rgba(224,118,46,.12)}
+  .btn-dark{border-color:var(--steel);color:var(--steel)}
+  .btn-dark:hover{background:var(--steel);color:var(--sand)}
+
+  /* ---------- Nav ---------- */
+  nav{background:var(--steel-deep);position:sticky;top:0;z-index:20;border-bottom:1px solid var(--steel-line)}
+  .nav-inner{max-width:70rem;margin:0 auto;padding:.8rem 1.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--sand)}
+  .brand svg{width:2rem;height:2rem;flex:none}
+  .brand span{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;letter-spacing:.01em}
+  .brand small{display:block;font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sol);font-weight:400}
+  .nav-links{display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap}
+  .nav-links a{color:var(--sand);text-decoration:none;font-size:.95rem;border-bottom:1px solid transparent;padding-bottom:2px}
+  .nav-links a:hover{color:var(--sol-light);border-bottom-color:var(--sol)}
+  .lang{font-family:'IBM Plex Mono',monospace;font-size:.8rem;letter-spacing:.1em;border:1px solid var(--steel-line);padding:.3rem .7rem!important;border-radius:3px}
+  .lang:hover{border-color:var(--sol)!important}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:
+      linear-gradient(180deg,var(--steel-deep) 0%,var(--steel) 100%);
+    color:var(--sand);padding:6rem 0 5rem;position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:linear-gradient(rgba(245,239,230,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(245,239,230,.045) 1px,transparent 1px);
+    background-size:2.5rem 2.5rem;
+    mask-image:radial-gradient(ellipse 70% 80% at 80% 50%,#000 20%,transparent 75%);
+    -webkit-mask-image:radial-gradient(ellipse 70% 80% at 80% 50%,#000 20%,transparent 75%);
+  }
+  .hero .container{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:3rem;align-items:center}
+  @media (max-width:52rem){.hero .container{grid-template-columns:1fr}}
+  .hero h1{font-size:clamp(2.4rem,5.6vw,4rem);margin-top:1rem;max-width:16ch}
+  .hero h1 em{font-style:italic;font-weight:400;color:var(--sol-light)}
+  .hero .lede{color:#C9CFD6;max-width:34rem}
+  .hero-cta{display:flex;gap:.9rem;flex-wrap:wrap;margin-top:2rem}
+  .spec{
+    border:1px solid var(--steel-line);background:rgba(17,28,39,.6);padding:1.5rem 1.6rem;
+    font-family:'IBM Plex Mono',monospace;font-size:.85rem;line-height:1.7;
+  }
+  .spec .mono{color:var(--sol);display:block;margin-bottom:.8rem}
+  .spec dl{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1.2rem}
+  .spec dt{color:#8C98A6}
+  .spec dd{color:var(--sand)}
+  .spec .ok{color:var(--sol-light)}
+
+  /* ---------- Sectors ---------- */
+  .sectors{background:var(--sand)}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;margin-top:2.6rem}
+  @media (max-width:60rem){.cards{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:36rem){.cards{grid-template-columns:1fr}}
+  .card{background:var(--paper);border:1px solid var(--sand-dim);border-top:3px solid var(--steel);padding:1.5rem 1.4rem 1.6rem}
+  .card .mono{color:var(--ink-soft)}
+  .card h3{font-size:1.35rem;margin:.6rem 0 .6rem}
+  .card p{color:var(--ink-soft);font-size:.98rem}
+
+  /* ---------- Bilingual ---------- */
+  .bilingual{background:var(--steel);color:var(--sand)}
+  .bilingual .lede{color:#C9CFD6}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;margin-top:2.5rem}
+  @media (max-width:52rem){.split{grid-template-columns:1fr}}
+  .bilingual .split ul{list-style:none;display:grid;gap:1rem}
+  .bilingual .split li{padding-left:1.6rem;position:relative;color:#DCE1E6}
+  .bilingual .split li::before{content:"";position:absolute;left:0;top:.65em;width:.8rem;height:2px;background:var(--sol)}
+  .bilingual .split li strong{color:var(--sand);display:block}
+  .code{
+    background:var(--steel-deep);border:1px solid var(--steel-line);padding:1.4rem 1.5rem;
+    font-family:'IBM Plex Mono',monospace;font-size:.82rem;line-height:1.75;overflow-x:auto;white-space:pre;color:#B9C3CE;
+  }
+  .code b{color:var(--sol-light);font-weight:500}
+  .code i{color:#7A9A5A;font-style:normal}
+
+  /* ---------- Packages ---------- */
+  .packages{background:var(--sand-dim)}
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.6rem}
+  @media (max-width:56rem){.tiers{grid-template-columns:1fr}}
+  .tier{background:var(--paper);border:1px solid #DED4C2;padding:1.8rem 1.6rem 1.9rem;display:flex;flex-direction:column}
+  .tier.featured{border-color:var(--steel);box-shadow:0 0 0 2px var(--steel) inset}
+  .tier h3{font-size:1.5rem;margin-top:.5rem}
+  .price{font-family:'Fraunces',serif;font-size:2.1rem;font-weight:600;color:var(--steel);margin:.7rem 0 .2rem}
+  .price small{font-family:'IBM Plex Sans',sans-serif;font-size:.9rem;font-weight:400;color:var(--ink-soft)}
+  .tier .for{color:var(--ink-soft);font-size:.98rem;min-height:3.2em}
+  .tier ul{list-style:none;margin:1.2rem 0 1.6rem;display:grid;gap:.5rem;font-size:.98rem}
+  .tier li{padding-left:1.4rem;position:relative}
+  .tier li::before{content:"";position:absolute;left:0;top:.62em;width:.5rem;height:.5rem;border:1.5px solid var(--sol);border-radius:50%}
+  .tier .btn{margin-top:auto;align-self:flex-start}
+  .addon{margin-top:1.4rem;background:var(--paper);border:1px dashed #C9BCA3;padding:1.3rem 1.6rem;display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}
+  .addon strong{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600}
+  .addon p{flex:1;min-width:18rem;color:var(--ink-soft);font-size:.98rem}
+  .fine{margin-top:1.2rem;font-size:.9rem;color:var(--ink-soft)}
+
+  /* ---------- Process (P&ID) ---------- */
+  .process{background:var(--sand)}
+  .pid{display:block;width:100%;height:auto;max-width:66rem;margin:2.6rem auto 0}
+  .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1.2rem;margin-top:1.6rem}
+  @media (max-width:56rem){.steps{grid-template-columns:1fr 1fr}}
+  @media (max-width:36rem){.steps{grid-template-columns:1fr}}
+  .step .mono{color:var(--sol)}
+  .step h3{font-size:1.15rem;margin:.3rem 0 .4rem}
+  .step p{font-size:.95rem;color:var(--ink-soft)}
+
+  /* ---------- Work ---------- */
+  .work{background:var(--steel-deep);color:var(--sand)}
+  .work .lede{color:#C9CFD6}
+  .case{
+    margin-top:2.6rem;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;
+    border:1px solid var(--steel-line);text-decoration:none;color:inherit;
+  }
+  @media (max-width:52rem){.case{grid-template-columns:1fr}}
+  .case-art{
+    background:#131F38;display:flex;align-items:center;justify-content:center;padding:3rem 2rem;min-height:16rem;
+    font-family:'Marcellus',Georgia,serif;color:#D8BC85;text-align:center;letter-spacing:.3em;
+  }
+  .case-art .big{font-size:3.6rem;letter-spacing:.12em;line-height:1.05}
+  .case-art .big sup{font-size:.4em;vertical-align:.7em}
+  .case-art .small{font-size:.85rem;margin-top:.5rem}
+  .case-art hr{border:none;height:1px;width:3rem;background:#B8955A;margin:.8rem auto}
+  .case-body{padding:2.2rem 2rem}
+  .case-body h3{font-size:1.6rem;margin:.5rem 0 .8rem}
+  .case-body p{color:#C9CFD6;font-size:.98rem}
+  .case-body .meta{margin-top:1.4rem;display:flex;gap:.6rem;flex-wrap:wrap}
+  .case-body .meta span{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--steel-line);padding:.25rem .6rem;color:#B9C3CE}
+  .case-body .btn{margin-top:1.6rem}
+  .bench{margin-top:1.6rem;color:#8C98A6;font-size:.95rem}
+
+  /* ---------- About ---------- */
+  .about{background:var(--sand)}
+  .about .split{align-items:start}
+  .about p{margin-top:1rem;max-width:36rem}
+  .pull{
+    font-family:'Fraunces',serif;font-size:clamp(1.4rem,2.6vw,1.8rem);font-weight:400;font-style:italic;
+    line-height:1.35;color:var(--steel);border-left:3px solid var(--sol);padding-left:1.4rem;
+  }
+  .facts{list-style:none;margin-top:1.6rem;display:grid;gap:.6rem;font-size:.95rem;color:var(--ink-soft)}
+  .facts li{display:flex;gap:.8rem}
+  .facts li b{font-family:'IBM Plex Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sol);min-width:6rem;padding-top:.2em}
+
+  /* ---------- Contact ---------- */
+  .contact{background:var(--steel);color:var(--sand)}
+  .contact .lede{color:#C9CFD6}
+  .contact form{max-width:36rem;margin-top:2rem;display:grid;gap:1rem}
+  .contact label{font-family:'IBM Plex Mono',monospace;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:#B9C3CE}
+  .contact input,.contact textarea,.contact select{
+    width:100%;padding:.75rem .9rem;margin-top:.35rem;font-family:'IBM Plex Sans',sans-serif;font-size:1rem;
+    color:var(--sand);background:var(--steel-deep);border:1px solid var(--steel-line);border-radius:3px;
+  }
+  .contact textarea{min-height:8rem;resize:vertical}
+  .contact select option{color:var(--ink)}
+  .contact button{
+    justify-self:start;font-weight:600;font-size:1rem;padding:.85rem 1.8rem;cursor:pointer;border-radius:3px;
+    background:var(--sol);color:var(--steel-deep);border:1.5px solid var(--sol);
+  }
+  .contact button:hover{background:var(--sol-light);border-color:var(--sol-light)}
+  .alt{margin-top:1.8rem;color:#B9C3CE;font-size:.95rem}
+  .alt a{color:var(--sol-light)}
+
+  footer{background:var(--steel-deep);color:#8C98A6;padding:2.4rem 1.4rem;font-size:.9rem;border-top:1px solid var(--steel-line)}
+  footer .container{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center}
+  footer a{color:#B9C3CE}
+</style>
+</head>
+<body>
+
+<nav aria-label="Main">
+  <div class="nav-inner">
+    <a class="brand" href="#top" aria-label="Plantworks Studio — home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 56 18v28L32 60 8 46V18z" fill="none" stroke="#E0762E" stroke-width="3"/><path d="M32 46V26M32 34c-6 0-10-4-11-10 6 0 10 4 11 10zm0-4c1-6 5-10 11-10-1 6-5 10-11 10z" fill="none" stroke="#F5EFE6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Plantworks<small>Studio · Marbella</small></span>
+    </a>
+    <div class="nav-links">
+      <a href="#sectors">Who it's for</a>
+      <a href="#bilingual">Bilingual</a>
+      <a href="#packages">Packages</a>
+      <a href="#process">Process</a>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+      <a class="lang" href="es/" hreflang="es" lang="es" aria-label="Versión en español">ES</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="container">
+    <div>
+      <span class="mono tag">Web studio · Costa del Sol</span>
+      <h1>Websites for the businesses that run this coast, <em>engineered not to fail.</em></h1>
+      <p class="lede">Fast, bilingual English &amp; Spanish sites for restaurants, property, wellness and trades &mdash; built by hand in Marbella, hosted for next to nothing, and looked after for as long as you want.</p>
+      <div class="hero-cta">
+        <a class="btn btn-solid" href="#packages">See packages</a>
+        <a class="btn btn-line" href="#contact">Start a conversation</a>
+      </div>
+    </div>
+    <div class="spec" aria-label="What every site includes">
+      <span class="mono">Data sheet &mdash; every build</span>
+      <dl>
+        <dt>Languages</dt><dd>English + Spanish, <span class="ok">hreflang correct</span></dd>
+        <dt>Load time</dt><dd><span class="ok">Under 1 second</span> on mobile</dd>
+        <dt>Hosting</dt><dd>Static, global CDN, HTTPS</dd>
+        <dt>Platform fees</dt><dd><span class="ok">None.</span> No Wix, no Squarespace</dd>
+        <dt>Search</dt><dd>On-page SEO + structured data</dd>
+        <dt>Ownership</dt><dd>Yours. Files, domain, everything</dd>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<section class="sectors" id="sectors">
+  <div class="container">
+    <span class="mono tag">Who it's for</span>
+    <h2>Built for the businesses that keep the Costa del Sol moving.</h2>
+    <p class="lede">Most local web shops do bilingual badly and charge monthly for the privilege. If your customers arrive in two languages, your site should too.</p>
+    <div class="cards">
+      <div class="card">
+        <span class="mono">01</span>
+        <h3>Restaurants &amp; bars</h3>
+        <p>Menus that read well on a phone, opening hours Google can trust, and a booking button that works. Chiringuito to fine dining.</p>
+      </div>
+      <div class="card">
+        <span class="mono">02</span>
+        <h3>Property &amp; rentals</h3>
+        <p>Sales, lettings, management and holiday lets. Listings that load fast, enquiry forms that reach you, and both languages ranking.</p>
+      </div>
+      <div class="card">
+        <span class="mono">03</span>
+        <h3>Health &amp; wellness</h3>
+        <p>Clinics, dentists, physios, yoga, personal trainers. Clear services, clear prices, and a way to book that isn't a DM.</p>
+      </div>
+      <div class="card">
+        <span class="mono">04</span>
+        <h3>Trades &amp; services</h3>
+        <p>Pool care, air-con, builders, electricians, gardeners. A site that says what you do, where you work, and how to call you &mdash; nothing more.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bilingual" id="bilingual">
+  <div class="container">
+    <span class="mono tag">Two languages, done properly</span>
+    <h2>Half your customers search in Spanish. Google needs telling which page is which.</h2>
+    <p class="lede">A translated page on its own isn't enough. Search engines need a signal called <em>hreflang</em> that pairs every English page with its Spanish twin. Get it wrong and the two versions compete against each other; get it right and each ranks for the people searching in that language.</p>
+    <div class="split">
+      <ul>
+        <li><strong>Every page paired</strong> English and Spanish versions linked to each other in the code, on every page, with a sensible default for everyone else.</li>
+        <li><strong>Real translation</strong> Copy written in Spanish, not run through a plug-in. Paid translated copy is proofread by a native speaker before it goes live.</li>
+        <li><strong>Local search in both languages</strong> Business details, hours and services marked up so Google Maps and search results show the right thing in the right language.</li>
+        <li><strong>One site, one domain</strong> No separate Spanish site to maintain. Language folders on the domain you already own.</li>
+      </ul>
+      <div class="code" aria-label="Example of hreflang markup"><i>&lt;!-- on every English page --&gt;</i>
+&lt;link rel="alternate" <b>hreflang="en"</b>
+      href="https://yourbusiness.es/"&gt;
+&lt;link rel="alternate" <b>hreflang="es"</b>
+      href="https://yourbusiness.es/es/"&gt;
+&lt;link rel="alternate" <b>hreflang="x-default"</b>
+      href="https://yourbusiness.es/"&gt;
+
+<i>&lt;!-- and the mirror of it on every Spanish page --&gt;</i></div>
+    </div>
+  </div>
+</section>
+
+<section class="packages" id="packages">
+  <div class="container">
+    <span class="mono tag">Packages</span>
+    <h2>Fixed prices. No monthly platform fee. You own the lot.</h2>
+    <p class="lede">Launch pricing while the studio builds its first Costa del Sol portfolio. Every price is quoted up front and doesn't move.</p>
+    <div class="tiers">
+      <div class="tier">
+        <span class="mono">Package 1</span>
+        <h3>One-page site</h3>
+        <div class="price">&euro;500 &ndash; 800</div>
+        <p class="for">For a business that needs to be found, trusted and contacted. Trades, single-location services, a new opening.</p>
+        <ul>
+          <li>One long page, designed around your brand</li>
+          <li>English, with Spanish as an option</li>
+          <li>Contact form, click-to-call, WhatsApp, map</li>
+          <li>On-page SEO and Google Business setup</li>
+          <li>Domain and hosting connected, HTTPS on</li>
+        </ul>
+        <a class="btn btn-dark" href="#contact">Ask about this</a>
+      </div>
+      <div class="tier featured">
+        <span class="mono">Package 2 &middot; most chosen</span>
+        <h3>Multi-page bilingual site</h3>
+        <div class="price">&euro;1,200 &ndash; 2,000</div>
+        <p class="for">For restaurants, property firms and clinics with more to say. Full English and Spanish, built to rank in both.</p>
+        <ul>
+          <li>Up to eight pages, each in both languages</li>
+          <li>hreflang, structured data, sitemap &mdash; done right</li>
+          <li>Menus, listings or services laid out properly</li>
+          <li>Booking or enquiry flow of your choice</li>
+          <li>Native-speaker proofread of Spanish copy</li>
+        </ul>
+        <a class="btn btn-dark" href="#contact">Ask about this</a>
+      </div>
+      <div class="tier">
+        <span class="mono">Package 3 &middot; ongoing</span>
+        <h3>Care plan</h3>
+        <div class="price">&euro;30 &ndash; 50 <small>/ month</small></div>
+        <p class="for">Hosting, updates and tweaks handled, so the site keeps working and you never have to think about it.</p>
+        <ul>
+          <li>Hosting, domain renewals and HTTPS managed</li>
+          <li>Menu, price and hours changes within two working days</li>
+          <li>Monthly check: speed, links, search visibility</li>
+          <li>Small design tweaks included</li>
+          <li>Cancel any month. Files stay yours</li>
+        </ul>
+        <a class="btn btn-dark" href="#contact">Ask about this</a>
+      </div>
+    </div>
+    <div class="addon">
+      <strong>Add-on: local search</strong>
+      <p>Google Business Profile management, review requests and local directory listings as a monthly retainer. For businesses where "near me" is how customers find them.</p>
+      <a class="btn btn-dark" href="#contact">Ask about this</a>
+    </div>
+    <p class="fine">Prices exclude IVA. Photography, copywriting and extra languages quoted separately.</p>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="container">
+    <span class="mono tag">Process</span>
+    <h2>From first conversation to launch in about three weeks.</h2>
+    <p class="lede">The same discipline I used on offshore maintenance: agree the scope, build it once, test it properly, hand it over with the documentation.</p>
+
+    <svg class="pid" viewBox="0 0 1000 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Process diagram drawn as an engineering flowline: brief, draft, revise, launch, care">
+      <g fill="none" stroke="#1B2A38" stroke-width="2">
+        <!-- main flowline -->
+        <line x1="20" y1="75" x2="980" y2="75"/>
+        <!-- flow arrows -->
+        <path d="M170 69l10 6-10 6M370 69l10 6-10 6M570 69l10 6-10 6M770 69l10 6-10 6" stroke="#E0762E"/>
+        <!-- 1 valve: brief -->
+        <path d="M80 60l40 30M120 60l-40 30M80 60v30M120 60v30"/>
+        <line x1="100" y1="75" x2="100" y2="48"/><rect x="88" y="40" width="24" height="8" fill="#F5EFE6"/>
+        <!-- 2 pump: draft -->
+        <circle cx="300" cy="75" r="22" fill="#F5EFE6"/>
+        <path d="M300 75l14-14M300 75l14 14" stroke="#E0762E"/>
+        <!-- 3 filter/strainer: revise -->
+        <path d="M478 55h44l-22 40z" fill="#F5EFE6"/>
+        <path d="M486 63h28M490 71h20M494 79h12" stroke="#E0762E"/>
+        <!-- 4 tank: launch -->
+        <path d="M676 50h48v50h-48z" fill="#F5EFE6"/>
+        <path d="M676 50q24-14 48 0" fill="#F5EFE6"/>
+        <line x1="676" y1="86" x2="724" y2="86" stroke="#E0762E" stroke-dasharray="3 3"/>
+        <!-- 5 gauge: care -->
+        <circle cx="900" cy="75" r="22" fill="#F5EFE6"/>
+        <path d="M900 75l12-12" stroke="#E0762E"/>
+        <circle cx="900" cy="75" r="3" fill="#E0762E" stroke="none"/>
+        <path d="M884 63a22 22 0 0 1 32 0" stroke="#E0762E" stroke-width="3"/>
+      </g>
+      <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#5B6672" text-anchor="middle" letter-spacing="2">
+        <text x="100" y="125">01 BRIEF</text>
+        <text x="300" y="125">02 DRAFT</text>
+        <text x="500" y="125">03 REVISE</text>
+        <text x="700" y="125">04 LAUNCH</text>
+        <text x="900" y="125">05 CARE</text>
+      </g>
+    </svg>
+
+    <div class="steps">
+      <div class="step"><span class="mono">01 &middot; Day 1</span><h3>Brief</h3><p>A coffee or a call. What the business does, who it's for, what the site has to achieve. Fixed quote the same day.</p></div>
+      <div class="step"><span class="mono">02 &middot; Week 1</span><h3>Draft</h3><p>A working first version on a private link, on your real content, designed for your brand. Not a template with your logo on it.</p></div>
+      <div class="step"><span class="mono">03 &middot; Week 2</span><h3>Revise</h3><p>Two rounds of changes, WhatsApp photos of scribbled notes welcome. Spanish copy goes to a native speaker for proofing.</p></div>
+      <div class="step"><span class="mono">04 &middot; Week 3</span><h3>Launch</h3><p>Domain connected, HTTPS on, Google told it exists. Speed and mobile checks signed off before it goes live.</p></div>
+      <div class="step"><span class="mono">05 &middot; Ongoing</span><h3>Care</h3><p>Optional care plan: updates, hosting and a monthly check. Or take the files and run it yourself. Your call.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="work" id="work">
+  <div class="container">
+    <span class="mono tag">Work</span>
+    <h2>Recent builds.</h2>
+    <p class="lede">Every site is designed around the business's own story, not a theme. Here's the most recent.</p>
+
+    <a class="case" href="https://the5thquarter.co.uk/" target="_blank" rel="noopener">
+      <div class="case-art" aria-hidden="true">
+        <div>
+          <div class="small">THE</div>
+          <div class="big">5<sup>TH</sup></div>
+          <div class="small" style="font-size:1.3rem;letter-spacing:.4em">QUARTER</div>
+          <hr>
+          <div class="small" style="letter-spacing:.35em;font-size:.7rem;color:#F6F1E4">RESTAURANT &amp; BAR</div>
+        </div>
+      </div>
+      <div class="case-body">
+        <span class="mono" style="color:#E0762E">Restaurant, bar &amp; delicatessen &middot; County Durham, UK</span>
+        <h3>The Fifth Quarter</h3>
+        <p>A restaurant opening in 2027 on the old Lambton coal estate, named for the Five Quarter seam beneath it. The site tells that story with a drawn cross-section of the coalfield, chalkboard menus that mirror the real boards in the room, and a design taken straight from the navy-and-gold sign. Seven menus on one page, no JavaScript needed for the tabs, loads instantly.</p>
+        <div class="meta"><span>Single page</span><span>Brand-led design</span><span>CSS-only menus</span><span>Static hosting</span></div>
+        <span class="btn btn-line">Visit the site &rarr;</span>
+      </div>
+    </a>
+    <p class="bench">On the bench now: a bilingual restaurant site for Marbella and a property-services site for the coast. Both here soon.</p>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <div class="container">
+    <span class="mono tag">About</span>
+    <h2>Two decades keeping offshore systems running. Now, websites.</h2>
+    <div class="split">
+      <div>
+        <p class="pull">"I spent two decades maintaining offshore systems that couldn't be allowed to fail. Now I build websites the same way."</p>
+        <ul class="facts">
+          <li><b>Founder</b><span>Dan Plant. Eighteen-plus years in oil and gas, subsea and well-control equipment. Recently relocated from the UK to Marbella.</span></li>
+          <li><b>Name</b><span>Plant is the family name. A plant is also a piece of industrial machinery, and a thing that grows. "Works" is a promise.</span></li>
+          <li><b>Method</b><span>Hand-built static sites, no bloated frameworks, tested like equipment before hand-over. Built with modern AI tooling in the workshop, sold and supported by a person you can meet for a coffee.</span></li>
+        </ul>
+      </div>
+      <div>
+        <p>Offshore, a website is the least of anyone's worries. But the habit sticks: you check things twice, you document what you did, you don't leave a job half-finished, and you build so that the person after you can pick it up.</p>
+        <p>That's the whole pitch. I'm not the cheapest or the flashiest studio on the coast. I'm the one whose site will still load fast in three years, whose hosting bill is close to zero, and who answers the phone when the menu changes.</p>
+        <p>If you'd rather talk in person, I'm in Marbella most days.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="container">
+    <span class="mono tag">Contact</span>
+    <h2>Tell me about the business. I'll reply within a working day.</h2>
+    <p class="lede">A few lines is plenty. If you have a current site, send the address and I'll come back with an honest read of what's working and what isn't &mdash; no charge.</p>
+    <form id="contactForm">
+      <div>
+        <label for="c-name">Your name</label>
+        <input id="c-name" name="name" type="text" autocomplete="name" required>
+      </div>
+      <div>
+        <label for="c-email">Email or WhatsApp</label>
+        <input id="c-email" name="contact" type="text" autocomplete="email" required>
+      </div>
+      <div>
+        <label for="c-type">Business type</label>
+        <select id="c-type" name="type">
+          <option>Restaurant or bar</option>
+          <option>Property or rentals</option>
+          <option>Health or wellness</option>
+          <option>Trade or service</option>
+          <option>Something else</option>
+        </select>
+      </div>
+      <div>
+        <label for="c-msg">What do you need?</label>
+        <textarea id="c-msg" name="message" required></textarea>
+      </div>
+      <button type="submit">Send</button>
+    </form>
+    <p class="alt">Or email <a href="mailto:hello@plantworks.studio">hello@plantworks.studio</a>. English or Spanish, whichever you prefer.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>&copy; 2026 Plantworks Studio &middot; Marbella, Málaga</span>
+    <span><a href="es/" hreflang="es" lang="es">Español</a> &middot; <a href="#top">Back to top</a></span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('contactForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var f = e.target;
+    var body = f.message.value + '\n\nBusiness type: ' + f.type.value + '\nFrom: ' + f.name.value + ' (' + f.contact.value + ')';
+    window.location.href = 'mailto:hello@plantworks.studio?subject=' +
+      encodeURIComponent('Website enquiry — ' + f.name.value) + '&body=' + encodeURIComponent(body);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Fifth Quarter — Restaurant, Bar &amp; Deli · Lambton Park</title>
+<meta name="description" content="The Fifth Quarter — restaurant, bar and delicatessen at Lions Gate, Lambton Park, County Durham. Named for the Five Quarter seam of the Great Northern Coalfield.">
+<link rel="canonical" href="https://the5thquarter.co.uk/">
+<meta property="og:type" content="restaurant.restaurant">
+<meta property="og:site_name" content="The Fifth Quarter">
+<meta property="og:title" content="The Fifth Quarter — Restaurant, Bar &amp; Deli · Lambton Park">
+<meta property="og:description" content="Restaurant, bar and delicatessen at Lions Gate, Lambton Park, County Durham. Opening Spring 2027. Named for the Five Quarter seam of the Great Northern Coalfield.">
+<meta property="og:url" content="https://the5thquarter.co.uk/">
+<meta property="og:locale" content="en_GB">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0C1526">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%230C1526'/%3E%3Ctext x='32' y='47' text-anchor='middle' font-family='Marcellus,Georgia,serif' font-size='42' fill='%23D8BC85'%3E5%3C/text%3E%3C/svg%3E">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "The Fifth Quarter",
+  "alternateName": "The 5th Quarter",
+  "url": "https://the5thquarter.co.uk/",
+  "description": "Restaurant, bar and delicatessen at Lions Gate, Lambton Park, County Durham. Named for the Five Quarter seam of the Great Northern Coalfield. Opening Spring 2027.",
+  "email": "info@the5thquarter.co.uk",
+  "servesCuisine": ["British", "Steakhouse", "Pizza", "Delicatessen"],
+  "priceRange": "££",
+  "acceptsReservations": "True",
+  "hasMenu": "https://the5thquarter.co.uk/#menu",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Lions Gate, Lambton Park",
+    "addressLocality": "Chester-le-Street",
+    "addressRegion": "County Durham",
+    "postalCode": "DH3 4DT",
+    "addressCountry": "GB"
+  },
+  "hasMap": "https://www.google.com/maps/search/?api=1&query=Lions+Gate+Lambton+Park+DH3+4DT",
+  "amenityFeature": [
+    {"@type": "LocationFeatureSpecification", "name": "Parking", "value": "True"},
+    {"@type": "LocationFeatureSpecification", "name": "Bar", "value": "True"},
+    {"@type": "LocationFeatureSpecification", "name": "Delicatessen", "value": "True"}
+  ],
+  "potentialAction": {
+    "@type": "ReserveAction",
+    "target": "mailto:bookings@the5thquarter.co.uk"
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#131F38;
+    --navy-deep:#0C1526;
+    --brass:#B8955A;
+    --gold:#D8BC85;
+    --parchment:#F6F1E4;
+    --parchment-dim:#EFE7D2;
+    --ink:#22293A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:'EB Garamond',Georgia,serif;
+    font-size:1.125rem;
+    line-height:1.65;
+    color:var(--ink);
+    background:var(--parchment);
+  }
+  h1,h2,h3,.wordmark,.menu-course{font-family:'Marcellus',serif;font-weight:400}
+  a{color:var(--brass)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+  .rule{border:none;height:1px;background:var(--brass);opacity:.55;width:4.5rem;margin:1.4rem auto}
+  .container{max-width:68rem;margin:0 auto;padding:0 1.4rem}
+
+  /* ---------- Announcement banner ---------- */
+  .announce{
+    background:var(--brass);color:var(--navy-deep);text-align:center;
+    font-family:'Marcellus',serif;letter-spacing:.28em;text-indent:.28em;
+    font-size:.95rem;padding:.55rem 1rem;
+  }
+  /* ---------- Navigation ---------- */
+  nav{
+    background:var(--navy-deep);
+    border-bottom:1px solid rgba(184,149,90,.35);
+    position:sticky;top:0;z-index:20;
+  }
+  .nav-inner{
+    max-width:68rem;margin:0 auto;padding:.85rem 1.4rem;
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  }
+  .nav-mark{
+    font-family:'Marcellus',serif;color:var(--gold);text-decoration:none;
+    letter-spacing:.22em;font-size:1rem;white-space:nowrap;
+  }
+  .nav-links{display:flex;gap:1.5rem;flex-wrap:wrap}
+  .nav-links a{
+    color:var(--parchment);text-decoration:none;font-size:1rem;letter-spacing:.03em;
+    border-bottom:1px solid transparent;padding-bottom:2px;
+  }
+  .nav-links a:hover{color:var(--gold);border-bottom-color:var(--brass)}
+
+  /* ---------- Hero ---------- */
+  header.hero{
+    background:
+      radial-gradient(ellipse 90% 70% at 50% 110%, rgba(184,149,90,.18), transparent 60%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 100%);
+    color:var(--parchment);
+    text-align:center;
+    padding:6rem 1.4rem 5rem;
+  }
+  .wordmark{color:var(--gold)}
+  .wordmark .over{
+    display:flex;align-items:center;justify-content:center;gap:1rem;
+    font-size:clamp(.9rem,2.5vw,1.15rem);letter-spacing:.55em;text-indent:.55em;
+  }
+  .wordmark .over::before,.wordmark .over::after{
+    content:"";height:1px;width:3.5rem;background:var(--brass)
+  }
+  .wordmark .big{
+    font-size:clamp(3.2rem,10vw,5.6rem);letter-spacing:.14em;text-indent:.14em;
+    line-height:1.1;margin:.4rem 0 .2rem;
+  }
+  .wordmark .big sup{font-size:.42em;vertical-align:.62em;letter-spacing:.1em}
+  .wordmark .under{
+    font-size:clamp(1.4rem,4.5vw,2.2rem);letter-spacing:.42em;text-indent:.42em;
+  }
+  .hero-tag{
+    margin-top:2rem;font-size:1.15rem;color:var(--parchment);
+    display:flex;align-items:center;justify-content:center;gap:.8rem;flex-wrap:wrap;
+  }
+  .hero-tag .dot{color:var(--brass)}
+  .hero-place{margin-top:.6rem;font-style:italic;color:var(--gold);font-size:1.05rem}
+  .hero-book{
+    display:inline-block;margin-top:1.6rem;font-family:'Marcellus',serif;
+    letter-spacing:.18em;font-size:1.05rem;text-decoration:none;
+    background:var(--brass);color:var(--navy-deep);padding:.85rem 2.4rem;
+  }
+  .hero-book:hover{background:var(--gold)}
+  .hero-hours{
+    margin-top:2.6rem;display:inline-block;border:1px solid rgba(184,149,90,.5);
+    padding:1rem 2.2rem;font-size:1.05rem;letter-spacing:.05em;
+  }
+  .hero-hours span{color:var(--gold)}
+
+  /* ---------- Seam story ---------- */
+  .story{padding:4.5rem 0 4rem;text-align:center}
+  .story h2{font-size:2rem;letter-spacing:.08em;color:var(--navy)}
+  .story p{max-width:38rem;margin:1.1rem auto 0;text-align:left}
+  .story p:first-of-type{text-align:center}
+  .strata{
+    max-width:46rem;margin:2.8rem auto 0;display:block;width:100%;height:auto;
+  }
+  .strata-caption{font-size:.95rem;font-style:italic;color:#5a5342;margin-top:.8rem}
+
+  /* ---------- Menu ---------- */
+  .menu{
+    background:var(--navy);color:var(--parchment);padding:4.5rem 0 5rem;
+  }
+  .menu h2{
+    text-align:center;font-size:2.1rem;letter-spacing:.12em;color:var(--gold);
+  }
+  .menu .lede{text-align:center;max-width:34rem;margin:1rem auto 0;color:#D9D2C0;font-style:italic}
+  .menu-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:3rem 4rem;
+    max-width:62rem;margin:3rem auto 0;padding:0 1.4rem;
+  }
+  @media (max-width:46rem){.menu-grid{grid-template-columns:1fr}}
+  .menu-course{
+    color:var(--gold);font-size:1.35rem;letter-spacing:.18em;
+    display:flex;align-items:center;gap:1rem;margin-bottom:1.3rem;
+  }
+  .menu-course::after{content:"";height:1px;flex:1;background:rgba(184,149,90,.45)}
+  .dish{margin-bottom:1.35rem;display:flex;gap:.9rem;align-items:baseline}
+  .dish-name{flex:1}
+  .dish-name em{color:#C9C1AC;font-style:italic;font-size:1rem;display:block}
+  .dish-price{color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .menu-note{
+    text-align:center;margin-top:2.5rem;font-size:.98rem;color:#B9B29E;font-style:italic;
+  }
+  .menu-tabs{
+    display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap;margin-top:2.2rem;
+  }
+  .menu-radio{position:absolute;opacity:0;pointer-events:none}
+  .menu-tabs label{
+    font-family:'Marcellus',serif;font-size:1.05rem;letter-spacing:.18em;
+    background:none;border:1px solid rgba(184,149,90,.5);color:var(--parchment);
+    padding:.7rem 1.8rem;cursor:pointer;user-select:none;
+  }
+  .menu-tabs label:hover{border-color:var(--gold);color:var(--gold)}
+  .menu-panel{display:none}
+  #tab-breakfast:checked ~ #panel-breakfast,
+  #tab-lunch:checked ~ #panel-lunch,
+  #tab-deli:checked ~ #panel-deli,
+  #tab-sunday:checked ~ #panel-sunday,
+  #tab-dinner:checked ~ #panel-dinner,
+  #tab-steaks:checked ~ #panel-steaks,
+  #tab-pizza:checked ~ #panel-pizza{display:block}
+  #tab-breakfast:checked ~ .menu-tabs label[for="tab-breakfast"],
+  #tab-lunch:checked ~ .menu-tabs label[for="tab-lunch"],
+  #tab-deli:checked ~ .menu-tabs label[for="tab-deli"],
+  #tab-sunday:checked ~ .menu-tabs label[for="tab-sunday"],
+  #tab-dinner:checked ~ .menu-tabs label[for="tab-dinner"],
+  #tab-steaks:checked ~ .menu-tabs label[for="tab-steaks"],
+  #tab-pizza:checked ~ .menu-tabs label[for="tab-pizza"]{
+    background:var(--brass);border-color:var(--brass);color:var(--navy-deep);
+  }
+  #tab-breakfast:focus-visible ~ .menu-tabs label[for="tab-breakfast"],
+  #tab-lunch:focus-visible ~ .menu-tabs label[for="tab-lunch"],
+  #tab-deli:focus-visible ~ .menu-tabs label[for="tab-deli"],
+  #tab-sunday:focus-visible ~ .menu-tabs label[for="tab-sunday"],
+  #tab-dinner:focus-visible ~ .menu-tabs label[for="tab-dinner"],
+  #tab-steaks:focus-visible ~ .menu-tabs label[for="tab-steaks"],
+  #tab-pizza:focus-visible ~ .menu-tabs label[for="tab-pizza"]{
+    outline:2px solid var(--gold);outline-offset:3px;
+  }
+  .menu-single{max-width:40rem;margin:3rem auto 0;padding:0 1.4rem}
+  .chalkboard{
+    background:#0B0E14;border:1px solid rgba(246,241,228,.4);
+    outline:1px solid rgba(246,241,228,.15);outline-offset:6px;
+    max-width:62rem;margin:3rem auto 0;padding:2.5rem 1rem 2rem;
+  }
+  .chalkboard .menu-grid,.chalkboard .menu-single{margin-top:0}
+  .chalk-caption{
+    text-align:center;font-style:italic;color:#B9B29E;font-size:.98rem;
+    margin-bottom:2rem;
+  }
+  .pizza-note{font-style:italic;color:#C9C1AC;font-size:1rem;margin:-0.6rem 0 1.2rem}
+
+  /* ---------- Deli ---------- */
+  .deli{padding:4.5rem 0 4rem;background:var(--parchment-dim)}
+  .deli h2{text-align:center;font-size:2rem;letter-spacing:.1em;color:var(--navy)}
+  .deli .lede{text-align:center;max-width:36rem;margin:1.1rem auto 0;font-style:italic;color:#5a5342}
+  .shelf-art{display:block;max-width:44rem;width:100%;height:auto;margin:2.5rem auto 0}
+  .deli-cols{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:2.5rem;
+    max-width:60rem;margin:3rem auto 0;padding:0 1.4rem;
+  }
+  @media (max-width:46rem){.deli-cols{grid-template-columns:1fr}}
+  .deli-col h3{
+    color:var(--navy);letter-spacing:.14em;font-size:1.15rem;margin-bottom:.8rem;
+    border-bottom:1px solid var(--brass);padding-bottom:.5rem;
+  }
+  .deli-col ul{list-style:none}
+  .deli-col li{padding:.35rem 0;border-bottom:1px solid rgba(184,149,90,.25)}
+  .deli-col li:last-child{border-bottom:none}
+
+  /* ---------- Bar ---------- */
+  .bar{background:var(--navy-deep);color:var(--parchment);padding:4.5rem 0;text-align:center}
+  .bar h2{font-size:2rem;letter-spacing:.12em;color:var(--gold)}
+  .bar p{max-width:38rem;margin:1.1rem auto 0;color:#D9D2C0}
+  .bar-list{
+    display:flex;justify-content:center;gap:2.4rem;flex-wrap:wrap;margin-top:2rem;
+    font-family:'Marcellus',serif;letter-spacing:.1em;color:var(--gold);font-size:1.05rem;
+  }
+
+  /* ---------- Find us ---------- */
+  .find{padding:4.5rem 0 5rem;text-align:center}
+  .find h2{font-size:2rem;letter-spacing:.1em;color:var(--navy)}
+  .find address{font-style:normal;margin-top:1.3rem;line-height:1.9}
+  .find .big-line{font-family:'Marcellus',serif;font-size:1.3rem;letter-spacing:.05em;color:var(--navy)}
+  .find p.directions{max-width:34rem;margin:1.4rem auto 0;color:#4c4636}
+
+  /* ---------- Suggestions & careers ---------- */
+  .suggest{background:var(--parchment-dim);padding:4.5rem 0}
+  .suggest h2,.careers h2{font-size:2rem;letter-spacing:.1em;color:var(--navy);text-align:center}
+  .suggest .lede,.careers .lede{text-align:center;max-width:36rem;margin:1.1rem auto 0;font-style:italic;color:#5a5342}
+  .suggest form{max-width:34rem;margin:2.2rem auto 0;display:grid;gap:1rem}
+  .suggest label{font-family:'Marcellus',serif;letter-spacing:.08em;color:var(--navy);font-size:1rem}
+  .suggest input,.suggest textarea{
+    width:100%;padding:.7rem .9rem;margin-top:.3rem;
+    font-family:'EB Garamond',Georgia,serif;font-size:1.05rem;color:var(--ink);
+    background:var(--parchment);border:1px solid var(--brass);
+  }
+  .suggest textarea{min-height:8rem;resize:vertical}
+  .suggest button{
+    justify-self:center;font-family:'Marcellus',serif;letter-spacing:.18em;font-size:1.05rem;
+    background:var(--navy);color:var(--gold);border:1px solid var(--navy);
+    padding:.8rem 2.4rem;cursor:pointer;
+  }
+  .suggest button:hover{background:var(--navy-deep)}
+  .careers{padding:4.5rem 0;text-align:center}
+  .careers p.body{max-width:36rem;margin:1.2rem auto 0;text-align:left}
+  .careers .cta{
+    display:inline-block;margin-top:2rem;font-family:'Marcellus',serif;letter-spacing:.16em;
+    color:var(--navy);text-decoration:none;border:1px solid var(--brass);
+    padding:.85rem 2.2rem;font-size:1.05rem;
+  }
+  .careers .cta:hover{background:var(--brass);color:var(--navy-deep)}
+  footer{
+    background:var(--navy-deep);color:#9BA3B5;text-align:center;
+    padding:2.2rem 1.4rem;font-size:.95rem;letter-spacing:.04em;
+  }
+  footer .fm{font-family:'Marcellus',serif;color:var(--gold);letter-spacing:.3em;font-size:1rem;margin-bottom:.5rem}
+</style>
+</head>
+<body>
+
+<div class="announce">COMING SPRING 2027</div>
+<nav aria-label="Main">
+  <div class="nav-inner">
+    <a class="nav-mark" href="#top">THE 5TH QUARTER</a>
+    <div class="nav-links">
+      <a href="#story">Our Name</a>
+      <a href="#menu">Menu</a>
+      <a href="#deli">The Deli</a>
+      <a href="#bar">The Bar</a>
+      <a href="#find">Find Us</a>
+      <a href="#suggest">Suggestions</a>
+      <a href="#careers">Work With Us</a>
+      <a href="mailto:bookings@the5thquarter.co.uk?subject=Booking%20enquiry%20%E2%80%94%20The%20Fifth%20Quarter">Book</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wordmark" role="img" aria-label="The Fifth Quarter — Restaurant and Bar">
+    <div class="over">THE</div>
+    <div class="big">5<sup>TH</sup></div>
+    <div class="under">QUARTER</div>
+    <hr class="rule">
+    <div style="letter-spacing:.4em;text-indent:.4em;font-size:.95rem;color:var(--parchment)">RESTAURANT&ensp;&amp;&ensp;BAR</div>
+  </div>
+  <p class="hero-tag">Breakfast <span class="dot">·</span> Lunch <span class="dot">·</span> Dinner <span class="dot">·</span> Delicatessen</p>
+  <p class="hero-place">Lions Gate, Lambton Park, County Durham</p>
+  <div class="hero-hours">
+    Open seven days <span>from 9am</span> &mdash; breakfast, lunch &amp; dinner
+  </div>
+  <br>
+  <a class="hero-book" href="mailto:bookings@the5thquarter.co.uk?subject=Booking%20enquiry%20%E2%80%94%20The%20Fifth%20Quarter">Booking Enquiries</a>
+</header>
+
+<section class="story container" id="story">
+  <h2>Named for the seam beneath our feet</h2>
+  <hr class="rule">
+  <p>Six hundred feet below Lambton Park runs the Five Quarter seam.</p>
+  <p>For two centuries the Great Northern Coalfield powered the world, and the Lambton Estate sat at its heart &mdash; the Lambton collieries sent their coal down the Wear to Sunderland and on to every port in Europe. Among the seams the pitmen worked, one name appears on colliery plans from Winlaton to Wearside: the Five Quarter, so called for its thickness of five quarter-yards of good coal. When Durham's mining engineers lettered the seams of the coalfield, the Five Quarter was seam G &mdash; sitting above the Main Coal, the Maudlin and the Low Main.</p>
+  <p>We've taken the name as our own &mdash; a fifth quarter, something extra beyond the expected &mdash; and we hope the pitmen would approve of what we do with it: honest food, generous measures, and a proper welcome, in the county that dug the seam.</p>
+
+  <svg class="strata" viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the Durham coalfield seams with the Five Quarter seam highlighted in gold">
+    <rect x="0" y="0" width="640" height="300" fill="#131F38"/>
+    <!-- surface -->
+    <path d="M0 34 Q 90 24 180 32 T 380 30 T 640 34 L 640 0 L 0 0 Z" fill="#0C1526"/>
+    <text x="320" y="22" fill="#D8BC85" font-family="Marcellus,serif" font-size="13" text-anchor="middle" letter-spacing="4">LAMBTON PARK</text>
+    <!-- strata lines -->
+    <g font-family="EB Garamond,serif" font-size="13" fill="#8B94A8">
+      <line x1="40" y1="80"  x2="600" y2="80"  stroke="#3A465F" stroke-width="1"/>
+      <text x="52" y="74">High Main</text>
+      <line x1="40" y1="118" x2="600" y2="118" stroke="#3A465F" stroke-width="1"/>
+      <text x="52" y="112">Metal &amp; Stone</text>
+      <!-- Five Quarter highlighted -->
+      <rect x="40" y="138" width="560" height="16" fill="#B8955A" opacity="0.92"/>
+      <text x="52" y="133" fill="#D8BC85" font-size="14" font-family="Marcellus,serif" letter-spacing="2">FIVE QUARTER — SEAM G</text>
+      <line x1="40" y1="186" x2="600" y2="186" stroke="#3A465F" stroke-width="1"/>
+      <text x="52" y="180">Main Coal</text>
+      <line x1="40" y1="220" x2="600" y2="220" stroke="#3A465F" stroke-width="1"/>
+      <text x="52" y="214">Maudlin</text>
+      <line x1="40" y1="252" x2="600" y2="252" stroke="#3A465F" stroke-width="1"/>
+      <text x="52" y="246">Low Main</text>
+      <line x1="40" y1="282" x2="600" y2="282" stroke="#3A465F" stroke-width="1"/>
+      <text x="52" y="276">Hutton</text>
+    </g>
+    <!-- shaft -->
+    <line x1="560" y1="34" x2="560" y2="146" stroke="#D8BC85" stroke-width="1.5" stroke-dasharray="3 4"/>
+    <circle cx="560" cy="146" r="3" fill="#D8BC85"/>
+  </svg>
+  <p class="strata-caption">The seams of the Durham coalfield, as the mining engineers lettered them.</p>
+</section>
+
+<section class="menu" id="menu">
+  <h2>The Menus</h2>
+  <hr class="rule">
+  <p class="lede">Example menus &mdash; dishes and prices may change before we open. Breakfast, lunch and dinner served daily; the deli counter runs all day.</p>
+
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-breakfast">
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-lunch">
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-deli">
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-sunday">
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-dinner" checked>
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-steaks">
+  <input class="menu-radio" type="radio" name="menu-choice" id="tab-pizza">
+  <div class="menu-tabs">
+    <label for="tab-breakfast">Breakfast</label>
+    <label for="tab-lunch">Lunch</label>
+    <label for="tab-deli">Deli</label>
+    <label for="tab-sunday">Sunday</label>
+    <label for="tab-dinner">Dinner</label>
+    <label for="tab-steaks">Steaks</label>
+    <label for="tab-pizza">Pizza</label>
+  </div>
+
+  <!-- ================= BREAKFAST ================= -->
+  <div class="menu-panel" id="panel-breakfast">
+    <div class="menu-grid">
+      <div>
+        <h3 class="menu-course">Breakfast</h3>
+        <div class="dish"><span class="dish-name">The Fifth Quarter full breakfast <em>grilled sausage, field mushroom, crispy bacon, black pudding, beans, tomato, toast white or brown, egg of choice &mdash; poached, fried or scrambled</em></span><span class="dish-price">£12</span></div>
+        <div class="dish"><span class="dish-name">The Fifth Quarter vegetarian breakfast <em>white sausage, field mushrooms, tomatoes, vegetarian black pudding, beans, toast white or brown, egg of choice</em></span><span class="dish-price">£12</span></div>
+        <div class="dish"><span class="dish-name">Smashed avocado <em>poached egg on hot honey &amp; chilli sourdough</em></span><span class="dish-price">£10</span></div>
+        <div class="dish"><span class="dish-name">American style pancakes <em>vanilla Greek yogurt, macerated berries</em></span><span class="dish-price">£9</span></div>
+        <div class="dish"><span class="dish-name">Eggs Benedict <em>smoked crispy bacon, poached eggs, hollandaise sauce</em></span><span class="dish-price">£10</span></div>
+        <div class="dish"><span class="dish-name">Eggs Royale <em>our own smoked salmon, poached eggs, hollandaise sauce</em></span><span class="dish-price">£11</span></div>
+        <div class="dish"><span class="dish-name">Smoothie bowl <em>frozen fruit yogurt topped with banana, fresh fruit, granola, nuts, seeds, smooth peanut butter</em></span><span class="dish-price">£9</span></div>
+        <div class="dish"><span class="dish-name">Gypsy eggs <em>black pudding, saut&eacute;ed potato, spinach, onions, chorizo, poached eggs on sourdough toast</em></span><span class="dish-price">£11</span></div>
+      </div>
+      <div>
+        <h3 class="menu-course">Something Simpler</h3>
+        <div class="dish"><span class="dish-name">Rolls <em>sausage, bacon or egg &mdash; add an extra filling £3</em></span><span class="dish-price">£6</span></div>
+        <div class="dish"><span class="dish-name">On toast <em>eggs (fried, poached or scrambled), beans or mushrooms</em></span><span class="dish-price">£6</span></div>
+        <div class="dish"><span class="dish-name">Toast <em>jam or marmalade</em></span><span class="dish-price">£4</span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">To Drink</h3>
+        <div class="dish"><span class="dish-name">Speciality teas &amp; coffee</span></div>
+        <div class="dish"><span class="dish-name">Freshly juiced orange</span></div>
+        <div class="dish"><span class="dish-name">Freshly juiced apple</span></div>
+        <div class="dish"><span class="dish-name">Power juice <em>spinach, apple, ginger, cucumber</em></span></div>
+        <div class="dish"><span class="dish-name">Red juice <em>beetroot, apple, carrot, ginger</em></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LUNCH ================= -->
+  <div class="menu-panel" id="panel-lunch">
+    <div class="menu-grid">
+      <div>
+        <h3 class="menu-course">Lunch</h3>
+        <div class="dish"><span class="dish-name">Soup of the day</span></div>
+        <div class="dish"><span class="dish-name">Signature sandwiches and salads from our deli <em>see the Deli menu</em></span></div>
+        <div class="dish"><span class="dish-name">Burgers <em>lamb &mdash; goats cheese, tomato &amp; mint jam; the 5th Quarter beef burger &mdash; burger sauce, Monterey Jack cheese, crispy bacon, gherkin; or veggie &mdash; all with fries</em></span></div>
+        <div class="dish"><span class="dish-name">Beer battered fish and chips <em>mushy or garden peas, lemon &amp; tartare sauce &mdash; add curry sauce £1</em></span></div>
+        <div class="dish"><span class="dish-name">Prawn salad <em>Greenland and king prawns, Marie Rose, shredded iceberg lettuce, tomato</em></span></div>
+        <div class="dish"><span class="dish-name">Scotch egg <em>mustard mayonnaise</em></span></div>
+        <div class="dish"><span class="dish-name">BBQ chicken wings</span></div>
+        <div class="dish"><span class="dish-name">Steak mince pie <em>suet crust, mash and gravy</em></span></div>
+        <div class="dish"><span class="dish-name">Steak frites <em>4oz rump, fries, peppercorn sauce</em></span></div>
+        <div class="dish"><span class="dish-name">Twice baked Comt&eacute; cheese souffl&eacute; <em>pickled walnut salad</em></span></div>
+      </div>
+      <div>
+        <h3 class="menu-course">Pizza</h3>
+        <p class="pizza-note">All pizzas on our own homemade base with fior di latte cheese and rich tomato sauce, unless a white base.</p>
+        <div class="dish"><span class="dish-name">Margherita <em>basil</em></span></div>
+        <div class="dish"><span class="dish-name">Prosciutto funghi</span></div>
+        <div class="dish"><span class="dish-name">Chicken Kiev</span></div>
+        <div class="dish"><span class="dish-name">Courgette and mushroom <em>oregano, extra virgin olive oil, white base</em></span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">On the Side</h3>
+        <div class="dish"><span class="dish-name">Creamed spinach &middot; proper chips &middot; fries &middot; seasonal vegetables &middot; mashed potato &middot; garlic mushrooms &middot; onion rings &middot; house salad</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DINNER ================= -->
+  <div class="menu-panel" id="panel-dinner">
+    <div class="menu-grid">
+      <div>
+        <h3 class="menu-course">Snacks</h3>
+        <div class="dish"><span class="dish-name">Smoked chicken wings <em>our own BBQ sauce</em></span></div>
+        <div class="dish"><span class="dish-name">Olives</span></div>
+        <div class="dish"><span class="dish-name">Plate of Parma ham and pickles</span></div>
+        <div class="dish"><span class="dish-name">Sweetcorn ribs <em>kombu and Old Bay seasoning</em></span></div>
+        <div class="dish"><span class="dish-name">Roast new potatoes <em>garlic aioli</em></span></div>
+        <div class="dish"><span class="dish-name">Honey and mustard glazed venison rissoles <em>sriracha mayonnaise</em></span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">Starters</h3>
+        <div class="dish"><span class="dish-name">Soup of the day <em>homemade bread and cultured butter</em></span></div>
+        <div class="dish"><span class="dish-name">Mushroom p&acirc;t&eacute; <em>pickled shimeji mushrooms, cep powder, sourdough toast</em></span></div>
+        <div class="dish"><span class="dish-name">Scotch egg <em>endive salad, Pommery mustard mayonnaise</em></span></div>
+        <div class="dish"><span class="dish-name">Twice baked Comt&eacute; cheese souffl&eacute; <em>pickled walnut salad</em></span></div>
+        <div class="dish"><span class="dish-name">Our own smoked salmon <em>pumpernickel bread, celeriac remoulade</em></span></div>
+        <div class="dish"><span class="dish-name">Confit chicken and ham hock terrine <em>chutney, toasted sourdough</em></span></div>
+      </div>
+      <div>
+        <h3 class="menu-course">Mains</h3>
+        <div class="dish"><span class="dish-name">Pav&eacute; of wild fallow deer <em>celeriac fondant, celeriac pur&eacute;e, buttered spinach, red wine &amp; peppercorn jus</em></span></div>
+        <div class="dish"><span class="dish-name">12-hour cooked beef cheeks <em>pomme pur&eacute;e, carrots, greens, rich red wine sauce</em></span></div>
+        <div class="dish"><span class="dish-name">Harissa spiced roast fillet of salmon <em>jumbo couscous, chard, smoked paprika dressing</em></span></div>
+        <div class="dish"><span class="dish-name">Aubergine melanzane <em>house salad</em></span></div>
+        <div class="dish"><span class="dish-name">Roast chicken breast <em>sweetcorn, fondant potato, wild mushrooms, leek &amp; grain mustard sauce</em></span></div>
+        <div class="dish"><span class="dish-name">The 5th Quarter burger <em>burger sauce, Monterey Jack cheese, crispy bacon, gherkin, chips and salad</em></span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">On the Side</h3>
+        <div class="dish"><span class="dish-name">Creamed spinach &middot; proper chips &middot; fries &middot; seasonal vegetables &middot; mashed potato &middot; garlic mushrooms &middot; onion rings &middot; house salad</span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">Puddings</h3>
+        <div class="dish"><span class="dish-name">Sticky toffee pudding <em>vanilla ice cream, butterscotch sauce</em></span></div>
+        <div class="dish"><span class="dish-name">Cheese selection</span></div>
+        <div class="dish"><span class="dish-name">Ice cream <em>chocolate sauce and honeycomb</em></span></div>
+        <div class="dish"><span class="dish-name">Eton mess <em>mixed berries, Chantilly cream, meringue</em></span></div>
+        <div class="dish"><span class="dish-name">Banana split <em>sweet nuts, ice cream, whipped cream</em></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SUNDAY ================= -->
+  <div class="menu-panel" id="panel-sunday">
+    <div class="menu-grid">
+      <div>
+        <h3 class="menu-course">Starters</h3>
+        <div class="dish"><span class="dish-name">Soup of the day</span></div>
+        <div class="dish"><span class="dish-name">Prawn cocktail</span></div>
+        <div class="dish"><span class="dish-name">Chicken terrine</span></div>
+        <div class="dish"><span class="dish-name">Cheese souffl&eacute;</span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">Roasts</h3>
+        <p class="pizza-note">All our roasts are served with duck fat roast potatoes, seasonal vegetables and rich gravy.</p>
+        <div class="dish"><span class="dish-name">Roast sirloin of beef</span></div>
+        <div class="dish"><span class="dish-name">Roast chicken <em>chicken fat roast potatoes</em></span></div>
+        <div class="dish"><span class="dish-name">Herb rolled pork belly <em>crackling</em></span></div>
+        <div class="dish"><span class="dish-name">Roast salmon <em>pea and Parmesan risotto</em></span></div>
+        <div class="dish"><span class="dish-name">Aubergine melanzane <em>salad</em></span></div>
+        <div class="dish"><span class="dish-name">Cauliflower cheese <em>on the side</em></span></div>
+      </div>
+      <div>
+        <h3 class="menu-course">Extras</h3>
+        <div class="dish"><span class="dish-name">Duck fat potatoes &middot; chicken fat potatoes &middot; crackling &middot; Yorkshire puddings &middot; braised red cabbage</span><span class="dish-price">£3 each</span></div>
+        <div class="dish"><span class="dish-name">Extra gravy</span><span class="dish-price">£1.50</span></div>
+        <div class="dish"><span class="dish-name">Extra meat</span><span class="dish-price">£7.50</span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">Puddings</h3>
+        <div class="dish"><span class="dish-name">Sticky toffee pudding <em>ice cream and butterscotch sauce</em></span></div>
+        <div class="dish"><span class="dish-name">Tonka bean rice pudding</span></div>
+        <div class="dish"><span class="dish-name">Vanilla cr&egrave;me br&ucirc;l&eacute;e</span></div>
+        <div class="dish"><span class="dish-name">Ice cream selection</span></div>
+        <div class="dish"><span class="dish-name">Cheese</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PIZZA ================= -->
+  <div class="menu-panel" id="panel-pizza">
+    <div class="menu-grid">
+      <div>
+        <h3 class="menu-course">From the Oven</h3>
+        <p class="pizza-note">All our pizzas are made with a rich pomodorino sauce and fior di latte cheese, except the zucchini &mdash; that&rsquo;s a white base. Gluten-free bases and vegan cheese available.</p>
+        <div class="dish"><span class="dish-name">Margherita <em>freshly torn basil, rich tomato sauce</em></span><span class="dish-price">£12</span></div>
+        <div class="dish"><span class="dish-name">Prosciutto funghi <em>roasted field mushrooms, Parma ham, shaved aged Parmesan, rocket salad</em></span><span class="dish-price">£14</span></div>
+        <div class="dish"><span class="dish-name">It&rsquo;s a Sin <em>slow cooked smoked ham hock, chilli honey roasted pineapple</em></span><span class="dish-price">£14</span></div>
+        <div class="dish"><span class="dish-name">Carne <em>chorizo, pepperoni, wood oven roasted chicken</em></span><span class="dish-price">£16</span></div>
+        <div class="dish"><span class="dish-name">Zucchini Bianco <em>thinly sliced yellow &amp; green courgette, chestnut mushrooms, aged Parmesan, fior di latte base</em></span><span class="dish-price">£13</span></div>
+      </div>
+      <div>
+        <h3 class="menu-course">On the Side</h3>
+        <div class="dish"><span class="dish-name">Dough balls <em>garlic mayonnaise</em></span><span class="dish-price">£4</span></div>
+        <div class="dish"><span class="dish-name">Crusts and dips</span><span class="dish-price">£5</span></div>
+        <div class="dish"><span class="dish-name">Extra dips <em>hot chilli honey, &rsquo;nduja mayonnaise, garlic mayonnaise</em></span><span class="dish-price">£3 each</span></div>
+        <div class="dish"><span class="dish-name">Charcuterie board</span><span class="dish-price">£15</span></div>
+        <div class="dish"><span class="dish-name">Burrata <em>red onion and tomato salad</em></span><span class="dish-price">£15</span></div>
+
+        <h3 class="menu-course" style="margin-top:2.2rem">Pizza Night at Home</h3>
+        <div class="dish"><span class="dish-name">The Pizza Box <em>got a pizza oven at home? Two doughs, tomato sauce for both, a bag of pre-mixed flour for rolling, fior di latte, and your choice of six toppings</em></span><span class="dish-price">£20</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= DELI ================= -->
+  <div class="menu-panel" id="panel-deli">
+    <div class="chalkboard">
+    <p class="chalk-caption">As chalked up on the boards around the room</p>
+    <div class="menu-grid">
+      <div>
+        <h3 class="menu-course">Signature Deli Sandwiches</h3>
+        <div class="dish"><span class="dish-name">Katz <em>salt beef, Swiss cheese, Russian dressing, sauerkraut</em></span></div>
+        <div class="dish"><span class="dish-name">Club <em>roast chicken, smoked streaky bacon, lettuce, tomato, Pommery mustard mayonnaise on thick white bread</em></span></div>
+        <div class="dish"><span class="dish-name">Cheesesteak</span></div>
+        <div class="dish"><span class="dish-name">Chicken Parm</span></div>
+        <div class="dish"><span class="dish-name">Veggie caprese <em>loads of chargrilled Mediterranean vegetables, mozzarella and pesto</em></span></div>
+        <div class="dish"><span class="dish-name">Fish finger</span></div>
+      </div>
+      <div>
+        <h3 class="menu-course">Salads</h3>
+        <div class="dish"><span class="dish-name">Caesar</span></div>
+        <div class="dish"><span class="dish-name">Feta and onion</span></div>
+        <div class="dish"><span class="dish-name">Goats cheese and watermelon</span></div>
+        <div class="dish"><span class="dish-name">Houmous bowl</span></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ================= STEAKS ================= -->
+  <div class="menu-panel" id="panel-steaks">
+    <div class="chalkboard">
+    <p class="chalk-caption">As chalked up on the boards around the room</p>
+    <div class="menu-single">
+      <h3 class="menu-course">From the Dry Ager</h3>
+      <p class="pizza-note">Dry aged, individually selected and butchered steaks &mdash; choose yours from our dry aged fridge.</p>
+      <div class="dish"><span class="dish-name">Your steak, your way <em>all served with proper chips, field mushroom and onion bread</em></span><span class="dish-price">from £23 per 100g</span></div>
+      <div class="dish"><span class="dish-name">Add prawns in garlic butter</span></div>
+
+      <h3 class="menu-course" style="margin-top:2.2rem">Sharing Cuts</h3>
+      <div class="dish"><span class="dish-name">Chateaubriand &middot; c&ocirc;te de boeuf &middot; T-bone <em>weights chalked up daily</em></span></div>
+
+      <h3 class="menu-course" style="margin-top:2.2rem">Sauces</h3>
+      <div class="dish"><span class="dish-name">Bordelaise &middot; peppercorn &middot; B&eacute;arnaise &middot; blue cheese</span></div>
+    </div>
+    </div>
+  </div>
+
+  <p class="menu-note">Please ask our team about allergies and dietary requirements &mdash; most dishes can be adapted.</p>
+</section>
+
+<section class="deli" id="deli">
+  <h2>The Delicatessen</h2>
+  <hr class="rule">
+  <p class="lede">A proper provisions counter in the grand tradition &mdash; shelves stacked with good things in jars, and hot food worth queuing for.</p>
+
+  <svg class="shelf-art" viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a deli shelf lined with jars and preserves">
+    <g stroke="#B8955A" stroke-width="1.6" fill="none" stroke-linecap="round">
+      <!-- shelf -->
+      <line x1="30" y1="150" x2="610" y2="150"/>
+      <line x1="30" y1="156" x2="610" y2="156" stroke-width="1" opacity=".5"/>
+      <!-- tall jar -->
+      <path d="M70 150 v-70 q0 -8 8 -8 h30 q8 0 8 8 v70"/>
+      <rect x="66" y="60" width="54" height="12" rx="2"/>
+      <line x1="78" y1="105" x2="108" y2="105" opacity=".6"/>
+      <!-- squat preserve jar -->
+      <path d="M160 150 v-45 q0 -6 6 -6 h36 q6 0 6 -6 v57" transform="translate(0,0)"/>
+      <path d="M160 150 v-48 q0 -7 7 -7 h34 q7 0 7 7 v48"/>
+      <rect x="157" y="88" width="54" height="9" rx="2"/>
+      <path d="M160 118 h48" opacity=".6"/>
+      <!-- bottle -->
+      <path d="M260 150 v-58 q0 -6 5 -9 l0 -14 h14 l0 14 q5 3 5 9 v58"/>
+      <rect x="263" y="62" width="8" height="8"/>
+      <!-- biscuit tin -->
+      <rect x="330" y="98" width="70" height="52" rx="4"/>
+      <line x1="330" y1="112" x2="400" y2="112" opacity=".6"/>
+      <circle cx="365" cy="130" r="9" opacity=".6"/>
+      <!-- honey pot -->
+      <path d="M450 150 q-10 -20 0 -38 q6 -12 20 -12 q14 0 20 12 q10 18 0 38"/>
+      <rect x="456" y="92" width="28" height="9" rx="3"/>
+      <!-- stacked preserves -->
+      <path d="M540 150 v-28 q0 -5 5 -5 h26 q5 0 5 5 v28"/>
+      <path d="M544 112 v-20 q0 -5 5 -5 h18 q5 0 5 5 v20"/>
+      <rect x="541" y="112" width="34" height="5" rx="2"/>
+      <rect x="546" y="82" width="24" height="5" rx="2"/>
+    </g>
+  </svg>
+
+  <div class="deli-cols">
+    <div class="deli-col">
+      <h3>Hot Counter</h3>
+      <ul>
+        <li>Rotisserie chicken, whole or half</li>
+        <li>Deli sandwiches, built to order</li>
+        <li>Pizza from the stone oven</li>
+        <li>Daily hot special</li>
+      </ul>
+    </div>
+    <div class="deli-col">
+      <h3>The Shelves</h3>
+      <ul>
+        <li>Preserves, pickles &amp; chutneys</li>
+        <li>Our own smoked salmon</li>
+        <li>Northern cheeses &amp; charcuterie</li>
+        <li>Oils, vinegars &amp; store-cupboard treasures</li>
+      </ul>
+    </div>
+    <div class="deli-col">
+      <h3>The Bakery</h3>
+      <ul>
+        <li>Homemade biscuits by the tin</li>
+        <li>Cakes &amp; traybakes</li>
+        <li>Fresh bread, daily</li>
+        <li>Hampers made to order</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="bar" id="bar">
+  <h2>The Bar</h2>
+  <hr class="rule">
+  <p>Cocktails done properly, a considered wine list, and North East ales that would have kept the pitmen happy. Open from morning coffee to last orders.</p>
+  <div class="bar-list">
+    <span>Cocktails</span><span>Wines</span><span>Local Ales</span><span>Coffee</span>
+  </div>
+</section>
+
+<section class="find container" id="find">
+  <h2>Find Us</h2>
+  <hr class="rule">
+  <address>
+    <span class="big-line">Lions Gate, Lambton Park</span><br>
+    Chester-le-Street, County Durham<br>
+    DH3 4DT
+  </address>
+  <p class="directions">Lambton Park lies a mile from Junction 63 of the A1(M) &mdash; ten minutes from Durham, fifteen from Newcastle. Parking on site among the landscaped grounds.</p>
+</section>
+
+<section class="suggest" id="suggest">
+  <div class="container">
+    <h2>The Suggestion Box</h2>
+    <hr class="rule">
+    <p class="lede">We&rsquo;re still building The Fifth Quarter &mdash; tell us what you&rsquo;d love to see on the menu, the shelves, or behind the bar.</p>
+    <form id="suggestForm">
+      <div>
+        <label for="sg-name">Your name</label>
+        <input id="sg-name" name="name" type="text" autocomplete="name">
+      </div>
+      <div>
+        <label for="sg-email">Your email</label>
+        <input id="sg-email" name="email" type="email" autocomplete="email">
+      </div>
+      <div>
+        <label for="sg-msg">Your suggestion</label>
+        <textarea id="sg-msg" name="message" required></textarea>
+      </div>
+      <button type="submit">Send suggestion</button>
+    </form>
+  </div>
+</section>
+
+<section class="careers container" id="careers">
+  <h2>Work With Us</h2>
+  <hr class="rule">
+  <p class="body">We&rsquo;ll be building our opening team through the year ahead &mdash; kitchen, front of house, bar and deli counter. If you take food seriously and want to be part of something new at Lambton Park, we&rsquo;d like to hear from you.</p>
+  <p class="body">Send us your CV and a few lines about yourself, and we&rsquo;ll be in touch as roles open up.</p>
+  <a class="cta" href="mailto:info@the5thquarter.co.uk?subject=Working%20at%20The%20Fifth%20Quarter">Send us your CV</a>
+</section>
+
+<footer>
+  <div class="fm">THE 5TH QUARTER</div>
+  Restaurant, Bar &amp; Delicatessen &mdash; Lions Gate, Lambton Park, DH3 4DT<br>
+  Named for the Five Quarter seam of the Great Northern Coalfield.
+</footer>
+
+<script>
+  document.getElementById('suggestForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const name = document.getElementById('sg-name').value;
+    const email = document.getElementById('sg-email').value;
+    const msg = document.getElementById('sg-msg').value;
+    const body = encodeURIComponent(msg + '\n\nFrom: ' + name + (email ? ' (' + email + ')' : ''));
+    window.location.href = 'mailto:info@the5thquarter.co.uk?subject=' +
+      encodeURIComponent('Suggestion for The Fifth Quarter') + '&body=' + body;
+  });
+</script>
+</body>
+</html>

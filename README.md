@@ -236,3 +236,10 @@ first run of `Update-Dashboard.ps1` overwrites it with your real reports. To
 test the pipeline end-to-end before touching the real folder, set
 `reportFolder` to the `sample-reports` directory and `filePattern` to
 `seadrill-report_*.json`, then run the script.
+
+## Other projects in this repo
+
+- **`plantworks-studio/`** — Plantworks Studio, a bilingual (EN/ES) web studio for
+  Costa del Sol businesses: the studio's own site, client sites (The Fifth
+  Quarter restaurant), and the business plan. Unrelated to the dashboard work
+  above. See `plantworks-studio/README.md`.

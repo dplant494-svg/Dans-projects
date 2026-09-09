@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://the5thquarter.co.uk/sitemap.xml
