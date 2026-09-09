@@ -1,0 +1,18 @@
+{
+  "_comment": "Server copy of config.json for D:\\TSC-Dashboard on sdrlazneuiis01d. IT: replace the three reportFolders entries with the server-local folders that mirror the SharePoint libraries (read-only sync, see SCANNER-SERVER-MIGRATION-IT-HANDOFF §2). Every other path already works from the server as a UNC path; switch to local paths later if wanted.",
+  "reportFolders": [
+    "<<IT: server-local mirror of the 'TSC REPORTING' SharePoint library>>",
+    "<<IT: server-local mirror of the 'PLANNING REPORTING' SharePoint library>>",
+    "<<IT: server-local mirror of the 'WellControl - PostedReports' SharePoint library>>"
+  ],
+  "filePattern": "*.json",
+  "recurse": true,
+  "outputFile": "dashboard\\reports-data.js",
+  "deployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred\\dashboard",
+  "bopDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred",
+  "bopPageName": "BOP Fleet Planning Dashboard.html",
+  "requestsDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred",
+  "prechargeDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred\\precharge",
+  "cocDashboardPath": "\\\\sdrlazneuiis01d.corp.local\\SSORT\\Seadrill_WCE_COC_Dashboard_REV6 1.html",
+  "notifications": { "enabled": false }
+}
