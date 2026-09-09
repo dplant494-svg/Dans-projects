@@ -114,3 +114,29 @@ Transport untouched. Filenames not load-bearing. `meta.asset` remains the
 rig identity contract — and the Unattributed bucket still catches the daily
 checks / daily log / vendor files that arrive without it (that fix is still
 owed on the tool side; nine such files were in the last scan).
+
+---
+
+## Addendum, 9 September 2026 (after Dan's checks)
+
+**Entry 3 — landed size and structure, confirmed.** The file in the posting
+folder is **exactly 22,012,925 bytes** (scanner v2.40 `Large report` line and
+Windows Properties agree). Read on Dan's PC with the same JavaScriptSerializer
+the scanner uses: top-level keys `version, exportedAt, meta, tiles,
+criticalRows, actionRows, eotArchive, noteArchive, checklist, photoDump,
+manualEot, photoDumpEot, failuresDb`; `tiles` = 1 (`'Daily Report Entry'`)
+with **`equipEntries` = 4**. So the file arrived intact and parses, the
+content is where the viewer reads it from, and the dashboard renders it via
+**View full report** on the row. Not truncated, not a transport limit.
+
+**Entry 1 — record count.** The scanner reports **3 Marine Integrity records
+across 2 rigs**. An export is trivial; the read-only archive stands.
+
+**Size ceiling — what the first v2.40 scan found over 10 MB.** Nine files:
+six West Capella CBM reports from July (12.5–24.3 MB, pre-REV-157 photos),
+`seadrill-report_report_2026-08-25_vendor-audit.json` at **74.8 MB** and
+`seadrill-report_report_2026-09-03_vendor-surveillance.json` at 29.9 MB (both
+also carry no `meta.asset` and sit in Unattributed — same source fix
+outstanding), and Brad's daily report at 21 MB. The 74.8 MB file alone is the
+largest cost in every 10-minute scan on PowerShell 5.1. Please apply the
+REV 157 compressor to whichever tool produces the vendor files.
