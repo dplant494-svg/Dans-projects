@@ -3988,7 +3988,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var sum = document.createElement('summary');
     sum.textContent = (bad.length ? bad.length + ' posted file(s) could not be read and are NOT on this dashboard' : '') +
       (bad.length && large.length ? ' · ' : '') +
-      (large.length ? large.length + ' oversized report(s) (over 10 MB - photos need downscaling at source)' : '') +
+      (large.length ? large.length + ' oversized report(s) (over the ceiling: 10 MB, or 30 MB for CBM inspections - photos or attachments need reducing at source)' : '') +
       ' — click for the list';
     det.appendChild(sum);
     var ul = document.createElement('ul');

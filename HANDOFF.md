@@ -159,7 +159,11 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.40** (`DASHBOARD-ROLLING-HANDOFF.md`
+- `scripts/Update-Dashboard.ps1`: **v2.41** (rolling handoff entry 6: the size
+  ceiling is applied per report type once the file is parsed — 10 MB for
+  everything, **30 MB for CBM Inspection**, because a CBM report legitimately
+  carries 48–100 compressed photographs and a warning that always fires
+  gets ignored; source tools warn at the same numbers). v2.40 (`DASHBOARD-ROLLING-HANDOFF.md`
   entries 1–4, 2026-09-09: `problems[]` in the payload + a red banner on the
   dashboard for every file the scan could not read — truncated posts fail
   loudly, never quietly; a 10 MB size ceiling with a warning (still ingested);

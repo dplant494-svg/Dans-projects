@@ -18,10 +18,238 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
-| 4 | Compliance report gains **action photos** and a **photo dump** | WCGRRT REV 158 | **NEEDS ACTION** — two new payload fields |
-| 3 | **A real daily report showed personnel but no technical content** | WCGRRT REV 157 | **NEEDS ACTION — highest priority.** One check needed from you, plus a rendering question |
-| 2 | Compliance Checklist now carries **Actions Raised During Visit** | WCGRRT REV 156 | **NEEDS ACTION** — new `actions[]` array in the payload |
-| 1 | **Marine Integrity retired** from Well Control reporting | WCGRRT REV 155 | **NEEDS DECISION** — what happens to your Marine view |
+| 6 | **The nine oversize files, diagnosed one by one** — two real defects fixed, and **CBM reports cannot meet 10 MB** | WCGRRT REV 160 · SSORT REV 144 | **NEEDS DECISION** — what happens to a legitimate 48-photo CBM report |
+| 5 | **Rig identity enforced at source, and a 10 MB warning** — the debt you flagged | SSORT REV 143 · WCGRRT REV 159 | **FYI** — nothing to build. The Unattributed bucket should now stop filling |
+| 4 | Compliance report gains **action photos** and a **photo dump** | WCGRRT REV 158 | ✅ **CLOSED** — done your side, scanner v2.40 |
+| 3 | **A real daily report showed personnel but no technical content** | WCGRRT REV 157 | ✅ **CLOSED** — landed at exactly 22,012,925 bytes, parses, `equipEntries` = 4. Not truncated. Content is behind **View full report** |
+| 2 | Compliance Checklist now carries **Actions Raised During Visit** | WCGRRT REV 156 | ✅ **CLOSED** — fleet open-actions view built |
+| 1 | **Marine Integrity retired** from Well Control reporting | WCGRRT REV 155 | ✅ **CLOSED** — read-only archive, nothing deleted |
+
+*Entries 1–4 were answered in full by scanner v2.40 on 9 September 2026. Entry 5 is
+our side of that exchange: the one piece of work the reply said was still owed by us.
+Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.*
+
+---
+
+# Entry 6 — the nine oversize files, diagnosed individually
+**WCGRRT REV 160 · SSORT REV 144 · 9 September 2026 · NEEDS DECISION**
+
+Your addendum asked us to *"apply the REV 157 compressor to whichever tool produces
+the vendor files."* Before changing anything we audited **every** file-intake path in
+both tools and took apart a real oversize report. The nine files turn out to have
+**three different causes**, only two of which are defects. The third needs a decision
+from you, because it cannot be fixed by compressing harder.
+
+## Audit result: every photo path was already compressed
+
+All nine `readAsDataURL` sites across both tools were checked. Every **photo** path —
+nine photo-slot inputs and the action-photo button in WCGRRT, nine in SSORT — already
+runs through `compressDataUrl`. So there was no missing compressor to apply. What the
+audit did find was two paths nobody had thought of.
+
+## Cause 1 — document attachments were never compressed (fixed, WCGRRT REV 160)
+
+**This is almost certainly your 74.8 MB vendor audit.**
+
+Two WCGRRT buttons embed a *file*, not a photo, and they wrote it verbatim as a base64
+data URL:
+
+- **"Attach Document"** on every Vendor Surveillance row (`refDocFile`) — scanned
+  certificates, OEM procedures, test reports
+- **"Attach PDF / Image"** on the Planning schedule (`meta-schedule-file`)
+
+Base64 adds a further third on top. One scanned certificate can therefore outweigh an
+entire photo dump, and a vendor audit may attach several. Both now route through a
+shared `sdReadAttachment(f, cb)`:
+
+- **an attached image is compressed like any photo** — a photographed certificate or
+  a screenshot goes from ~6 MB to ~300 KB
+- **a PDF or Office file cannot be**, so its embedded size is named at attach time and
+  the user decides: warn over 8 MB, never block. Same rule as the post guard.
+
+## Cause 2 — the photo editor silently undid the compressor (fixed, SSORT REV 144)
+
+SSORT's annotation editor re-encoded the edited photo at **JPEG 0.90 with no size
+cap**, against an intake setting of 1600 px / 0.70. Every annotated photo therefore
+got *heavier* than it arrived.
+
+Measured on the real **West Capella Riser Adapter CBM report** (48 photos, one of the
+six you flagged):
+
+| | Whole report, posted |
+|---|---|
+| As it posts today | **14.2 MB** |
+| If every photo were annotated, at the old q0.90 | **17.7 MB** — **+24%** |
+| Same, after REV 144 (1600 px / q0.70, matching intake) | **13.5 MB** — −5% |
+
+So annotating a photo no longer changes what it weighs. **The intake settings are
+untouched at 1600 px / q0.70**, exactly as you asked.
+
+*Also fixed in passing:* SSORT's compressor drew onto an unpainted canvas, so JPEG —
+which has no alpha channel — rendered every transparent pixel **black**. A screenshot
+or a PNG with a clear background came back with black patches. WCGRRT has carried the
+white-flatten since REV 157; SSORT now does too. Correctness only, no size change.
+
+## Cause 3 — CBM reports are legitimately over 10 MB. This is the decision.
+
+We took the 14.27 MB Riser Adapter CBM report apart:
+
+| | |
+|---|---|
+| Embedded images | **48**, every one JPEG |
+| Already at the 1600 px cap | 34 of 48 (the rest are smaller by nature) |
+| Mean size per photo | **228 KB** |
+| Share of the whole file that is photographs | **100%** *(14.25 of 14.27 MB)* |
+
+**There is no defect here and nothing to fix.** These photos are already compressed to
+REV-157-equivalent settings. A CBM equipment report carries 48 to roughly 100
+photographs *by design* — it is a condition record, and the photographs are the
+evidence. 48 × 228 KB is 10.9 MB of base64 before a single word of text.
+
+**Which means the 10 MB ceiling is unreachable for CBM without a real trade-off:**
+
+| Option | The 48-photo report becomes | Cost |
+|---|---|---|
+| Leave it | **14.2 MB** | Every legitimate CBM report trips your warning and ours. Warnings that always fire get ignored — and then the one that matters is ignored too |
+| 1600 px / **q0.55** | 11.7 MB (−18%) | *Still over 10 MB.* Buys nothing |
+| **1200 px** / q0.70 | **8.8 MB** (−38%) | Under the ceiling. Loses detail — 1200 px is marginal for reading a corroded serial number or a hairline crack |
+| 1200 px / q0.60 | 7.3 MB (−49%) | Comfortably under. Visibly softer |
+| Split the report | 2 × ~7 MB | No quality loss at all, but the CBM record for one piece of equipment stops being one document |
+
+**Our view, for what it is worth:** don't degrade the photographs. A CBM photo exists
+so that somebody two years later can see whether a crack has grown, and 1200 px is
+where that starts to get difficult. We would rather you **exempt CBM reports from the
+10 MB warning** — they are a known, bounded, deliberate case — than have every rig
+trained to click past a warning.
+
+**We have deliberately not changed the CBM photo settings.** That is Dan's call on
+engineering-evidence quality, not ours to make quietly in a compressor.
+
+## The nine files, accounted for
+
+| Files | Cause | Status |
+|---|---|---|
+| `seadrill-report_report_2026-08-25_vendor-audit.json` — 74.8 MB | Uncompressed **document attachments** (cause 1). Also predates the REV 153 rig guard and the REV 157 compressor, hence `report` where the rig should be | **Fixed at source, REV 160** |
+| `..._2026-09-03_vendor-surveillance.json` — 29.9 MB | Same | **Fixed at source, REV 160** |
+| Six West Capella CBM reports, July, 12.5–24.3 MB | **Not a defect** (cause 3) — 48–100 already-compressed photographs | **Needs your decision** |
+| Brad's West Capella daily, 21 MB | Pre-REV-157 photos | **Fixed** — the same report now posts at 4.0 MB |
+
+All nine predate the fixes. Nothing new should join them, other than CBM.
+
+## What we would ask
+
+1. **Exempt CBM from the 10 MB warning**, or tell us the number you can live with and
+   we will apply it — but please read the trade-off table first.
+2. **The 74.8 MB file is the one worth clearing manually** if it is still costing you
+   ten seconds every ten minutes. It is a pre-fix artefact and nothing will replace it.
+
+## Unchanged, verified
+
+- **Transport byte-identical** in both tools — `sdPostReport` and
+  `sdWriteToReportFolder` diffed against REV 159 / REV 143, character for character.
+- No payload field added, removed or renamed. Nothing for you to parse.
+- Photo intake settings unchanged: **1600 px long edge, q0.70 in SSORT, q0.82 in
+  WCGRRT** — as you asked.
+- Every `<script>` block in both files parses clean; both revisions shipped, byte size
+  and tail verified.
+
+---
+
+# Entry 5 — Rig identity enforced at source, and a 10 MB warning before Post
+**SSORT REV 143 · WCGRRT REV 159 · 9 September 2026 · FYI — nothing to build**
+
+Both of these come straight out of your v2.40 reply. Neither needs anything from the
+dashboard; this entry exists so you know the source behaviour has changed and can
+stop compensating for it.
+
+## 1. The Unattributed bucket — fixed at source
+
+> *"the Unattributed bucket still catches the daily checks / daily log / vendor files
+> that arrive without it (that fix is still owed on the tool side; nine such files
+> were in the last scan)."*
+
+That debt is paid. **SSORT now fails closed on rig identity at every post entry
+point.** WCGRRT already did, from REV 153.
+
+A single helper, `sdRequireRig(what)`, is called at the top of all six SSORT paths:
+
+| Post path | What it posts |
+|---|---|
+| `checksPost` | Daily Checks (12 h round) and weekly FLM |
+| `addToLog` | a Daily Log entry |
+| `postLessonLearned` | a Lesson Learned |
+| `postMonthlyLog` | the whole month's Daily Log |
+| `postMonthEntry` | a re-post of one day from the month list |
+| `postReport` | the main SSORT report |
+
+If `meta.asset` is empty the post is **refused with the reason named**, the Rig /
+Vessel field is focused and scrolled to, and nothing is sent. Nothing is silently
+dropped — on the Daily Log path the entry stays in the form, so the user sets the rig
+and clicks again.
+
+**Why this was the right shape.** The old failure was quiet: `addToLog` built its
+filename as `seadrill-daily-log_report_<date>_<shift>.json` when no rig was set —
+the literal string `report` where the rig should be. That file posted successfully,
+looked fine to the rig, and then landed in your Unattributed bucket where nobody
+looks. A refused post the user can see and fix beats a successful post nobody can
+attribute.
+
+**Expect the nine to stop.** Anything already in Unattributed is historic and still
+needs whatever manual attribution you were going to do — we have not, and cannot,
+retro-fit a rig onto a file that never carried one.
+
+## 2. The 10 MB ceiling — enforced at source as a warning
+
+> *"Over 10 MB the scan warns and the dashboard shows an amber banner, but the report
+> is still ingested — it is a warning, not a rejection… please enforce 10 MB at source
+> before Post."*
+
+Implemented as **a warning, not a block** — mirroring your own behaviour deliberately,
+so the two sides can never disagree about whether a report is acceptable.
+
+`sdSizeOk(json, what)` runs after the rig guard and after the "post this?" confirm,
+and before anything is sent. Under 10 MB it is completely silent. Over 10 MB the user
+sees the **real number**, the reason (the 10-minute scan cost and the viewer download),
+the fact that photos are almost always the cause, and a plain *Post anyway?* — which
+they may accept.
+
+Live at:
+
+| Tool | Where |
+|---|---|
+| WCGRRT REV 159 | `postReport` (rig-visit, planning, TOPSET, vendor) · `postCompliance` |
+| SSORT REV 143 | `postReport` · `checksPost` · `dlPostPayload` (covers Daily Log entry, Lesson Learned, monthly log and single-day re-post) |
+
+Measured against real files:
+
+| Report | Size | Behaviour |
+|---|---|---|
+| Brad's West Capella daily, before REV 157 | 21.0 MB | *"This report is 21.0 MB… Post anyway?"* |
+| The same report after REV 157 | 4.0 MB | silent |
+| A 24-photo compliance dump plus action photos | ~8 MB | silent |
+| 9.99 MB | — | silent |
+| 10.04 MB | — | warns, and displays **10.1 MB** (rounded up, so the figure is never below the threshold that triggered it) |
+
+So in practice, with the REV 157 compressor in place, nobody should ever see this
+prompt. It is there for the case the compressor cannot save — thirty photos, or a
+future report type we have not thought about — rather than as a routine gate. **The
+per-photo compressor settings stay exactly where they are**, as you asked.
+
+## Unchanged, verified
+
+- **Transport byte-identical.** `sdPostReport` and `sdWriteToReportFolder` were
+  diffed against REV 142 / REV 158 in both tools: identical, character for
+  character. Both guards sit *above* the transport and only decide whether to call it.
+- No payload field added, removed or renamed by this entry. Nothing for you to parse.
+- Filenames unchanged — and still not load-bearing.
+- Every `<script>` block in both files parses clean; both revisions shipped and
+  verified byte size and tail.
+
+## Nothing needed from you
+
+Unless you would rather we blocked over 10 MB outright — say so and it is a one-word
+change in one function per tool. Dan's decision was to warn and allow, on the grounds
+that a report is worth having even when it is fat.
 
 ---
 

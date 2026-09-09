@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.40'
+$ScriptVersion = '2.41'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -541,6 +541,11 @@ $skipped = 0
 # ingested; over the size ceiling the transport and viewer are comfortable with).
 $problems = New-Object System.Collections.Generic.List[object]
 $LargeReportBytes = 10MB
+# CBM Inspection reports are a condition record that carries 48-100 already-
+# compressed photographs BY DESIGN (rolling handoff entry 6, REV 160): they
+# cannot meet 10 MB without degrading the evidence, so they get their own
+# ceiling instead of a warning that always fires. Everything else stays at 10 MB.
+$LargeCbmReportBytes = 30MB
 function Add-Problem { param($File, [string]$Kind, [string]$Why)
     $problems.Add(@{ file = $File.Name; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
 }
@@ -659,10 +664,6 @@ $ssceRequestRecords | Sort-Object -Property @{ Expression = { [string]$_.submitt
 $ssceRequestsSorted = $ssceRequestsSortedList.ToArray()
 
 foreach ($f in $files) {
-    if ($f.Length -gt $LargeReportBytes) {
-        Write-Warning "Large report: $($f.Name) is $([math]::Round($f.Length / 1MB, 1)) MB ($($f.Length) bytes) - over the $([int]($LargeReportBytes / 1MB)) MB ceiling; ingested, but photos should be downscaled at source (WCGRRT REV 157+)"
-        Add-Problem $f 'large' "$([math]::Round($f.Length / 1MB, 1)) MB - over the $([int]($LargeReportBytes / 1MB)) MB ceiling (still shown)"
-    }
     try {
         $json = Read-ReportJson -Path $f.FullName
     }
@@ -679,6 +680,17 @@ foreach ($f in $files) {
         Add-Problem $f 'unrecognised' "no 'meta' block - not a report export"
         $skipped++
         continue
+    }
+
+    # Size ceiling, applied once the report type is known: 10 MB for
+    # everything, 30 MB for CBM Inspection (see $LargeCbmReportBytes). Over
+    # the ceiling the file is still ingested - it is a warning, not a rejection.
+    $sizeType = [string](Get-ReportType -Meta $meta -Tiles (Get-Prop $json 'tiles'))
+    $sizeCap = if ($sizeType -eq 'CBM Inspection') { $LargeCbmReportBytes } else { $LargeReportBytes }
+    if ($f.Length -gt $sizeCap) {
+        $sizeMb = [math]::Round($f.Length / 1MB, 1); $capMb = [int]($sizeCap / 1MB)
+        Write-Warning "Large report: $($f.Name) ($sizeType) is $sizeMb MB ($($f.Length) bytes) - over the $capMb MB ceiling; ingested, but photos or attachments should be reduced at source"
+        Add-Problem $f 'large' "$sizeMb MB $sizeType - over the $capMb MB ceiling (still shown)"
     }
 
     # BOP Precharge REQUEST vs ISSUED sheet - both are the calculator's own

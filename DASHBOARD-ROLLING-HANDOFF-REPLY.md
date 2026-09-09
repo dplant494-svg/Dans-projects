@@ -140,3 +140,56 @@ also carry no `meta.asset` and sit in Unattributed — same source fix
 outstanding), and Brad's daily report at 21 MB. The 74.8 MB file alone is the
 largest cost in every 10-minute scan on PowerShell 5.1. Please apply the
 REV 157 compressor to whichever tool produces the vendor files.
+
+---
+
+## Entries 5 and 6 (REV 159/160, SSORT REV 143/144) — reply, 9 September 2026
+
+### Entry 6 — decision: CBM gets its own ceiling, 30 MB. Nothing degraded.
+
+Agreed on every point of the diagnosis, and thank you for taking the Riser
+Adapter report apart rather than compressing harder. Decision:
+
+- **CBM Inspection reports are exempt from the 10 MB warning and get a
+  ceiling of 30 MB** (scanner v2.41). The ceiling is now applied *after* the
+  file is parsed, by report type, so it reads the same `cbmData` marker you
+  emit; nothing in the filename is used. Everything else stays at 10 MB.
+- **Photo settings stay exactly where they are.** 1600 px / q0.70 in SSORT,
+  q0.82 in WCGRRT. Dan's evidence-quality call, and the answer is: do not
+  soften a crack photograph to save a warning.
+- **Please mirror 30 MB for CBM in `sdSizeOk`** so the two sides keep
+  agreeing: 10 MB for every other type, 30 MB when the payload carries
+  `cbmData`. Warn and allow, as now.
+- Why 30 and not 25: the largest real CBM seen so far is 24.3 MB (a ~100-photo
+  report at REV-157-equivalent settings). 30 MB leaves headroom for a full
+  100-photo record without ever tripping, and anything beyond that really is
+  worth a look.
+- The dashboard's amber banner text now names both numbers.
+
+The six July Capella CBM reports (12.5–24.3 MB) therefore stop warning on the
+next scan. Brad's daily and the two vendor files remain flagged until they
+are re-posted or removed.
+
+**Cause 1 (document attachments) and cause 2 (annotation editor)** — both
+good catches and both squarely at source; nothing for the dashboard to do.
+The 74.8 MB vendor audit and the 29.9 MB surveillance file are pre-fix
+artefacts with no rig inside them: Dan will remove them from the posting
+folder (they can be re-posted from REV 160 with the rig set if the content
+is still wanted).
+
+### Entry 5 — acknowledged, nothing to build
+
+- Rig identity enforced at source in SSORT (all six post paths) and WCGRRT:
+  the Unattributed bucket should now only ever hold history. The scanner's
+  guard stays in place as the backstop it was always meant to be.
+- The 10 MB warning at source, warn-and-allow, matches the dashboard exactly;
+  with the CBM figure above it stays matched.
+- The nine historic Unattributed files: Dan decides file by file. The two
+  vendor files are going; the rest are test posts from before REV 153 and can
+  go with them. The scanner cannot attribute a rig retrospectively and will
+  not guess.
+
+### Verified
+
+Scanner v2.41 tested with a 12 MB CBM report (silent) beside a 12 MB rig
+visit (warns, listed on the dashboard); all earlier v2.40 checks unchanged.
