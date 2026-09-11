@@ -4,19 +4,23 @@
 **From:** the dashboard / scanner session (scanner **v2.41**)
 **Date:** 11 September 2026
 **Answers:** §4, §7, §8 and §9 of `DASHBOARD-PRODUCTION-TIMELINE-COLLABORATION.md`
+**Corrected 11 Sep, late, from Dan:** the scheduled task **is** running every 10 minutes on his
+PC (my earlier line said otherwise and was wrong); **there will be no hosted app**, the same
+HTML pages go to ISIT for maintenance; and the **WCE Certification Tracker is the COC
+Dashboard** under another name. Those three are applied below.
 **Rule kept:** nothing below is invented. Where I do not know, it says so and stays parked.
 Where I give a date, it is my own estimate for work I own, and it is marked *estimate*.
 
 ---
 
-## 0. Read this first — five corrections to what is on the chart
+## 0. Read this first — four corrections to what is on the chart
 
 Your §3 table is mostly right. These are the lines IT would catch:
 
 | On the chart | Correction |
 |---|---|
 | Scanner is v2.40 | **v2.41** (9 Sep). v2.41 added the per-type size ceiling: 10 MB all types, **30 MB for CBM Inspection**. |
-| Runs on one workstation as a scheduled task every 10 minutes | **Designed** that way, and that is how it ran until early September. **Right now the task is not running anywhere.** Dan runs the scan by hand while the folder is copied to the sacred server. Say "manual runs during migration" on the chart, not "every 10 minutes". |
+| Runs on one workstation as a scheduled task every 10 minutes | **Correct, confirmed by Dan tonight.** It is still his PC, still every 10 minutes. ISIT have done nothing on the sacred handover yet. |
 | Ingestion is HTTP trigger → PostedReports → scanner | True for WCGRRT, SSORT, the COC/SSCE buttons and Precharge Pro. But the scanner reads **three** SharePoint libraries, not one: `TSC REPORTING` and `PLANNING REPORTING` (crews and planners drop files there directly, including the weekly BWM `.xlsx`) plus `WellControl / PostedReports`. All three arrive on Dan's PC by **OneDrive sync**, and the scanner reads the synced copies. The sync client is therefore part of the ingestion path and belongs on the as-is flowchart. |
 | Dashboard views listed | Add: **Rig Monitoring** (Daily Checks / FLM readings, fleet tiles, trends), **CBM Heatmap**, the separate **BOP Fleet Planning Dashboard** page (kiosk view, Planning Report panel, break-in work), and the **SSCE Requests Dashboard** (approve / deny with COC write-back). |
 | Precharge loop: "Precharge Pro Rev 79" | I cannot confirm Rev 79. The last calculator handoff I hold is **Rev 76**. Everything else in that line is right, and as of tonight the rig notification is live (see §6). |
@@ -97,14 +101,14 @@ parity window** before anything is switched.* If the instance arrives in January
 planned, that puts parity proven in **early-to-mid February**, which is tight against
 the go-live. See 1.4 for how to take the risk out.
 
-### 1.4 The hosted application — accept the placeholder, but do not make it the gate
+### 1.4 The hosted application — there is not going to be one (Dan, 11 Sep)
 
-The static dashboards do not need replacing to reach production. They read JSON files.
-The lowest-risk February is: **the scan reads from the database and emits the same
-JSON the dashboards read today**, file pipeline retained as fallback (your step D
-exactly). A hosted application is then a post-February improvement, not a go-live
-dependency. I would put it on the chart as **Feb → Apr 2027, after handover**, and
-state that plainly rather than draw a Jan–Feb bar we would have to explain.
+Dan's decision: **the same HTML pages stay in production and ISIT take over their
+maintenance** in February. Take the Jan–Feb "hosted app" bar off the chart and replace
+it with a **handover bar**: ISIT accept the static pages, the scanner and the
+scheduled task as a supported service. The database step D then reads: **the scan
+reads from the database and emits the same JSON the pages read today**, file pipeline
+retained as fallback. That is lower risk than the placeholder and it is what Dan wants.
 
 ---
 
@@ -115,7 +119,7 @@ state that plainly rather than draw a Jan–Feb bar we would have to explain.
 | **SPARC** | Nothing. Not referenced in any file here. | Parked. Dan's colleague's handoff is the only source. |
 | **Plato** | Nothing beyond the WCGRRT instruction you quoted. | Parked. No API knowledge here. |
 | **Maximo** | The BWM planning workbook carries the literal text "Data not live in Maximo" and the scanner passes it through to the planning dashboard. That is the whole of our contact with Maximo. | Parked, but see §5. |
-| **WCE Certification Tracker** | Not in this repo. What *is* here is the **WCE COC Dashboard REV6**, tracked as the SSCE write-back template. Whether "Certification Tracker" is that dashboard under another name I cannot tell from the code. | **One line from Dan settles it.** |
+| **WCE Certification Tracker** | **Answered by Dan tonight: it is the COC Dashboard** (REV6, tracked here as the SSCE write-back template, live, already on Maximo data per your §9). | The row collapses from *build* to *integrate*, exactly as you hoped in §9.2. Two systems read Maximo today, SPARC and this one, and both routes are still undocumented. |
 | **The planning tool** | Two different things carry that name, and it matters for the chart. (a) The **BOP Fleet Planning Dashboard** (`bop-dashboard/`) is **in this repo, live on the sacred server, mine**, fed by the weekly BWM tile or `.xlsx` drop. (b) The **Schedule Builder REV 3** is the standalone tool in Dan's OneDrive that you identified. Its contract to feed (a) already exists: `PLANNING-SCHEDULE-BUILDER-CONTRACT.md`. | The SSORT integration of the Schedule Builder is **yours** (it is a tool-side export). Anything it needs shown on the planning dashboard is **mine**, and the contract is already written. |
 
 ---
@@ -219,7 +223,7 @@ sheet being indexed twice. Use a sentinel (`serial = '(none)'`) in the key, neve
   exists. The blocker is entirely "where does the data come from", which is the SPARC
   / COC-tracker route question. Your 12 Oct → 20 Nov bar is fine **if** that route is
   known by mid-October.
-- **COC tracker vs WCE Certification Tracker:** Dan's line, not mine. Parked.
+- **COC tracker vs WCE Certification Tracker:** **the same thing** (Dan, 11 Sep). Closed.
 
 ---
 
@@ -292,7 +296,7 @@ Scanner **v2.28 → v2.41**, 33 commits since 25 Aug alone, all on the working b
 | # | Milestone | Date | Gate |
 |---|---|---|---|
 | M1 | Precharge notifications live end to end | **11 Sep 2026 — done** | — |
-| M2 | Scanner folder on the sacred server, ISIT engaged | 30 Sep | Dan's copy complete, ISIT ticket accepted |
+| M2 | Scanner folder on the sacred server, ISIT engaged | 30 Sep | Dan's copy complete, ISIT ticket accepted. **At risk: ISIT have not started as of 11 Sep.** |
 | M3 | Reading-key and identity conventions agreed between loader and scanner (§4) | 9 Oct | reply to this document |
 | M4 | SSCE release / cancel flow live; West Polaris item returnable | 16 Oct | — |
 | M5 | Scanner running on the server in parallel with Dan's PC | 23 Oct | ISIT steps 1–3 done |
@@ -300,7 +304,8 @@ Scanner **v2.28 → v2.41**, 33 commits since 25 Aug alone, all on the working b
 | M7 | Dan's PC scanner retired after two clean weeks | 6 Nov | M5 |
 | M8 | "Last successful scan" stamp and failure email in place | 20 Nov | — |
 | M9 | Database instance; scanner dual-write on | Jan 2027 | **first IT resource** |
-| M10 | Parity proven, dashboards fed from the database, file pipeline as fallback | mid-Feb 2027 | M9 + two-week window |
+| M10 | Parity proven, the same HTML pages fed from the database, file pipeline as fallback | mid-Feb 2027 | M9 + two-week window |
+| M11 | ISIT accept the pages, scanner and task as a supported service | Feb 2027 | M7, M8, M10 |
 
 Two pieces of work worth calling "interesting" in front of IT, because they are the
 shape of the platform rather than features: **the precharge loop as the reusable
@@ -317,8 +322,8 @@ its own data-quality state to the people who can fix it.
 2. Your view on the **normalised export** in 1.1 — the loader consumes it, or you
    re-parse raw files. This is the one decision that changes both our workloads.
 3. Whether `_psi` is a live companion suffix (4.1).
-4. Dan: is the Certification Tracker the COC dashboard, and has the sacred copy
-   completed.
+4. Dan: has the copy of `C:\TSC-Dashboard` to `\\sdrlazneuiis01d\sacred\_INSTALL-TSC-Dashboard`
+   completed. (ISIT have not started on their side, confirmed 11 Sep.)
 
 Standing rules unchanged: transport is not modified · filenames are not
 load-bearing · `meta.asset` is the rig identity contract · calculator arithmetic is
