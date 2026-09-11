@@ -1864,6 +1864,16 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   // full-report viewer's meta.checks section.
 
   function rigCheckAttention(e) { return e.pass === false || !!e.comment; }
+  // One reading to a human: a tons item carries its pressure (_psi), an rb
+  // readback carries test/differential pressure (_tp/_dp). Scanner v2.42+
+  // merges those companions onto the base reading; render them with it.
+  function rigCheckValueText(e) {
+    var base = e.pass === true ? 'Pass' : e.pass === false ? 'Fail' : String(e.value || '—') + (e.unit ? ' ' + e.unit : '');
+    var extra = [];
+    if (e.psi) extra.push(e.psi + ' psi');
+    if (e.tp || e.dp) extra.push((e.tp ? 'TP ' + e.tp : '') + (e.tp && e.dp ? ' / ' : '') + (e.dp ? 'DP ' + e.dp : ''));
+    return extra.length ? base + ' / ' + extra.join(' / ') : base;
+  }
 
   // Set of source file names whose submission contains at least one
   // attention-worthy reading - drives the red triangle in the report list.
@@ -2146,11 +2156,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
               else if (e.pass === false) { td.className += ' fail'; td.appendChild(document.createTextNode('✗')); }
               else {
                 var vtxt = String(e.value || '—');
+                if (e.psi || e.tp || e.dp) vtxt = rigCheckValueText(e);
                 td.appendChild(document.createTextNode(vtxt.length > 14 ? vtxt.slice(0, 13) + '…' : vtxt));
               }
               if (e.comment) td.appendChild(mk('span', 'rm-cmt-dot'));
               td.title = it.item.replace(/_/g, ' ') + ' — ' + rmFmtDate(e.date) + (e.shift ? ' · ' + e.shift : '') +
-                '\nValue: ' + e.value + (e.unit ? ' ' + e.unit : '') +
+                '\nValue: ' + rigCheckValueText(e) +
                 (e.comment ? '\nComment: ' + e.comment : '') +
                 '\nClick to open the source report.';
               td.addEventListener('click', function () {
@@ -3332,6 +3343,10 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       Object.keys(checkValues).forEach(function (key) {
         if (/_unit$/.test(key) && checkKeySet[key.slice(0, -5)]) return;
         if (/_cmt$/.test(key) && checkKeySet[key.slice(0, -4)]) return;
+        // _psi (tons item), _tp / _dp (rb readback) are companions too, same
+        // rule as the scanner: merge only when the base key exists.
+        if (/_psi$/.test(key) && checkKeySet[key.slice(0, -4)]) return;
+        if (/_(tp|dp)$/.test(key) && checkKeySet[key.slice(0, -3)]) return;
         var m = /^[^_]+_(.+?)__(.+)$/.exec(key);
         if (!m) return;
         var system = m[1], item = m[2];
@@ -3340,7 +3355,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         var unit = checkValues[key + '_unit'] || '';
         var comment = checkValues[key + '_cmt'] || '';
         var pass = value === 'pass' ? true : (value === 'fail' ? false : null);
-        bySystem[system].push({ item: item, value: value, unit: unit, comment: comment, pass: pass });
+        bySystem[system].push({ item: item, value: value, unit: unit, comment: comment, pass: pass,
+          psi: checkValues[key + '_psi'] || '', tp: checkValues[key + '_tp'] || '', dp: checkValues[key + '_dp'] || '' });
       });
       systemOrder.forEach(function (system) {
         var t = mk('div', 'rv-tile');
@@ -3353,7 +3369,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
           var line = mk('div', 'rv-check-row' + (attention ? ' attention' : ''));
           line.appendChild(mk('span', 'rv-check-label', row.item.replace(/_/g, ' ')));
           var valCls = row.pass === true ? ' pass' : row.pass === false ? ' fail' : '';
-          var valText = row.pass === true ? 'Pass' : row.pass === false ? 'Fail' : (row.value + (row.unit ? ' ' + row.unit : ''));
+          var valText = rigCheckValueText(row);
           line.appendChild(mk('span', 'rv-check-value' + valCls, valText));
           tb.appendChild(line);
           if (row.comment) tb.appendChild(mk('div', 'rv-check-comment', row.comment));

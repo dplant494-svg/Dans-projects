@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.41'
+$ScriptVersion = '2.42'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -314,9 +314,16 @@ function Get-CbmGradedItems {
 # itself is the attention-worthy value; the comment's presence, not the
 # pass/fail value, is what actually signals "worth a look", so the dashboard
 # should key attention-styling off Comment being non-empty, not off pass
-# alone). A companion suffix only merges onto its base if that base key
-# genuinely exists as its own reading - an orphaned "_unit"/"_cmt" key
-# (base missing) is kept as its own standalone item rather than dropped.
+# alone). SSORT REV 145 emits three more companions (confirmed from its
+# checkItemDisp, production-timeline reply 10.4): "_psi" rides on a tons
+# item (load with its pressure alongside), "_tp"/"_dp" ride on an rb
+# readback item (test / differential pressure). They are one reading to a
+# human (WCGRRT shows "<n> tons / <p> psi" and "TP <x> / DP <y>"), so
+# they merge onto the base too - v2.41 and earlier listed each as a
+# phantom standalone reading. A companion suffix only merges onto its base
+# if that base key genuinely exists as its own reading - an orphaned
+# companion (base missing, which is legitimate: a pressure with no load)
+# is kept as its own standalone item rather than dropped.
 function Get-CheckReadings {
     param($Checks)
     $result = New-Object System.Collections.Generic.List[object]
@@ -328,7 +335,7 @@ function Get-CheckReadings {
     $keySet = @{}
     foreach ($k in $allKeys) { $keySet[[string]$k] = $true }
 
-    $companionSuffixes = @('_unit', '_cmt')
+    $companionSuffixes = @('_unit', '_cmt', '_psi', '_tp', '_dp')
     $baseKeys = New-Object System.Collections.Generic.List[object]
     foreach ($k in $allKeys) {
         $key = [string]$k
@@ -356,6 +363,9 @@ function Get-CheckReadings {
             unit    = [string](Get-Prop $values ($key + '_unit'))
             pass    = $pass
             comment = ConvertTo-PlainText ([string](Get-Prop $values ($key + '_cmt')))
+            psi     = [string](Get-Prop $values ($key + '_psi'))
+            tp      = [string](Get-Prop $values ($key + '_tp'))
+            dp      = [string](Get-Prop $values ($key + '_dp'))
         }) | Out-Null
     }
     return $result.ToArray()
@@ -1067,6 +1077,9 @@ foreach ($f in $files) {
                 unit       = $reading.unit
                 pass       = $reading.pass
                 comment    = $reading.comment
+                psi        = $reading.psi
+                tp         = $reading.tp
+                dp         = $reading.dp
                 photos     = $alarmPhotoCount
                 file       = $f.Name
             }

@@ -367,3 +367,70 @@ its own data-quality state to the people who can fix it.
 Standing rules unchanged: transport is not modified · filenames are not
 load-bearing · `meta.asset` is the rig identity contract · calculator arithmetic is
 never touched here.
+
+---
+
+## 10. Answers to your §10 — 11 September 2026, later still
+
+### 10.1 The export schema version — yes, and the loader should refuse anything else
+
+Every normalised export file will carry a top-level `exportSchema` string, starting
+at `"1.0"`, next to the scanner version and the run timestamp. Rule: **the loader
+loads only versions it knows and fails loudly on any other**, no "best effort". A
+column added without changing the row shape bumps the minor number; a changed or
+removed column bumps the major. I will publish the row shapes for `1.0` as a short
+contract file in the repo before the first export lands, so you can write the loader
+against it rather than against a sample.
+
+### 10.2 The three companion suffixes — done tonight, scanner v2.42, not waiting for the export
+
+Thank you for checking the shipped code. `_psi`, `_tp` and `_dp` now merge onto their
+base reading exactly as `_unit` and `_cmt` do, with the orphan rule unchanged (a
+pressure with no load stays a standalone item). The readings matrix and the
+full-report viewer render them as one reading: `180 tons / 2150 psi` and
+`ok / TP 5000 / DP 250`. Verified in a browser against a synthetic Daily Checks file
+with all five companions and an orphan. Trending is unchanged: the trend line follows
+the base value, the companion is in the tooltip.
+
+The full-report viewer had its own copy of the companion rule, separate from the
+scanner's, and it needed the same fix. That is the two-parsers-drift problem in
+miniature, inside my own code, and it is one more reason the export is the right
+design.
+
+### 10.3 The ISIT dual-run hours — 10 is light; say 16 to 24, and name the one that slips
+
+During dual-run and parity ISIT will have to do these, and none of them is ours:
+
+| ISIT task in the dual-run window | Likely hours |
+|---|---|
+| Grant the scanner's service account write on the database (roles, not just a login) | 1–2 |
+| Network path from the sacred server to Azure SQL: firewall rule and the **change ticket** that goes with it | 4–8 |
+| Review the DDL (your one review pass) and run it on the instance | 4–6 |
+| A second run of the DDL after the first parity findings, because there will be some | 2–4 |
+| Be on hand for two parity checkpoints with us (start, and before cutover) | 2–4 |
+
+**The line that slips is the firewall change.** In most IT shops that is a ticket with
+its own approval cycle, and it is on the critical path for step B, because nothing can
+dual-write until the server can reach the database. Ask for it in the January instance
+request, not after the instance exists.
+
+### 10.4 One more fact for page 2, found tonight, and it strengthens M8
+
+While Dan was testing the notification flow the dashboard would not refresh. The
+scheduled task on his PC had been **stuck in "Running" since the last time a script was
+downloaded from a browser**: Windows marks downloaded files, PowerShell asks "Run once?"
+on them, and inside a scheduled task nobody can answer. Every scheduled run since then
+had hung, and the dashboards had only moved when Dan ran the scan by hand. The PC was
+also still on **v2.40**, the v2.41 file never having been saved into place. Both are
+fixed tonight (`Unblock-File`, v2.42 installed), and the step-by-step for the server
+move already avoids the trap. But it means "every 10 minutes" was true in name only for
+several days and **nobody was told**. That is exactly the failure M8 exists for. I am
+pulling M8, the "last successful scan" stamp on the dashboard plus an email after two
+consecutive failures, forward to **9 October**.
+
+### 10.5 What page 6 should say for the scanner tonight
+
+Scanner **v2.42**: `_psi` / `_tp` / `_dp` companions merged (10.2). Precharge Pro
+**Rev 80** deployed to the server: unique issued filename, printable copy in every
+issued post, and the rig notification email now carries both the JSON and the HTML
+sheet. Precharge inbox on the last scan: 4 requests, all 4 issued, return leg working.
