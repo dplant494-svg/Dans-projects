@@ -63,9 +63,36 @@ runtime side.
 
 What is already done: the migration handoff (27 Aug, PDF), the step-by-step for Dan
 and IT (`SACRED-SERVER-MOVE-STEPS.md`, 9 Sep), and `config.server.json` with the three
-`reportFolders` placeholders for IT to fill. Dan's part (copying `C:\TSC-Dashboard`
-to `\\sdrlazneuiis01d\sacred\_INSTALL-TSC-Dashboard`) was in progress this week; I
-have not had confirmation it is complete.
+`reportFolders` placeholders for IT to fill. **Dan's part is complete:** the folder was
+copied to the sacred server sandbox and announced to IT in Teams on **Wednesday 9 Sep**,
+with the migration PDF attached. **No reply from IT as of 11 Sep.**
+
+**IT's own plan exists, and it is the source for this bar.** The 27 Aug Teams meeting
+(notes posted by Deepthi Viswanathan) set eight next steps, with names:
+
+1. Dan moves the TSC Dashboard folder to the sandbox — **done 9 Sep**.
+2. Dan updates the PowerShell script with the new folder path — **done**
+   (`config.server.json`; no path is hardcoded in the script).
+3. **Adam Snyder** schedules the task to run every 10 minutes — **not started**.
+4. Dan / Lee validate it.
+5. Notifications are sent from the script using **a standard ID instead of Dan's ID**.
+6. Dan validates the notification.
+7. If the pilot works, **submit the app for Architecture, Security and Governance
+   review**.
+8. Proceed per the review feedback.
+
+So the critical path is now specific: **step 3, one named person.** Steps 4 and 6 are
+a day each on our side.
+
+**Step 5 is a requirement we had not planned for, and it reaches the flows.** Every
+notification today, including the Precharge Notifications flow that went live tonight,
+is sent from **Dan's own Office 365 connection**, so the mails come from Dan's mailbox.
+IT want a standard (service) identity. That means: (a) the Power Automate flows need
+their Office 365 Outlook connection switched to a service mailbox once IT provide one,
+and (b) the scanner's own notification settings (`notifications` in `config.json`,
+disabled on the server copy) must use the same identity if they are ever enabled.
+Neither is hard, but both need the account to exist first. Add it to page 1 as a
+dependency on ISIT, alongside the service account for the task.
 
 What I need from ISIT, in order, and none of it is exotic:
 
@@ -126,14 +153,22 @@ retained as fallback. That is lower risk than the placeholder and it is what Dan
 
 ## 3. §4.3 — process and gates
 
-9. **Security protocols.** Unknown here. Nothing in this repo names Seadrill's gates.
-   What I can say is what will be found: the precharge gate is client-side only
-   (F-25 / F-25a, open), the IIS site is plain `http` on port 8080, and posted payloads
-   sit on an open share. Those three should be in front of IT *before* the review
-   window, as known items, not discovered inside it.
-10. **ISIT support model.** Unknown. What the plan **implicitly assumes** on our side:
-    one service account, one scheduled task, one folder, and Dan able to update
-    `scripts\` without a ticket. Runbooks exist in draft form (the migration handoff,
+9. **Security protocols — the gates are named, the lead times are not.** IT's 27 Aug
+   meeting notes (step 7) say that after a working pilot the app is submitted for
+   **three reviews: Architecture, Security, and Governance**, and the programme then
+   "moves on according to the review feedback". That replaces the generic four-week
+   pen-test window with three named gates. **What is still unknown: who owns each
+   review, the lead time, and whether they run in parallel.** Draw them as three
+   sequential gates after the pilot, mark the durations *to be confirmed by IT*, and
+   ask Deepthi Viswanathan's team for the lead times, because they, not we, set them.
+   What the reviews will find, so it is declared rather than discovered: the precharge
+   gate is client-side only (F-25 / F-25a, open), the IIS site is plain `http` on port
+   8080, posted payloads sit on an open share, and notifications currently send from
+   a personal identity (step 5 above).
+10. **ISIT support model.** Not stated by IT beyond the eight steps above, which
+    describe a **pilot** on the sandbox, not the support arrangement after it. What
+    the plan **implicitly assumes** on our side: one service account, one scheduled
+    task, one folder, and Dan able to update `scripts\` without a ticket. Runbooks exist in draft form (the migration handoff,
     the move steps); a monitoring hook does not — today a failed scan is noticed by a
     stale dashboard. A **"last successful scan" stamp on the dashboard and an email on
     two consecutive failures** is a small item I will add to my list (*estimate 3 days*).
@@ -296,13 +331,15 @@ Scanner **v2.28 → v2.41**, 33 commits since 25 Aug alone, all on the working b
 | # | Milestone | Date | Gate |
 |---|---|---|---|
 | M1 | Precharge notifications live end to end | **11 Sep 2026 — done** | — |
-| M2 | Scanner folder on the sacred server, ISIT engaged | 30 Sep | Dan's copy complete, ISIT ticket accepted. **At risk: ISIT have not started as of 11 Sep.** |
+| M2 | Scanner folder on the sacred server, ISIT engaged | 30 Sep | Dan's copy complete (9 Sep). **Waiting on Adam Snyder to schedule the task; no reply from IT as of 11 Sep.** |
 | M3 | Reading-key and identity conventions agreed between loader and scanner (§4) | 9 Oct | reply to this document |
 | M4 | SSCE release / cancel flow live; West Polaris item returnable | 16 Oct | — |
 | M5 | Scanner running on the server in parallel with Dan's PC | 23 Oct | ISIT steps 1–3 done |
 | M6 | Scanner normalised export feeding loader dry-runs over the full history | 6 Nov | M3 |
 | M7 | Dan's PC scanner retired after two clean weeks | 6 Nov | M5 |
 | M8 | "Last successful scan" stamp and failure email in place | 20 Nov | — |
+| M8a | Notifications re-pointed to the IT-provided service identity (their step 5) | when IT provide it | ISIT |
+| M8b | Pilot validated by Dan and Lee (their steps 4 and 6); app submitted for Architecture, Security and Governance review (their step 7) | Nov, *estimate* | M5, M8a |
 | M9 | Database instance; scanner dual-write on | Jan 2027 | **first IT resource** |
 | M10 | Parity proven, the same HTML pages fed from the database, file pipeline as fallback | mid-Feb 2027 | M9 + two-week window |
 | M11 | ISIT accept the pages, scanner and task as a supported service | Feb 2027 | M7, M8, M10 |
@@ -322,8 +359,9 @@ its own data-quality state to the people who can fix it.
 2. Your view on the **normalised export** in 1.1 — the loader consumes it, or you
    re-parse raw files. This is the one decision that changes both our workloads.
 3. Whether `_psi` is a live companion suffix (4.1).
-4. Dan: has the copy of `C:\TSC-Dashboard` to `\\sdrlazneuiis01d\sacred\_INSTALL-TSC-Dashboard`
-   completed. (ISIT have not started on their side, confirmed 11 Sep.)
+4. From IT, via Dan: the owners and lead times of the Architecture, Security and
+   Governance reviews, and the service identity for notifications (steps 5 and 7 of
+   their 27 Aug plan).
 
 Standing rules unchanged: transport is not modified · filenames are not
 load-bearing · `meta.asset` is the rig identity contract · calculator arithmetic is
