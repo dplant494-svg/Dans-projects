@@ -63,3 +63,18 @@ Keep `precharge` in the name (the flow keys on it) and keep the rest of the
 POST call exactly as it is. Filenames are not load-bearing for the scanner;
 it keys on `meta`, so nothing on the dashboard side changes. The request form
 already does this (`seadrill-request_vela_Test-1234_20260911_precharge.json`).
+
+## Third item — issued sheet posted with an empty well (observed 2026-09-11)
+
+`seadrill-report_West-Vela_2026-09-11_precharge.json` (exportedAt
+2026-09-11T19:18:28Z) has `meta.well: ""`, an empty Well cell in the notes
+table and `prechargeData.conditions.well: ""`. The request it was issued
+against was well `Test 1234` (`seadrill-request_vela_Test-1234_20260911_precharge.json`).
+
+Please check whether opening a request from the Requests tab populates the
+calculator's Well field, and whether Issue / Post refuses or warns when the
+well is empty. Without the well:
+
+- the dashboard return leg (rigKey + well) cannot flip the request to
+  *issued*, and
+- the rig notification email goes out with "well ," in the subject and body.
