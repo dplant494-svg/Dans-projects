@@ -23,7 +23,7 @@ Your §3 table is mostly right. These are the lines IT would catch:
 | Runs on one workstation as a scheduled task every 10 minutes | **Correct, confirmed by Dan tonight.** It is still his PC, still every 10 minutes. ISIT have done nothing on the sacred handover yet. |
 | Ingestion is HTTP trigger → PostedReports → scanner | True for WCGRRT, SSORT, the COC/SSCE buttons and Precharge Pro. But the scanner reads **three** SharePoint libraries, not one: `TSC REPORTING` and `PLANNING REPORTING` (crews and planners drop files there directly, including the weekly BWM `.xlsx`) plus `WellControl / PostedReports`. All three arrive on Dan's PC by **OneDrive sync**, and the scanner reads the synced copies. The sync client is therefore part of the ingestion path and belongs on the as-is flowchart. |
 | Dashboard views listed | Add: **Rig Monitoring** (Daily Checks / FLM readings, fleet tiles, trends), **CBM Heatmap**, the separate **BOP Fleet Planning Dashboard** page (kiosk view, Planning Report panel, break-in work), and the **SSCE Requests Dashboard** (approve / deny with COC write-back). |
-| Precharge loop: "Precharge Pro Rev 79" | I cannot confirm Rev 79. The last calculator handoff I hold is **Rev 76**. Everything else in that line is right, and as of tonight the rig notification is live (see §6). |
+| Precharge loop: "Precharge Pro Rev 79" | Now **Rev 80** (calculator session reply, late 11 Sep): unique issued filename and a printable `sheetHtml` copy in every issued post. Everything else in that line is right, and as of tonight the rig notification is live (see §6). |
 
 Single points of failure: your three are right. Add a fourth: **OneDrive sync on one
 PC is the ingestion path today.** If sync stalls, nothing new reaches the scanner, and
@@ -294,13 +294,14 @@ For page 2, the current, verified end-to-end behaviour:
 
 **Edges, stated so nobody prints "closed loop" without them:**
 
-- The issued filename is rig + date only, so a **second issue for the same rig on the
-  same day overwrites the first** in SharePoint and the file-created trigger does
-  not fire. Fix requested from the calculator session (unique filename per sheet).
-- The attachment is the raw JSON. A **printable HTML copy** inside the post has been
-  requested so the rig gets a sheet it can open.
+- ~~The issued filename is rig + date only~~ — **fixed in Rev 80**: well, stack and a
+  timestamp in the name, so a re-issue no longer overwrites and the trigger fires.
+  Awaiting deploy to the server.
+- ~~The attachment is the raw JSON~~ — **fixed in Rev 80**: every issued post carries a
+  self-contained printable HTML copy (`sheetHtml`), which the flow attaches alongside
+  the JSON, with a footer naming the PDF as the controlled document.
 - One issued sheet tonight carried an **empty `meta.well`**, which defeats the return
-  leg and the email subject. Reported to the calculator session.
+  leg and the email subject. Reported to the calculator session; **still open**.
 - The trigger is the deprecated "When a file is created" and is to be swapped for the
   properties-only trigger once the above are in.
 
