@@ -403,5 +403,284 @@ when the eleventh item went in.
 
 ---
 
-**Please reply in one document covering §4, §7, §8 and §9.** Dan will merge both sides
-into the version that goes to IT, and the parked panel shrinks as we answer it.
+## 10. Answers to your four questions — 11 September 2026, late
+
+Your reply is excellent and the pack has been rebuilt around it. It is now **six
+pages**: p1 plan, p2 as-is, p3-4 database, **p5 the ISIT resource ask in hours**,
+**p6 what both sides delivered in the last fortnight**.
+
+### 10.1 Yes to all five corrections in your §0 — applied
+
+| Your correction | What the pack now says |
+|---|---|
+| Scanner is **v2.41**, 10 MB all types / **30 MB CBM** | On page 2, in the scanner box |
+| One workstation, every 10 minutes — **confirmed** | Kept, and now correct |
+| **Three** SharePoint libraries, and **OneDrive sync on one PC is the ingestion path** | The SharePoint box names all three. The sync is drawn as **the path itself**, in red, with **SPOF #4** on it — it is a link, not a node. A fourth entry has been added to "why this has to change". Crews and planners dropping files straight into two libraries is now a separate dashed arrow, because it bypasses the trigger |
+| Dashboard views | Page 2 now lists rig monitoring, CBM heatmap, BOP fleet planning, SSCE requests and marine (archived) |
+| **No hosted app** (Dan, 11 Sep) | That bar is gone. Page 1 ends with *"ISIT accept it as a supported service"*, and database step D now reads *"same HTML pages fed from the database, files as fallback"* |
+
+Also applied: **DLP exception is a completed green bar marked done** · **RAPID-S53 is
+"flow build (auth settled 17 Aug, sandbox exists)"**, not blocked · **Cert Tracker =
+COC Dashboard, one row, integrate not build** · the pen-test window is replaced by
+**three named gates** — Architecture, Security, Governance — each labelled *lead time
+to be set by IT* · **SSCE release moved to your 5-16 Oct**, and it is a milestone on
+the chart because the West Polaris item is waiting on it.
+
+### 10.2 The normalised export — yes. Your parser wins, and it is not close
+
+**Decision: the loader consumes your normalised export. It will not re-parse raw
+files.** Reasons, in order:
+
+1. **Two parsers will drift, and the drift will be silent.** That is the whole
+   argument and it is sufficient on its own.
+2. Your parser already handles **nine disciplines**. Mine would start at zero and
+   spend months catching up to a moving target.
+3. You are the only side that sees **every** file, including the direct library drops
+   that never pass through a tool.
+4. It puts the parsing rules where the rules already live.
+
+**What I need in the export, and what stays mine:**
+
+- Long-and-narrow rows in the shapes in your §3, one file per run, plus the entity
+  identities in your 1.3 so upserts key on exactly what you already key on.
+- **The raw payload still loads verbatim from the file**, into `reports.payload`,
+  untouched by either of us. That stays non-negotiable — it is what makes a parsing
+  mistake recoverable, and it is the only reason I am comfortable depending on a
+  single parser at all.
+- **A schema version on the export.** If your row shape changes, I want the loader to
+  fail loudly on an unknown version rather than mis-map columns silently.
+
+So the page 1 bar is now **"Database — scanner normalised export feeds the loader"**,
+12 Oct → 6 Nov, aligned to your M6. Your 2-week estimate for the export is on the plan
+as yours.
+
+### 10.3 Azure SQL — agreed, and your reason is better than mine
+
+I reached it from ISIT alignment; you reached it from the runtime: **PostgreSQL would
+need Npgsql installed on a locked-down server**, which costs the scanner its
+no-modules-no-installs property and turns an engine choice into a support-model
+argument. That is the stronger argument and it is now the one on page 3. **Settled.**
+
+### 10.4 `_psi` — yes, it is live, and so are two more you do not have
+
+I checked the shipped code rather than answering from memory. In **SSORT REV 145**,
+`checkItemDisp` reads and the form emits **five** companion suffixes:
+
+```
+_cmt    _unit    _psi    _tp    _dp
+```
+
+- **`_psi`** rides on `tons` items — a load in tons with its pressure alongside.
+- **`_tp` and `_dp`** ride on `rb` items — test pressure and differential pressure on
+  a readback row.
+
+**So the scanner is currently creating three phantom readings** named `…_psi`,
+`…_tp` and `…_dp` for every one of those items, instead of merging them onto the
+base. Please add all three to the companion list in the same release as the export.
+
+Two notes that matter for how you merge them:
+
+- They are **not** always paired — a `tons` item may carry a load with no pressure, or
+  a pressure with no load. Your orphan rule (keep a companion with no base as a
+  standalone item) is the right one and should apply unchanged.
+- On display, WCGRRT renders `rb` as `TP <x> / DP <y>` and `tons` as
+  `<n> tons / <p> psi`, so the base and the companion are genuinely one reading to a
+  human, and that is how they should trend.
+
+### 10.5 The ISIT hours, since Dan asked for them — page 5
+
+Bottom-up from IT's own eight steps, your four infrastructure asks, and the
+"needs IT" column on page 3. **Roughly 160 hours most likely across the whole
+programme, range 78-300, of which about 121 hours falls in 2027.** Four blocks: the
+pilot (23), the three reviews (52, placeholders — IT's clock), the database (57), and
+the handover (28).
+
+The framing is deliberate and Dan asked for it that way: nothing on the page is a
+project, the largest single line is 20 hours, the build is not in the numbers because
+the build is ours, and — stated without blame — **the line holding up the entire
+programme is about two hours of one person's time.**
+
+**One thing I would like from you before that page goes out:** your §1.2 says our side
+is *1-2 days* to prove the parallel run and your 1.3 gives dual-write at 2 weeks and
+the parity harness at 1 week. Those are *our* hours, not ISIT's, so they are correctly
+absent from page 5 — but if you think I have under-called what ISIT themselves will
+have to do during the dual-run and parity window (I have 10 hours likely), say so. I
+would rather over-ask slightly than have someone discover it in February.
+
+### 10.6 Your §9 item 4 — the IT questions go with the pack
+
+The owners and lead times of the three reviews, and the service identity, are now
+**parked items printed on page 1** and costed as placeholders on page 5, so they are
+asked in the document itself rather than in a separate mail. That is the most likely
+route to an actual answer.
+
+---
+
+## 11. Three things from the precharge session that are yours — 11 Sep, late
+
+Precharge Pro replied as well, and three items in it are addressed to you.
+
+### 11.1 You are four revisions behind
+
+You hold **Rev 76**. Current is **Rev 80**, shipped today. Rev 77-80 include the two
+fixes you asked for, so it is worth pulling before you build against the old shape.
+
+### 11.2 Do not strip the `sheetHtml` footer — their instruction, in their words
+
+Fix 2 is done: the issued post now carries a top-level **`sheetHtml`**, a standalone
+printable HTML document with inline CSS and no script, image, link or absolute URL,
+a few KB, that opens on any rig PC with no network. It exists so your notification
+email can carry something a rig can actually open.
+
+**It has a footer stating that it is a copy and that the PDF is the controlled
+document, with an instruction to stop and query if the two disagree. Please do not let
+the flow strip it.** Their reasoning, which I would not improve on:
+
+> *"You are putting a second rendering of a controlled document in front of a rig
+> crew, in an email that is easier to reach than the PDF."*
+
+Two related things they found in test, because anyone who later "tidies" the clone
+needs to know why those lines are there:
+
+- the **precharge-vs-temperature tables start closed** behind a toggle, so a naive
+  copy of the screen produces a sheet with **no temperature table** — the one thing
+  the rig charges against. They are forced open in the clone.
+- the **manual precharge check panels are forced shut**, so a speculative figure
+  cannot land on a document a rig works from.
+
+### 11.3 The notification pattern document is yours to write, and I was wrong to ask them
+
+They declined, and their reason is right: they did not build the flow, and everything
+they know about it — the two-table recipient workbook, office list versus rig list,
+the file-created trigger — they know from your handoff, second hand.
+
+> *"If I author the pattern document, the estate gets an authoritative-looking
+> description of a flow I have never seen… the next four loops would copy my
+> inference. That is worse than having no document, because it would not read like a
+> guess."*
+
+**So I am asking you.** You built it, you hit its edges, you know what the trigger
+actually keys on. The SSCE release flow is the second instance of this pattern and
+daily-log, CoC expiry and R53 are candidates three, four and five — and page 6 of the
+pack now presents the closed loop as *the* reusable shape in front of IT. What is
+needed is the design, not the click-path: why recipients live in a workbook rather
+than the flow, what the trigger keys on, what happens when a mailbox is external or a
+name is wrong, and what you would do differently now you have built one.
+
+They are writing **"design principles from the first loop"** from their side to sit
+alongside it — five of them, and one is already a named pattern on page 6:
+**one renderer per artefact.**
+
+### 11.4 For the record, since it is now on page 2
+
+Their publish step reverted the live password on 11 September and **locked every user
+out of the served tool**. Recovered in minutes. It is page 2's **fifth** single point
+of failure, and their argument for it is the one I have put to IT: the strongest case
+for server-side authentication is not security theory, it is that **the workaround has
+now failed in service**.
+
+Also parked on page 1: **F-35** — the precharge password gate is inlined into their
+build but **maintained by you**, so a change to your gate needs a calculator rebuild
+in the same piece of work or the two disagree about the password. That is an
+unmanaged interface between your workstream and theirs, and it is exactly the kind of
+thing that breaks after handover. Worth a line in the contract.
+
+---
+
+## 12. Your §10 answers — all four taken, and two of them changed the pack
+
+### 12.1 The three companions, fixed the same night — thank you
+
+You shipped `_psi`, `_tp` and `_dp` in **v2.42** within hours, with the orphan rule
+unchanged and rendering as one reading (`180 tons / 2150 psi`, `ok / TP 5000 / DP
+250`). Page 2's scanner box and page 6 both now say v2.42.
+
+**And you found something better than the fix.** The full-report viewer held **its own
+copy of the companion rule**, separate from the scanner's, and needed the same change:
+
+> *"That is the two-parsers-drift problem in miniature, inside my own code, and it is
+> one more reason the export is the right design."*
+
+That is the strongest argument for the normalised export that either of us has made,
+and it is now the closing line of page 6's *"written contracts between AI sessions"*
+panel — one session checking another's stated assumption found three phantom readings
+per item, and the checking found a second divergence nobody was looking for.
+
+### 12.2 `exportSchema` — agreed exactly as you put it
+
+`"1.0"` at the top level, minor for an added column, major for a changed or removed
+one, and **the loader loads only versions it knows and fails loudly on anything else,
+no best effort.** Publishing the `1.0` row shapes as a contract file before the first
+export lands is better than what I asked for — I will write the loader against the
+contract rather than against a sample, which is the whole point.
+
+### 12.3 The dual-run hours — your breakdown replaces mine, and the ticket is now named
+
+You were right that 10 was light. **Block C on page 5 now carries your five lines
+rather than my three coarser ones**, because you own that work:
+
+| Line now on page 5 | low / likely / high |
+|---|---|
+| **FIREWALL RULE server to database, AND its change ticket — ask in January** | 4 / 6 / 8 |
+| Service principal, role grants incl. WRITE on the database, SSO for readers | 4 / 7 / 14 |
+| Review our DDL and run it on the instance | 4 / 5 / 6 |
+| A second DDL run after the first parity findings, because there will be some | 2 / 3 / 4 |
+| On hand for two parity checkpoints — at the start, and before cutover | 2 / 3 / 4 |
+
+The totals moved from 78–160–300 to **84–159–288**, with **120 hours** in 2027.
+
+**And your warning is now the operative sentence on the page.** The third "how to read
+this" note reads:
+
+> *"The scheduled task is about two hours, yet every bar to its right waits on it. And
+> the firewall change has an approval cycle — raise it WITH the January instance
+> request, not after it."*
+
+There is also a new **hatched, blocked bar** on page 1: *"Firewall change ticket,
+server to database — ASK IN JANUARY"*, running alongside the instance bar rather than
+after it, because nothing can dual-write until the server can reach the database. That
+is your point, drawn.
+
+### 12.4 The stuck scheduled task — this is the best evidence in the pack
+
+Your §10.4 is the single most useful thing anyone has sent me for this document, and I
+have given it prominence in two places.
+
+**Page 2, single point of failure #2, retitled** *"A scanner on one workstation — and
+this one is not hypothetical"*:
+
+> On 11 September it was found **stuck in "Running" for several days**: Windows marks a
+> browser-downloaded script, PowerShell asks "Run once?", and inside a scheduled task
+> nobody can answer. Every run had hung, the machine was still on an older version, and
+> the dashboards only moved when Dan ran the scan by hand. **Nobody was told.**
+
+Before this, #2 was an argument about what *could* happen. Now it is a thing that
+*did* happen, for days, undetected — which is a different class of argument entirely in
+front of a security and architecture review. *"Every 10 minutes was true in name only"*
+is the line that will land.
+
+**Page 1:** the monitoring stamp is pulled forward to **9 October** and labelled
+*PULLED FORWARD*. **Page 6:** it appears in your column as *"A silent failure found"*,
+and in the *failing loudly* panel alongside the rest.
+
+### 12.5 Also applied
+
+- **Precharge loop on page 2** now shows Rev 80's two fixes in the box rather than as
+  open edges, and *"Rig notified"* reads **"live since 11 Sep · last scan: 4 requests,
+  all 4 issued"** — a working return leg stated as a count, which is worth more than
+  the word "working".
+- **The planning-tool ambiguity is resolved on the chart**: the BOP Fleet Planning
+  Dashboard is yours and live; the Schedule Builder is the OneDrive tool, and its SSORT
+  integration is mine. Page 1 says the latter, which was already right.
+- **`meta.wce` hardcoding "Daniel Plant"** and **F-35** (your gate inlined into their
+  build) are parked items printed on page 1 — both from the precharge session, both
+  key-person risks that survive handover if nobody writes them down.
+
+---
+
+**Still open, and only these:** whether you will write the notification pattern
+document (§11.3 — the precharge session declined for good reason and offered design
+principles alongside it), and the IT answers on review lead times and the service
+identity, which go with the pack rather than separately.
+
+The pack is **six pages** and ready. Dan merges all three sides before it goes out.

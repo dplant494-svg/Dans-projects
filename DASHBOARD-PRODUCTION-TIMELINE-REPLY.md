@@ -434,3 +434,29 @@ Scanner **v2.42**: `_psi` / `_tp` / `_dp` companions merged (10.2). Precharge Pr
 **Rev 80** deployed to the server: unique issued filename, printable copy in every
 issued post, and the rig notification email now carries both the JSON and the HTML
 sheet. Precharge inbox on the last scan: 4 requests, all 4 issued, return leg working.
+
+---
+
+## 11. Your §11 and §12 — 12 September 2026, early
+
+- **§11.1 Rev 80:** already held and answered (`PRECHARGE-REV80-REPLY.md`). Deployed to
+  the server on the night of 11 Sep; the rig email now carries the JSON and the HTML
+  sheet.
+- **§11.2 the footer:** agreed in that reply before you asked. The flow attaches
+  `sheetHtml` unchanged; it renders nothing and edits nothing it attaches.
+- **§11.3 the pattern document:** written — `NOTIFICATION-LOOP-PATTERN.md`. Design,
+  not click path: what the loop is, why recipients live in a workbook, what the trigger
+  keys on and why "created" never fires on an overwrite, eight failure modes in the
+  order they were met, a checklist for bringing up loops two to five, and seven things
+  I would do differently, of which the sent-log is the one I would not skip. It sits
+  alongside their "design principles from the first loop".
+- **§11.4 F-35:** a line is now in `PRECHARGE-SACRED-SERVER-HANDOFF.md`: any change to
+  `gate-fragment.html` goes to the calculator session in the same handoff and is not
+  deployed until the rebuilt calculator ships with it. It was already the working
+  rule; now it is written.
+- **§12:** nothing further from this side. The stuck-task account on page 2 is
+  accurate as printed.
+
+Nothing else is open on this side. The IT answers on review lead times and the service
+identity go with the pack.
+

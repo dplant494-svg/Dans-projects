@@ -153,3 +153,17 @@ Data contract (`PRECHARGE-OWNERSHIP-AND-DATA-CONTRACT.md` §3), the id
 `<rigKey>_<well>_BOP<bop>`, the `archive\` rule, `meta.tool` as the routing
 key, the request form Rev 3 frozen, transport byte-identical. The move changes
 where files sit, not what is in them.
+
+---
+
+## Addendum, 11 September 2026 — F-35, the gate as a shared interface
+
+The password gate is **maintained here** (`precharge/gate-fragment.html`, published to
+the server) and **inlined into the calculator build** by the Precharge Pro session. So
+a change to the gate on this side needs a calculator rebuild in the same piece of
+work, or the served page and the fragment disagree about the password. This is the
+F-41 rule stated as an interface: **any change to `gate-fragment.html` is sent to the
+calculator session in the same handoff, and is not deployed until the rebuilt
+calculator ships with it.** SALT and the sha256 method never change. Recorded so it
+survives handover (production-timeline handoff §11.4).
+
