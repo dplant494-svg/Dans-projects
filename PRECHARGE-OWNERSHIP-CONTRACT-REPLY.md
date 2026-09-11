@@ -76,8 +76,8 @@ in a new tab. Dan has the steps.
 - **F-25 / F-25a** (production security) — unchanged, joint. The gate is a
   curtain; the payloads carry MASP, water depth and shear on an open share.
   Folder authentication or encrypted payloads before this leaves the sandbox.
-- **Name.** Dan has chosen **DeepCharge Pro** for the calculator. Branding is
+- **Name.** Dan has chosen **Precharge Pro** for the calculator (renamed from DeepCharge Pro, 2026-09-11). Branding is
   yours (it renders); nothing on our side changes — the folder stays
   `precharge` and `prechargeDeployPath` is untouched. If you ever want the URL
-  to say `deepcharge`, it is one line in `config.json` and a re-deploy.
+  to say `prechargepro`, it is one line in `config.json` and a re-deploy.
 - The request form (**Rev 3** — corrected; Rev 2 is the broken build) is kept exactly as it is, by Dan's decision.

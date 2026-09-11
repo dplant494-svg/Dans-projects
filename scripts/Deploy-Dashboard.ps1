@@ -97,7 +97,7 @@ else {
 }
 
 
-# DeepCharge Pro / BOP Precharge Calculator. 'prechargeDeployPath' names the
+# Precharge Pro (formerly DeepCharge Pro) / BOP Precharge Calculator. 'prechargeDeployPath' names the
 # folder the calculator is served from (the scanner writes its requests\
 # subfolder there). Every page in it is built by the calculator session and
 # dropped into precharge\ by Dan; this script publishes them AS-IS, never

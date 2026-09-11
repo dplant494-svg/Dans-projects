@@ -131,7 +131,7 @@ not touched.
       <p>A precharge request has been posted from <b>@{outputs('RigName')}</b>.</p>
       <p>Well: @{outputs('Well')} · BOP: @{body('Parse_JSON')?['meta']?['bop']} · Raised by: @{body('Parse_JSON')?['meta']?['raisedBy']}</p>
       <p>Shear required: @{body('Parse_JSON')?['fields']?['shReqTop']?['v']} psig · MAWHP: @{body('Parse_JSON')?['fields']?['mawhpTop']?['v']} psi · Water depth: @{body('Parse_JSON')?['fields']?['wd']?['v']}</p>
-      <p><a href="http://sdrlazneuiis01d.corp.local:8080/sacred/precharge/calculator.html">Open DeepCharge Pro</a> — it is on the Requests tab within 10 minutes of posting.</p>
+      <p><a href="http://sdrlazneuiis01d.corp.local:8080/sacred/precharge/calculator.html">Open Precharge Pro</a> — it is on the Requests tab within 10 minutes of posting.</p>
       ```
 
     **If no** (an issued precharge) → **Condition**: `outputs('SupervisorEmail')`

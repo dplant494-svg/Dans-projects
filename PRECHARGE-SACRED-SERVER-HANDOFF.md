@@ -1,4 +1,4 @@
-# Handoff — DeepCharge Pro on the sacred server: where everything lives and who puts it there
+# Handoff — Precharge Pro (formerly DeepCharge Pro) on the sacred server: where everything lives and who puts it there
 
 **To:** the precharge-calculator session (calculator Rev 76+, request form Rev 3)
 **From:** the dashboard / scanner session (scanner v2.41)
@@ -145,7 +145,7 @@ when he does; this week's "request not showing" reports were all that.
    with nobody running anything.
 5. `http://sdrlazneuiis01d.corp.local:8080/sacred/precharge/gate-fragment.html`
    returns the fragment (your `_gatecheck.js` reads it from there).
-6. SharePoint tile "DeepCharge Pro" opens the URL in a new tab.
+6. SharePoint tile "Precharge Pro" opens the URL in a new tab.
 
 ## 8. Unchanged
 
