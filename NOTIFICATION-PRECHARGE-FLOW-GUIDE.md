@@ -7,7 +7,7 @@
 | Posted file | Who posts it | Goes TO | CC |
 |---|---|---|---|
 | **Request** `seadrill-request_<rig>_<well>_<date>_precharge.json` | the rig, from the SSORT request form | Office table: Dan, Lee, Joao | — |
-| **Issued precharge** `seadrill-report_<rig>_<date>_precharge.json` | you, from the calculator's Post to Dashboard | that rig's Subsea Supervisor (Rigs table) | Office table |
+| **Issued precharge** `seadrill-report_<rig>_<date>_precharge.json` | you, from the calculator's Post to Dashboard | that rig's Subsea Supervisor **and Technical Section Leader** (Rigs table, `SubseaSupervisorEmail` + `TSLEmail`) | Office table |
 
 **File you need:** `WCE_Precharge_Notification.xlsx` (sent with this). Two
 tables: **Office** (the three addresses, already filled) and **Rigs** (one
@@ -110,6 +110,14 @@ not touched.
     ```
     coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],'')
     ```
+13b. **Compose**, rename **RigTo** — the rig-side To line (supervisor plus
+    TSL, either may be blank). Expression:
+    ```
+    join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TSLEmail'],'')),';'),json('[]')),';')
+    ```
+    Then in step 14 use `outputs('RigTo')` for the ISSUED email's To, and
+    test `outputs('RigTo')` (not SupervisorEmail) for the NO RIG CONTACT
+    condition.
 
 ## Part F — send (5 minutes)
 
