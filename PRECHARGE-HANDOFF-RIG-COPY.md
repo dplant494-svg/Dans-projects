@@ -38,3 +38,28 @@ still send.
 
 Routing, folder, `prechargeDeployPath`, gate, `gate-fragment.html`, the Rev 3
 request form and the calculator arithmetic are all untouched by this.
+
+## Second ask — a unique filename for every issued post
+
+Observed live today: an issued post is named
+`seadrill-report_West-Vela_2026-09-11_precharge.json`, rig and date only.
+Re-issuing the same rig on the same day (a second BOP, or a correction)
+posts the same name and SharePoint **overwrites** the earlier file.
+
+Two consequences:
+
+1. The notification flow triggers on file *creation*. An overwrite is a
+   modification, so the rig gets no email for the second sheet.
+2. If the scanner has not run in the 10-minute window between the two posts,
+   the first file is gone from `PostedReports` before it was ever read.
+
+Please make the issued `FileName` unique per sheet, for example:
+
+```
+seadrill-report_West-Vela_<well sanitised>_BOP<bop>_<yyyyMMdd-HHmmss>_precharge.json
+```
+
+Keep `precharge` in the name (the flow keys on it) and keep the rest of the
+POST call exactly as it is. Filenames are not load-bearing for the scanner;
+it keys on `meta`, so nothing on the dashboard side changes. The request form
+already does this (`seadrill-request_vela_Test-1234_20260911_precharge.json`).
