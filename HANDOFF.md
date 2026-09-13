@@ -159,7 +159,7 @@ paths with credentials, but this shape is fine to document)
 
 ## Current script versions
 
-- `scripts/Update-Dashboard.ps1`: **v2.42** (`_psi`/`_tp`/`_dp` merged as reading companions, no more phantom readings; v2.41 = rolling handoff entry 6: the size
+- `scripts/Update-Dashboard.ps1`: **v2.43** (report digests for Copilot Studio: optional `digestPath`/`dashboardUrl`/`copilotUrl` in config.json, one HTML digest per report into a separate synced library, scanner sole writer, see `COPILOT-REPORTS-ASSISTANT-GUIDE.md`; v2.42 = `_psi`/`_tp`/`_dp` merged as reading companions, no more phantom readings; v2.41 = rolling handoff entry 6: the size
   ceiling is applied per report type once the file is parsed — 10 MB for
   everything, **30 MB for CBM Inspection**, because a CBM report legitimately
   carries 48–100 compressed photographs and a warning that always fires

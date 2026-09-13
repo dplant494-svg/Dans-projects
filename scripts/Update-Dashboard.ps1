@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.42'
+$ScriptVersion = '2.43'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -89,6 +89,28 @@ $outputFile = [Environment]::ExpandEnvironmentVariables($config.outputFile)
 if (-not [System.IO.Path]::IsPathRooted($outputFile)) {
     $outputFile = Join-Path $repoRoot $outputFile
 }
+# v2.43: optional readable digest per report for Microsoft Copilot Studio.
+# Copilot's SharePoint knowledge indexes Office/HTML/text files and ignores
+# the raw .json posts (proven 13 Sep 2026: an agent pointed at PostedReports
+# found the notification workbook and nothing else). 'digestPath' names a
+# folder - a SEPARATE synced SharePoint library, never one of reportFolders
+# and never PostedReports (the notification flows trigger on every file
+# created there and would mail a digest whose name says 'precharge') - and
+# the scanner is its sole writer: one <source file>.html per report,
+# rewritten only when the content changes, stale ones removed.
+# 'dashboardUrl' makes each digest link back to its report on the dashboard;
+# 'copilotUrl' is the agent's share link, shown on the dashboard as
+# 'Ask Copilot'. All three optional; nothing happens when they are absent.
+$digestPath = ''
+if ($config.PSObject.Properties['digestPath'] -and $config.digestPath) {
+    $digestPath = [Environment]::ExpandEnvironmentVariables([string]$config.digestPath)
+}
+$dashboardUrl = ''
+if ($config.PSObject.Properties['dashboardUrl'] -and $config.dashboardUrl) { $dashboardUrl = [string]$config.dashboardUrl }
+$copilotUrl = ''
+if ($config.PSObject.Properties['copilotUrl'] -and $config.copilotUrl) { $copilotUrl = [string]$config.copilotUrl }
+$digestExpected = @{}
+$digestWritten = 0
 
 function Get-Prop {
     param($Object, [string]$Name)
@@ -369,6 +391,247 @@ function Get-CheckReadings {
         }) | Out-Null
     }
     return $result.ToArray()
+}
+
+# ---- Report digests (v2.43) -------------------------------------------------
+# One self-contained HTML page per posted report, written for a search index
+# and a language model rather than a person: every value the report carries,
+# as text, in tables, with the rig / type / date / file stated up front and a
+# link back to the dashboard. Photos, base64 and the Rev 80 sheetHtml are
+# left out (the copy on the dashboard has them). Generic on purpose: a new
+# report type is digested the day it appears, with no scanner change.
+function ConvertTo-DigestText {
+    param([string]$Html)   # ConvertTo-PlainText without the 1200-char cap
+    if (-not $Html) { return '' }
+    $t = $Html -replace '<br\s*/?>', ' ' -replace '</(p|div|tr|li|h[1-6])>', ' | ' -replace '<[^>]+>', ' '
+    $t = $t -replace '&nbsp;', ' ' -replace '&amp;', '&' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&quot;', '"' -replace '&#39;', "'"
+    return (($t -replace '\s+', ' ') -replace '(\s*\|\s*)+', ' | ').Trim(' |'.ToCharArray())
+}
+function ConvertTo-HtmlText { param([string]$Text) return [System.Net.WebUtility]::HtmlEncode([string]$Text) }
+function ConvertTo-DigestScalar {
+    param($Value)   # ConvertFrom-Json turns ISO dates into [datetime]; keep them ISO, not locale
+    if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }
+    if ($Value -is [string]) { return ConvertTo-DigestText $Value }
+    return [string]$Value
+}
+function Test-DigestScalar { param($Value) return ($Value -is [string] -or $Value -is [ValueType]) }
+function Test-DigestEmpty {
+    param($Value)   # nothing worth a heading: null, '', [], {}
+    if ($null -eq $Value) { return $true }
+    if ($Value -is [string]) { return ($Value.Trim() -eq '') }
+    if (Test-DigestScalar $Value) { return $false }
+    if ($Value -is [System.Array] -or $Value -is [System.Collections.IList]) { return (@($Value).Count -eq 0) }
+    return (@(Get-KeyNames $Value | Where-Object { $null -ne $_ }).Count -eq 0)   # @($null).Count is 1 - filter it
+}
+function Write-DigestSection {
+    param([System.Text.StringBuilder]$Sb, [string]$Tag, [string]$Label, $Value, [int]$Depth)
+    # heading only if the body renders to something - a {} or a set of empty
+    # strings must not leave a bare heading for the index to find
+    $tmp = New-Object System.Text.StringBuilder
+    Write-DigestValue -Sb $tmp -Value $Value -Depth $Depth
+    if ($tmp.Length -eq 0) { return }
+    [void]$Sb.Append("<$Tag>").Append((ConvertTo-HtmlText $Label)).Append("</$Tag>").Append($tmp.ToString())
+}
+$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1 }
+function Test-DigestSkipValue {
+    param($Value)
+    if ($Value -is [string]) {
+        if ($Value.StartsWith('data:')) { return $true }              # embedded image
+        if ($Value.Length -gt 4000 -and ($Value -notmatch '\s')) { return $true }   # bare base64
+        if ($Value.Length -gt 40000) { return $true }
+    }
+    return $false
+}
+function Write-DigestValue {
+    param([System.Text.StringBuilder]$Sb, $Value, [int]$Depth)
+    if ($Depth -gt 6) { return }
+    if ($null -eq $Value) { return }
+    if (Test-DigestScalar $Value) {
+        $txt = ConvertTo-DigestScalar $Value
+        if ($txt) { [void]$Sb.Append('<p>').Append((ConvertTo-HtmlText $txt)).Append('</p>') }
+        return
+    }
+    if ($Value -is [System.Array] -or $Value -is [System.Collections.IList]) {
+        $items = @($Value)
+        if ($items.Count -eq 0) { return }
+        $first = $items[0]
+        if ($first -is [System.Array] -or $first -is [System.Collections.IList]) {
+            # rows of cells (e.g. precharge summaryRows)
+            [void]$Sb.Append('<table>')
+            foreach ($row in $items) {
+                [void]$Sb.Append('<tr>')
+                foreach ($cell in @($row)) { [void]$Sb.Append('<td>').Append((ConvertTo-HtmlText (ConvertTo-DigestText ([string]$cell)))).Append('</td>') }
+                [void]$Sb.Append('</tr>')
+            }
+            [void]$Sb.Append('</table>')
+            return
+        }
+        if ($first -is [string] -or $first -is [ValueType]) {
+            $vals = @($items | ForEach-Object { ConvertTo-HtmlText (ConvertTo-DigestText ([string]$_)) } | Where-Object { $_ })
+            if ($vals.Count) { [void]$Sb.Append('<p>').Append(($vals -join ', ')).Append('</p>') }
+            return
+        }
+        # array of objects carrying nested structure (tiles with equipEntries,
+        # cbmData...) -> one section per item, headed by its title/name; flat
+        # objects -> one table, union of keys in first-seen order
+        $hasNested = $false
+        foreach ($it in $items) {
+            foreach ($k in (Get-KeyNames $it)) {
+                $ks = [string]$k
+                if ($DigestSkipKeys.ContainsKey($ks.ToLower())) { continue }
+                $v = Get-Prop $it $ks
+                if ($null -eq $v -or (Test-DigestScalar $v)) { continue }
+                if (($v -is [System.Array] -or $v -is [System.Collections.IList]) -and (@($v).Count -eq 0 -or (Test-DigestScalar @($v)[0]))) { continue }
+                $hasNested = $true; break
+            }
+            if ($hasNested) { break }
+        }
+        if ($hasNested) {
+            $n = 0
+            foreach ($it in $items) {
+                $n++
+                $label = ''
+                foreach ($lk in @('title', 'name', 'equip', 'label', 'id')) { $lv = Get-Prop $it $lk; if ($lv -and (Test-DigestScalar $lv)) { $label = ConvertTo-DigestScalar $lv; break } }
+                $tag = if ($Depth -le 1) { 'h3' } else { 'h4' }
+                Write-DigestSection -Sb $Sb -Tag $tag -Label "$n. $label" -Value $it -Depth ($Depth + 1)
+            }
+            return
+        }
+        $cols = New-Object System.Collections.Generic.List[string]
+        $seen = @{}
+        foreach ($it in $items) { foreach ($k in (Get-KeyNames $it)) { $ks = [string]$k; if (-not $seen.ContainsKey($ks) -and -not $DigestSkipKeys.ContainsKey($ks.ToLower())) { $seen[$ks] = 1; $cols.Add($ks) } } }
+        if ($cols.Count -eq 0) { return }
+        $nested = New-Object System.Collections.Generic.List[object]
+        [void]$Sb.Append('<table><tr>')
+        foreach ($c in $cols) { [void]$Sb.Append('<th>').Append((ConvertTo-HtmlText $c)).Append('</th>') }
+        [void]$Sb.Append('</tr>')
+        $rowNo = 0
+        foreach ($it in $items) {
+            $rowNo++
+            [void]$Sb.Append('<tr>')
+            foreach ($c in $cols) {
+                $v = Get-Prop $it $c
+                $cellTxt = ''
+                if ($null -ne $v -and -not (Test-DigestSkipValue $v)) {
+                    if (Test-DigestScalar $v) { $cellTxt = ConvertTo-DigestScalar $v }
+                    elseif ($v -is [System.Array] -or $v -is [System.Collections.IList]) {
+                        $inner = @($v)
+                        if ($inner.Count -and (Test-DigestScalar $inner[0])) { $cellTxt = (@($inner | ForEach-Object { ConvertTo-DigestScalar $_ }) -join ', ') }
+                        elseif ($inner.Count) { $cellTxt = "(see $c, row $rowNo below)"; $nested.Add(@{ label = "$c - row $rowNo"; value = $v }) }
+                    }
+                    else { $cellTxt = "(see $c, row $rowNo below)"; $nested.Add(@{ label = "$c - row $rowNo"; value = $v }) }
+                }
+                [void]$Sb.Append('<td>').Append((ConvertTo-HtmlText $cellTxt)).Append('</td>')
+            }
+            [void]$Sb.Append('</tr>')
+        }
+        [void]$Sb.Append('</table>')
+        foreach ($n in $nested) { Write-DigestSection -Sb $Sb -Tag 'h4' -Label $n.label -Value $n.value -Depth ($Depth + 1) }
+        return
+    }
+    # object: scalars as a two-column table, then nested sections
+    $scalars = New-Object System.Collections.Generic.List[object]
+    $sections = New-Object System.Collections.Generic.List[object]
+    foreach ($k in (Get-KeyNames $Value)) {
+        $ks = [string]$k
+        if ($DigestSkipKeys.ContainsKey($ks.ToLower())) { continue }
+        $v = Get-Prop $Value $ks
+        if ($null -eq $v) { continue }
+        if (Test-DigestSkipValue $v) { continue }
+        if (Test-DigestScalar $v) {
+            $txt = ConvertTo-DigestScalar $v
+            if ($txt -ne '') { $scalars.Add(@{ k = $ks; v = $txt }) }
+        }
+        elseif (-not (Test-DigestEmpty $v)) { $sections.Add(@{ k = $ks; v = $v }) }
+    }
+    if ($scalars.Count) {
+        [void]$Sb.Append('<table>')
+        foreach ($sc in $scalars) { [void]$Sb.Append('<tr><th>').Append((ConvertTo-HtmlText $sc.k)).Append('</th><td>').Append((ConvertTo-HtmlText $sc.v)).Append('</td></tr>') }
+        [void]$Sb.Append('</table>')
+    }
+    foreach ($sec in $sections) {
+        $tag = if ($Depth -le 1) { 'h3' } else { 'h4' }
+        Write-DigestSection -Sb $Sb -Tag $tag -Label $sec.k -Value $sec.v -Depth ($Depth + 1)
+    }
+}
+function Write-ReportDigest {
+    param($File, $Json, $Meta, $Rec)
+    $rig = ''
+    if ($Rec) { $rig = [string]$Rec.rig }
+    if (-not $rig) { $rig = ([string](Get-Prop $Meta 'asset')).Trim() }
+    if (-not $rig) { $rig = 'Unattributed' }
+    $rtype = if ($Rec) { [string]$Rec.reporttype } else { [string](Get-ReportType -Meta $Meta -Tiles (Get-Prop $Json 'tiles')) }
+    $date = [string](Get-Prop $Meta 'date'); if (-not $date) { $date = [string](Get-Prop $Meta 'logDate') }
+    $dateEnd = [string](Get-Prop $Meta 'dateend')
+    $lead = if ($Rec) { [string]$Rec.wce } else { [string](Get-Prop $Meta 'wce') }
+    $location = [string](Get-Prop $Meta 'location')
+    $well = [string](Get-Prop $Meta 'well')
+    $title = "$rig - $rtype" + $(if ($date) { " - $date" } else { '' })
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append('<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>').Append((ConvertTo-HtmlText $title)).Append('</title>')
+    [void]$sb.Append('<meta name="description" content="').Append((ConvertTo-HtmlText "Seadrill Well Control $rtype for $rig$(if ($date) { ", dated $date" })$(if ($lead) { ", by $lead" })$(if ($location) { ", at $location" }).")).Append('">')
+    [void]$sb.Append('<style>body{font-family:Arial,sans-serif;font-size:13px;margin:24px}table{border-collapse:collapse;margin:6px 0 12px}th,td{border:1px solid #bbb;padding:3px 6px;text-align:left;vertical-align:top}th{background:#eef}h1{font-size:20px}h2{font-size:16px;margin-top:22px}h3{font-size:14px}h4{font-size:13px;color:#444}</style></head><body>')
+    [void]$sb.Append('<h1>').Append((ConvertTo-HtmlText $title)).Append('</h1>')
+    [void]$sb.Append('<p>').Append((ConvertTo-HtmlText "This is the Seadrill Well Control Engineering $rtype for the rig $rig$(if ($date) { ", dated $date" })$(if ($dateEnd -and $dateEnd -ne $date) { " to $dateEnd" })$(if ($lead) { ", completed by $lead" })$(if ($location) { ", location $location" })$(if ($well) { ", well $well" }).")).Append('</p>')
+    [void]$sb.Append('<table>')
+    $hdr = @(
+        @('Rig', $rig), @('Report type', $rtype), @('Visit type', [string](Get-Prop $Meta 'type')), @('Discipline', [string](Get-Prop $Meta 'discipline')),
+        @('Date', $date), @('Date end', $dateEnd), @('Completed by', $lead), @('Location', $location), @('Well', $well),
+        @('Schedule', [string](Get-Prop $Meta 'schedule')), @('BOP', [string](Get-Prop $Meta 'bop')), @('Source file', $File.Name),
+        @('Posted', $File.LastWriteTime.ToString('yyyy-MM-dd HH:mm'))
+    )
+    foreach ($h in $hdr) { if ($h[1]) { [void]$sb.Append('<tr><th>').Append((ConvertTo-HtmlText $h[0])).Append('</th><td>').Append((ConvertTo-HtmlText $h[1])).Append('</td></tr>') } }
+    if ($dashboardUrl) {
+        $link = $dashboardUrl + '?report=' + [Uri]::EscapeDataString($File.Name)
+        [void]$sb.Append('<tr><th>Dashboard</th><td><a href="').Append((ConvertTo-HtmlText $link)).Append('">Open this report on the Rig Visit Dashboard</a></td></tr>')
+    }
+    [void]$sb.Append('</table>')
+    if ($Rec -and $Rec.criticalItems -and @($Rec.criticalItems).Count) {
+        [void]$sb.Append('<h2>Critical items (').Append(@($Rec.criticalItems).Count).Append(', ').Append([int]$Rec.criticalOpen).Append(' open)</h2>')
+        Write-DigestValue -Sb $sb -Value $Rec.criticalItems -Depth 1
+    }
+    if ($Rec -and $Rec.actionItems -and @($Rec.actionItems).Count) {
+        [void]$sb.Append('<h2>Actions raised during the visit (').Append(@($Rec.actionItems).Count).Append(')</h2>')
+        Write-DigestValue -Sb $sb -Value $Rec.actionItems -Depth 1
+    }
+    $checks = Get-Prop $Meta 'checks'
+    if ($checks) {
+        [void]$sb.Append('<h2>Readings</h2><table><tr><th>System</th><th>Item</th><th>Value</th><th>Unit</th><th>Result</th><th>Pressure (psi)</th><th>Test pressure</th><th>Differential pressure</th><th>Comment</th></tr>')
+        foreach ($r in (Get-CheckReadings -Checks $checks)) {
+            $res = if ($r.pass -eq $true) { 'pass' } elseif ($r.pass -eq $false) { 'FAIL' } else { '' }
+            foreach ($cell in @($r.system, $r.item, $r.value, $r.unit, $res, $r.psi, $r.tp, $r.dp, $r.comment)) { [void]$sb.Append($(if ($cell -eq $r.system) { '<tr>' } else { '' })).Append('<td>').Append((ConvertTo-HtmlText ([string]$cell))).Append('</td>') }
+            [void]$sb.Append('</tr>')
+        }
+        [void]$sb.Append('</table>')
+    }
+    # Everything else the file carries, generically: meta first (minus what is
+    # already in the header), then every other top-level key.
+    $metaRest = [ordered]@{}
+    foreach ($k in (Get-KeyNames $Meta)) { $ks = [string]$k; if ($ks -in @('asset','type','discipline','date','dateend','wce','location','well','schedule','bop','checks','logDate','reporttype')) { continue }; $metaRest[$ks] = Get-Prop $Meta $ks }
+    if ($metaRest.Count) { Write-DigestSection -Sb $sb -Tag 'h2' -Label 'Report details' -Value ([pscustomobject]$metaRest) -Depth 1 }
+    $topScalars = [ordered]@{}
+    foreach ($k in (Get-KeyNames $Json)) {
+        $ks = [string]$k
+        if ($ks -in @('meta','version','exportedAt','criticalRows','actionRows')) { continue }
+        if ($DigestSkipKeys.ContainsKey($ks.ToLower())) { continue }
+        $v = Get-Prop $Json $ks
+        if ($null -eq $v) { continue }
+        if (Test-DigestSkipValue $v) { continue }
+        if (Test-DigestScalar $v) { $topScalars[$ks] = $v; continue }
+        if (Test-DigestEmpty $v) { continue }
+        Write-DigestSection -Sb $sb -Tag 'h2' -Label $ks -Value $v -Depth 1
+    }
+    if ($topScalars.Count) { [void]$sb.Append('<h2>Other fields</h2>'); Write-DigestValue -Sb $sb -Value ([pscustomobject]$topScalars) -Depth 1 }
+    [void]$sb.Append('<hr><p>Generated by the TSC Dashboard scanner v').Append($ScriptVersion).Append(' from ').Append((ConvertTo-HtmlText $File.Name)).Append('. This digest is a searchable text copy for Copilot; the report on the dashboard is the reference and carries the photographs.</p></body></html>')
+    $html = $sb.ToString()
+    $dest = Join-Path $digestPath ($File.Name + '.html')
+    $script:digestExpected[$File.Name + '.html'] = $true
+    $existing = ''
+    if (Test-Path -Path $dest) { $existing = [System.IO.File]::ReadAllText($dest) }
+    if ($existing -ne $html) {
+        [System.IO.File]::WriteAllText($dest, $html, (New-Object System.Text.UTF8Encoding($false)))
+        $script:digestWritten++
+    }
 }
 
 # cbmData.equip is always the equipment CLASS (a fixed inspection template,
@@ -1528,8 +1791,9 @@ foreach ($f in $files) {
     # Restricted TOPSET files (cfClass above 'Seadrill Internal') stay out of
     # the reports list entirely - the header-only record in
     # topsetInvestigations[] is their sole presence on the dashboard.
+    $summaryRec = $null
     if (-not $isPlanningOnly -and -not $restrictedTopsetFiles.ContainsKey($f.Name)) {
-        $reports.Add([pscustomobject]@{
+        $summaryRec = [pscustomobject]@{
             file          = $f.Name
             rig           = [string]$rig
             reporttype    = [string](Get-ReportType -Meta $meta -Tiles $tilesRaw)
@@ -1551,7 +1815,17 @@ foreach ($f in $files) {
             # throw 'Argument types do not match' on List[object] contents here.
             criticalItems = $criticalItems.ToArray()
             actionItems   = $actionItems.ToArray()
-        }) | Out-Null
+        }
+        $reports.Add($summaryRec) | Out-Null
+    }
+    # Digest for Copilot (v2.43): same exclusions as the deployed report copies
+    # (restricted TOPSET bodies and precharge request payloads never leave the
+    # scanner); planning-only reports are digested too, they answer "what is
+    # the plan for X" questions.
+    if ($digestPath -and -not $restrictedTopsetFiles.ContainsKey($f.Name) -and -not $prechargeRequestFiles.ContainsKey($f.Name)) {
+        if (-not (Test-Path -Path $digestPath)) { New-Item -ItemType Directory -Path $digestPath -Force | Out-Null }
+        try { Write-ReportDigest -File $f -Json $json -Meta $meta -Rec $summaryRec }
+        catch { Write-Warning "Digest not written for $($f.Name): $($_.Exception.Message)" }
     }
     }
     catch {
@@ -1622,8 +1896,20 @@ $complianceSorted = New-Object System.Collections.Generic.List[object]
 $complianceList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $complianceSorted.Add($_) | Out-Null }
 
+# Digest folder housekeeping (v2.43): the scanner is the sole writer there,
+# so anything it did not produce this run is stale. Only .html is touched.
+# Skipped when the scan found nothing, for the same reason the deploy is.
+if ($digestPath -and (Test-Path -Path $digestPath) -and $reports.Count -gt 0) {
+    $digestRemoved = 0
+    foreach ($old in Get-ChildItem -Path $digestPath -File -Filter *.html) {
+        if (-not $digestExpected.ContainsKey($old.Name)) { Remove-Item -Path $old.FullName -Force; $digestRemoved++ }
+    }
+    Write-Host "Digests for Copilot: $digestWritten new/updated, $($digestExpected.Count) total, $digestRemoved stale removed in $digestPath" -ForegroundColor Green
+}
+
 $payload = [pscustomobject]@{
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+    copilotUrl   = $copilotUrl
     reportFolder = ($existingFolders -join '  |  ')
     reports      = $sortedList.ToArray()
     dailyLog     = [pscustomobject]@{

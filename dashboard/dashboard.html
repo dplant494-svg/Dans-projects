@@ -70,6 +70,8 @@
   }
   .banner-meta .fresh { color: rgba(255,255,255,0.7); text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px; }
   .banner-meta .stale { color: var(--sd-yellow); }
+  .banner-meta .ask-copilot { display: inline-block; margin-top: 8px; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.55); border-radius: 4px; color: #fff; text-decoration: none; font-size: 12px; letter-spacing: 0.02em; }
+  .banner-meta .ask-copilot:hover { background: rgba(255,255,255,0.12); }
 
   .page-body { padding: 24px 32px 32px; }
 
@@ -3669,6 +3671,20 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       warn.className = 'stale';
       warn.textContent = 'Stale — check scheduled task';
       el.appendChild(warn);
+    }
+    // Ask Copilot (scanner v2.43): the Copilot Studio agent grounded on the
+    // scanner's report digests. Config-driven (copilotUrl), so the page is
+    // the same on every server; absent config, no button.
+    if (data.copilotUrl) {
+      el.appendChild(document.createElement('br'));
+      var ask = document.createElement('a');
+      ask.className = 'ask-copilot';
+      ask.href = data.copilotUrl;
+      ask.target = '_blank';
+      ask.rel = 'noopener';
+      ask.textContent = 'Ask Copilot about these reports';
+      ask.title = 'Opens the WCE Reports Assistant in a new tab. It answers from the same reports this dashboard shows.';
+      el.appendChild(ask);
     }
   }
 

@@ -236,3 +236,11 @@ first run of `Update-Dashboard.ps1` overwrites it with your real reports. To
 test the pipeline end-to-end before touching the real folder, set
 `reportFolder` to the `sample-reports` directory and `filePattern` to
 `seadrill-report_*.json`, then run the script.
+
+## Ask Copilot (scanner v2.43)
+
+Optional. Three keys in `config.json`: `digestPath` (a separate synced SharePoint
+library the scanner fills with one readable HTML digest per report), `dashboardUrl`
+(so each digest links back to its report) and `copilotUrl` (the Copilot Studio agent's
+link, shown on the dashboard as "Ask Copilot about these reports"). Setup in
+`COPILOT-REPORTS-ASSISTANT-GUIDE.md`. Absent keys, nothing happens.
