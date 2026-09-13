@@ -332,6 +332,8 @@ Scanner **v2.28 → v2.41**, 33 commits since 25 Aug alone, all on the working b
 | # | Milestone | Date | Gate |
 |---|---|---|---|
 | M1 | Precharge notifications live end to end | **11 Sep 2026 — done** | — |
+| M1a | **"Ask Copilot about these reports" live**: a Copilot Studio agent grounded on scanner-written digests of every posted report (266 on day one), answering with citations, reachable from a button on the dashboard and from Teams | **13 Sep 2026 — done** | — |
+| M1b | **A SQL database created by Dan himself**, on Fabric, no IT resource; the database workstream starts now instead of January | **13 Sep 2026 — done** | — |
 | M2 | Scanner folder on the sacred server, ISIT engaged | 30 Sep | Dan's copy complete (9 Sep). **Waiting on Adam Snyder to schedule the task; no reply from IT as of 11 Sep.** |
 | M3 | Reading-key and identity conventions agreed between loader and scanner (§4) | 9 Oct | reply to this document |
 | M4 | SSCE release / cancel flow live; West Polaris item returnable | 16 Oct | — |
@@ -499,4 +501,30 @@ Dan also confirmed: WCGRRT and SSORT get **photo shrinking at source**
 carry **the PDF itself** (`PRECHARGE-HANDOFF-SHEETPDF.md`), Daily Checks move off the
 Report List into Rig Monitoring, and a **rig visit report email with a dashboard link**
 is loop two of the notification pattern. All in `WEEK-PLAN-2026-09-14.md`.
+
+---
+
+## 13. Two milestones delivered on 13 September — for page 1 and page 6
+
+- **M1a — Copilot on the reports, live.** Copilot's SharePoint index ignores the raw
+  `.json` posts (proven on the morning of the 13th), so scanner **v2.44** writes one
+  readable HTML digest per report into its own library, `WellControl/Digests/Reports`:
+  266 digests, 4.3 MB in total, largest 43 KB, no photographs, rewritten only on change,
+  stale ones removed. The **WCE Reports Assistant** agent in Copilot Studio is grounded
+  on that folder only, web search off, and answers with a citation to the digest. It is
+  published to Teams and the dashboard header carries **"Ask Copilot about these
+  reports"**, config-driven, so the page is identical on every server. Anyone who can
+  open the Digests library can ask; nobody else gets an answer. The digests are the
+  bridge until the database holds the data; then the agent is pointed at the database
+  and the library retires.
+- **M1b — the database exists.** See §12. Fabric SQL, Dan's workspace, 60-day trial,
+  query window and connection strings live.
+- **Item 5 of the week plan** is built: Daily Checks and FLM leave the Report List
+  and live on Rig Monitoring, with a per-rig submissions list into the viewer. Ships in
+  the next dashboard page Dan installs.
+- **Rev 81** of Precharge Pro carries the issued PDF itself; the flow attaches it in
+  place of the JSON as soon as Dan rewires the attachment. Their correction: the
+  qualification suite is **47/47**, not 45/45, and it stands on page 6.
+
+Page 6's "what both sides delivered in the last fortnight" can take all four.
 
