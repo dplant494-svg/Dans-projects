@@ -45,7 +45,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.43'
+$ScriptVersion = '2.44'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -401,11 +401,16 @@ function Get-CheckReadings {
 # left out (the copy on the dashboard has them). Generic on purpose: a new
 # report type is digested the day it appears, with no scanner change.
 function ConvertTo-DigestText {
-    param([string]$Html)   # ConvertTo-PlainText without the 1200-char cap
+    param([string]$Html)   # ConvertTo-PlainText without the 1200-char cap; photos out, text capped at 40k
     if (-not $Html) { return '' }
-    $t = $Html -replace '<br\s*/?>', ' ' -replace '</(p|div|tr|li|h[1-6])>', ' | ' -replace '<[^>]+>', ' '
+    if ($Html.StartsWith('data:')) { return '' }                       # a bare embedded image
+    if ($Html.Length -gt 4000 -and ($Html -notmatch '\s')) { return '' } # bare base64
+    $t = $Html -replace '<img[^>]*>', ' ' -replace 'data:[a-z]+/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+', ' '
+    $t = $t -replace '<br\s*/?>', ' ' -replace '</(p|div|tr|li|h[1-6])>', ' | ' -replace '<[^>]+>', ' '
     $t = $t -replace '&nbsp;', ' ' -replace '&amp;', '&' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&quot;', '"' -replace '&#39;', "'"
-    return (($t -replace '\s+', ' ') -replace '(\s*\|\s*)+', ' | ').Trim(' |'.ToCharArray())
+    $t = (($t -replace '\s+', ' ') -replace '(\s*\|\s*)+', ' | ').Trim(' |'.ToCharArray())
+    if ($t.Length -gt 40000) { $t = $t.Substring(0, 40000) + ' ...' }
+    return $t
 }
 function ConvertTo-HtmlText { param([string]$Text) return [System.Net.WebUtility]::HtmlEncode([string]$Text) }
 function ConvertTo-DigestScalar {
@@ -432,13 +437,19 @@ function Write-DigestSection {
     if ($tmp.Length -eq 0) { return }
     [void]$Sb.Append("<$Tag>").Append((ConvertTo-HtmlText $Label)).Append("</$Tag>").Append($tmp.ToString())
 }
-$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1 }
+$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; imgdata = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1 }
+function Test-DigestSkipKey {
+    param([string]$Key)   # photo-carrying keys by name: cbm _ph, *photo*, *image*, imgData...
+    $k = $Key.ToLower()
+    if ($DigestSkipKeys.ContainsKey($k)) { return $true }
+    if ($k.EndsWith('_ph') -or $k.EndsWith('_photo') -or $k.EndsWith('_photos') -or $k.EndsWith('_img') -or $k.EndsWith('_image')) { return $true }
+    return $false
+}
 function Test-DigestSkipValue {
     param($Value)
     if ($Value -is [string]) {
         if ($Value.StartsWith('data:')) { return $true }              # embedded image
         if ($Value.Length -gt 4000 -and ($Value -notmatch '\s')) { return $true }   # bare base64
-        if ($Value.Length -gt 40000) { return $true }
     }
     return $false
 }
@@ -460,14 +471,14 @@ function Write-DigestValue {
             [void]$Sb.Append('<table>')
             foreach ($row in $items) {
                 [void]$Sb.Append('<tr>')
-                foreach ($cell in @($row)) { [void]$Sb.Append('<td>').Append((ConvertTo-HtmlText (ConvertTo-DigestText ([string]$cell)))).Append('</td>') }
+                foreach ($cell in @($row)) { [void]$Sb.Append('<td>').Append((ConvertTo-HtmlText (ConvertTo-DigestScalar $cell))).Append('</td>') }
                 [void]$Sb.Append('</tr>')
             }
             [void]$Sb.Append('</table>')
             return
         }
         if ($first -is [string] -or $first -is [ValueType]) {
-            $vals = @($items | ForEach-Object { ConvertTo-HtmlText (ConvertTo-DigestText ([string]$_)) } | Where-Object { $_ })
+            $vals = @($items | Where-Object { -not (Test-DigestSkipValue $_) } | ForEach-Object { ConvertTo-HtmlText (ConvertTo-DigestScalar $_) } | Where-Object { $_ })
             if ($vals.Count) { [void]$Sb.Append('<p>').Append(($vals -join ', ')).Append('</p>') }
             return
         }
@@ -478,7 +489,7 @@ function Write-DigestValue {
         foreach ($it in $items) {
             foreach ($k in (Get-KeyNames $it)) {
                 $ks = [string]$k
-                if ($DigestSkipKeys.ContainsKey($ks.ToLower())) { continue }
+                if (Test-DigestSkipKey $ks) { continue }
                 $v = Get-Prop $it $ks
                 if ($null -eq $v -or (Test-DigestScalar $v)) { continue }
                 if (($v -is [System.Array] -or $v -is [System.Collections.IList]) -and (@($v).Count -eq 0 -or (Test-DigestScalar @($v)[0]))) { continue }
@@ -499,7 +510,7 @@ function Write-DigestValue {
         }
         $cols = New-Object System.Collections.Generic.List[string]
         $seen = @{}
-        foreach ($it in $items) { foreach ($k in (Get-KeyNames $it)) { $ks = [string]$k; if (-not $seen.ContainsKey($ks) -and -not $DigestSkipKeys.ContainsKey($ks.ToLower())) { $seen[$ks] = 1; $cols.Add($ks) } } }
+        foreach ($it in $items) { foreach ($k in (Get-KeyNames $it)) { $ks = [string]$k; if (-not $seen.ContainsKey($ks) -and -not (Test-DigestSkipKey $ks)) { $seen[$ks] = 1; $cols.Add($ks) } } }
         if ($cols.Count -eq 0) { return }
         $nested = New-Object System.Collections.Generic.List[object]
         [void]$Sb.Append('<table><tr>')
@@ -516,7 +527,7 @@ function Write-DigestValue {
                     if (Test-DigestScalar $v) { $cellTxt = ConvertTo-DigestScalar $v }
                     elseif ($v -is [System.Array] -or $v -is [System.Collections.IList]) {
                         $inner = @($v)
-                        if ($inner.Count -and (Test-DigestScalar $inner[0])) { $cellTxt = (@($inner | ForEach-Object { ConvertTo-DigestScalar $_ }) -join ', ') }
+                        if ($inner.Count -and (Test-DigestScalar $inner[0])) { $cellTxt = (@($inner | Where-Object { -not (Test-DigestSkipValue $_) } | ForEach-Object { ConvertTo-DigestScalar $_ } | Where-Object { $_ }) -join ', ') }
                         elseif ($inner.Count) { $cellTxt = "(see $c, row $rowNo below)"; $nested.Add(@{ label = "$c - row $rowNo"; value = $v }) }
                     }
                     else { $cellTxt = "(see $c, row $rowNo below)"; $nested.Add(@{ label = "$c - row $rowNo"; value = $v }) }
@@ -534,7 +545,7 @@ function Write-DigestValue {
     $sections = New-Object System.Collections.Generic.List[object]
     foreach ($k in (Get-KeyNames $Value)) {
         $ks = [string]$k
-        if ($DigestSkipKeys.ContainsKey($ks.ToLower())) { continue }
+        if (Test-DigestSkipKey $ks) { continue }
         $v = Get-Prop $Value $ks
         if ($null -eq $v) { continue }
         if (Test-DigestSkipValue $v) { continue }
@@ -613,7 +624,7 @@ function Write-ReportDigest {
     foreach ($k in (Get-KeyNames $Json)) {
         $ks = [string]$k
         if ($ks -in @('meta','version','exportedAt','criticalRows','actionRows')) { continue }
-        if ($DigestSkipKeys.ContainsKey($ks.ToLower())) { continue }
+        if (Test-DigestSkipKey $ks) { continue }
         $v = Get-Prop $Json $ks
         if ($null -eq $v) { continue }
         if (Test-DigestSkipValue $v) { continue }

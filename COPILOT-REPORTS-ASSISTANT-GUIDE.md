@@ -1,6 +1,6 @@
 # Ask Copilot about the reports — setup guide
 
-**For:** Dan · **Date:** 13 September 2026 · **Needs:** scanner v2.43, Copilot Studio (you have it)
+**For:** Dan · **Date:** 13 September 2026 · **Needs:** scanner v2.44, Copilot Studio (you have it)
 
 ## Why this is built the way it is
 
@@ -44,7 +44,7 @@ scanner must never read its own output as a report.
 
 ## Part C — install v2.43 and run it (5 minutes)
 
-1. Save `Update-Dashboard.ps1` (v2.43) over `C:\TSC-Dashboard\scripts\Update-Dashboard.ps1`.
+1. Save `Update-Dashboard.ps1` (v2.44) over `C:\TSC-Dashboard\scripts\Update-Dashboard.ps1`.
 2. Save `dashboard.html` over `C:\TSC-Dashboard\dashboard\dashboard.html`.
 3. In PowerShell:
 
