@@ -168,6 +168,13 @@
   .check-flag { color: var(--sd-fail); margin-left: 6px; font-size: 13px; cursor: help; }
   tr:last-child td { border-bottom: 0; }
   .table-empty { color: var(--sd-text-light); padding: 22px 0; text-align: center; }
+  .table-note { color: var(--sd-text-light); font-size: 12px; margin: -6px 0 10px; }
+  .linkish { background: none; border: none; padding: 0; color: var(--sd-blue, #1f3b73); text-decoration: underline; cursor: pointer; font: inherit; font-size: 12px; }
+  .rm-subs { margin-top: 18px; }
+  .rm-subs h4 { margin: 0 0 6px; font-size: 13px; }
+  .rm-subs table { border-collapse: collapse; font-size: 12px; }
+  .rm-subs th, .rm-subs td { padding: 4px 10px 4px 0; text-align: left; border-bottom: 1px solid var(--sd-border, #e3e6ea); }
+  .rm-subs .attn { color: var(--sd-red, #c2392b); font-weight: 600; }
 
   .status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 700; }
   .status-ico {
@@ -639,6 +646,7 @@
 
         <section class="card">
           <h2>Reports</h2>
+          <div class="table-note">Daily Checks and FLM submissions are on the <button type="button" class="linkish" id="goto-monitoring">Rig Monitoring</button> tab.</div>
           <div class="table-scroll">
             <table>
               <thead><tr id="table-head"></tr></thead>
@@ -782,6 +790,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     return { kind: 'pass', icon: '✓', label: 'Clear' };
   }
 
+  function isRigCheckReport(r) { return r.reporttype === 'Daily Checks' || r.reporttype === 'FLM'; }
+
   function filteredReports() {
     var data = window.DASHBOARD_DATA;
     if (!data || !data.reports) return [];
@@ -798,6 +808,11 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       // routing ask). They stay in data.reports so the full-report viewer,
       // deep links, and the Marine tab's drill-through still work.
       if (r.discipline === 'Marine') return false;
+      // Daily Checks / FLM submissions (one per rig per shift, dozens a week)
+      // route to the Rig Monitoring tab, where they have their readings
+      // matrix and trends. They stay in data.reports for the viewer, deep
+      // links, digests and the per-rig submission list on that tab.
+      if (isRigCheckReport(r)) return false;
       if (cutoff && reportDate(r) < cutoff) return false;
       if (state.rig && r.rig !== state.rig) return false;
       if (state.rtype && (r.reporttype || '') !== state.rtype) return false;
@@ -2191,6 +2206,44 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       table.appendChild(tbody);
       scroll.appendChild(table);
       matrixHost.appendChild(scroll);
+
+      // The submissions behind the matrix, one row per date+shift in the
+      // range, newest first, each opening its own report in the viewer.
+      // This is where a specific day's checks are opened from now that
+      // Daily Checks / FLM no longer sit in the Report List.
+      var subsSeen = {}, subs = [];
+      entries.forEach(function (e) {
+        var k = e.date + '|' + (e.shift || '') + '|' + (e.file || '');
+        if (subsSeen[k]) { if (rigCheckAttention(e)) subsSeen[k].attn++; return; }
+        subsSeen[k] = { date: e.date, shift: e.shift || '', by: e.by || '', file: e.file || '', attn: rigCheckAttention(e) ? 1 : 0 };
+        subs.push(subsSeen[k]);
+      });
+      subs.sort(function (a, b) { return a.date === b.date ? (b.shift || '').localeCompare(a.shift || '') : (a.date < b.date ? 1 : -1); });
+      var subsBox = mk('div', 'rm-subs');
+      subsBox.appendChild(mk('h4', '', view.kind + ' submissions in this range (' + subs.length + ')'));
+      var st = mk('table', '');
+      var sh = mk('tr', '');
+      ['Date', 'Shift', 'Completed by', 'Flagged', ''].forEach(function (h) { sh.appendChild(mk('th', '', h)); });
+      st.appendChild(sh);
+      subs.forEach(function (s) {
+        var tr = mk('tr', '');
+        tr.appendChild(mk('td', '', rmFmtDate(s.date)));
+        tr.appendChild(mk('td', '', s.shift || '—'));
+        tr.appendChild(mk('td', '', s.by || '—'));
+        tr.appendChild(mk('td', s.attn ? 'attn' : '', s.attn ? String(s.attn) : '—'));
+        var td = mk('td', '');
+        var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === s.file; });
+        if (rec) {
+          var ob = mk('button', 'rm-trend-btn', 'Open');
+          ob.type = 'button';
+          ob.addEventListener('click', function () { openReportViewer(rec); });
+          td.appendChild(ob);
+        }
+        tr.appendChild(td);
+        st.appendChild(tr);
+      });
+      subsBox.appendChild(st);
+      matrixHost.appendChild(subsBox);
     }
 
     update();
@@ -3708,6 +3761,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var rigs = [], buckets = [], types = [];
     (window.DASHBOARD_DATA.reports || []).forEach(function (r) {
       if (r.discipline === 'Marine') return;  // routed to the Marine tab, so no dead filter option here
+      if (isRigCheckReport(r)) return;        // routed to Rig Monitoring, same reason
       if (r.rig) {
         if (NON_RIG_BUCKETS[r.rig]) { if (buckets.indexOf(r.rig) === -1) buckets.push(r.rig); }
         else if (rigs.indexOf(r.rig) === -1) rigs.push(r.rig);
@@ -4135,6 +4189,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
   $('tab-monitoring-btn').addEventListener('click', function () { showTab('monitoring'); });
+  $('goto-monitoring').addEventListener('click', function () { showTab('monitoring'); });
   $('tab-marine-btn').addEventListener('click', function () { showTab('marine'); });
   $('tab-invest-btn').addEventListener('click', function () { showTab('invest'); });
   $('tab-compliance-btn').addEventListener('click', function () { showTab('compliance'); });
