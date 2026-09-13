@@ -460,3 +460,43 @@ sheet. Precharge inbox on the last scan: 4 requests, all 4 issued, return leg wo
 Nothing else is open on this side. The IT answers on review lead times and the service
 identity go with the pack.
 
+---
+
+## 12. The database can start now — 13 September 2026
+
+Dan checked what he can create himself. Azure: no subscription. Dataverse: present, no
+create rights. **Fabric: a SQL database created in his Power BI workspace in one click**,
+on a 60-day Fabric trial that started automatically. Query window, connection strings,
+the lot.
+
+What that does to page 1 and page 3:
+
+- **The engine choice stands.** A Fabric SQL database *is* Azure SQL, so the schema,
+  DDL, `OPENJSON` / `JSON_VALUE` and the loader you are writing target exactly this.
+  Nothing you have started changes.
+- **"Database instance provisioned — FIRST IT RESOURCE NEEDED" moves out of January**
+  and becomes two smaller things: (a) we create the real database on the trial as soon
+  as the DDL is ready, no IT; (b) IT attach a **paid Fabric capacity** to the WCE
+  workspace before the trial ends, which is a licence line, not provisioning. Ask for
+  it on the same ticket as the service identity and the firewall change.
+- **The dual-run and parity window can start when the loader is ready**, not in
+  January. The two-week parity window still applies; it just happens earlier and
+  against a real database.
+- **Copilot** can be pointed at the database as soon as it holds data (Copilot Studio
+  through the SQL connector, or Fabric's own Data agent, which was also on Dan's
+  screen). The digest library then retires. Until then the digests carry Copilot,
+  which is going live this week.
+- **One new question, mine:** authentication from the scanner. Fabric SQL is Entra
+  sign-in only. From PowerShell 5.1 with no installs the route is a service principal
+  token fetched with `Invoke-RestMethod` and set on `SqlConnection.AccessToken`. The
+  app registration is a small Entra admin ask. I will prove the connection from Dan's
+  PC under his own account first, then ask for the principal.
+- **Honest limit:** nothing on the trial is production. It is a sandbox with a
+  deadline, and the pack should say so.
+
+Dan also confirmed: WCGRRT and SSORT get **photo shrinking at source**
+(`LARGE-REPORTS-PHOTO-HANDOFF.md`, 1600 px, JPEG 0.80), the precharge email will
+carry **the PDF itself** (`PRECHARGE-HANDOFF-SHEETPDF.md`), Daily Checks move off the
+Report List into Rig Monitoring, and a **rig visit report email with a dashboard link**
+is loop two of the notification pattern. All in `WEEK-PLAN-2026-09-14.md`.
+
