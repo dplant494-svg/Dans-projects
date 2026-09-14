@@ -238,8 +238,9 @@ sheet being indexed twice. Use a sentinel (`serial = '(none)'`) in the key, neve
 
 ## 5. §8 and §9 — SPARC, the Schedule Builder, the one-way door, Maximo
 
-- **SPARC and how it reaches Maximo:** answered 14 Sep by Lee's handoff, see §14:
-  **it does not.** Static exports, no live route to reuse. Field mapping banked.
+- **SPARC and how it reaches Maximo:** answered 14 Sep, see §14: no live link, but a
+  **scheduled daily Maximo export (06:00 Houston)** that SPARC and the COC tracker
+  both read. The route exists; our tools just do not read it yet. Field mapping banked.
 - **Schedule Builder REV 3:** the no-remote-repository risk is real and I would put it
   in October, not February. It is a one-hour fix (`git remote add` + push) once someone
   who holds that folder does it.
@@ -334,7 +335,7 @@ Scanner **v2.28 → v2.41**, 33 commits since 25 Aug alone, all on the working b
 | M1 | Precharge notifications live end to end | **11 Sep 2026 — done** | — |
 | M1a | **"Ask Copilot about these reports" live**: a Copilot Studio agent grounded on scanner-written digests of every posted report (266 on day one), answering with citations, reachable from a button on the dashboard and from Teams | **13 Sep 2026 — done** | — |
 | M1b | **A SQL database created by Dan himself**, on Fabric, no IT resource; the database workstream starts now instead of January | **13 Sep 2026 — done** | — |
-| M1c | **SPARC handoff received**; the Maximo question answered (static exports, no live link); ICN / SFI / job plan / Master PM / cost mapping banked from SPARC §6 | **14 Sep 2026 — done** | — |
+| M1c | **SPARC handoff received**; the Maximo question answered: no live link, but a **scheduled daily Maximo export (06:00 Houston)** already feeds SPARC and the COC tracker; ICN / SFI / job plan / Master PM / cost mapping banked from SPARC §6 | **14 Sep 2026 — done** | landing path from Lee |
 | M2 | Scanner folder on the sacred server, ISIT engaged | 30 Sep | Dan's copy complete (9 Sep). **Waiting on Adam Snyder to schedule the task; no reply from IT as of 11 Sep.** |
 | M3 | Reading-key and identity conventions agreed between loader and scanner (§4) | 9 Oct | reply to this document |
 | M4 | SSCE release / cancel flow live; West Polaris item returnable | 16 Oct | — |
@@ -531,29 +532,29 @@ Page 6's "what both sides delivered in the last fortnight" can take all four.
 
 ---
 
-## 14. SPARC handoff received 14 September — the Maximo answer, and a correction to your §9
+## 14. SPARC handoff received 14 September — the Maximo answer
 
 Lee's session delivered `SPARC-HANDOFF-SACRED.md` (filed in this repo). Full reply in
 `SPARC-HANDOFF-REPLY.md`. The part that changes the pack:
 
-**SPARC does not reach Maximo.** Its ICNs, costs, statuses, job plans and Master PMs
-are a point-in-time extract from five hand-exported `SDITEM_SFI` item files and one
-`WCE Job Plans.xlsx`. No API, no service account, no ODBC, no IT integration. Live
-Maximo is SPARC's own roadmap item 3. **The COC tracker uses the same export** (Dan,
-14 Sep), so one hand-run export set is the estate's entire Maximo supply today.
+**SPARC has no live link to Maximo** (handoff §6: point-in-time extract, live
+integration is its roadmap item 3). **But the extract is not hand-made: it comes from
+Maximo direct on a schedule, refreshing at 06:00 Houston every day, and the COC tracker
+reads the same export** (Dan, 14 Sep). Five `SDITEM_SFI` item files and the job-plan
+list. No API, no service account, none needed.
 
-So your §9 ("Maximo is a reuse question", two weeks off the front) rested on a premise
-that is gone. Proposed bars:
+So your §9 ("Maximo is a reuse question", two weeks off the front) stands, for a
+different reason than it assumed: the thing to reuse is a **scheduled export that
+already runs**, not a live route. Proposed bars:
 
 | Bar | Now |
 |---|---|
-| `Maximo — field mapping done (from SPARC); route is an IT ask`, 15 Sep → 9 Oct | the mapping half of discovery is finished for free (SPARC §6 names every field); the route half joins the ISIT service-identity ticket |
-| `Maximo read-only feed into the platform`, back to 23 Oct → 11 Dec | dependent on IT, honestly |
+| `Maximo — read the daily 06:00 Houston export SPARC and the COC tracker already use`, 15 Sep → 9 Oct | one week of real work: find where the export lands and list its files. The field mapping is finished for free (SPARC §6 names every field) |
+| `Maximo read-only feed into the platform`, 9 Oct → 27 Nov | stays pulled forward: if the landing folder is reachable by a sync client, the scanner reads it the way it reads the BWM workbook today, and the loader reads the same files. No IT build |
 
-Cheapest route to ask for first: a **scheduled Maximo report** of the same five item
-queries plus the job-plan list into a SharePoint library. That is a report schedule,
-not an integration, and it feeds SPARC, the COC tracker, the Schedule Builder and the
-database from one place.
+One question to Lee decides it: **where does the 06:00 export land, and which files
+are in it?** Also worth checking whether the Schedule Builder's hand-refreshed exports
+are the same data; if so, that hand refresh stops.
 
 Next steps proposed in the reply: load `SPARC_Master_Data.xlsx` (eight Excel tables)
 into the Fabric database as the first reference tables (your loader gets real data);

@@ -13,9 +13,12 @@ The timeline pack (collaboration doc §8.1 and §9) called *"how does SPARC reac
 Maximo?"* the single highest-value unknown, on the assumption that SPARC reads live
 Maximo data and its route could be reused by the whole estate.
 
-**The handoff answers it plainly: SPARC does not reach Maximo. There is no live route.**
-(§6, "Current state": a static, point-in-time extract; "no live API yet"; live
-integration is roadmap item 3.) What SPARC holds came from **files exported by hand**:
+**The handoff answers it: SPARC has no live connection to Maximo** (§6, "Current state":
+a static, point-in-time extract; "no live API yet"; live integration is roadmap item 3).
+**Dan then answered the rest (14 Sep): the export comes from Maximo direct and refreshes
+at 06:00 Houston time every day.** So the route is not an API and not a person at a
+screen: it is **a scheduled daily Maximo export that already runs.** SPARC and the COC
+tracker both read it. What it produces:
 
 | Export | What it is | Used for |
 |---|---|---|
@@ -23,9 +26,11 @@ integration is roadmap item 3.) What SPARC holds came from **files exported by h
 | `WCE Job Plans.xlsx` | 707 job plans, make/model in column H, SFI group in column I | job plan numbers `0900-xxxx`, Master PM `Cxxxx`, descriptions per interval |
 
 So there is no service account, no API, no ODBC connection and no IT-built integration
-sitting behind SPARC. **The COC tracker (WCE Certification Tracker) uses the same
-export** (Dan, 14 Sep). So the whole estate's Maximo data comes from one hand-run
-export set, and there is exactly one thing to ask IT to schedule.
+sitting behind SPARC, and none is needed. **The COC tracker (WCE Certification
+Tracker) uses the same export** (Dan, 14 Sep). One scheduled export, refreshed daily at
+06:00 Houston (12:00 UK in summer, 11:00 in winter), is the estate's Maximo supply, and
+it is already automated. **The estate's Maximo route exists today. What is missing is
+only that our tools do not read it yet.**
 
 ### What this does to the timeline
 
@@ -33,20 +38,23 @@ The §9 rewrite in the collaboration doc ("Maximo is not an unknown, it is a reu
 question", two weeks off the front) rested on a premise the handoff removes. Honest
 correction:
 
+The §9 rewrite in the collaboration doc ("Maximo is not an unknown, it is a reuse
+question", two weeks off the front) turns out to be **right, for a different reason
+than it assumed.** Not a live route to reuse, but a scheduled export to read:
+
 | Bar | Was (§9) | Should be |
 |---|---|---|
-| `Maximo — reuse the route SPARC and the COC tracker already use`, 15 Sep → 9 Oct | reuse | **`Maximo — field mapping done (from SPARC); route is an IT ask`**, 15 Sep → 9 Oct. The *mapping* half of the old discovery bar is finished for free: ICN, SFI group, job plan, Master PM, last price, status, manufacturer are all named and reconciled in SPARC §6. The *route* half (who can give the estate a scheduled export or a read-only view) goes on the same ISIT ticket as the service identity. |
-| `Maximo read-only feed into the platform`, 9 Oct → 27 Nov | pulled forward two weeks | **Back to 23 Oct → 11 Dec**, and honestly dependent on IT. Not a "first IT resource in January" item, but not ours to finish either. |
+| `Maximo — reuse the route SPARC and the COC tracker already use`, 15 Sep → 9 Oct | reuse a live route | **`Maximo — read the daily 06:00 Houston export SPARC and the COC tracker already use`**, 15 Sep → 9 Oct. Two things to establish, both small: **where the export lands** (a share, a SharePoint library, a mailbox?) and **its exact file set** (the five `SDITEM_SFI` files and the job-plan list, or more). The field mapping half is finished for free: ICN, SFI group, job plan, Master PM, last price, status and manufacturer are all named and reconciled in SPARC §6. |
+| `Maximo read-only feed into the platform`, 9 Oct → 27 Nov | pulled forward two weeks | **Stays pulled forward.** If the export lands somewhere a sync client can reach, the scanner reads it the way it already reads the planners' BWM workbook dropped in a folder (raw file carried through, parsed downstream), and the database loader reads the same files. No IT build; at most an ISIT ask to add one read-only path. |
 
-Net: the field mapping is a real gain and stays. The two weeks were not real and come
-back. The Schedule Builder keeps consuming hand-refreshed exports until the route exists,
-exactly as it does today, and so does SPARC.
+Net: the two weeks §9 took off are real after all, the discovery bar is now a
+one-week "find the landing folder and list the files" task, and the Schedule Builder's
+hand-refreshed exports (`Job Plans and Durations.xlsm`, `PMs with due dates.xlsx`)
+should be checked against the same daily export: if they are the same data, the hand
+refresh stops.
 
-**Cheapest possible route, worth asking IT first:** whoever produces the `SDITEM_SFI`
-exports today does it from a Maximo screen. A **scheduled export of the same five
-queries plus the job-plan list to a SharePoint library** is a Maximo report schedule,
-not an integration project, and it would feed SPARC, the COC tracker, the Schedule
-Builder and the database from one place. Ask for that before asking for an API.
+**The one thing still to ask:** not IT, Lee. *Where does the 06:00 export land, and what
+files are in it?* Everything else follows from the answer.
 
 ## 2. What SPARC is, in SACRED terms
 
@@ -112,15 +120,18 @@ checklist and the planning report), not a scanner one, and not urgent.
 - **Page 4 (effort):** the handoff leaves man-hours blank for the timeline owner to
   fill; it gives ten weeks elapsed, six phases, and a note that the AI-assisted actuals
   are far below a traditional multi-month small-team estimate. Lee owns that figure.
-- **Milestone:** M1c, *SPARC handoff received; Maximo route answered (static exports,
-  no live link); field mapping banked*, 14 Sep 2026, done.
+- **Milestone:** M1c, *SPARC handoff received; Maximo route answered: a scheduled
+  daily export (06:00 Houston) already feeds SPARC and the COC tracker; field mapping
+  banked*, 14 Sep 2026, done.
 
 ## 5. Questions back to Lee's session (three, all short)
 
-1. Who runs the `SDITEM_SFI` and job-plan exports, from which Maximo screen, and how
-   often? (This is the person and the report IT would schedule.)
+1. ~~Who runs the exports and how often?~~ **Answered by Dan, 14 Sep: Maximo direct,
+   scheduled, refreshes 06:00 Houston daily.** Remaining half: **where does it land
+   (exact path or library) and which files are in it?** That path is what the scanner
+   and the database loader read.
 2. ~~Is the COC tracker fed from the same export?~~ **Answered by Dan, 14 Sep: yes, the
-   same export.** One export set feeds SPARC and the COC tracker.
+   same export.**
 3. Can we have `SPARC_Master_Data.xlsx` for the database load (step 3.1)?
 
 Everything else in the handoff is complete enough to work from. It is a good document.
