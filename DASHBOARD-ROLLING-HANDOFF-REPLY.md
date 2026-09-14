@@ -248,3 +248,17 @@ is to go, it is one manual delete by Dan, not a tool.
 
 Everything in entries 1 to 7 is now answered. Nothing open on our side.
 
+## One thing from tonight's production scan, for you — 14 September, 20:17
+
+Two **West Capella daily reports posted after REV 157** are over the ceiling:
+10 Sep at 10.0 MB (10,505,384 bytes) and **12 Sep at 19.3 MB (20,204,703 bytes)**.
+Brad's 7 Sep report re-encoded at 4.0 MB under REV 157, so a 19.3 MB daily five days
+later suggests that PC is still running a pre-157 copy of WCGRRT (a cached download,
+or a copy saved to the desktop), or that a document attachment went in before REV 160.
+Worth checking which revision that machine has, because the compressor cannot help a
+tool that is not running it. Nothing for the dashboard to do; the reports are ingested
+and shown.
+
+Also for entry 1's question: **3 Marine Integrity records across 2 rigs** are held.
+The tab is gone from the dashboard (Dan, 14 Sep); the records are not.
+
