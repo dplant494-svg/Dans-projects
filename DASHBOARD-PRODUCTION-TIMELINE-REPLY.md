@@ -562,3 +562,64 @@ serve SPARC from IIS on the sacred server instead of a 139 MB file on the share;
 dashboard link after that; order lists as a posted artefact later, loop three of the
 pattern, when Dan wants a parts-readiness widget. Three questions back to Lee are in
 the reply §5. Milestone M1c added above.
+
+---
+
+## 15. Your §14 and §15, 14 September — one answer, four corrections for page 2, nothing else open
+
+### 15.1 §14.8, the photo value — 0.82 in both tools, recommended; Dan confirms
+
+You are right not to change a live compressor on a line in a week plan, and right that
+`0.80` would be a third value. My `0.80` was a target from before I knew either tool had
+shipped shrinking; it was not a measured preference.
+
+**Recommendation: 1600 px / JPEG 0.82 in both tools**, which is the value WCGRRT REV
+157 already uses, so only SSORT moves (0.70 → 0.82). Reasons: Dan's standard is *"good
+quality and legible"* and 0.82 is the higher of the two; SSORT's Daily Checks carry a
+handful of alarm photos, so the size cost of 0.82 there is a few hundred KB per
+submission at most; and one number across two tools is one number to write in the
+contract. The keep-full-size tick stays for the rare case someone needs the original.
+**Dan, one word: 0.82 in both, yes?** Until he says so, nothing changes; you were right
+to ask.
+
+For the record, the five reports over the ceiling on the dashboard today all pre-date
+REV 157. They are on the dashboard and stay there, by Dan's instruction of 14
+September; the Errors list carries them as "oversized, still shown", not as failures.
+
+### 15.2 Four things page 2 says about the scanner that stopped being true today
+
+Your §3 rule, "anything you assert I will print as fact", cuts both ways, so here are
+today's changes before the PDF rebuild rather than after:
+
+| Page 2 says | Now true (14 Sep) |
+|---|---|
+| Scanner **v2.42**, "parsing every file on every run" | **v2.46.** Since v2.45 the scanner fingerprints every input first (each file's name, size and modified time, the config, the version, the date) and **does the full parse only when something changed**; otherwise it refreshes the "Data updated" stamp and exits in about a second. The 10-minute task still runs every 10 minutes; it now does real work only in the ten minutes after a post, and at most once a day otherwise. Any changed input, failed deploy or `-Force` runs the full scan unchanged. Measured: 9.1 s full, 0.8 s unchanged, on the 16-file test set. |
+| Dashboard views include **"marine (archived)"** | **Marine Integrity is off the dashboard**, Dan's decision today: tab and view removed, not archived. `marineScores[]` is still produced and ignored; an old report opened in the viewer still shows its marine section. Views now: Report List, CBM Heatmap, Rig Monitoring, Investigations, Compliance. |
+| (nothing on Daily Checks routing) | **Daily Checks and FLM live on Rig Monitoring only** (13 Sep): out of the Report List, KPIs and charts, with a per-rig submissions list. The Report List is visits, CBM, investigations, compliance and precharge. |
+| "Files that could not be read" as a red banner | **An `Errors (n)` button** at the right of the tab strip, red when posts are missing from the dashboard, amber when only oversized ones remain, opening the list. And a new `Archive-ProblemFiles.ps1`: the scanner writes the same list with full paths, the script shows it, asks for a Y, and moves the cut-short posts out of the report folders into a logged archive. It cannot move an oversized report; there is no switch for it. |
+
+One more for SPOF #2 and your M8 row: **the scanner now writes `scan-state.json`
+with `lastFullScan` after every complete run** (every deploy step succeeded, at least
+one report found). That is the "last successful scan" stamp, on disk today; the
+failure email that reads it is the remaining half of M8, still 20 Nov.
+
+The Copilot button is also renamed: **"Ask SACRED AI"**, gold, in the header. Same
+agent, same link; page 6 can say either name, Dan chose this one.
+
+### 15.3 §15, SPARC — agreed as written, two small notes
+
+- Your caution on serving SPARC from IIS is fair: bundled with the sacred ticket, yes;
+  a second thing waiting on the same silence, no. If the ticket has not moved by the
+  time Lee answers the landing-folder question, SPARC stays on the share and the link
+  waits. Nothing else depends on it.
+- The Schedule Builder export check belongs to whoever holds that OneDrive folder, as
+  you say. Lee's answer on where the 06:00 export lands will settle both in one go.
+
+### 15.4 The PDF being one rebuild behind
+
+Understood; the source files carry the changes. When the workspace is back, the rebuild
+should pick up §15.2 above as well, so page 2 does not go out saying v2.42 and
+"marine (archived)" in front of IT.
+
+Nothing else between us is open. The last unanswered line on the pack is Lee's.
+

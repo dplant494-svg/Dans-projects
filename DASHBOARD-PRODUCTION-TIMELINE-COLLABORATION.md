@@ -678,9 +678,268 @@ and in the *failing loudly* panel alongside the rest.
 
 ---
 
-**Still open, and only these:** whether you will write the notification pattern
-document (§11.3 — the precharge session declined for good reason and offered design
-principles alongside it), and the IT answers on review lead times and the service
-identity, which go with the pack rather than separately.
+## 13. The pattern document — written, and better than what I asked for
 
-The pack is **six pages** and ready. Dan merges all three sides before it goes out.
+`NOTIFICATION-LOOP-PATTERN.md` closes the last item that was open between us. It is
+the design and not the click path, which was the whole ask, and three things in it
+earned a place on the pack.
+
+### 13.1 "The file is the event" — that sentence is the pattern
+
+> *"The scanner is not in the loop and does not need to be: the flow reads the same
+> posted file the scanner reads, at the same moment, from the same place."*
+
+That is a better articulation of the architecture than anything on my page 2. It is
+also why the loop is genuinely reusable rather than precharge-shaped: nothing in it
+knows about nitrogen.
+
+The other decision worth naming is **three branches, never zero** — a posted file
+always produces exactly one email, and the "no rig contact" branch exists so that a
+lookup miss is *a message to the office rather than silence*. That is the same
+fail-loudly instinct as the `problems[]` feed and the fail-closed rig guard, arrived
+at independently in a third place.
+
+### 13.2 §5.5 is now a parked item on page 1, because it is a live risk
+
+> *"The flow cannot tell a bad address from a good one. A typo in the Rigs table sends
+> the mail into the void with a green tick."*
+
+This is the most important operational sentence in the document, and it was not on the
+chart anywhere. It now is:
+
+> *"A mistyped address in the recipient workbook sends mail into the void WITH A GREEN
+> TICK — the flow cannot tell a bad address from a good one. Today the only defence is
+> the office CC on every rig-bound mail."*
+
+It is on the pack as an open item rather than buried in a handoff, because a rig that
+was never told about its own precharge sheet is exactly the failure the loop exists to
+prevent, and the current mitigation is a human noticing.
+
+### 13.3 The sent-log is on the plan
+
+Your §7 item 5, the one you said you would not skip:
+
+> *"One row per send… it outlives the 28-day history, and 'was the rig told, and when'
+> becomes a lookup rather than an archaeology."*
+
+Agreed, and it is stronger than you pitched it. **Flow run history expiring at 28 days
+is a governance problem, not just an inconvenience** — the Architecture, Security and
+Governance reviews will ask how a notification is evidenced, and "we look in the run
+history, if it is recent enough" is not an answer. A sent-log turns it into one.
+
+New row on page 1, in the assurance group: **"Notification sent-log, and the
+properties-only trigger"**, 12 Oct → 6 Nov. I have paired it with the trigger swap
+because your §4 makes the deprecated trigger a build-time trap for loops two to five,
+and the two are one sitting.
+
+### 13.4 What §6 gives us that nothing else did
+
+The bring-up checklist for loops two to five, and especially item 1 — *"does the tool
+post a unique filename per event? If not, stop and get that fixed"* — is the sentence
+that would have saved the Rev 80 filename collision if it had existed a week earlier.
+It is now the first thing anyone building the SSCE release loop will read.
+
+### 13.5 State of play
+
+Everything between the three sessions is now closed. Page 1's panel reads **STILL
+OPEN — 7 · CLOSED — 8**, restructured so the open questions are bullets and the
+answers are a single score line; the answers had grown to the point of crowding out
+the questions.
+
+**All seven remaining items need IT, or a colleague, not us:** the SPARC route into
+Maximo, the Plato sandbox, the three review owners and lead times, the service
+identity, the ISIT support model, the bad-address exposure, and the hardcoded issuer
+in every precharge sheet.
+
+---
+
+## 14. The database exists — 14 September, and it changes the central argument
+
+Your §12 and §13 are the biggest single change to this pack since it was drafted.
+**Dan created a SQL database himself on 13 September**, on a Fabric trial in his own
+Power BI workspace, in one click, with no IT resource whatsoever.
+
+### 14.1 What that does to page 3, which was built around the opposite claim
+
+Page 3's headline was *"Can we build it? Yes, most of it, and without waiting for
+January."* It now reads **"It is already built. The database exists as of 13
+September."** And the "NEEDS IT / ISIT" column has lost its first and largest line —
+*the instance itself, networking and firewall* — and gained three smaller ones:
+
+- a **paid Fabric capacity** before the 60-day trial expires — *a licence line, not
+  provisioning*
+- an **Entra app registration**, because Fabric SQL is Entra sign-in only and the
+  scanner has to sign in from PowerShell 5.1 with no installs
+- the **network path** and its change ticket, which you already flagged as the line
+  that slips
+
+Your point that **a Fabric SQL database *is* Azure SQL** is what makes this free of
+rework: the schema, the DDL, the `OPENJSON` / `JSON_VALUE` work and the loader all
+target exactly what now exists. Nothing written so far is wasted, and the engine
+argument — which we reached independently from two directions — still holds.
+
+### 14.2 Page 1: dual-run moves out of January into December
+
+| Was | Is now |
+|---|---|
+| `Database instance provisioned — FIRST IT RESOURCE NEEDED`, Jan 4–22 | **`Database CREATED on a Fabric trial, by Dan, no IT resource`** — a green *done* bar, 13 Sep |
+| `Dual-write on, then a two-week parity window`, 18 Jan – 19 Feb | **7 Dec – 22 Jan** — it can start when the loader is ready, not when an instance appears |
+| `Same HTML pages fed from the database`, 8–26 Feb | **18 Jan – 12 Feb** |
+| — | **`PAID FABRIC CAPACITY before the 60-day trial expires`** and **`Entra service principal so the scanner can sign in`** |
+
+And a new milestone that is a genuine deadline rather than a target: **"Fabric trial
+EXPIRES", 12 November.** That is the most useful thing on the chart for getting a
+licence approved, because it is a date somebody else set.
+
+### 14.3 Page 5: the ISIT ask has shrunk
+
+**152 hours most likely, range 80–274, of which 113 falls in 2027** — down from
+159 / 84–288 / 120. Provisioning came out; a licence, an app registration and role
+grants went in. The operative note now reads:
+
+> *"The scheduled task is about two hours, yet every bar to its right waits on it. And
+> the Fabric licence has a HARD DEADLINE — the trial expires around 12 November and
+> the database goes with it."*
+
+### 14.4 Page 1's ask list was stale, and is rewritten
+
+It still led with *"hosted application and database to replace the file pipeline"* and
+*"formalise the Power Automate HTTP trigger exception"*. **Neither is an ask any
+more** — there is no hosted app, the DLP exception is granted, and the database exists.
+The seven asks are now current, and the first two are the ones with dates attached:
+schedule the scanner task, and buy the Fabric capacity before mid-November.
+
+### 14.5 Copilot, and the 266 digests
+
+`M1a` is on page 1 as a *done* bar and on page 6 as a delivery. The detail worth
+keeping is **why** it exists: Copilot's SharePoint index ignores raw `.json`, so the
+scanner writes one readable HTML digest per report into its own library — 266 of them,
+4.3 MB, no photographs, rewritten only on change, stale ones removed — and the agent is
+grounded on that folder alone with web search off.
+
+**266 is now a headline figure on Dan's slide**, because "every report we have is
+queryable in plain language, with a citation" is the clearest statement of what the
+programme is for that anyone has produced. And the digests retire when the database
+holds the data, which is exactly the right shape for a bridge.
+
+### 14.6 The trial caveat is on the page, in your words
+
+> *"Honest limit: nothing on the trial is production. It is a sandbox with a deadline,
+> and the pack should say so."*
+
+It does — both in page 3's opening paragraph and as the 12 November milestone. You
+were right to insist on it; a database that disappears in November is not a platform,
+and the pack would have been overclaiming without that line.
+
+### 14.7 The suite count, for the third and final time
+
+Your §13 records the precharge session re-establishing it at **47/47**. Page 6 now
+carries the whole chain rather than just the number, because the chain is the more
+useful fact:
+
+> *"Found, fixed, and the count re-established at 47/47. That number has now been
+> revised three times by three sessions, and never reached IT wrong."*
+
+### 14.8 One thing I have not acted on, and will not without asking
+
+Your §12 lists *"WCGRRT and SSORT get photo shrinking at source (1600 px, JPEG
+0.80)"*. Shrinking at source is already shipped — **WCGRRT REV 157 at 1600 px / 0.82,
+SSORT at 1600 px / 0.70**. So `0.80` would be a *third* value across two tools.
+
+Standardising is a good idea and I will do it on one instruction, but I am not going
+to change a compressor setting on a live fleet tool on the strength of a line in a
+week plan. **Which value do you want, and shall it be the same in both tools?** Worth
+knowing: the setting only affects photographs taken after the change, so there is no
+re-render and no risk to anything already posted.
+
+---
+
+## 15. SPARC — the biggest unknown is closed, and I had the premise wrong
+
+Lee's handoff, via your reply of 14 September, answers what this document has called
+the highest-value outstanding question since §8.1. **It also corrects me, and the
+correction matters more than the answer.**
+
+### 15.1 What I got wrong
+
+I wrote, in §9, that *"two systems already read live Maximo — SPARC and the COC
+tracker"* and built a rewrite on it. **SPARC has no live connection to Maximo.** It is
+a static, point-in-time extract; live integration is item 3 on its own roadmap.
+
+You were generous about it — *"right, for a different reason than it assumed"* — and
+the conclusion does survive, but not because I reasoned correctly. It survives because
+the truth is better than my guess:
+
+> **A scheduled Maximo export already runs, every day at 06:00 Houston time, and both
+> SPARC and the COC tracker read it.**
+
+Not an API. Not a person at a screen. **An automated daily export that exists today.**
+So there is no service account, no ODBC, no IT-built integration behind either system —
+and none is needed. The estate's Maximo supply is already running; our tools simply do
+not read it yet.
+
+### 15.2 What that does to the chart
+
+- **`Maximo — reuse the SPARC / COC route`** becomes **`Maximo — read the daily 06:00
+  export SPARC and COC already use`**. Same dates. The two weeks §9 took off the front
+  are real, for the right reason this time.
+- **The field mapping half is finished for free.** ICN, SFI group, job plan, Master PM,
+  last price, status and manufacturer are all named and reconciled in the handoff. That
+  was going to be a discovery task; it is now a read.
+- **SPARC's hatched scope band is gone.** In its place: a *done* bar, **`SPARC handoff
+  in — the Maximo route answered, mapping banked`** (14 Sep), then **`SPARC — 8
+  reference tables into the database, served from IIS`** (Oct), then **`SPARC order
+  lists posted — loop three, Lee's session`** (Nov→Jan).
+- **The parked question has shrunk to one line, and it is not for IT:**
+
+  > *"WHERE does the 06:00 Houston export land, and which files are in it? That path is
+  > what the scanner and the loader read. For Lee, not IT — and it is the last thing
+  > between us and Maximo data."*
+
+  That is the single most valuable question left on the whole pack, and it is one
+  message to a colleague.
+
+### 15.3 Two things I have taken as actions for this side
+
+1. **Nothing we produce carries an SFI location code.** Your §2 is right that this is a
+   reporting-tools question, not a scanner one — a field on the compliance checklist and
+   the planning report. It is now a parked item on page 1, worded as the capability it
+   buys: *what is due, what certifies it, and what parts it needs, per location.* Not
+   urgent, and I will not add a field to a live rig form without Dan asking.
+2. **The Schedule Builder's hand-refreshed exports** — `Job Plans and Durations.xlsm`
+   and `PMs with due dates.xlsx` — should be checked against the same daily export.
+   Your point that *"if they are the same data, the hand refresh stops"* is the kind of
+   win nobody would have found without this handoff, and it belongs to whoever holds
+   that OneDrive folder.
+
+### 15.4 Your step 1 is the right first move, and it is available now
+
+> *"Load `SPARC_Master_Data.xlsx` into the Fabric database as reference tables… This is
+> the first real content in the database Dan created on 13 September."*
+
+Agreed, and the sequencing is neat: the database exists, the loader is being written,
+and eight native Excel tables are a clean, one-off, re-runnable load with no build cost
+to anyone. **It gives the loader something real to be tested against a week before the
+report export is ready** — which is better than testing a loader against its own
+synthetic fixtures. Worth asking Lee for the workbook this week.
+
+**A caution on step 2** (serving SPARC from IIS to kill the 139 MB single-file build):
+the recommendation is sound and I have nothing to add technically — but it lands on the
+**same ISIT ticket as the sacred pages**, which has not moved since 9 September. Bundle
+it, by all means, but do not let SPARC's hosting become a second thing waiting on the
+same silence.
+
+---
+
+### Note on the workspace, 14 September
+
+The shell that renders the pack went down mid-edit — a Windows update on 8 September is
+stopping it reaching the files. **Every change above is written into
+`make_timeline.py` and `page6_delivered.py`**, so nothing is lost, but the PDF itself
+is one rebuild behind: it still shows the old SPARC scope band and the old Maximo
+label. One run of `make_timeline.py` when the workspace is back brings it current.
+
+---
+
+The pack is **six pages**, the deck is two slides, and every figure on both is one
+somebody checked. Dan merges all three sides before it goes out.
