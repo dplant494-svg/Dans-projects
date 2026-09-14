@@ -91,8 +91,9 @@ You answer questions about Seadrill Well Control Engineering reports using only 
 C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
 ```
 
-3. Open the dashboard, Ctrl+F5. Under "Data updated" there is now a button, **Ask
-   Copilot about these reports**. It opens the agent in a new tab.
+3. Open the dashboard, Ctrl+F5. Under "Data updated" there is now a gold button,
+   **✦ Ask SACRED AI** (named that on 14 Sep; it was "Ask Copilot about these
+   reports" first). It opens the agent in a new tab.
 
 ## Part F — one line in the precharge flow, belt and braces (2 minutes)
 

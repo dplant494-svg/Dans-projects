@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.45'
+$ScriptVersion = '2.46'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -946,7 +946,11 @@ $LargeReportBytes = 10MB
 $LargeCbmReportBytes = 30MB
 function Add-Problem { param($File, [string]$Kind, [string]$Why)
     $problems.Add(@{ file = $File.Name; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
+    # v2.46: the same list with full paths, for scripts\Archive-ProblemFiles.ps1.
+    # Paths never enter the dashboard payload.
+    $problemFiles.Add(@{ file = $File.Name; path = $File.FullName; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
 }
+$problemFiles = New-Object System.Collections.Generic.List[object]
 
 foreach ($xf in $excelFiles) {
     try {
@@ -2066,6 +2070,16 @@ if (-not (Test-Path -Path $outDir)) {
 [System.IO.File]::WriteAllText($outputFile, $content, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Host "Wrote $($reports.Count) report(s) to $outputFile" -ForegroundColor Green
+
+# v2.46: scan-problems.json next to the data file - the Errors list with full
+# paths, read by scripts\Archive-ProblemFiles.ps1 to move unusable posts out
+# of the report folders. Written every full scan, empty list included, so
+# the archive script can say "nothing to archive" with confidence.
+try {
+    $problemsOut = [pscustomobject]@{ generatedAt = $payload.generatedAt; scanner = $ScriptVersion; problems = $problemFiles.ToArray() }
+    [System.IO.File]::WriteAllText((Join-Path $outDir 'scan-problems.json'), ($problemsOut | ConvertTo-Json -Depth 4), (New-Object System.Text.UTF8Encoding($false)))
+}
+catch { Write-Warning "scan-problems.json not written ($($_.Exception.Message))" }
 if ($skipped -gt 0) { Write-Host "Skipped $skipped file(s) - listed on the dashboard under 'Files that could not be read'." -ForegroundColor Yellow }
 
 # ---------------------------------------------------------------------------

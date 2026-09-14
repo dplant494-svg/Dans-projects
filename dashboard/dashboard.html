@@ -70,8 +70,9 @@
   }
   .banner-meta .fresh { color: rgba(255,255,255,0.7); text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11px; }
   .banner-meta .stale { color: var(--sd-yellow); }
-  .banner-meta .ask-copilot { display: inline-block; margin-top: 8px; padding: 4px 10px; border: 1px solid rgba(255,255,255,0.55); border-radius: 4px; color: #fff; text-decoration: none; font-size: 12px; letter-spacing: 0.02em; }
-  .banner-meta .ask-copilot:hover { background: rgba(255,255,255,0.12); }
+  .banner-meta .ask-copilot { display: inline-block; margin-top: 8px; padding: 8px 16px; background: var(--sd-yellow); color: var(--sd-blue); border: 0; border-radius: 22px; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: none; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+  .banner-meta .ask-copilot:hover { filter: brightness(1.08); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+  .banner-meta .ask-copilot .spark { display: inline-block; margin-right: 6px; font-size: 15px; line-height: 1; }
 
   .page-body { padding: 24px 32px 32px; }
 
@@ -81,6 +82,15 @@
     margin-bottom: 10px;
   }
   .source-line { color: var(--sd-text-light); font-size: 11px; margin: -4px 0 16px; }
+  .errors-btn { margin-left: auto; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #fff; background: #c0392b; border: 1.5px solid #c0392b; border-radius: 20px; padding: 7px 16px; cursor: pointer; }
+  .errors-btn:hover { background: #a93226; }
+  .errors-btn.warn { background: #ad6800; border-color: #ad6800; }
+  .errors-btn.warn:hover { background: #8f5600; }
+  .errors-list { margin: 0; padding-left: 0; list-style: none; }
+  .errors-list li { padding: 8px 0; border-bottom: 1px solid var(--sd-border); font-size: 13px; }
+  .errors-list code { font-family: Consolas, monospace; font-size: 12px; color: var(--sd-blue); }
+  .errors-list .why { display: block; color: var(--sd-text-light); margin-top: 2px; }
+  .errors-note { font-size: 12.5px; color: var(--sd-text-light); margin: 0 0 12px; }
   .problems { background: #fdecea; border: 1px solid #c0392b; border-left: 5px solid #c0392b; color: #7a1f16; border-radius: 6px; padding: 10px 14px; margin: 0 0 16px; font-size: 12.5px; }
   .problems.warn { background: #fff4e0; border-color: #ad6800; color: #5c3a00; }
   .problems summary { cursor: pointer; font-weight: 700; }
@@ -606,15 +616,13 @@
 
     <main id="app" hidden>
       <div class="source-line" id="folder-line"></div>
-      <div id="problems-banner" hidden></div>
-
       <div class="view-tabs">
         <button type="button" class="view-tab active" id="tab-list-btn">Report List</button>
         <button type="button" class="view-tab" id="tab-cbm-btn">CBM Heatmap</button>
         <button type="button" class="view-tab" id="tab-monitoring-btn">Rig Monitoring</button>
-        <button type="button" class="view-tab" id="tab-marine-btn">Marine (archived)</button>
         <button type="button" class="view-tab" id="tab-invest-btn">Investigations</button>
         <button type="button" class="view-tab" id="tab-compliance-btn">Compliance</button>
+        <button type="button" class="errors-btn" id="errors-btn" hidden title="Posted files the scanner could not use, or that are over the size ceiling"></button>
       </div>
 
       <div class="filter-row" id="filter-row">
@@ -701,16 +709,6 @@
           <div class="source-line" id="rig-mon-source">One tile per rig — latest Daily Checks and FLM received. Click a rig for its full readings history.</div>
           <div class="rig-mon-empty" id="rig-mon-empty" hidden></div>
           <div class="rig-mon-grid" id="rig-mon-grid"></div>
-        </section>
-      </div>
-
-      <div id="marine-view" hidden>
-        <section class="card">
-          <h2>Marine Integrity — Compliance Scores (archived)</h2>
-          <div class="archived-note">Read-only archive. Marine Integrity reporting was retired from the Well Control reporting tool at WCGRRT REV 155 on 9 September 2026 (Dan Plant's decision). No new reports are expected; every record received before that date is kept here unchanged, and any file that still arrives from an older tool revision is ingested as before. Nothing has been deleted.</div>
-          <div class="source-line">Latest Marine Integrity Report per rig, ranked lowest score first so outliers stand out. Minimum target score 3.0. Click a rig for score trends and the action list.</div>
-          <div class="rig-mon-empty" id="marine-empty" hidden></div>
-          <div class="marine-grid" id="marine-grid"></div>
         </section>
       </div>
 
@@ -2483,241 +2481,10 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     });
   }
 
-  // Marine Integrity tab: latest report per rig, worst overall average
-  // first (nulls last) so outliers lead the view.
-  function renderMarine() {
-    var grid = $('marine-grid'), msg = $('marine-empty');
-    grid.textContent = '';
-    var scores = window.DASHBOARD_DATA.marineScores || [];
-    if (!scores.length) {
-      msg.hidden = false; grid.hidden = true;
-      msg.textContent = 'No Marine Integrity Reports were received before the section was retired (WCGRRT REV 155, 9 September 2026).';
-      return;
-    }
-    msg.hidden = true; grid.hidden = false;
-    var latest = {}, rigs = [];
-    scores.forEach(function (r) { if (r.rig && !latest[r.rig]) { latest[r.rig] = r; rigs.push(r.rig); } });
-    rigs.sort(function (a, b) {
-      var A = latest[a].avgOverall, B = latest[b].avgOverall;
-      if (A == null && B == null) return a.localeCompare(b);
-      if (A == null) return 1;
-      if (B == null) return -1;
-      return A - B || a.localeCompare(b);
-    });
-
-    rigs.forEach(function (rig) {
-      var r = latest[rig];
-      var card = mk('button', 'mi-card');
-      card.type = 'button';
-      var h = mk('h3', '', rig);
-      var avg = mk('span', 'mi-avg ' + miAvgClass(r.avgOverall, r.target), r.avgOverall == null ? '—' : Number(r.avgOverall).toFixed(2));
-      avg.title = 'Overall average vs minimum target ' + Number(r.target == null ? 3 : r.target).toFixed(1);
-      h.appendChild(avg);
-      card.appendChild(h);
-      [['Policies & Procedures', r.avgPol], ['Regulatory', r.avgReg], ['Equipment & Systems', r.avgEqp]].forEach(function (pair) {
-        var row = mk('div', 'mi-card-row');
-        row.appendChild(mk('span', 'lbl', pair[0]));
-        row.appendChild(mk('span', 'val ' + miAvgClass(pair[1], r.target), miFmtAvg(pair[1])));
-        card.appendChild(row);
-      });
-      card.appendChild(mk('div', 'mi-card-meta', rmFmtDate(r.date) + ' · ' + (r.scoredCount || 0) + ' items scored'));
-      if (r.certexp) card.appendChild(mk('div', 'mi-card-flag', '⚠ ' + r.certexp));
-      if (r.asidef) card.appendChild(mk('div', 'mi-card-flag', '⚠ ASI: ' + r.asidef));
-      if (r.classcc) card.appendChild(mk('div', 'mi-card-flag', '⚠ Conditions of Class: ' + r.classcc));
-      card.addEventListener('click', function () { openMarineDetail(rig); });
-      grid.appendChild(card);
-    });
-  }
-
-  function openMarineDetail(rig) {
-    var history = (window.DASHBOARD_DATA.marineScores || []).filter(function (r) { return r.rig === rig; });
-    if (!history.length) return;
-    var chron = history.slice().reverse();  // marineScores is newest-first
-    var target = history[0].target == null ? 3 : history[0].target;
-
-    var overlay = mk('div', 'report-overlay');
-    var frame = mk('div', 'report-frame');
-    frame.style.maxWidth = '980px';
-    var head = mk('div', 'report-head');
-    var title = mk('div', 'rh-title');
-    title.appendChild(mk('div', 'rh-rig', rig));
-    title.appendChild(mk('div', 'rh-sub', 'Marine Integrity — score trends & action list'));
-    head.appendChild(title);
-    var closeBtn = mk('button', 'report-close', '✕');
-    closeBtn.type = 'button';
-    closeBtn.setAttribute('aria-label', 'Close');
-    head.appendChild(closeBtn);
-    var body = mk('div', 'report-body');
-    frame.appendChild(head);
-    frame.appendChild(body);
-    overlay.appendChild(frame);
-    document.body.appendChild(overlay);
-    document.body.classList.add('no-scroll');
-
-    body.appendChild(mk('div', 'rv-section-label', 'Score trends — target ' + Number(target).toFixed(1) +
-      (history.length === 1 ? ' (one report so far — trends build as more arrive)' : '')));
-    var tg = mk('div', 'mi-trend-grid');
-    [['Overall', 'avgOverall'], ['Policies & Procedures', 'avgPol'], ['Regulatory', 'avgReg'], ['Equipment & Systems', 'avgEqp']].forEach(function (m) {
-      var pts = chron.filter(function (r) { return r[m[1]] != null; })
-        .map(function (r) { return { date: r.date, v: Number(r[m[1]]) }; });
-      var card = mk('div', 'mi-trend-card');
-      card.appendChild(mk('h4', '', m[0]));
-      if (!pts.length) card.appendChild(mk('div', 'rm-empty', 'Not scored yet.'));
-      else card.appendChild(miTrendChart(pts, target));
-      tg.appendChild(card);
-    });
-    body.appendChild(tg);
-
-    var selRow = mk('div', 'rm-toolbar');
-    selRow.appendChild(mk('span', 'rm-range-lbl', 'Report:'));
-    var sel = document.createElement('select');
-    sel.className = 'mi-select';
-    history.forEach(function (r, i) {
-      var o = document.createElement('option');
-      o.value = String(i);
-      o.textContent = rmFmtDate(r.date) + (i === 0 ? ' (latest)' : '');
-      sel.appendChild(o);
-    });
-    selRow.appendChild(sel);
-    var openBtn = mk('button', 'rm-preset', 'Open full report');
-    openBtn.type = 'button';
-    selRow.appendChild(openBtn);
-    body.appendChild(selRow);
-
-    var drill = mk('div', '');
-    body.appendChild(drill);
-
-    function renderDrill() {
-      var r = history[Number(sel.value) || 0];
-      drill.textContent = '';
-      if (r.certexp || r.asidef || r.classcc) {
-        drill.appendChild(mk('div', 'rv-section-label', 'Attention'));
-        if (r.certexp) drill.appendChild(mk('div', 'mi-card-flag', '⚠ Certificates: ' + r.certexp));
-        if (r.asidef) drill.appendChild(mk('div', 'mi-card-flag', '⚠ ASI deficiencies: ' + r.asidef));
-        if (r.classcc) drill.appendChild(mk('div', 'mi-card-flag', '⚠ Conditions of Class: ' + r.classcc));
-      }
-
-      // The actionable list: everything scored 1 or 2, with its comment.
-      var low = (r.items || []).filter(function (it) { return it.score === '1' || it.score === '2'; });
-      drill.appendChild(mk('div', 'rv-section-label', 'Items scored 1 or 2 — action list (' + low.length + ')'));
-      if (!low.length) {
-        drill.appendChild(mk('div', 'rv-notes', 'Nothing scored below 3 in this report.'));
-      } else {
-        MI_SECTION_ORDER.forEach(function (sec) {
-          low.filter(function (it) { return it.section === sec; }).forEach(function (it) {
-            var row = mk('div', 'mi-item-row');
-            row.appendChild(miScoreChip(it.score));
-            row.appendChild(mk('span', 'mi-item-label', MI_SECTIONS[sec] + ' — ' + miItemLabel(it.item)));
-            drill.appendChild(row);
-            if (it.comment) drill.appendChild(mk('div', 'mi-item-cmt', it.comment));
-          });
-        });
-      }
-
-      var ex = r.ex || {};
-      var anyEx = Object.keys(ex).some(function (k) { return ex[k]; });
-      if (anyEx) {
-        drill.appendChild(mk('div', 'rv-section-label', 'Executive summary'));
-        MI_SECTION_ORDER.forEach(function (sec) {
-          MI_EX_KINDS.forEach(function (kind) {
-            var v = ex[sec + '_' + kind[0]];
-            if (!v) return;
-            var blk = mk('div', 'mi-ex-block' + (kind[0] === 'nc' ? ' nc' : ''));
-            blk.appendChild(mk('div', 'mi-ex-kind', MI_SECTIONS[sec] + ' — ' + kind[1] + (kind[0] === 'nc' ? ' (to Synergi)' : '')));
-            blk.appendChild(mk('p', '', v));
-            drill.appendChild(blk);
-          });
-        });
-      }
-
-      var infoBits = [r.unit, r.imo ? 'IMO ' + r.imo : '', r.flagclass, r.client, r.field].filter(Boolean);
-      if (infoBits.length) drill.appendChild(mk('div', 'mi-card-meta', infoBits.join(' · ')));
-    }
-    renderDrill();
-    sel.addEventListener('change', renderDrill);
-    openBtn.addEventListener('click', function () {
-      var r = history[Number(sel.value) || 0];
-      var rec = (window.DASHBOARD_DATA.reports || []).find(function (x) { return x.file === r.file; });
-      if (rec) openReportViewer(rec);
-    });
-
-    function close() {
-      overlay.remove();
-      document.body.classList.remove('no-scroll');
-      document.removeEventListener('keydown', onKey);
-    }
-    function onKey(e) { if (e.key === 'Escape') close(); }
-    closeBtn.addEventListener('click', close);
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
-    document.addEventListener('keydown', onKey);
-  }
-
-  // Small-multiple score trend: one metric per chart (no legend needed - the
-  // card title names the single series). Fixed 1-4 domain so every chart in
-  // the grid shares a scale, hairline target reference, dots carry a
-  // date+value tooltip and the newest point is direct-labeled.
-  function miTrendChart(pts, target) {
-    var W = 340, H = 150, padL = 30, padR = 34, padT = 12, padB = 22;
-    var minT = parseDate(pts[0].date).getTime();
-    var maxT = parseDate(pts[pts.length - 1].date).getTime();
-    if (!(maxT > minT)) maxT = minT + 1;
-    function x(t) { return padL + (t - minT) / (maxT - minT) * (W - padL - padR); }
-    function y(v) { return padT + (4 - v) / 3 * (H - padT - padB); }
-
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
-    svg.setAttribute('width', '100%');
-    svg.style.display = 'block';
-    function el(name, attrs) {
-      var n = document.createElementNS('http://www.w3.org/2000/svg', name);
-      Object.keys(attrs).forEach(function (k) { n.setAttribute(k, attrs[k]); });
-      return n;
-    }
-    for (var tv = 1; tv <= 4; tv++) {
-      svg.appendChild(el('line', { x1: padL, y1: y(tv), x2: W - padR, y2: y(tv), stroke: '#e3e6ea', 'stroke-width': 1 }));
-      var lbl = el('text', { x: padL - 6, y: y(tv) + 3, 'text-anchor': 'end', 'font-size': 10, fill: '#5b6572' });
-      lbl.textContent = String(tv);
-      svg.appendChild(lbl);
-    }
-    // target reference - status color, labeled, thin but distinct from grid
-    svg.appendChild(el('line', { x1: padL, y1: y(target), x2: W - padR, y2: y(target), stroke: '#E25303', 'stroke-width': 1 }));
-    var tlbl = el('text', { x: W - padR + 3, y: y(target) + 3, 'font-size': 9, fill: '#E25303' });
-    tlbl.textContent = 'target';
-    svg.appendChild(tlbl);
-
-    var first = pts[0], last = pts[pts.length - 1];
-    [first, last].forEach(function (p, i) {
-      if (i === 1 && pts.length === 1) return;
-      var d = parseDate(p.date);
-      var t = el('text', {
-        x: x(parseDate(p.date).getTime()), y: H - 6,
-        'text-anchor': i === 0 ? 'start' : 'end', 'font-size': 10, fill: '#5b6572'
-      });
-      t.textContent = isNaN(d) ? p.date : (fmtDate(d) + ' ' + String(d.getFullYear()).slice(2));
-      svg.appendChild(t);
-    });
-
-    var blue = '#00205b';
-    if (pts.length > 1) {
-      var lineD = pts.map(function (p, i) { return (i ? 'L' : 'M') + x(parseDate(p.date).getTime()).toFixed(1) + ' ' + y(p.v).toFixed(1); }).join(' ');
-      svg.appendChild(el('path', { d: lineD, fill: 'none', stroke: blue, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
-    }
-    pts.forEach(function (p) {
-      var c = el('circle', { cx: x(parseDate(p.date).getTime()), cy: y(p.v), r: 4, fill: blue, stroke: '#fff', 'stroke-width': 2 });
-      var tt = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-      tt.textContent = rmFmtDate(p.date) + ': ' + p.v.toFixed(2);
-      c.appendChild(tt);
-      svg.appendChild(c);
-    });
-    // direct label on the newest point
-    var lastLbl = el('text', {
-      x: Math.min(x(parseDate(last.date).getTime()) + 7, W - 2), y: y(last.v) + 3,
-      'font-size': 10, 'font-weight': 700, fill: '#1b2733'
-    });
-    lastLbl.textContent = last.v.toFixed(2);
-    svg.appendChild(lastLbl);
-    return svg;
-  }
+  // Marine Integrity tab removed 14 Sep 2026 (Dan's decision: off the
+  // dashboard, not archived). marineScores[] is still produced by the scanner
+  // and ignored here; rvMarine() above still renders the section inside an
+  // old report opened in the viewer.
 
   // ---------- TOPSET Investigation (Terms of Reference) — WCGRRT REV 148 ----------
   // A ToR defines scope, team, authority and the evidence plan. It records no
@@ -3735,8 +3502,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       ask.href = data.copilotUrl;
       ask.target = '_blank';
       ask.rel = 'noopener';
-      ask.textContent = 'Ask Copilot about these reports';
-      ask.title = 'Opens the WCE Reports Assistant in a new tab. It answers from the same reports this dashboard shows.';
+      ask.appendChild(mk('span', 'spark', '\u2726'));
+      ask.appendChild(document.createTextNode('Ask SACRED AI'));
+      ask.title = 'Ask SACRED AI about these reports. Opens the WCE Reports Assistant in Teams; it answers from the same reports this dashboard shows.';
       el.appendChild(ask);
     }
   }
@@ -4062,31 +3830,69 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
   // Files the scanner could not use (v2.40+): shown here so a truncated or
   // unreadable post never passes for a quietly empty report.
+  // Errors button (14 Sep 2026, replaces the red banner): one pill at the
+  // right of the tab strip, red when files are missing from the dashboard,
+  // amber when only oversized reports are listed. Click for the list.
+  var errorsState = { problems: [] };
   function renderProblems(problems) {
-    var box = $('problems-banner');
-    box.innerHTML = '';
+    var btn = $('errors-btn');
     var bad = problems.filter(function (p) { return p.kind !== 'large'; });
     var large = problems.filter(function (p) { return p.kind === 'large'; });
-    if (!bad.length && !large.length) { box.hidden = true; return; }
-    box.hidden = false;
-    box.className = 'problems' + (bad.length ? '' : ' warn');
-    var det = document.createElement('details');
-    var sum = document.createElement('summary');
-    sum.textContent = (bad.length ? bad.length + ' posted file(s) could not be read and are NOT on this dashboard' : '') +
-      (bad.length && large.length ? ' · ' : '') +
-      (large.length ? large.length + ' oversized report(s) (over the ceiling: 10 MB, or 30 MB for CBM inspections - photos or attachments need reducing at source)' : '') +
-      ' — click for the list';
-    det.appendChild(sum);
-    var ul = document.createElement('ul');
-    bad.concat(large).forEach(function (p) {
-      var li = document.createElement('li');
-      var c = document.createElement('code'); c.textContent = p.file; li.appendChild(c);
-      li.appendChild(document.createTextNode(' — ' + p.why + (p.bytes != null ? ' (' + Number(p.bytes).toLocaleString() + ' bytes)' : '')));
-      ul.appendChild(li);
-    });
-    det.appendChild(ul);
-    box.appendChild(det);
+    errorsState.problems = problems;
+    if (!bad.length && !large.length) { btn.hidden = true; return; }
+    btn.hidden = false;
+    btn.className = 'errors-btn' + (bad.length ? '' : ' warn');
+    btn.textContent = (bad.length ? '\u26A0 ' : '') + 'Errors (' + (bad.length + large.length) + ')';
   }
+  function openErrorsModal() {
+    var problems = errorsState.problems || [];
+    var bad = problems.filter(function (p) { return p.kind !== 'large'; });
+    var large = problems.filter(function (p) { return p.kind === 'large'; });
+    var overlay = mk('div', 'report-overlay');
+    var frame = mk('div', 'report-frame');
+    frame.style.maxWidth = '860px';
+    var head = mk('div', 'report-head');
+    var title = mk('div', 'rh-title');
+    title.appendChild(mk('div', 'rh-rig', 'Errors'));
+    title.appendChild(mk('div', 'rh-sub', (bad.length ? bad.length + ' posted file(s) could not be read and are NOT on this dashboard' : '') +
+      (bad.length && large.length ? ' \u00B7 ' : '') + (large.length ? large.length + ' oversized report(s), shown but over the ceiling' : '')));
+    head.appendChild(title);
+    var closeBtn = mk('button', 'report-close', '\u2715');
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Close');
+    head.appendChild(closeBtn);
+    var body = mk('div', 'report-body');
+    frame.appendChild(head);
+    frame.appendChild(body);
+    function section(label, note, items) {
+      if (!items.length) return;
+      body.appendChild(mk('div', 'rv-section-label', label + ' (' + items.length + ')'));
+      body.appendChild(mk('p', 'errors-note', note));
+      var ul = mk('ul', 'errors-list');
+      items.forEach(function (p) {
+        var li = document.createElement('li');
+        var c = document.createElement('code'); c.textContent = p.file; li.appendChild(c);
+        li.appendChild(mk('span', 'why', p.why + (p.bytes != null ? ' \u00B7 ' + Number(p.bytes).toLocaleString() + ' bytes' : '') + (p.modified ? ' \u00B7 posted ' + String(p.modified).replace('T', ' ').slice(0, 16) : '')));
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+    section('Not on this dashboard', 'These files are in the report folders but could not be used: usually a post cut short in transit, or a file that is not a report export. Run scripts\\Archive-ProblemFiles.ps1 on the scanner PC to move them out of the folders into the archive; the poster can re-send the report.', bad);
+    section('Oversized, still shown', 'Over the ceiling (10 MB, or 30 MB for CBM inspections). The report is on the dashboard; the photos or attachments need reducing at source in the reporting tool.', large);
+    overlay.appendChild(frame);
+    document.body.appendChild(overlay);
+    document.body.classList.add('no-scroll');
+    function close() {
+      overlay.remove();
+      document.body.classList.remove('no-scroll');
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+  }
+  $('errors-btn').addEventListener('click', openErrorsModal);
 
   function render() {
     var data = window.DASHBOARD_DATA;
@@ -4108,7 +3914,6 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     renderLogSection();
     renderCbmHeatmap();
     renderRigMonitoring();
-    renderMarine();
     renderInvestigations();
     renderCompliance();
   }
@@ -4163,34 +3968,30 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var isList = name === 'list';
     var isCbm = name === 'cbm';
     var isMonitoring = name === 'monitoring';
-    var isMarine = name === 'marine';
     var isInvest = name === 'invest';
     var isCompliance = name === 'compliance';
     $('tab-list-btn').classList.toggle('active', isList);
     $('tab-cbm-btn').classList.toggle('active', isCbm);
     $('tab-monitoring-btn').classList.toggle('active', isMonitoring);
-    $('tab-marine-btn').classList.toggle('active', isMarine);
     $('tab-invest-btn').classList.toggle('active', isInvest);
     $('tab-compliance-btn').classList.toggle('active', isCompliance);
     $('list-view').hidden = !isList;
     $('cbm-view').hidden = !isCbm;
     $('monitoring-view').hidden = !isMonitoring;
-    $('marine-view').hidden = !isMarine;
     $('invest-view').hidden = !isInvest;
     $('compliance-view').hidden = !isCompliance;
     $('range-group').hidden = !isList;
     $('type-filter').hidden = !isList;
     $('search').hidden = !isList;
-    // The monitoring, marine, investigations and compliance tabs are
-    // deliberately fleet-wide (one tile/card per rig or investigation),
-    // so the rig filter has nothing to scope there.
-    $('rig-filter').hidden = isMonitoring || isMarine || isInvest || isCompliance;
+    // The monitoring, investigations and compliance tabs are deliberately
+    // fleet-wide (one tile/card per rig or investigation), so the rig
+    // filter has nothing to scope there.
+    $('rig-filter').hidden = isMonitoring || isInvest || isCompliance;
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
   $('tab-monitoring-btn').addEventListener('click', function () { showTab('monitoring'); });
   $('goto-monitoring').addEventListener('click', function () { showTab('monitoring'); });
-  $('tab-marine-btn').addEventListener('click', function () { showTab('marine'); });
   $('tab-invest-btn').addEventListener('click', function () { showTab('invest'); });
   $('tab-compliance-btn').addEventListener('click', function () { showTab('compliance'); });
 

@@ -77,6 +77,7 @@ Visit status uses the tool's own semantics: open critical equipment rows →
 | `bop-dashboard/xlsx.full.min.js` | Vendored SheetJS (legacy Excel upload path, offline) |
 | `config.json` | Where the report .json files live |
 | `scripts/Update-Dashboard.ps1` | Scans the report folder, regenerates both data files |
+| `scripts/Archive-ProblemFiles.ps1` | Moves the posts the scanner could not use (the dashboard's Errors list) out of the report folders into `archive\`, with a log; asks first |
 | `scripts/Register-DashboardTask.ps1` | One-time: schedules the scan every 10 minutes |
 | `scripts/Deploy-Dashboard.ps1` | Publishes both dashboards to the IIS deploy path |
 | `tools/build_world.js` | Regenerates the BOP map's embedded world geometry |
@@ -237,12 +238,12 @@ test the pipeline end-to-end before touching the real folder, set
 `reportFolder` to the `sample-reports` directory and `filePattern` to
 `seadrill-report_*.json`, then run the script.
 
-## Ask Copilot (scanner v2.43)
+## Ask SACRED AI (scanner v2.43)
 
 Optional. Three keys in `config.json`: `digestPath` (a separate synced SharePoint
 library the scanner fills with one readable HTML digest per report), `dashboardUrl`
 (so each digest links back to its report) and `copilotUrl` (the Copilot Studio agent's
-link, shown on the dashboard as "Ask Copilot about these reports"). Setup in
+link, shown on the dashboard as the gold "Ask SACRED AI" button). Setup in
 `COPILOT-REPORTS-ASSISTANT-GUIDE.md`. Absent keys, nothing happens.
 
 ## Nothing-changed short cut (scanner v2.45)
