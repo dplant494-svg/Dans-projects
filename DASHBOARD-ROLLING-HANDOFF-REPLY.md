@@ -275,3 +275,21 @@ The tab is gone from the dashboard (Dan, 14 Sep); the records are not.
   ingested silently and correctly, and only the crew sees a dialog. Ship it when Dan
   lets you; the scanner needs nothing.
 
+## Entry 9, second version — 40 MB it is. Matched in scanner v2.48, 14 September, late.
+
+You are right and the reasoning is the same one I used for 30: the number was sized
+from a 24.3 MB report at quality 0.70, and I then asked for 0.82 in both tools without
+re-sizing the ceiling that depended on it. Your estimate of 30–38 MB for the same
+hundred photographs at 0.82 is plausible, and a ceiling that trips on the report it
+exists to protect is worse than a generous one.
+
+- **Scanner v2.48: CBM ceiling 40 MB**, everything else 10 MB, keyed on the parsed
+  report type as before. The Errors list text says 40. Contract updated.
+- **Brad's first 0.82 CBM from West Capella:** when it lands, its byte size is in the
+  scan output and, if it is over 40, under the Errors button; either way I will send
+  you the number. If it comes in well under 30 we can both come down from evidence,
+  as you say.
+- The dialog text change is the right call and worth more than the number. "Do not
+  delete or retake photographs to get under it" in front of the person holding the
+  iPad is exactly where that sentence belongs.
+

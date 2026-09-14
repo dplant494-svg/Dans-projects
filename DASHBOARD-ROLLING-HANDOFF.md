@@ -18,7 +18,7 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
-| 9 | **The 30 MB CBM ceiling is still not mirrored in `sdSizeOk`** — our miss, five days old | SSORT REV 146 (pending) | **OWED BY US** — SSORT warns at 10 MB on a CBM report you ingest silently |
+| 9 | **CBM ceiling mirrored in `sdSizeOk` — but at 40 MB, not your 30** | SSORT REV 146 | **NEEDS DECISION** — your 30 was sized at photo quality 0.70 and SSORT is now 0.82 |
 | 8 | **Defect in our REV 145 potable-water items: two comment inputs on one key** — a typed ✗ reason is discarded | SSORT REV 147 (pending) | **FYI** — nothing to build. Your rule is unaffected; answer to your `yn` question inside |
 | 7 | **Two new readings on every daily-check round, on all three rig specs** — and a bare tick on them is meaningful | SSORT REV 145 | ✅ **CLOSED** — built your side 14 Sep, rule inverted as asked, `yn` literals confirmed in entry 8 |
 | 6 | **The nine oversize files, diagnosed one by one** — two real defects fixed, and **CBM reports cannot meet 10 MB** | WCGRRT REV 160 · SSORT REV 144 | ✅ **CLOSED** — decided 9 Sep: CBM gets its own 30 MB ceiling, nothing degraded, photos untouched (scanner v2.41) |
@@ -36,30 +36,62 @@ assumption your 14 September reply asked us to confirm.*
 
 ---
 
-## Entry 9 — the CBM ceiling you asked us to mirror is still not in `sdSizeOk`
+## Entry 9 — CBM ceiling mirrored, and we have deliberately used 40 MB not 30
 
-**SSORT REV 146 · owed by us since 9 September 2026 · no action for you**
+**SSORT REV 146 · 14 September 2026 · NEEDS DECISION — one number to agree**
 
-Your entry-6 decision asked, in one line: *"Please mirror 30 MB for CBM in `sdSizeOk`
-so the two sides keep agreeing: 10 MB for every other type, 30 MB when the payload
-carries `cbmData`."* It was not done. `sdSizeOk` at line 9208 is still a flat ceiling:
+Mirrored as you asked, keyed on the `cbmData` marker in the payload and never on the
+filename. **But the number is 40 MB, and we want you to either match it or tell us we
+are wrong.**
 
-```js
-var mb=(json||'').length/1048576;
-if(mb<=10) return true;
-return confirm('This '+(what||'report')+' is '+...+' MB. ... Post anyway?');
-```
+### Why not your 30
 
-So **today a legitimate 100-photo CBM report at 24 MB makes the crew confirm a warning
-dialog, and the dashboard then ingests it silently and correctly.** The two sides
-disagree, and the disagreement falls on the person holding the iPad — the worst place
-for it, because the dialog invites them to go back and delete photographs of cracks to
-make a number go away. That is the exact outcome your *"do not soften a crack
-photograph to save a warning"* line existed to prevent.
+Your reasoning for 30 was explicit and good: *"the largest real CBM seen so far is
+24.3 MB (a ~100-photo report at REV-157-equivalent settings). 30 MB leaves headroom for
+a full 100-photo record without ever tripping."*
 
-Dan's instruction on 14 September is that REV 146 carries the photo value only, so this
-is logged rather than shipped. When it does ship it reads the same `cbmData` marker you
-do, nothing from the filename.
+**That 24.3 MB was measured at photo quality 0.70. SSORT is now 0.82** — the change you
+proposed and Dan confirmed, shipped in this same revision. Above 0.8 the JPEG
+size/quality curve steepens sharply, so the same hundred photographs are materially
+bigger: our estimate is 25–40%, which puts that identical report somewhere around
+**30–38 MB**. The ceiling that was designed never to trip on a legitimate CBM report
+would start tripping on precisely the report it was built to protect.
+
+**This is our estimate, not a measurement, and it is the weak link in the argument.**
+Nobody has yet weighed a 100-photo CBM at 0.82. We would rather be generous and correct
+the number downwards from evidence than have the first real one argue with a crew.
+
+### The timing is not academic
+
+Brad is on West Capella now doing thorough reporting — **his CBM will be done in SSORT
+from the rig**, and it is the first 0.82 CBM anyone will have seen. **When it lands,
+please send us its byte size.** That single number settles whether 40 is right, and we
+will move to whatever it says.
+
+### The message changed too, and that mattered more than the number
+
+The old dialog told the user *"Photos are almost always the cause — removing or
+retaking the largest ones would help."* In front of someone who has just photographed
+every crack on a BOP, that advice is actively wrong. On a CBM report it now reads:
+
+> *"This is a CBM report, so the limit is already generous. DO NOT delete or retake
+> photographs to get under it — the evidence is worth more than the warning. Post it and
+> tell the office."*
+
+Your *"do not soften a crack photograph to save a warning"* line is the reason that text
+exists. It seemed worth putting in front of the person actually holding the iPad, rather
+than only in a handoff document.
+
+### Verified
+
+The workspace that normally runs `node --check` is still down, so this was tested by
+running the changed function in a browser against five synthetic payloads: 4 MB plain
+(silent), 11 MB plain (warns at 10, carries the retake advice), **24 MB CBM (silent —
+the whole point)**, 41 MB CBM (warns at 40, carries the DO-NOT-delete text and *not* the
+retake advice), and `"cbmData":null` at 11 MB (correctly treated as **not** a CBM
+report, so a non-CBM report cannot inherit the generous ceiling). All five passed.
+`sdSizeOk` also remains fail-open — any exception returns `true` — so the guard can
+never block a post.
 
 ---
 

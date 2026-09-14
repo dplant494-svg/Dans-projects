@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.47'
+$ScriptVersion = '2.48'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -950,7 +950,7 @@ $LargeReportBytes = 10MB
 # compressed photographs BY DESIGN (rolling handoff entry 6, REV 160): they
 # cannot meet 10 MB without degrading the evidence, so they get their own
 # ceiling instead of a warning that always fires. Everything else stays at 10 MB.
-$LargeCbmReportBytes = 30MB
+$LargeCbmReportBytes = 40MB   # v2.48: 40, matching SSORT REV 146 (rolling handoff entry 9) - the 30 was sized at photo quality 0.70, SSORT is now 0.82
 function Add-Problem { param($File, [string]$Kind, [string]$Why)
     $problems.Add(@{ file = $File.Name; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
     # v2.46: the same list with full paths, for scripts\Archive-ProblemFiles.ps1.
@@ -1092,7 +1092,7 @@ foreach ($f in $files) {
     }
 
     # Size ceiling, applied once the report type is known: 10 MB for
-    # everything, 30 MB for CBM Inspection (see $LargeCbmReportBytes). Over
+    # everything, 40 MB for CBM Inspection (see $LargeCbmReportBytes). Over
     # the ceiling the file is still ingested - it is a warning, not a rejection.
     $sizeType = [string](Get-ReportType -Meta $meta -Tiles (Get-Prop $json 'tiles'))
     $sizeCap = if ($sizeType -eq 'CBM Inspection') { $LargeCbmReportBytes } else { $LargeReportBytes }
