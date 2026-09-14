@@ -23,8 +23,9 @@ integration is roadmap item 3.) What SPARC holds came from **files exported by h
 | `WCE Job Plans.xlsx` | 707 job plans, make/model in column H, SFI group in column I | job plan numbers `0900-xxxx`, Master PM `Cxxxx`, descriptions per interval |
 
 So there is no service account, no API, no ODBC connection and no IT-built integration
-sitting behind SPARC. The COC tracker (WCE Certification Tracker) is "on Maximo data"
-the same way until someone shows otherwise: an export.
+sitting behind SPARC. **The COC tracker (WCE Certification Tracker) uses the same
+export** (Dan, 14 Sep). So the whole estate's Maximo data comes from one hand-run
+export set, and there is exactly one thing to ask IT to schedule.
 
 ### What this does to the timeline
 
@@ -118,7 +119,8 @@ checklist and the planning report), not a scanner one, and not urgent.
 
 1. Who runs the `SDITEM_SFI` and job-plan exports, from which Maximo screen, and how
    often? (This is the person and the report IT would schedule.)
-2. Is the COC tracker fed from the same export, a different one, or something live?
+2. ~~Is the COC tracker fed from the same export?~~ **Answered by Dan, 14 Sep: yes, the
+   same export.** One export set feeds SPARC and the COC tracker.
 3. Can we have `SPARC_Master_Data.xlsx` for the database load (step 3.1)?
 
 Everything else in the handoff is complete enough to work from. It is a good document.

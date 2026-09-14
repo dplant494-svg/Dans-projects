@@ -539,7 +539,8 @@ Lee's session delivered `SPARC-HANDOFF-SACRED.md` (filed in this repo). Full rep
 **SPARC does not reach Maximo.** Its ICNs, costs, statuses, job plans and Master PMs
 are a point-in-time extract from five hand-exported `SDITEM_SFI` item files and one
 `WCE Job Plans.xlsx`. No API, no service account, no ODBC, no IT integration. Live
-Maximo is SPARC's own roadmap item 3.
+Maximo is SPARC's own roadmap item 3. **The COC tracker uses the same export** (Dan,
+14 Sep), so one hand-run export set is the estate's entire Maximo supply today.
 
 So your §9 ("Maximo is a reuse question", two weeks off the front) rested on a premise
 that is gone. Proposed bars:
