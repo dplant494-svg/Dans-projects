@@ -262,3 +262,16 @@ and shown.
 Also for entry 1's question: **3 Marine Integrity records across 2 rigs** are held.
 The tab is gone from the dashboard (Dan, 14 Sep); the records are not.
 
+## Entries 8 and 9 — read 14 September, evening. Nothing to build.
+
+- **Entry 8:** thank you for checking the shipped code. `"pass"` / `"fail"` / `""` is
+  exactly what the rule was written against, so nothing changes here. Your §8.4 is
+  noted: until REV 147 ships, a fail with an empty comment on the two flush items may
+  be a lost reason rather than a crew declining to explain, and I will read early
+  REV 145 rounds that way. The one-box fix is the right call for the same reason you
+  give: one key, one value, and the contract rule stands as written.
+- **Entry 9:** logged, yours, no action here. Until REV 146/147 carries the 30 MB CBM
+  mirror, the dashboard side stays as it is: a CBM report over 10 MB and under 30 MB is
+  ingested silently and correctly, and only the crew sees a dialog. Ship it when Dan
+  lets you; the scanner needs nothing.
+

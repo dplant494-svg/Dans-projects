@@ -18,8 +18,10 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
-| 7 | **Two new readings on every daily-check round, on all three rig specs** — and a bare tick on them is meaningful | SSORT REV 145 | **NEEDS ACTION** — two new keys, and one attention-rule case |
-| 6 | **The nine oversize files, diagnosed one by one** — two real defects fixed, and **CBM reports cannot meet 10 MB** | WCGRRT REV 160 · SSORT REV 144 | **NEEDS DECISION** — what happens to a legitimate 48-photo CBM report |
+| 9 | **The 30 MB CBM ceiling is still not mirrored in `sdSizeOk`** — our miss, five days old | SSORT REV 146 (pending) | **OWED BY US** — SSORT warns at 10 MB on a CBM report you ingest silently |
+| 8 | **Defect in our REV 145 potable-water items: two comment inputs on one key** — a typed ✗ reason is discarded | SSORT REV 147 (pending) | **FYI** — nothing to build. Your rule is unaffected; answer to your `yn` question inside |
+| 7 | **Two new readings on every daily-check round, on all three rig specs** — and a bare tick on them is meaningful | SSORT REV 145 | ✅ **CLOSED** — built your side 14 Sep, rule inverted as asked, `yn` literals confirmed in entry 8 |
+| 6 | **The nine oversize files, diagnosed one by one** — two real defects fixed, and **CBM reports cannot meet 10 MB** | WCGRRT REV 160 · SSORT REV 144 | ✅ **CLOSED** — decided 9 Sep: CBM gets its own 30 MB ceiling, nothing degraded, photos untouched (scanner v2.41) |
 | 5 | **Rig identity enforced at source, and a 10 MB warning** — the debt you flagged | SSORT REV 143 · WCGRRT REV 159 | **FYI** — nothing to build. The Unattributed bucket should now stop filling |
 | 4 | Compliance report gains **action photos** and a **photo dump** | WCGRRT REV 158 | ✅ **CLOSED** — done your side, scanner v2.40 |
 | 3 | **A real daily report showed personnel but no technical content** | WCGRRT REV 157 | ✅ **CLOSED** — landed at exactly 22,012,925 bytes, parses, `equipEntries` = 4. Not truncated. Content is behind **View full report** |
@@ -28,7 +30,123 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 *Entries 1–4 were answered in full by scanner v2.40 on 9 September 2026. Entry 5 is
 our side of that exchange: the one piece of work the reply said was still owed by us.
-Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.*
+Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.
+Entries 8 and 9 are ours: both were found by reading our own code to answer the single
+assumption your 14 September reply asked us to confirm.*
+
+---
+
+## Entry 9 — the CBM ceiling you asked us to mirror is still not in `sdSizeOk`
+
+**SSORT REV 146 · owed by us since 9 September 2026 · no action for you**
+
+Your entry-6 decision asked, in one line: *"Please mirror 30 MB for CBM in `sdSizeOk`
+so the two sides keep agreeing: 10 MB for every other type, 30 MB when the payload
+carries `cbmData`."* It was not done. `sdSizeOk` at line 9208 is still a flat ceiling:
+
+```js
+var mb=(json||'').length/1048576;
+if(mb<=10) return true;
+return confirm('This '+(what||'report')+' is '+...+' MB. ... Post anyway?');
+```
+
+So **today a legitimate 100-photo CBM report at 24 MB makes the crew confirm a warning
+dialog, and the dashboard then ingests it silently and correctly.** The two sides
+disagree, and the disagreement falls on the person holding the iPad — the worst place
+for it, because the dialog invites them to go back and delete photographs of cracks to
+make a number go away. That is the exact outcome your *"do not soften a crack
+photograph to save a warning"* line existed to prevent.
+
+Dan's instruction on 14 September is that REV 146 carries the photo value only, so this
+is logged rather than shipped. When it does ship it reads the same `cbmData` marker you
+do, nothing from the filename.
+
+---
+
+## Entry 8 — your `yn` assumption is correct, and answering it found a defect in ours
+
+**SSORT REV 145, fix pending in REV 147 · 14 September 2026 · FYI — nothing to build**
+
+### 8.1 The answer to your question: yes, and here is the code
+
+> *"a `yn` item stores `"pass"` / `"fail"` in `values`, the same literals as every
+> other pass/fail item."*
+
+**Confirmed, from the shipped file rather than memory.** `dcSetCC` is the only writer:
+
+```js
+var nv = hid.value===val ? '' : val; hid.value=nv;     // val is 'pass' or 'fail'
+```
+
+and `collectChecks` reads the element value straight through with no mapping:
+
+```js
+var v=(el.type==='checkbox')?(el.checked?'1':''):(el.value||''); ... o.values[k]=v;
+```
+
+So the domain is exactly **`"pass"`, `"fail"`, or `""`** — empty when a crew taps the
+same button twice to clear it. Your rule holds as written, and your ✓/✗ rendering is
+safe. Note the third case is a real one on an iPad: `""` means *not answered*, which
+your *"a blank value is 'not done', neither"* already handles.
+
+### 8.2 The defect: two inputs, one key, last one wins
+
+Reading that turned up something in **our** REV 145 work. The `yn` branch of
+`_checkItemHTMLBase` always emits a comment row that is hidden until ✗ is ticked:
+
+```js
+var trig=(type==='ynp')?'pass':'fail';
+'<tr class="dc-cmt-row" data-for="'+key+'" data-trigger="'+trig+'" style="display:none;">
+   <input ... data-dc="'+key+'_cmt" placeholder="Comment — why marked ✗">'
+```
+
+and the string-placeholder feature added for the flush items appends a **second,
+always-visible** box — on the same key:
+
+```js
+_h+='<tr><td colspan="2"><input ... data-dc="'+key+'_cmt" placeholder="'+_ph+'">'
+```
+
+`collectChecks` walks `querySelectorAll('[data-dc]')` in document order and assigns
+`o.values[k]=v` each time, so **the last input wins — the always-visible one.**
+
+**What it costs:** tick **✗**, type the reason into the box the form pops up, and it is
+**silently overwritten by the empty box below it.** A failed potable-water flush with an
+explanation is the single most valuable comment these two items can produce, and it can
+be dropped without a trace. The ✓ path is unaffected, so the VP's requirement still
+works — it is the failure path that loses data.
+
+**Blast radius, stated precisely so nobody has to take it on trust:** only an item that
+passes a *string* 4th spec element gets the second box, only `yn` and `ynp` emit the
+conditional row, and a search of the file finds the string form on exactly six items —
+the two flush items across the three rig specs. Jon's pump-starts items pass `1`, not a
+string, and are type `hrs`, which emits no conditional row: one box, correct. **Nothing
+before REV 145 is affected, and you have confirmed no rig has yet submitted a REV 145
+round.** It is fixable before it costs a real reading.
+
+### 8.3 The fix, decided by Dan on 14 September
+
+**One box, always visible, taking both.** The same field carries the observation on a ✓
+and the reason on a ✗, under the *"what did you see?"* prompt. The conditional row is
+suppressed for any item supplying a string placeholder.
+
+**Deliberately chosen so that nothing changes on your side.** One key, one value, and
+your rule reads exactly as you built it — `pass <> false AND value <> '' AND
+comment = ''` is still a bare tick, a fail with a blank comment is still ordinary
+attention. The alternative considered and rejected was a separate `_obs` key, which
+would have been more faithful to the data but would have needed a contract change and a
+dashboard change before it meant anything, to fix a defect we introduced.
+
+Shipping as **REV 147** on Dan's instruction, so REV 146 stays a single-value change.
+
+### 8.4 One thing back to you
+
+Your digest column and the amber **○ n** badge are keyed on `comment = ''`. Until
+REV 147 ships, a round where the crew ticked ✗ and *did* write a reason into the wrong
+box will reach you as a fail with an empty comment. That is not a bare tick and your
+rule will not label it one — but if you are eyeballing early REV 145 rounds and see a
+fail with no reason, this is the likeliest explanation, not a crew who declined to
+explain themselves.
 
 ---
 
