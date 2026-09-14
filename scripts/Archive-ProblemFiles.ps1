@@ -10,8 +10,8 @@
     shows, with full paths. By default only files that are NOT on the
     dashboard are moved (kinds: unreadable, unrecognised, no-rig, error - a
     post cut short in transit, or a file that is not a report export).
-    Oversized reports are real reports and are left alone unless
-    -IncludeOversized is given.
+    Oversized reports are real reports, on the dashboard, and this script
+    never touches them (Dan, 14 Sep 2026). There is no switch for it.
 
     Each file goes to <archive>\<today>\<kind>\<file name>, and a line is
     appended to <archive>\ARCHIVED.log saying where it came from and why.
@@ -27,10 +27,6 @@
     Where to put the files. Defaults to 'archivePath' in config.json, else
     <repository root>\archive (C:\TSC-Dashboard\archive on the scanner PC).
 
-.PARAMETER IncludeOversized
-    Also move reports listed as oversized. Off by default: those reports ARE
-    on the dashboard and moving them removes them from it.
-
 .PARAMETER Yes
     Do not ask for confirmation.
 
@@ -41,7 +37,6 @@
 param(
     [string]$ConfigPath = '',
     [string]$ArchivePath = '',
-    [switch]$IncludeOversized,
     [switch]$Yes
 )
 
@@ -94,10 +89,10 @@ function Format-Stamp { param($Value)   # ConvertFrom-Json hands ISO dates back 
 $stamp = Format-Stamp $data.generatedAt
 Write-Host "Errors list from the scan of $stamp ($($all.Count) entries)"
 
-$toMove = @($all | Where-Object { $IncludeOversized -or ([string]$_.kind -ne 'large') })
-$leftAlone = @($all | Where-Object { -not $IncludeOversized -and ([string]$_.kind -eq 'large') })
+$toMove = @($all | Where-Object { [string]$_.kind -ne 'large' })
+$leftAlone = @($all | Where-Object { [string]$_.kind -eq 'large' })
 if ($leftAlone.Count) {
-    Write-Host "$($leftAlone.Count) oversized report(s) left where they are (they ARE on the dashboard; the photos need reducing at source). Use -IncludeOversized to move them too." -ForegroundColor Yellow
+    Write-Host "$($leftAlone.Count) oversized report(s) stay where they are: they are real reports, on the dashboard. This script never moves them." -ForegroundColor Yellow
 }
 if (-not $toMove.Count) {
     Write-Host "Nothing to archive: no unusable files in the last scan." -ForegroundColor Green
