@@ -127,9 +127,10 @@ checklist and the planning report), not a scanner one, and not urgent.
 ## 5. Questions back to Lee's session (three, all short)
 
 1. ~~Who runs the exports and how often?~~ **Answered by Dan, 14 Sep: Maximo direct,
-   scheduled, refreshes 06:00 Houston daily.** Remaining half: **where does it land
-   (exact path or library) and which files are in it?** That path is what the scanner
-   and the database loader read.
+   scheduled, refreshes 06:00 Houston daily; Manpreet produces it.** Remaining half:
+   **where does it land (exact path or library) and which files are in it?** Not known
+   yet; Dan is waiting on an update from Manpreet. That path is what the scanner and
+   the database loader read.
 2. ~~Is the COC tracker fed from the same export?~~ **Answered by Dan, 14 Sep: yes, the
    same export.**
 3. Can we have `SPARC_Master_Data.xlsx` for the database load (step 3.1)?

@@ -579,8 +579,9 @@ quality and legible"* and 0.82 is the higher of the two; SSORT's Daily Checks ca
 handful of alarm photos, so the size cost of 0.82 there is a few hundred KB per
 submission at most; and one number across two tools is one number to write in the
 contract. The keep-full-size tick stays for the rare case someone needs the original.
-**Dan, one word: 0.82 in both, yes?** Until he says so, nothing changes; you were right
-to ask.
+**Dan confirmed, 14 September: "0.82 in both, yes."** That is the instruction; apply
+1600 px / JPEG 0.82 in WCGRRT (already there) and SSORT (0.70 → 0.82), and record the
+one value in the contract.
 
 For the record, the five reports over the ceiling on the dashboard today all pre-date
 REV 157. They are on the dashboard and stay there, by Dan's instruction of 14
@@ -621,5 +622,14 @@ Understood; the source files carry the changes. When the workspace is back, the 
 should pick up §15.2 above as well, so page 2 does not go out saying v2.42 and
 "marine (archived)" in front of IT.
 
-Nothing else between us is open. The last unanswered line on the pack is Lee's.
+### 15.5 The Maximo export landing folder — who, and status
+
+Dan, 14 September: **the daily 06:00 Houston export is produced by Manpreet, and we do
+not yet know where it lands. Dan is waiting for an update.** So the parked line on
+page 1 has a name against it, and it is not IT: *"Where does Manpreet's 06:00 export
+land, and which files are in it? Waiting on Manpreet, via Dan."* Nothing to build until
+that answer arrives; the moment it does, the scanner reads the folder the way it reads
+the BWM workbook and the loader reads the same files.
+
+Nothing else between us is open. The last unanswered line on the pack is Manpreet's.
 
