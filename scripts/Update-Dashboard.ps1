@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.46'
+$ScriptVersion = '2.47'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -626,7 +626,14 @@ function Write-ReportDigest {
         [void]$sb.Append('<h2>Readings</h2><table><tr><th>System</th><th>Item</th><th>Value</th><th>Unit</th><th>Result</th><th>Pressure (psi)</th><th>Test pressure</th><th>Differential pressure</th><th>Comment</th></tr>')
         foreach ($r in (Get-CheckReadings -Checks $checks)) {
             $res = if ($r.pass -eq $true) { 'pass' } elseif ($r.pass -eq $false) { 'FAIL' } else { '' }
-            foreach ($cell in @($r.system, $r.item, $r.value, $r.unit, $res, $r.psi, $r.tp, $r.dp, $r.comment)) { [void]$sb.Append($(if ($cell -eq $r.system) { '<tr>' } else { '' })).Append('<td>').Append((ConvertTo-HtmlText ([string]$cell))).Append('</td>') }
+            # v2.47, rolling handoff entry 7: on the two potable-water flush
+            # items a tick with no comment is itself the finding; say so in
+            # the digest so Copilot can count "ticked, nothing observed".
+            $cmt = [string]$r.comment
+            if (-not $cmt -and ([string]$r.item) -match '^flush_potable_water_supply_line_(before|after)_filtration$' -and $r.pass -ne $false -and [string]$r.value) {
+                $cmt = 'No observation recorded (ticked only)'
+            }
+            foreach ($cell in @($r.system, $r.item, $r.value, $r.unit, $res, $r.psi, $r.tp, $r.dp, $cmt)) { [void]$sb.Append($(if ($cell -eq $r.system) { '<tr>' } else { '' })).Append('<td>').Append((ConvertTo-HtmlText ([string]$cell))).Append('</td>') }
             [void]$sb.Append('</tr>')
         }
         [void]$sb.Append('</table>')

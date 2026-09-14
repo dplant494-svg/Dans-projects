@@ -185,6 +185,9 @@
   .rm-subs table { border-collapse: collapse; font-size: 12px; }
   .rm-subs th, .rm-subs td { padding: 4px 10px 4px 0; text-align: left; border-bottom: 1px solid var(--sd-border, #e3e6ea); }
   .rm-subs .attn { color: var(--sd-red, #c2392b); font-weight: 600; }
+  .rm-subs .noobs { color: #ad6800; font-weight: 600; }
+  .rm-noobs-line { margin-top: 14px; font-size: 12.5px; color: var(--sd-text-light); }
+  .rm-noobs-line.warn { color: #5c3a00; background: #fff4e0; border-left: 4px solid #ad6800; padding: 6px 10px; border-radius: 4px; }
 
   .status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 700; }
   .status-ico {
@@ -343,6 +346,8 @@
     font-size: 13px; padding: 3px 0;
   }
   .rv-check-row.attention { background: rgba(194,57,43,0.06); border-radius: 3px; padding: 3px 6px; margin: 0 -6px; }
+  .rv-check-row.noobs { background: rgba(173,104,0,0.10); border-radius: 3px; padding: 3px 6px; margin: 0 -6px; }
+  .rv-check-noobs { font-size: 11.5px; color: #ad6800; margin: 0 0 6px 6px; }
   .rv-check-label { color: var(--sd-text); text-transform: capitalize; }
   .rv-check-value { font-weight: 700; white-space: nowrap; }
   .rv-check-value.pass { color: var(--sd-pass); }
@@ -363,6 +368,7 @@
     display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
   }
   .rig-tile-attn { color: var(--sd-fail); font-size: 12px; white-space: nowrap; }
+  .rig-tile-noobs { color: #ad6800; font-size: 12px; white-space: nowrap; margin-left: 6px; }
   .rig-tile-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 2px 0; }
   .rig-tile-row .lbl { color: var(--sd-text-light); }
   .rig-tile-row .val { color: var(--sd-text); font-weight: 700; white-space: nowrap; }
@@ -495,6 +501,7 @@
   .rm-cell.pass { color: var(--sd-pass); font-weight: 700; }
   .rm-cell.fail { color: var(--sd-fail); font-weight: 700; }
   .rm-cell.attention { background: rgba(194,57,43,0.10); }
+  .rm-cell.noobs { background: rgba(173,104,0,0.16); }
   .rm-cell .rm-cmt-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--sd-fail); margin-left: 5px; vertical-align: middle; }
   .rm-trend-btn {
     font-size: 10px; font-weight: 700; color: var(--sd-blue); background: none;
@@ -1879,6 +1886,17 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   // full-report viewer's meta.checks section.
 
   function rigCheckAttention(e) { return e.pass === false || !!e.comment; }
+  // Rolling handoff entry 7 (SSORT REV 145, 14 Sep 2026): the two potable-
+  // water flush items exist so the VP can see whether a rig recorded an
+  // observation or just ticked the box. On these two items a tick with NO
+  // comment is the finding - the opposite of the attention rule everywhere
+  // else. Matched on the item half of the key because the section differs
+  // per rig spec (diverter_panel_hpu / mixing_skid / hpu). A fail is already
+  // attention; a blank value is "not done", which is neither.
+  var OBSERVATION_ITEMS = /^flush_potable_water_supply_line_(before|after)_filtration$/;
+  function rigCheckNoObservation(e) {
+    return OBSERVATION_ITEMS.test(String(e.item || '')) && e.pass !== false && String(e.value || '') !== '' && !e.comment;
+  }
   // One reading to a human: a tons item carries its pressure (_psi), an rb
   // readback carries test/differential pressure (_tp/_dp). Scanner v2.42+
   // merges those companions onto the base reading; render them with it.
@@ -1938,8 +1956,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     checks.forEach(function (e) {
       var k = e.rig + '|' + e.kind;
       var cur = latest[k];
-      if (!cur) { cur = latest[k] = { date: e.date, shift: e.shift, attn: 0 }; }
+      if (!cur) { cur = latest[k] = { date: e.date, shift: e.shift, attn: 0, noObs: 0 }; }
       if (e.date === cur.date && e.shift === cur.shift && rigCheckAttention(e)) cur.attn++;
+      if (e.date === cur.date && e.shift === cur.shift && rigCheckNoObservation(e)) cur.noObs++;
     });
 
     var srcLine = $('rig-mon-source');
@@ -1957,6 +1976,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         var a = mk('span', 'rig-tile-attn', '⚠ ' + attnTotal);
         a.title = attnTotal + ' failed or flagged reading' + (attnTotal === 1 ? '' : 's') + ' in the latest submissions';
         h.appendChild(a);
+      }
+      var noObsTotal = (dc ? dc.noObs : 0) + (flm ? flm.noObs : 0);
+      if (noObsTotal) {
+        var nb = mk('span', 'rig-tile-noobs', '\u25CB ' + noObsTotal);
+        nb.title = 'Potable-water flush ticked with no observation recorded (' + noObsTotal + ' of 2) in the latest submission';
+        h.appendChild(nb);
       }
       tile.appendChild(h);
 
@@ -2167,6 +2192,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
             } else {
               var attn = rigCheckAttention(e);
               if (attn) td.className += ' attention';
+              var noObs = rigCheckNoObservation(e);
+              if (noObs) td.className += ' noobs';
               if (e.pass === true) { td.className += ' pass'; td.appendChild(document.createTextNode('✓')); }
               else if (e.pass === false) { td.className += ' fail'; td.appendChild(document.createTextNode('✗')); }
               else {
@@ -2178,6 +2205,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
               td.title = it.item.replace(/_/g, ' ') + ' — ' + rmFmtDate(e.date) + (e.shift ? ' · ' + e.shift : '') +
                 '\nValue: ' + rigCheckValueText(e) +
                 (e.comment ? '\nComment: ' + e.comment : '') +
+                (noObs ? '\nTicked, no observation recorded' : '') +
                 '\nClick to open the source report.';
               td.addEventListener('click', function () {
                 var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === e.file; });
@@ -2212,16 +2240,32 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var subsSeen = {}, subs = [];
       entries.forEach(function (e) {
         var k = e.date + '|' + (e.shift || '') + '|' + (e.file || '');
-        if (subsSeen[k]) { if (rigCheckAttention(e)) subsSeen[k].attn++; return; }
-        subsSeen[k] = { date: e.date, shift: e.shift || '', by: e.by || '', file: e.file || '', attn: rigCheckAttention(e) ? 1 : 0 };
+        if (subsSeen[k]) {
+          if (rigCheckAttention(e)) subsSeen[k].attn++;
+          if (OBSERVATION_ITEMS.test(String(e.item || ''))) { subsSeen[k].obsItems++; if (rigCheckNoObservation(e)) subsSeen[k].noObs++; }
+          return;
+        }
+        subsSeen[k] = { date: e.date, shift: e.shift || '', by: e.by || '', file: e.file || '', attn: rigCheckAttention(e) ? 1 : 0,
+          obsItems: OBSERVATION_ITEMS.test(String(e.item || '')) ? 1 : 0, noObs: rigCheckNoObservation(e) ? 1 : 0 };
         subs.push(subsSeen[k]);
       });
+      // The VP's count (entry 7): how many rounds ticked the potable-water
+      // flush without recording what they saw. Only shown once a rig has
+      // submitted a round that carries the items (SSORT REV 145+).
+      var obsRounds = subs.filter(function (s) { return s.obsItems > 0; });
+      if (obsRounds.length) {
+        var ticked = obsRounds.filter(function (s) { return s.noObs > 0; }).length;
+        var line = mk('div', 'rm-noobs-line' + (ticked ? ' warn' : ''),
+          'Potable-water flush: ' + ticked + ' of ' + obsRounds.length + ' round' + (obsRounds.length === 1 ? '' : 's') +
+          ' in this range ticked without recording an observation' + (ticked ? '.' : ' \u2014 every round recorded what was seen.'));
+        matrixHost.appendChild(line);
+      }
       subs.sort(function (a, b) { return a.date === b.date ? (b.shift || '').localeCompare(a.shift || '') : (a.date < b.date ? 1 : -1); });
       var subsBox = mk('div', 'rm-subs');
       subsBox.appendChild(mk('h4', '', view.kind + ' submissions in this range (' + subs.length + ')'));
       var st = mk('table', '');
       var sh = mk('tr', '');
-      ['Date', 'Shift', 'Completed by', 'Flagged', ''].forEach(function (h) { sh.appendChild(mk('th', '', h)); });
+      ['Date', 'Shift', 'Completed by', 'Flagged', 'Flush, no observation', ''].forEach(function (h) { sh.appendChild(mk('th', '', h)); });
       st.appendChild(sh);
       subs.forEach(function (s) {
         var tr = mk('tr', '');
@@ -2229,6 +2273,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         tr.appendChild(mk('td', '', s.shift || '—'));
         tr.appendChild(mk('td', '', s.by || '—'));
         tr.appendChild(mk('td', s.attn ? 'attn' : '', s.attn ? String(s.attn) : '—'));
+        tr.appendChild(mk('td', s.noObs ? 'noobs' : '', s.obsItems ? (s.noObs ? String(s.noObs) + ' of ' + s.obsItems : 'observed') : '—'));
         var td = mk('td', '');
         var rec = (window.DASHBOARD_DATA.reports || []).find(function (r) { return r.file === s.file; });
         if (rec) {
@@ -3188,13 +3233,15 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         var tb = mk('div', 'rv-tile-body');
         bySystem[system].forEach(function (row) {
           var attention = row.pass === false || !!row.comment;
-          var line = mk('div', 'rv-check-row' + (attention ? ' attention' : ''));
+          var noObs = rigCheckNoObservation(row);
+          var line = mk('div', 'rv-check-row' + (attention ? ' attention' : '') + (noObs ? ' noobs' : ''));
           line.appendChild(mk('span', 'rv-check-label', row.item.replace(/_/g, ' ')));
           var valCls = row.pass === true ? ' pass' : row.pass === false ? ' fail' : '';
           var valText = rigCheckValueText(row);
           line.appendChild(mk('span', 'rv-check-value' + valCls, valText));
           tb.appendChild(line);
           if (row.comment) tb.appendChild(mk('div', 'rv-check-comment', row.comment));
+          else if (noObs) tb.appendChild(mk('div', 'rv-check-noobs', 'Ticked, no observation recorded'));
         });
         t.appendChild(tb);
         body.appendChild(t);

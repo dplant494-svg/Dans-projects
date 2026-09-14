@@ -18,6 +18,7 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
+| 7 | **Two new readings on every daily-check round, on all three rig specs** — and a bare tick on them is meaningful | SSORT REV 145 | **NEEDS ACTION** — two new keys, and one attention-rule case |
 | 6 | **The nine oversize files, diagnosed one by one** — two real defects fixed, and **CBM reports cannot meet 10 MB** | WCGRRT REV 160 · SSORT REV 144 | **NEEDS DECISION** — what happens to a legitimate 48-photo CBM report |
 | 5 | **Rig identity enforced at source, and a 10 MB warning** — the debt you flagged | SSORT REV 143 · WCGRRT REV 159 | **FYI** — nothing to build. The Unattributed bucket should now stop filling |
 | 4 | Compliance report gains **action photos** and a **photo dump** | WCGRRT REV 158 | ✅ **CLOSED** — done your side, scanner v2.40 |
@@ -28,6 +29,96 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 *Entries 1–4 were answered in full by scanner v2.40 on 9 September 2026. Entry 5 is
 our side of that exchange: the one piece of work the reply said was still owed by us.
 Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.*
+
+---
+
+# Entry 7 — potable-water flush: two new readings on every round
+**SSORT REV 145 · 11 September 2026 · NEEDS ACTION**
+
+**I owe you this one.** REV 145 added two items to the daily-check round and I did not
+tell you at the time, which was an oversight — you ingest daily checks into Rig
+Monitoring with a readings matrix and trends, so two new keys appear on every round
+from every rig and you found out from page 6 of the pack rather than from a handoff.
+
+## What was added, and why
+
+Requested by the VP. The concern was specific and worth understanding, because it
+shapes how the data should be read:
+
+> *"I want to see if they verify they flush and provide a visual observation to
+> clarity, or just tick the box."*
+
+So the point of these two items is not the tick. It is **whether an observation was
+recorded at all.**
+
+Two items, identically worded, on **all three daily-check specs** — every rig is
+covered:
+
+| Spec | Rigs | Section |
+|---|---|---|
+| `CAPELLA_CHECKS` | most of the fleet | Diverter Panel / HPU, after Water Flow Meter |
+| `AURIGA_CHECKS` | West Auriga | Mixing Skid, after Potable Water Total Flow |
+| `DAILY_CHECKS` | West Saturn, Sevan Louisiana | HPU, after Potable Water Reading |
+
+## The new keys
+
+Type `yn` with a comment companion, so the convention is unchanged and no parser
+change is needed:
+
+```
+<prefix>_<section>__flush_potable_water_supply_line_before_filtration
+<prefix>_<section>__flush_potable_water_supply_line_after_filtration
+     + the matching _cmt companions
+```
+
+Worked example, West Capella:
+
+```
+dc_diverter_panel_hpu__flush_potable_water_supply_line_before_filtration
+dc_diverter_panel_hpu__flush_potable_water_supply_line_before_filtration_cmt
+```
+
+The section slug differs per rig because the item sits in a different section on each
+spec — `diverter_panel_hpu`, `mixing_skid`, `hpu`. **Match on the item half, not the
+whole key**, if you want them side by side across rigs.
+
+## The one thing that needs a decision your side
+
+The comment prompt is bespoke — *"What did you see? — clarity, colour, any
+particulate, how long flushed"* — because a generic "(optional)" invites a blank box.
+On the report it prints:
+
+| What the operator did | Prints as |
+|---|---|
+| Flushed and observed | `✓ — Ran 2 min, clear, no particulate` |
+| Flushed, recorded nothing | `✓` |
+| Found a problem | `✗ — Cloudy after filter, filter changed` |
+
+**A bare `✓` is the signal the VP asked for.** It means *flushed, nothing observed* —
+and on your side that case is currently invisible, because the dashboard styles
+attention off **`comment <> ''` alone** (your §4.2). A pass with an empty comment
+therefore looks identical to an item nobody was worried about.
+
+**What I would ask:** when the database view adopts our rule
+(`status = 'fail' OR comment <> ''`), these two items want the *opposite* treatment —
+**a pass with no comment is the thing to surface**, not to hide. It is the only place
+in the estate where an empty comment is itself the finding. A small exception, but the
+VP will ask for exactly that count: *how many rounds ticked it without looking.*
+
+## Honest limits
+
+- **The comment is not mandatory.** Nothing in the daily-check engine can block a
+  round from being submitted, so a bare tick is possible by design — which is the
+  point, since it makes "ticked without looking" visible rather than impossible.
+- If Dan later wants it *impossible* rather than *visible*, that needs a clarity
+  dropdown instead of a tick, plus a small fix so dropdown comments print in the PDF
+  (they currently do not). Offered, not built.
+
+## Unchanged
+
+Transport untouched · filenames not load-bearing · `meta.asset` still the rig
+identity contract · the key convention and the companion rule are exactly as you
+implement them today, so nothing about ingestion changes.
 
 ---
 

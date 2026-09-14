@@ -193,3 +193,58 @@ is still wanted).
 
 Scanner v2.41 tested with a 12 MB CBM report (silent) beside a 12 MB rig
 visit (warns, listed on the dashboard); all earlier v2.40 checks unchanged.
+
+---
+
+## Entry 7 (SSORT REV 145) — reply, 14 September 2026: built, and the rule is inverted exactly where you said
+
+No apology needed; page 6 got it to us within three days and nothing was lost, because
+the key convention held and the scanner ingested the two items on the first round that
+carried them without a change. What was missing was the meaning, and that is now built:
+
+- **The rule, as implemented** (and written into `INTEGRATION-CONTRACT.md` so the
+  database view can copy it, your §7.3 concern): for an item whose slug matches
+  `flush_potable_water_supply_line_(before|after)_filtration`, **`pass <> false AND
+  value <> '' AND comment = ''` is the finding**, `ticked_no_observation`. A fail is
+  ordinary attention as everywhere else; a blank value is "not done", neither. Matched
+  on the item half of the key, as you asked, so the three section slugs line up across
+  rigs.
+- **Rig Monitoring:** an amber **○ n** badge on the rig tile (bare ticks in the latest
+  submission, distinct from the red ⚠ so nobody reads it as a failure); the matrix
+  cell amber with "Ticked, no observation recorded" in its tooltip; and **the VP's
+  count as a line above the submissions list**: *"Potable-water flush: 3 of 14 rounds in
+  this range ticked without recording an observation"*, over whatever range is
+  selected, with a "Flush, no observation" column per round. It appears only once a rig
+  has submitted a round carrying the items, so pre-REV-145 history shows nothing rather
+  than a false zero.
+- **Full-report viewer:** the row is marked amber with "Ticked, no observation
+  recorded" under it where the comment would be.
+- **Digests (scanner v2.47):** the comment cell carries "No observation recorded
+  (ticked only)" for those rows, so *"how many rounds ticked it without looking"* is a
+  question Copilot can answer from the digests as well as the dashboard.
+
+One assumption to confirm, one line: **a `yn` item stores `"pass"` / `"fail"` in
+`values`, the same literals as every other pass/fail item.** The rule above does not
+actually depend on it (anything non-blank that is not `"fail"`, with no comment, is a
+bare tick), but the ✓ / ✗ rendering does, so if `yn` stores something else the cell
+would show the literal text instead of a tick. Verified here on synthetic rounds only;
+the first real REV 145 round from any rig is the real test.
+
+**On the dropdown alternative:** Dan's call, and I would leave it as a tick. The VP
+asked to *see* whether they look, and a dropdown removes the thing being measured.
+
+## Entry 6 — closed on 9 September, for the record
+
+The summary table still shows entry 6 as NEEDS DECISION. The decision was given the
+same day, above: **CBM reports get a 30 MB ceiling, nothing degraded, photos untouched**
+(scanner v2.41, and it is on page 2 of the pack). Please mark it closed.
+
+On your point 2, the 74.8 MB vendor audit: since scanner v2.45 (14 Sep) an unchanged
+scan does not open any file at all, so the ten-seconds-every-ten-minutes cost is gone;
+it is parsed only when something else changes. It is still listed under the Errors
+button as oversized. Dan's instruction of 14 September is that oversized reports stay
+where they are and the archive script cannot move them, so if that one pre-fix artefact
+is to go, it is one manual delete by Dan, not a tool.
+
+Everything in entries 1 to 7 is now answered. Nothing open on our side.
+
