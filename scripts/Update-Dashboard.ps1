@@ -33,6 +33,11 @@
     Path to config.json. Defaults to the config.json in the repository root
     (one level above this script).
 
+.PARAMETER Force
+    Do the full scan even when nothing has changed since the last complete
+    run (v2.45 remembers a fingerprint of every input file in scan-state.json
+    next to config.json and otherwise only refreshes the 'Data updated' stamp).
+
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File .\scripts\Update-Dashboard.ps1
 #>
@@ -41,11 +46,13 @@ param(
     # Resolved below; do NOT default this from $PSScriptRoot - that variable is
     # empty inside param() defaults on Windows PowerShell 5.1 when the script
     # is launched via 'powershell.exe -File' (which is how Task Scheduler runs it).
-    [string]$ConfigPath = ''
+    [string]$ConfigPath = '',
+    # v2.45: skip the nothing-changed short cut and do a full scan regardless.
+    [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.44'
+$ScriptVersion = '2.45'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -597,13 +604,22 @@ function Write-ReportDigest {
         [void]$sb.Append('<tr><th>Dashboard</th><td><a href="').Append((ConvertTo-HtmlText $link)).Append('">Open this report on the Rig Visit Dashboard</a></td></tr>')
     }
     [void]$sb.Append('</table>')
+    # v2.45: an explicit 'none recorded' line when a report raised nothing,
+    # so Copilot answers 'no actions were raised' instead of improvising
+    # actions out of the narrative text further down.
     if ($Rec -and $Rec.criticalItems -and @($Rec.criticalItems).Count) {
         [void]$sb.Append('<h2>Critical items (').Append(@($Rec.criticalItems).Count).Append(', ').Append([int]$Rec.criticalOpen).Append(' open)</h2>')
         Write-DigestValue -Sb $sb -Value $Rec.criticalItems -Depth 1
     }
+    elseif ($Rec) {
+        [void]$sb.Append('<h2>Critical items (0)</h2><p>None recorded: this report raised no critical items.</p>')
+    }
     if ($Rec -and $Rec.actionItems -and @($Rec.actionItems).Count) {
         [void]$sb.Append('<h2>Actions raised during the visit (').Append(@($Rec.actionItems).Count).Append(')</h2>')
         Write-DigestValue -Sb $sb -Value $Rec.actionItems -Depth 1
+    }
+    elseif ($Rec) {
+        [void]$sb.Append('<h2>Actions raised during the visit (0)</h2><p>None recorded: no actions were raised in this report. Anything that reads like a task in the text below was not raised as an action.</p>')
     }
     $checks = Get-Prop $Meta 'checks'
     if ($checks) {
@@ -737,7 +753,7 @@ function Get-ScannedFiles {
                 $excluded = $false
                 foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
                 (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json') -and
-                ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json')
+                ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json') -and ($_.Name -ne 'scan-state.json')
             } | ForEach-Object { $list.Add($_) | Out-Null }
     }
     return $list.ToArray()
@@ -777,6 +793,104 @@ if ($config.PSObject.Properties['ssceDecisionPattern'] -and $config.ssceDecision
 }
 $ssceRequestFiles = Get-ScannedFiles -Pattern $ssceRequestPattern
 $ssceDecisionFiles = Get-ScannedFiles -Pattern $ssceDecisionPattern
+
+# ---------------------------------------------------------------------------
+# v2.45: the nothing-changed short cut ("only recheck and post if it has been
+# modified"). Every output of this script is a pure function of the input
+# files, config.json, the script version and today's date (TOPSET overdue
+# flags compare due dates with today). So a fingerprint of exactly those -
+# name, size and last-modified time of every scanned file, hashed together
+# with the config text, the version and the date - decides whether anything
+# CAN have changed. If it matches the fingerprint recorded by the last run
+# that got all the way to the end with every deploy step succeeding, the
+# whole scan is skipped: the data files (and their deployed copies) get a
+# fresh generatedAt so the dashboards keep showing 'Data updated' rather
+# than 'Stale', and nothing else is touched. One changed byte in any input,
+# a new day, an edited config, a new script version, a deleted output or a
+# failed deploy last time, and the full scan runs exactly as before. -Force
+# always runs the full scan. The state file lives next to config.json and is
+# excluded from the scan like the other state files.
+# ---------------------------------------------------------------------------
+$scanStateFile = Join-Path $repoRoot 'scan-state.json'
+$scanFingerprint = ''
+$scanRetryNeeded = $false   # set by any deploy/output step that did not finish; the state is only recorded when it stays $false
+try {
+    $fpLines = New-Object System.Collections.Generic.List[string]
+    foreach ($sf in @(@($files) + @($excelFiles) + @($ssceRequestFiles) + @($ssceDecisionFiles) | Where-Object { $_ })) {
+        $fpLines.Add(('{0}|{1}|{2}' -f $sf.FullName, $sf.Length, $sf.LastWriteTimeUtc.Ticks))
+    }
+    $fpLines.Sort([StringComparer]::Ordinal)
+    $fpText = 'v' + $ScriptVersion + '|' + (Get-Date).ToString('yyyy-MM-dd') + "`n" + [string](Get-Content -Path $ConfigPath -Raw) + "`n" + ($fpLines -join "`n")
+    $fpSha = [System.Security.Cryptography.SHA256]::Create()
+    $scanFingerprint = [BitConverter]::ToString($fpSha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($fpText))).Replace('-', '')
+    $fpSha.Dispose()
+}
+catch { $scanFingerprint = ''; Write-Warning "Scan fingerprint not computed ($($_.Exception.Message)) - full scan" }
+
+function Update-GeneratedStamp {
+    # Rewrites the generatedAt value of a data file already on disk (and its
+    # deployed copy, when given) without touching anything else in it.
+    param([string]$Path, [string]$DeployDir, [string]$DeployName, [string]$Stamp)
+    if (-not $Path -or -not (Test-Path -Path $Path)) { return }
+    $text = [System.IO.File]::ReadAllText($Path)
+    $rx = [regex]'("generatedAt"\s*:\s*")[^"]*(")'
+    if (-not $rx.IsMatch($text)) { return }
+    $text = $rx.Replace($text, ('${1}' + $Stamp + '${2}'), 1)
+    [System.IO.File]::WriteAllText($Path, $text, (New-Object System.Text.UTF8Encoding($false)))
+    if ($DeployDir -and (Test-Path -Path $DeployDir)) { Copy-Item -Path $Path -Destination (Join-Path $DeployDir $DeployName) -Force }
+}
+
+$scanUnchanged = $false
+$scanPrev = $null
+if ($scanFingerprint -and -not $Force -and (Test-Path -Path $scanStateFile) -and (Test-Path -Path $outputFile)) {
+    try {
+        $scanPrev = Get-Content -Path $scanStateFile -Raw | ConvertFrom-Json
+        $scanUnchanged = (([string]$scanPrev.fingerprint) -eq $scanFingerprint) -and (([string]$scanPrev.status) -eq 'complete')
+    }
+    catch { $scanUnchanged = $false }
+}
+if ($scanUnchanged) {
+    # Same resolution as the deploy section below (kept in one place there;
+    # only read here, never written).
+    $scDeploy = ''
+    if ($config.PSObject.Properties['deployPath'] -and $config.deployPath) { $scDeploy = [Environment]::ExpandEnvironmentVariables($config.deployPath) }
+    if ($scDeploy -and -not (Test-Path -Path (Join-Path $scDeploy 'reports-data.js'))) {
+        Write-Host "Inputs unchanged, but the deployed data file is missing from $scDeploy - full scan" -ForegroundColor Yellow
+        $scanUnchanged = $false
+    }
+}
+if ($scanUnchanged) {
+    $scStamp = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+    $scBopDir = ''; $scReqDir = ''
+    if ($scDeploy) {
+        $scBopDir = Join-Path $scDeploy 'bop'
+        if ($config.PSObject.Properties['bopDeployPath'] -and $config.bopDeployPath) { $scBopDir = [Environment]::ExpandEnvironmentVariables($config.bopDeployPath) }
+        $scReqDir = Join-Path $scDeploy 'requests'
+        if ($config.PSObject.Properties['requestsDeployPath'] -and $config.requestsDeployPath) { $scReqDir = [Environment]::ExpandEnvironmentVariables($config.requestsDeployPath) }
+    }
+    $scBopFile = Join-Path $repoRoot 'bop-dashboard\bop-planning-data.js'
+    if ($config.PSObject.Properties['bopOutputFile'] -and $config.bopOutputFile) {
+        $scBopFile = [Environment]::ExpandEnvironmentVariables($config.bopOutputFile)
+        if (-not [System.IO.Path]::IsPathRooted($scBopFile)) { $scBopFile = Join-Path $repoRoot $scBopFile }
+    }
+    $scReqFile = Join-Path $repoRoot 'requests-dashboard\ssce-requests-data.js'
+    if ($config.PSObject.Properties['requestsOutputFile'] -and $config.requestsOutputFile) {
+        $scReqFile = [Environment]::ExpandEnvironmentVariables($config.requestsOutputFile)
+        if (-not [System.IO.Path]::IsPathRooted($scReqFile)) { $scReqFile = Join-Path $repoRoot $scReqFile }
+    }
+    $scLast = $scanPrev.lastFullScan   # ConvertFrom-Json hands ISO dates back as [datetime]
+    if ($scLast -is [datetime]) { $scLast = $scLast.ToString('yyyy-MM-dd HH:mm:ss') }
+    try {
+        Update-GeneratedStamp -Path $outputFile -DeployDir $scDeploy -DeployName 'reports-data.js' -Stamp $scStamp
+        Update-GeneratedStamp -Path $scBopFile -DeployDir $scBopDir -DeployName 'bop-planning-data.js' -Stamp $scStamp
+        Update-GeneratedStamp -Path $scReqFile -DeployDir $scReqDir -DeployName 'ssce-requests-data.js' -Stamp $scStamp
+        Write-Host ("Nothing changed since the last full scan at {0}: {1} report file(s) and every other input identical. Refreshed the 'Data updated' stamp{2}; nothing else touched. Run with -Force for a full scan." -f [string]$scLast, @($files | Where-Object { $_ }).Count, $(if ($scDeploy) { " and the deployed copies in $scDeploy" } else { '' })) -ForegroundColor Green
+        exit 0
+    }
+    catch {
+        Write-Warning "Could not refresh the data stamp ($($_.Exception.Message)) - full scan instead"
+    }
+}
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
@@ -1836,7 +1950,7 @@ foreach ($f in $files) {
     if ($digestPath -and -not $restrictedTopsetFiles.ContainsKey($f.Name) -and -not $prechargeRequestFiles.ContainsKey($f.Name)) {
         if (-not (Test-Path -Path $digestPath)) { New-Item -ItemType Directory -Path $digestPath -Force | Out-Null }
         try { Write-ReportDigest -File $f -Json $json -Meta $meta -Rec $summaryRec }
-        catch { Write-Warning "Digest not written for $($f.Name): $($_.Exception.Message)" }
+        catch { $scanRetryNeeded = $true; Write-Warning "Digest not written for $($f.Name): $($_.Exception.Message)" }
     }
     }
     catch {
@@ -2297,6 +2411,7 @@ if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
         Write-Warning "Precharge inbox skipped: $($prechargeRequests.Count) request(s) seen but 'prechargeDeployPath' is not set in config.json"
     }
     elseif (-not (Test-Path -Path $prechargeDeployPath)) {
+        $scanRetryNeeded = $true
         Write-Warning "Precharge inbox skipped: prechargeDeployPath not reachable: $prechargeDeployPath"
     }
     else {
@@ -2379,6 +2494,7 @@ if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
             Write-Host "Precharge inbox: $($pcRows.Count) request(s) indexed ($pcNew new, $pcIssued issued, $pcArchived superseded payload(s) archived) to $pcIndexPath" -ForegroundColor Green
         }
         catch {
+            $scanRetryNeeded = $true
             Write-Warning "Precharge inbox failed (scan unaffected): $($_.Exception.Message)"
         }
     }
@@ -2454,6 +2570,7 @@ else {
         }
     }
     catch {
+        $scanRetryNeeded = $true
         Write-Warning "SSCE COC write-back failed (scan unaffected): $($_.Exception.Message)"
     }
 }
@@ -2591,6 +2708,32 @@ elseif ($deployPath) {
     catch {
         # Don't fail the scheduled task over a transient network issue -
         # the next run will catch the server up.
+        $scanRetryNeeded = $true
         Write-Warning "Could not copy data file to '$deployPath': $($_.Exception.Message)"
     }
+}
+
+# v2.45: record this run's fingerprint so the next run can skip the work if
+# nothing has changed. Only after a complete run: every deploy step above
+# succeeded, at least one report was found (an empty scan is never cached -
+# it is usually a sync glitch) and no digest failed. Anything less and the
+# next run does the full scan again, which is the safe default.
+if ($scanFingerprint -and $reports.Count -gt 0 -and -not $scanRetryNeeded) {
+    try {
+        $scanState = [pscustomobject]@{
+            version      = $ScriptVersion
+            status       = 'complete'
+            fingerprint  = $scanFingerprint
+            lastFullScan = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+            files        = @($files | Where-Object { $_ }).Count
+            note         = 'Written by Update-Dashboard.ps1. Delete this file, or run with -Force, to make the next run a full scan.'
+        }
+        [System.IO.File]::WriteAllText($scanStateFile, ($scanState | ConvertTo-Json), (New-Object System.Text.UTF8Encoding($false)))
+    }
+    catch { Write-Warning "Scan state not recorded ($($_.Exception.Message)) - the next run will be a full scan" }
+}
+elseif ($scanFingerprint -and (Test-Path -Path $scanStateFile)) {
+    # A run that did not complete must not leave an older 'complete' state
+    # behind, or the next run would trust it.
+    try { Remove-Item -Path $scanStateFile -Force } catch { }
 }

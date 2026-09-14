@@ -4,3 +4,5 @@ precharge/requests/
 # built by the calculator session (PRECHARGE-OWNERSHIP-AND-DATA-CONTRACT): Dan drops them in, Deploy publishes them as-is
 precharge/calculator.html
 precharge/set-password.html
+# written by Update-Dashboard.ps1 v2.45 next to config.json; per-installation, never committed
+scan-state.json

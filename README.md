@@ -244,3 +244,14 @@ library the scanner fills with one readable HTML digest per report), `dashboardU
 (so each digest links back to its report) and `copilotUrl` (the Copilot Studio agent's
 link, shown on the dashboard as "Ask Copilot about these reports"). Setup in
 `COPILOT-REPORTS-ASSISTANT-GUIDE.md`. Absent keys, nothing happens.
+
+## Nothing-changed short cut (scanner v2.45)
+
+The scheduled task runs every ten minutes; most runs find nothing new. Since v2.45
+the scanner fingerprints its inputs first (every scanned file's name, size and
+modified time, the `config.json` text, the script version, today's date) and keeps
+the fingerprint of the last complete run in `scan-state.json` next to `config.json`.
+A run with the same fingerprint refreshes the "Data updated" stamp in the data files
+and their deployed copies and exits in about a second. Anything different, a deploy
+that failed last time, or `-Force`, and the full scan runs as before. Delete
+`scan-state.json` to force one full scan by hand.
