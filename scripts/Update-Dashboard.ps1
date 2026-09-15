@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.48'
+$ScriptVersion = '2.49'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -917,6 +917,11 @@ $complianceEntries = @{}  # keyed rig|date (newest exportedAt wins) - standalone
 # report copies and every fleet view - they exist only in the inbox index.
 $prechargeRequests = @{}
 $prechargeRequestFiles = @{}   # source filenames, so the report-copy loop never publishes them to the open share
+# v2.49: OEM copies (CBM-to-OEM loop, CBM-OEM-HANDOFF.md): a small post carrying the
+# report PDF for the OEM notification flow. Not a report: recorded for the 'Sent to
+# OEM' badge only, never listed, copied to the server, digested or size-checked.
+$oemCopies = New-Object System.Collections.Generic.List[object]
+$oemCopyFiles = @{}
 $prechargeSuperseded = New-Object System.Collections.Generic.List[object]  # older payloads for an id (F-23a) -> requests\archive\<id>_<saved>.json
 $prechargeIssued = @{}         # rigKey|well -> list of @{bop; saved} of ISSUED precharge sheets (calculator post) - the return leg
 $PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta.asset is preferred (form Rev 2+ ships it; Rev 3 is the live, frozen build)
@@ -1088,6 +1093,29 @@ foreach ($f in $files) {
         Write-Warning "Skipping $($f.Name): no 'meta' block - not a TSC Rig Reporting Tool export?"
         Add-Problem $f 'unrecognised' "no 'meta' block - not a report export"
         $skipped++
+        continue
+    }
+
+    # v2.49: OEM copy - see $oemCopies above. Recognised by meta.kind, or by
+    # the seadrill-oem_ prefix as a fallback (filenames are not load-bearing,
+    # but a copy whose meta was mangled still must not surface as a report).
+    if (([string](Get-Prop $meta 'kind')) -eq 'oem-copy' -or $f.Name -like 'seadrill-oem_*') {
+        $oemCopyFiles[$f.Name] = $true
+        $oemSent = ConvertTo-StableTimestamp (Get-Prop $meta 'saved')
+        if (-not $oemSent) { $oemSent = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+        $oemCopies.Add([pscustomobject]@{
+            file       = $f.Name
+            rig        = ([string](Get-Prop $meta 'asset')).Trim()
+            date       = [string](Get-Prop $meta 'date')
+            reporttype = [string](Get-Prop $meta 'reporttype')
+            equipment  = [string](Get-Prop $meta 'equipment')
+            sourceFile = [string](Get-Prop $meta 'sourceFile')
+            oem        = [string](Get-Prop $json 'oem')
+            pdfName    = [string](Get-Prop $json 'pdfName')
+            pdfBytes   = [int][math]::Floor(([string](Get-Prop $json 'pdf')).Length * 0.75)
+            sent       = [string]$oemSent
+            modified   = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+        }) | Out-Null
         continue
     }
 
@@ -2057,6 +2085,7 @@ $payload = [pscustomobject]@{
     marineScores = $marineSorted.ToArray()
     topsetInvestigations = $topsetSorted.ToArray()
     complianceChecklists = $complianceSorted.ToArray()
+    oemCopies    = @($oemCopies | Sort-Object -Property @{ Expression = { [string]$_.sent } } -Descending)
     problems     = $problems.ToArray()
 }
 # Marine Integrity was retired from WCGRRT at REV 155 (2026-09-09): the view
@@ -2077,6 +2106,7 @@ if (-not (Test-Path -Path $outDir)) {
 [System.IO.File]::WriteAllText($outputFile, $content, (New-Object System.Text.UTF8Encoding($false)))
 
 Write-Host "Wrote $($reports.Count) report(s) to $outputFile" -ForegroundColor Green
+if ($oemCopies.Count) { Write-Host "OEM copies: $($oemCopies.Count) CBM report(s) sent to the OEM via the notification flow (recorded, not listed)" -ForegroundColor Cyan }
 
 # v2.46: scan-problems.json next to the data file - the Errors list with full
 # paths, read by scripts\Archive-ProblemFiles.ps1 to move unusable posts out
@@ -2680,7 +2710,7 @@ elseif ($deployPath) {
             # Restricted TOPSET bodies must never reach the open share; also
             # excluded from $expected below so a copy from before the file
             # became restricted gets cleaned up as stale.
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name)) { continue }
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name)) { continue }
             $dest = Join-Path $reportsDir ($f.Name + '.js')
             if (-not (Test-Path -Path $dest) -or ($f.LastWriteTime -gt (Get-Item -Path $dest).LastWriteTime)) {
                 Copy-Item -Path $f.FullName -Destination $dest -Force
@@ -2689,7 +2719,7 @@ elseif ($deployPath) {
         }
         $expected = @{}
         foreach ($f in $files) {
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name)) { continue }
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name)) { continue }
             $expected[$f.Name + '.js'] = $true
         }
         foreach ($old in Get-ChildItem -Path $reportsDir -File) {

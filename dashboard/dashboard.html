@@ -82,6 +82,7 @@
     margin-bottom: 10px;
   }
   .source-line { color: var(--sd-text-light); font-size: 11px; margin: -4px 0 16px; }
+  .oem-chip { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; color: #1b5e20; background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px; padding: 1px 8px; }
   .errors-btn { margin-left: auto; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #fff; background: #c0392b; border: 1.5px solid #c0392b; border-radius: 20px; padding: 7px 16px; cursor: pointer; }
   .errors-btn:hover { background: #a93226; }
   .errors-btn.warn { background: #ad6800; border-color: #ad6800; }
@@ -1201,6 +1202,21 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     return tr;
   }
 
+  // Latest OEM copy for a report: by the source file name the tool recorded,
+  // else by rig + date on a CBM report (the copy may have been posted before
+  // the dashboard post, so sourceFile can be blank).
+  function oemCopyFor(r) {
+    var copies = window.DASHBOARD_DATA.oemCopies || [];
+    if (!copies.length) return null;
+    var hit = null;
+    copies.forEach(function (c) {
+      var match = (c.sourceFile && c.sourceFile === r.file) ||
+        (!c.sourceFile && c.rig === r.rig && c.date === r.date && /cbm/i.test(String(r.reporttype || '')));
+      if (match && (!hit || String(c.sent) > String(hit.sent))) hit = c;
+    });
+    return hit;
+  }
+
   function renderTable(reports) {
     var head = $('table-head');
     head.textContent = '';
@@ -1251,6 +1267,14 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       typ.textContent = _isPlan ? ((r.rig ? r.rig + ' · ' : '') + 'Planning Report') : (r.type || r.reporttype || 'Report');
       var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file;
       tdRig.appendChild(rig); tdRig.appendChild(typ); tdRig.appendChild(file);
+      // CBM-to-OEM loop (scanner v2.49): a 'Post to OEM' from the tool leaves an
+      // oemCopies[] record; show it on the report it belongs to.
+      var oem = oemCopyFor(r);
+      if (oem) {
+        var chip = mk('div', 'oem-chip', 'Sent to ' + (oem.oem || 'OEM') + (oem.sent ? ' \u00B7 ' + String(oem.sent).replace('T', ' ').slice(0, 16) : ''));
+        chip.title = 'A copy of this report was emailed to the OEM by the CBM-to-OEM flow' + (oem.pdfName ? ' (' + oem.pdfName + ')' : '') + '. Posted as ' + oem.file + '.';
+        tdRig.appendChild(chip);
+      }
       tr.appendChild(tdRig);
 
       var tdDates = document.createElement('td');
