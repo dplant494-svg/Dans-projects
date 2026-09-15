@@ -135,4 +135,10 @@ checklist and the planning report), not a scanner one, and not urgent.
    same export.**
 3. Can we have `SPARC_Master_Data.xlsx` for the database load (step 3.1)?
 
+**Update 15 Sep:** Dan sent the five `SDITEM_SFI` files themselves. Profiled in
+`MAXIMO-ITEM-EXPORT-PROFILE.md` and readable with `scripts/Convert-MaximoItemExport.ps1`:
+22,171 active items across SFI 331/332/334/335/336, generated 12 June 05:01–06:10 in a
+chain, which is what a scheduled run looks like. Two new questions for Lee: is SFI 333
+deliberately absent, and are the job-plan exports on the same schedule?
+
 Everything else in the handoff is complete enough to work from. It is a good document.
