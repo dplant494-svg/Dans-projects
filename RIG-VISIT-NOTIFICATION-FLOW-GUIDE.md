@@ -19,10 +19,12 @@ The recipients live in the workbook you already have,
 SharePoint site in the browser, not from the synced folder.
 
 1. **Rigs** sheet. In the first empty header cell to the right of `TSLEmail` (that is
-   **F1**) type `OIMEmail`. In **G1** type `RigEngineerEmail`. The blue table extends
-   itself to include them; if it does not, click any cell in the table, **Table
-   Design**, **Resize Table**, and drag the range to column G.
-2. Fill in the OIM and Rig Engineer addresses for each vessel you want to receive
+   **F1**) type `OIMEmail`. In **G1** type `RigEngineerEmail`. In **H1** type `ARMEmail`
+   (the Assistant Rig Manager; also wanted on the precharge emails, week plan item 12,
+   so add it now and the column is there for both). The blue table extends itself to
+   include them; if it does not, click any cell in the table, **Table Design**,
+   **Resize Table**, and drag the range to column H.
+2. Fill in the OIM, Rig Engineer and ARM addresses for each vessel you want to receive
    visit reports. Leave a cell blank where there is nobody; the flow skips blanks.
 3. Close the workbook. It must be closed whenever the flow runs.
 
@@ -107,10 +109,10 @@ concat('Vessel eq ''', trim(outputs('RigName')), '''')
 
     Top Count: `1`. Rename **RigRow**. (This is the filter that bit us last time:
     one expression, no hand-typed quotes.)
-11. **RigTo** — Compose. Joins the four rig addresses, skipping blanks:
+11. **RigTo** — Compose. Joins the five rig addresses, skipping blanks:
 
 ```
-join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TSLEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['OIMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],'')),';'),json('[]')),';')
+join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TSLEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['OIMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['ARMEmail'],'')),';'),json('[]')),';')
 ```
 
     Because `split` leaves empty strings for blank cells, add one more Compose
