@@ -18,7 +18,7 @@ The recipients live in the workbook you already have,
 `PostedReports/Notifications/WCE_Precharge_Notification.xlsx`. Open it from the
 SharePoint site in the browser, not from the synced folder.
 
-1. **Rigs** sheet. In the first empty header cell to the right of `TSLEmail` (that is
+1. **Rigs** sheet. In the first empty header cell to the right of `TslEmail` (that is
    **F1**) type `OIMEmail`. In **G1** type `RigEngineerEmail`. In **H1** type `ARMEmail`
    (the Assistant Rig Manager; also wanted on the precharge emails, week plan item 12,
    so add it now and the column is there for both). The blue table extends itself to
@@ -112,7 +112,7 @@ concat('Vessel eq ''', trim(outputs('RigName')), '''')
 11. **RigTo** — Compose. Joins the five rig addresses, skipping blanks:
 
 ```
-join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TSLEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['OIMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['ARMEmail'],'')),';'),json('[]')),';')
+join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TslEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['OIMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['ARMEmail'],'')),';'),json('[]')),';')
 ```
 
     Because `split` leaves empty strings for blank cells, add one more Compose
