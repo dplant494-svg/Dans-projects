@@ -46,7 +46,7 @@ header names appear twice; the reader suffixes the second with `2`.
 | `Manufacturer Part No` | the part number on this line | one line per manufacturer part |
 | `Description2` | second description column | blank on the sampled rows |
 | `Default Vendor` | `Y` / `N` | marks the vendor line |
-| `Item2` | the ICN again | equals `Item` on all but ~10 rows in 65,725 |
+| `Item2` | the ICN again | equals `Item` on all but ~10 rows in 65,720 |
 | `Manufacturer` | manufacturer name | **truncated to 12 characters** (`NATIONAL OIL`, `VETCO GRAY G`, `HYDRIL (GE O`) |
 | `Default Manufacturer` | `Y` / `N` | **exactly one `Y` per item**: the canonical row |
 | `Manufacturer Part No2` | the part number normalised | hyphens and leading zeros stripped (`02206101` → `2206101`) |
@@ -55,17 +55,19 @@ header names appear twice; the reader suffixes the second with `2`.
 
 | File | Rows | Distinct items | Generated |
 |---|---|---|---|
-| SFI 331 | 23,988 | 7,311 | 05:03 |
-| SFI 332 | 23,010 | 7,849 | 05:05 |
-| SFI 334 | 3,384 | 1,243 | 05:01 |
-| SFI 335 | 6,128 | 2,090 | 05:07 |
-| SFI 336 | 9,215 | 3,682 | 06:10 |
-| **All five** | **65,725** | **22,171** | |
+| SFI 331 | 23,987 | 7,310 | 05:03 |
+| SFI 332 | 23,009 | 7,848 | 05:05 |
+| SFI 334 | 3,383 | 1,242 | 05:01 |
+| SFI 335 | 6,127 | 2,089 | 05:07 |
+| SFI 336 | 9,214 | 3,681 | 06:10 |
+| **All five** | **65,720** | **22,170** | |
+
+Each file's footer declares `Number of Records:`; the reader checks its row count against it and warns on a mismatch, so a file cut short in transfer cannot pass as complete.
 
 The timestamps run 05:01 to 06:10 on one morning, one file after another: that is the
 signature of a scheduled report chain, consistent with Dan's "refreshes 06:00 Houston
 every day". SPARC's handoff said "~34k items"; that is rows in three of the files, not
-items. **22,171 distinct active items** is the number.
+items. **22,170 distinct active items** is the number.
 
 ## 4. How to read it into anything
 
@@ -76,8 +78,9 @@ items. **22,171 distinct active items** is the number.
 - **Do not trust `Manufacturer` for identity.** Twelve characters is enough to read,
   not enough to join on. `NOV` and `NATIONAL OIL` are the same company.
 - **Read by header name, never position.** Proven necessary by the 336 file.
-- **Skip the footer rows** by shape: `Saved Query:`, `Dynamic Query:`, and a first cell
-  matching `dd-MMM-yyyy hh:mm` is the generated stamp, worth keeping as the data's date.
+- **Skip the footer rows** by shape: `Saved Query:`, `Dynamic Query:`, `Number of Records:` (keep it: it is the
+  completeness check), and a first cell matching `dd-MMM-yyyy hh:mm` is the generated
+  stamp, worth keeping as the data's date.
 
 ## 5. What this gives the plan
 

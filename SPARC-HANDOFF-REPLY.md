@@ -137,7 +137,7 @@ checklist and the planning report), not a scanner one, and not urgent.
 
 **Update 15 Sep:** Dan sent the five `SDITEM_SFI` files themselves. Profiled in
 `MAXIMO-ITEM-EXPORT-PROFILE.md` and readable with `scripts/Convert-MaximoItemExport.ps1`:
-22,171 active items across SFI 331/332/334/335/336, generated 12 June 05:01–06:10 in a
+22,170 active items across SFI 331/332/334/335/336, generated 12 June 05:01–06:10 in a
 chain, which is what a scheduled run looks like. Two new questions for Lee: is SFI 333
 deliberately absent, and are the job-plan exports on the same schedule?
 

@@ -126,7 +126,7 @@ try {
         foreach ($need in @('Item', 'SFI Group ID', 'Status', 'Last Price', 'Default Manufacturer')) {
             if (-not $colmap.ContainsKey($need)) { throw "$($f.Name): expected column '$need' not in the header: $($hdr -join ' | ')" }
         }
-        $stamp = ''; $savedQuery = ''
+        $stamp = ''; $savedQuery = ''; $declared = ''
         $items = @{}; $n = 0; $p500 = 0; $p0 = 0; $sfi = @{}; $status = @{}; $defY = 0
         for ($i = $hdrIdx + 1; $i -lt $rows.Count; $i++) {
             $row = $rows[$i]
@@ -134,7 +134,11 @@ try {
             $first = $row[0]
             if ($first -eq 'Saved Query:' -or $first -eq 'Dynamic Query:') { $savedQuery = ($row | Where-Object { $_ -like '*item.*' }) -join ' '; continue }
             if ($first -match '^\d\d-[A-Za-z]{3}-\d{4} \d\d:\d\d') { $stamp = $first; continue }
+            if ($first -eq 'Number of Records:') { $declared = ($row | Where-Object { $_ -match '^\d+$' } | Select-Object -First 1); continue }
             if (-not $first -or $row.Length -lt 10) { continue }
+            # Every real line carries the SFI group (the query filters on it); a
+            # footer label that reaches here never does.
+            if (-not ($colmap['SFI Group ID'] -lt $row.Length -and $row[$colmap['SFI Group ID']])) { continue }
             $get = { param($name) $j = $colmap[$name]; if ($null -ne $j -and $j -lt $row.Length) { $row[$j] } else { '' } }
             $vals = foreach ($c in $Canon) { & $get $c }
             $w.WriteLine(((@($f.Name) + @($vals)) | ForEach-Object { ConvertTo-CsvField $_ }) -join ',')
@@ -148,12 +152,13 @@ try {
         $totalRows += $n
         $rec = [ordered]@{
             file = $f.Name; bytes = $f.Length; modified = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
-            generated = $stamp; rows = $n; distinctItems = $items.Count; defaultManufacturerRows = $defY
+            generated = $stamp; rows = $n; declaredRecords = $declared; distinctItems = $items.Count; defaultManufacturerRows = $defY
             sfiGroups = $sfi; statuses = $status; lastPrice500Placeholder = $p500; lastPriceZero = $p0
             headerOrder = @($hdr | Where-Object { $_ }); savedQuery = $savedQuery; seconds = [Math]::Round($sw.Elapsed.TotalSeconds, 1)
         }
         $summary.Add([pscustomobject]$rec) | Out-Null
-        Write-Host ("{0}: {1} rows, {2} items, SFI {3}, generated {4}, {5}s" -f $f.Name, $n, $items.Count, ($sfi.Keys -join '/'), $stamp, $rec.seconds)
+        Write-Host ("{0}: {1} rows{6}, {2} items, SFI {3}, generated {4}, {5}s" -f $f.Name, $n, $items.Count, ($sfi.Keys -join '/'), $stamp, $rec.seconds, $(if ($declared) { " (report says $declared)" } else { '' }))
+        if ($declared -and ([int]$declared -ne $n)) { Write-Warning "$($f.Name): the report footer declares $declared records but $n data rows were read - check the file is complete" }
     }
 }
 finally { $w.Close() }

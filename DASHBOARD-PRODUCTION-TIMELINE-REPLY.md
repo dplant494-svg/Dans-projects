@@ -633,7 +633,7 @@ the BWM workbook and the loader reads the same files.
 
 **15 Sep:** the "which files" half is answered from the files themselves. Dan sent
 SPARC's five `SDITEM_SFI` exports: Maximo saved-query reports in Excel 2003 XML, active
-items only, one file per SFI group (331, 332, 334, 335, 336), 65,725 lines, **22,171
+items only, one file per SFI group (331, 332, 334, 335, 336), 65,720 lines, **22,170
 distinct items**, generated 12 June between 05:01 and 06:10 in sequence, which is the
 signature of the scheduled chain. Profile in `MAXIMO-ITEM-EXPORT-PROFILE.md`; a
 PowerShell 5.1 reader (`scripts/Convert-MaximoItemExport.ps1`) turns them into one CSV
