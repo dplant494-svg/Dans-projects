@@ -196,6 +196,13 @@
   .case-body .meta{margin-top:1.4rem;display:flex;gap:.6rem;flex-wrap:wrap}
   .case-body .meta span{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--steel-line);padding:.25rem .6rem;color:#B9C3CE}
   .case-body .btn{margin-top:1.6rem}
+  .cases2{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.4rem}
+  @media (max-width:52rem){.cases2{grid-template-columns:1fr}}
+  .case.small{margin-top:0;grid-template-columns:1fr}
+  .case.small .case-art{min-height:10rem;padding:2rem 1.5rem}
+  .case.small .case-body{padding:1.6rem 1.5rem 1.8rem}
+  .case.small .case-body h3{font-size:1.35rem}
+  .case.small .case-body p{font-size:.95rem}
   .bench{margin-top:1.6rem;color:#8C98A6;font-size:.95rem}
 
   .about{background:var(--sand)}
@@ -458,7 +465,37 @@
         <span class="btn btn-line">Ver la web (en inglés) &rarr;</span>
       </div>
     </a>
-    <p class="bench">En el taller ahora mismo: una web bilingüe para un restaurante de Marbella y otra para una empresa de servicios inmobiliarios de la costa. Pronto aquí.</p>
+    <div class="cases2">
+      <a class="case small" href="../work/brasa-y-sal/">
+        <div class="case-art" style="background:#1C1A17" aria-hidden="true">
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;letter-spacing:0">
+            <div style="font-size:2.6rem;font-weight:600;color:#F08A5B;line-height:1">Brasa y Sal</div>
+            <div style="font-style:italic;color:#E8DCC5;letter-spacing:.12em;font-size:.85rem;margin-top:.4rem">espetos &middot; brasa &middot; mar</div>
+          </div>
+        </div>
+        <div class="case-body">
+          <span class="mono" style="color:#E0762E">Restaurante de playa &middot; Marbella &middot; demo</span>
+          <h3>Brasa y Sal</h3>
+          <p>Una web bilingüe para un restaurante de espetos a pie de playa, en español primero y con el inglés al lado. La marca se construye sobre el espeto: una barca de brasas dibujada, una carta que cambia con la lonja y el día contado como el arco del sol.</p>
+          <div class="meta"><span>ES + EN</span><span>hreflang</span><span>Cartas solo CSS</span></div>
+        </div>
+      </a>
+      <a class="case small" href="../work/pinar-property/es/">
+        <div class="case-art" style="background:#1F3D2B" aria-hidden="true">
+          <div style="font-family:'DM Serif Display',Georgia,serif;letter-spacing:0">
+            <div style="font-size:2.4rem;color:#F3F0E9;line-height:1">Pinar</div>
+            <div style="font-family:'IBM Plex Mono',monospace;color:#B5C288;letter-spacing:.16em;font-size:.7rem;margin-top:.5rem">PROPERTY CARE &middot; ESTEPONA</div>
+          </div>
+        </div>
+        <div class="case-body">
+          <span class="mono" style="color:#E0762E">Gestión de propiedades &middot; Estepona &middot; demo</span>
+          <h3>Pinar Property Care</h3>
+          <p>Custodia de llaves y alquileres para propietarios que viven fuera. El argumento de venta es el informe de visita, así que la web empieza por uno: una inspección de siete puntos dibujada sobre una villa, tarifas sin permanencia y preguntas de propietarios. Inglés primero, español al lado.</p>
+          <div class="meta"><span>EN + ES</span><span>hreflang</span><span>Datos LocalBusiness</span></div>
+        </div>
+      </a>
+    </div>
+    <p class="bench">Las dos webs de demostración son negocios ficticios, creados para mostrar el enfoque bilingüe. Así se indica en el pie de cada una.</p>
   </div>
 </section>
 

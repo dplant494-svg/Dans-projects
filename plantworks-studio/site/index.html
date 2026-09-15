@@ -203,6 +203,13 @@
   .case-body .meta{margin-top:1.4rem;display:flex;gap:.6rem;flex-wrap:wrap}
   .case-body .meta span{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--steel-line);padding:.25rem .6rem;color:#B9C3CE}
   .case-body .btn{margin-top:1.6rem}
+  .cases2{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.4rem}
+  @media (max-width:52rem){.cases2{grid-template-columns:1fr}}
+  .case.small{margin-top:0;grid-template-columns:1fr}
+  .case.small .case-art{min-height:10rem;padding:2rem 1.5rem}
+  .case.small .case-body{padding:1.6rem 1.5rem 1.8rem}
+  .case.small .case-body h3{font-size:1.35rem}
+  .case.small .case-body p{font-size:.95rem}
   .bench{margin-top:1.6rem;color:#8C98A6;font-size:.95rem}
 
   /* ---------- About ---------- */
@@ -474,7 +481,37 @@
         <span class="btn btn-line">Visit the site &rarr;</span>
       </div>
     </a>
-    <p class="bench">On the bench now: a bilingual restaurant site for Marbella and a property-services site for the coast. Both here soon.</p>
+    <div class="cases2">
+      <a class="case small" href="work/brasa-y-sal/en/">
+        <div class="case-art" style="background:#1C1A17" aria-hidden="true">
+          <div style="font-family:'Cormorant Garamond',Georgia,serif;letter-spacing:0">
+            <div style="font-size:2.6rem;font-weight:600;color:#F08A5B;line-height:1">Brasa y Sal</div>
+            <div style="font-style:italic;color:#E8DCC5;letter-spacing:.12em;font-size:.85rem;margin-top:.4rem">espetos &middot; brasa &middot; mar</div>
+          </div>
+        </div>
+        <div class="case-body">
+          <span class="mono" style="color:#E0762E">Beach restaurant &middot; Marbella &middot; demo</span>
+          <h3>Brasa y Sal</h3>
+          <p>A bilingual site for a beachfront espeto grill, Spanish first with English alongside. The brand is built on the sardine skewer: a drawn boat of embers, a menu that changes with the fish market, and the day told as the arc of the sun.</p>
+          <div class="meta"><span>ES + EN</span><span>hreflang</span><span>CSS-only menus</span></div>
+        </div>
+      </a>
+      <a class="case small" href="work/pinar-property/">
+        <div class="case-art" style="background:#1F3D2B" aria-hidden="true">
+          <div style="font-family:'DM Serif Display',Georgia,serif;letter-spacing:0">
+            <div style="font-size:2.4rem;color:#F3F0E9;line-height:1">Pinar</div>
+            <div style="font-family:'IBM Plex Mono',monospace;color:#B5C288;letter-spacing:.16em;font-size:.7rem;margin-top:.5rem">PROPERTY CARE &middot; ESTEPONA</div>
+          </div>
+        </div>
+        <div class="case-body">
+          <span class="mono" style="color:#E0762E">Property management &middot; Estepona &middot; demo</span>
+          <h3>Pinar Property Care</h3>
+          <p>Key holding and lettings for owners who live abroad. The pitch is the visit report, so the site leads with one: a seven-point inspection drawn on a villa, pricing with no lock-in, and an owners' FAQ. English first, Spanish alongside.</p>
+          <div class="meta"><span>EN + ES</span><span>hreflang</span><span>LocalBusiness data</span></div>
+        </div>
+      </a>
+    </div>
+    <p class="bench">The two demo sites are fictional businesses, built to show the bilingual approach. Both are marked as such in their footers.</p>
   </div>
 </section>
 

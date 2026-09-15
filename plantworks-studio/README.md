@@ -13,8 +13,12 @@ plantworks-studio/
 ├── site/                     ← the studio's own site. Deploy this folder as-is.
 │   ├── index.html            ← English (default, x-default)
 │   ├── es/index.html         ← Spanish
-│   ├── sitemap.xml           ← both URLs with hreflang alternates
-│   └── robots.txt
+│   ├── sitemap.xml           ← all six URLs with hreflang alternates
+│   ├── robots.txt
+│   └── work/                 ← fictional demo sites, deployed with the studio at /work/<name>/
+│       ├── README.md         ← what's invented, how to reuse for a real client
+│       ├── brasa-y-sal/      ← beach restaurant, Marbella. ES at /, EN at /en/
+│       └── pinar-property/   ← property management, Estepona. EN at /, ES at /es/
 └── clients/
     └── the-fifth-quarter/    ← client site. Deploy this folder as-is.
         ├── index.html
@@ -66,8 +70,8 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 
 1. **Portfolio of three**
    - [x] The Fifth Quarter (in flight; open items in `clients/the-fifth-quarter/NOTES.md`)
-   - [ ] Fictional bilingual Marbella restaurant
-   - [ ] One trades or property site
+   - [x] Fictional bilingual Marbella restaurant: Brasa y Sal (`site/work/brasa-y-sal/`)
+   - [x] Fictional property-services site: Pinar Property Care (`site/work/pinar-property/`)
 2. **Own studio site**
    - [x] Built, bilingual, hreflang correct
    - [ ] Placeholders swapped (see checklist)
@@ -85,7 +89,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
 - [ ] **WhatsApp**. Add a `wa.me` link next to the email once there is a Spanish number.
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
-- [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys.
+- [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys. The two demo cards link relatively into `work/`, so they work as soon as `site/` is deployed.
 - [ ] **Legal footer**. Add NIF, address and a privacy note once registered as autónomo.
 - [ ] **Google Business Profile** for the studio itself, in Marbella.
 

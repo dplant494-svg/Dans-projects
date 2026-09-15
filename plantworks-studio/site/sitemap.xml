@@ -12,4 +12,28 @@
     <xhtml:link rel="alternate" hreflang="es" href="https://plantworks.studio/es/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://plantworks.studio/"/>
   </url>
+  <url>
+    <loc>https://plantworks.studio/work/brasa-y-sal/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://plantworks.studio/work/brasa-y-sal/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://plantworks.studio/work/brasa-y-sal/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://plantworks.studio/work/brasa-y-sal/"/>
+  </url>
+  <url>
+    <loc>https://plantworks.studio/work/brasa-y-sal/en/</loc>
+    <xhtml:link rel="alternate" hreflang="es" href="https://plantworks.studio/work/brasa-y-sal/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://plantworks.studio/work/brasa-y-sal/en/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://plantworks.studio/work/brasa-y-sal/"/>
+  </url>
+  <url>
+    <loc>https://plantworks.studio/work/pinar-property/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://plantworks.studio/work/pinar-property/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://plantworks.studio/work/pinar-property/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://plantworks.studio/work/pinar-property/"/>
+  </url>
+  <url>
+    <loc>https://plantworks.studio/work/pinar-property/es/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://plantworks.studio/work/pinar-property/"/>
+    <xhtml:link rel="alternate" hreflang="es" href="https://plantworks.studio/work/pinar-property/es/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://plantworks.studio/work/pinar-property/"/>
+  </url>
 </urlset>
