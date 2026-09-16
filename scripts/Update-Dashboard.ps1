@@ -52,8 +52,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.51'
+$ScriptVersion = '2.52'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
+$scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
 trap {
@@ -2805,3 +2806,4 @@ elseif ($scanFingerprint -and (Test-Path -Path $scanStateFile)) {
     # behind, or the next run would trust it.
     try { Remove-Item -Path $scanStateFile -Force } catch { }
 }
+Write-Host ("Scan finished in {0:N0} s" -f $scanClock.Elapsed.TotalSeconds) -ForegroundColor Green
