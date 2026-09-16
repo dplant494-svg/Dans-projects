@@ -58,6 +58,8 @@ and(startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'sead
    - **Subject**: `coalesce(body('Parse_JSON')?['subject'], concat('CBM Report - ', outputs('RigName'), ' - ', coalesce(body('Parse_JSON')?['meta']?['equipment'],''), ' - ', coalesce(body('Parse_JSON')?['meta']?['date'],'')))`
    - **PdfName**: `coalesce(body('Parse_JSON')?['pdfName'], replace(triggerOutputs()?['body/{FilenameWithExtension}'], '.json', '.pdf'))`
    - **HasPdf**: `not(empty(coalesce(body('Parse_JSON')?['pdf'],'')))`
+   - **Link** (the dashboard, for the Seadrill readers in copy; NOV cannot open it):
+     `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html?report=', encodeUriComponent(coalesce(body('Parse_JSON')?['meta']?['sourceFile'], '')))`
 7. **OemRows**: `List rows present in a table` (Excel Online (Business)). Location
    SharePoint Site - WellControl, Document Library PostedReports, File
    `/Notifications/WCE_Precharge_Notification.xlsx`, Table: click the box, choose
@@ -78,6 +80,7 @@ and(startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'sead
 <p>Seadrill Well Control Engineering has completed a Condition Based Monitoring inspection report and it is attached for OEM review.</p>
 <p><b>@{outputs('Subject')}</b><br>Rig: @{outputs('RigName')}<br>Completed by: @{body('Parse_JSON')?['meta']?['wce']}</p>
 <p>Please review and respond to the Seadrill Technical Services contacts in copy. This is an automated distribution; replies go to the people in copy, not to this mailbox.</p>
+<p>Seadrill readers: <a href="@{outputs('Link')}">open this report on the Rig Visit Dashboard</a> (internal network only).</p>
 <p>Technical Services - Subsea<br>Daniel Plant - daniel.plant@seadrill.com<br>Lee Arnold - lee.arnold@seadrill.com<br>Joao Almeida - Joao.Almeida@seadrill.com</p>
 ```
 

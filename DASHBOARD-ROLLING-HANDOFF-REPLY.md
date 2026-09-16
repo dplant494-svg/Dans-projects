@@ -520,3 +520,10 @@ print artefact.** Put to Dan tonight with a concrete option: a print-only rule t
 lays figures three across the page (about 60 mm wide on A4), screen unchanged. If he
 says yes it is one line here and one line there, and the PDF gets bigger evidence
 without either of us touching the screen layout.
+
+**Dan's answer on §6, 16 September, evening:** keep it exactly as the dashboard shows
+it. *"We literally love the way the report looks on the dashboard, clean, symmetrical;
+we just want it to print like that."* So 150 px figures for entry photographs, 220 px
+for the photo dump, captions under, nothing bigger on paper. The 40 mm question is
+answered by the customer: match the dashboard, including the 220 px dump figures.
+

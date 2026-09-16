@@ -191,6 +191,9 @@ enough. See §7, item 5.
 
 > **Added 16 Sep 2026:** every loop reads the `Settings` table first and obeys `TestMode`
 > (`NOTIFICATION-TEST-MODE-GUIDE.md`). A loop that ignores the switch is not finished.
+> **Also 16 Sep (Dan):** every notification email carries a link that opens the report on
+> the dashboard (`dashboard.html?report=<posted file name>`). The dashboard is the report;
+> the email is the doorbell.
 
 For SSCE release, daily-log, CoC expiry and R53, in order of what to settle first:
 
