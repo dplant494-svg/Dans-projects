@@ -292,6 +292,13 @@
     .report-close, .report-print { display: none !important; }
     /* 16 Sep 2026: keep a photo, an equipment entry or a table whole on a page (rolling handoff entry 11.4). */
     .rv-photos figure, .rv-equip, .rv-soak table, .rv-tile-head { break-inside: avoid; page-break-inside: avoid; }
+    /* REPORT-PHOTO-RENDERING-HANDOFF.md, 16 Sep 2026, traps 2 and 3, belt and braces:
+       a photograph is never height-capped against its pinned width (that squashes
+       the aspect ratio, measured at 87% error by the tool session), and a bare <img>
+       dropped straight into a photo grid gets the figure width, not the page width. */
+    .rv-photos img { max-height: none; height: auto; }
+    .rv-photos > img { width: 150px; }
+    .rv-dump > img { width: 220px; }
   }
   .rv-loading, .rv-error { color: var(--sd-text-light); padding: 32px 0; text-align: center; }
   .rv-error { color: var(--sd-fail); }

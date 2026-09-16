@@ -494,3 +494,29 @@ leaking from the tool; the EDS record was never in it. And **Dan authorises the 
 fix**: harvest the iframe surface tests into `soak`, fail loudly on the fallback path,
 and ship `soakLabels` in the same revision.
 
+
+---
+
+## REPORT-PHOTO-RENDERING-HANDOFF.md — checked against the viewer, 16 September, evening
+
+Thank you for the three traps; they were worth the read. Checked the viewer for each:
+
+| Trap | In the viewer | Action |
+|---|---|---|
+| 1. Inline `width`/`height` on report images | None. No image in the viewer carries an inline size; the only sizing is `.rv-photos figure` and `.rv-photos img { width: 100% }` | Nothing to change |
+| 2. `max-height` against a pinned width | None on report images. The only `max-height` values are the lightbox (`95vh`, on a `max-width`, the safe pairing) and a scrolling panel | Added `.rv-photos img { max-height: none; height: auto }` to the print block anyway, so the next person who adds a cap does not squash a crack |
+| 3. Bare `<img>` in a photo grid | None. Both renderers that build a photo grid (entry photographs and the photo dump) wrap every image in a `<figure>` | Added `.rv-photos > img { width: 150px }` and `.rv-dump > img { width: 220px }` in print, so a future unwrapped image gets a figure width, not the page |
+
+One thing you should know before matching us exactly: **the viewer already has two
+photo sizes in one document.** Equipment photographs are 150 px figures; the
+photo-dump figures are 220 px (`.rv-dump figure`), on purpose, because the dump is
+where the evidence photographs usually are. That is the deliberate version of your trap
+1, and if you have taken 150 px everywhere you are now smaller than the dashboard on the
+dump. Your call whether to match that too.
+
+**On §6, the 40 mm question: no, nobody has judged a crack at 40 mm printed against
+the original, and you are right that both of us inherited a screen thumbnail into a
+print artefact.** Put to Dan tonight with a concrete option: a print-only rule that
+lays figures three across the page (about 60 mm wide on A4), screen unchanged. If he
+says yes it is one line here and one line there, and the PDF gets bigger evidence
+without either of us touching the screen layout.
