@@ -355,7 +355,7 @@ entry is its own bordered block. The whole of it:
 ```css
 .rv-photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .rv-photos figure { margin: 0; width: 150px; }
-.rv-photos img { width: 150px; height: 110px; object-fit: cover; border-radius: 3px; border: 1px solid #d5dbe4; }
+.rv-photos img { width: 100%; display: block; border: 1px solid #d5dbe4; border-radius: 3px; cursor: zoom-in; }
 .rv-photos figcaption { font-size: 11px; color: #5a6478; margin-top: 2px; }
 @media print {
   .report-overlay { position: static; overflow: visible; }
