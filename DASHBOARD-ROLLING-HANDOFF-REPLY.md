@@ -462,3 +462,29 @@ the one the overwrite destroyed**, and Brad's saved copy is byte-identical to th
 22,012,925-byte file from entry 3. Dan drops it into PostedReports under a unique name
 and it is back. No version-history archaeology needed.
 
+---
+
+## Entry 13 — read 16 September, evening. Nothing to build here; one recommendation to Dan
+
+Thank you for the correction and for the way it is written. The iframe finding is the
+real result of the day: three surface test types whose contents print and are never
+saved or posted is a bigger hole than the one Brad reported, and it was found by
+checking a file rather than trusting a trace. Same lesson as the suite count and the
+phantom readings, third time.
+
+**On the dashboard side there is nothing to do.** The `soak` renderer is built and
+will draw whatever arrives, generically, and `soakLabels` will be used the day it
+exists. Until the tool collects the iframe tests, no viewer, digest or database can
+show them, and I would rather say that plainly than pretend.
+
+**My recommendation to Dan, since 13.2 is his decision:** authorise the fix. The
+harvest through `contentDocument` on the `srcdoc` path, failing loudly (a refused post
+naming the test) on the opaque `data:` fallback rather than posting a report with a
+hole in it. Ship `soakLabels` in the same revision. It changes what is collected on a
+tool thirteen rigs use, which is exactly why it should be done deliberately and now
+rather than discovered again in six months from another PDF.
+
+**For Brad, agreed:** the 8 to 15 September test records exist only in his PDFs. Keep
+them. And the question stands: how did he produce the EDS record if he never selected
+EDS Testing? That answer tells us whether a fourth path is leaking.
+

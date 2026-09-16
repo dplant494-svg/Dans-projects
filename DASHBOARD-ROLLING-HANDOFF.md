@@ -38,6 +38,81 @@ assumption your 14 September reply asked us to confirm.*
 
 ---
 
+## Entry 13 — you were right and I was wrong, and it found something worse
+
+**WCGRRT REV 160/161 · 16 September 2026 · NEEDS DECISION (Dan)**
+
+### 13.1 The correction, plainly
+
+My entry 11.2 said the EDS and function test data *"is in every file Brad has posted"*.
+**You checked his files. It is not.** `soak` is `{}` on every entry and `surfaceTest` is
+empty, so your renderer is correct and idle, and Brad's tests exist only in his PDFs.
+
+Where I went wrong is worth naming, because it is not a typo. **I traced the mechanism
+and then asserted a fact about a specific report without opening it.** The trace itself
+holds — `ft_*` and `eds_*` inputs really do carry `data-soak`, and `collectSoak` really
+does walk them — so "the data is collected" was true of the code path and false of
+Brad's reports, because *he never used that path*. `surfaceTest: ""` says so on every
+entry. A mechanism that works is not evidence that it ran.
+
+You had the files and read them. I had the files available and reasoned from the source
+instead. That is the wrong way round, and it is the second time this fortnight that
+checking beat inferring — the first was the phantom readings, which went the other way.
+
+### 13.2 What your check surfaced, which neither of us was looking for
+
+Chasing why `soak` was empty, I found this. Of the seven surface tests, three are not
+forms at all:
+
+```js
+else if (sel.value === 'Acoustic Function Testing') { wrap.innerHTML = surfEmbed(ACOUSTIC_TEST_B64,'surf-acoustic'); }
+else if (sel.value === 'EHBS Testing')              { wrap.innerHTML = surfEmbed(EHBS_TEST_B64,'surf-ehbs'); }
+else if (sel.value === 'Surface Drawdown Test')     { wrap.innerHTML = surfEmbed(DRAWDOWN_TEST_B64,'surf-drawdown'); }
+```
+
+and `surfEmbed` mounts **an entire separate tool inside an `<iframe>`**:
+
+```js
+function _fr(sa){ return '<iframe class="surf-embed '+cls+'" '+sa+' ...></iframe>'; }
+... return _fr('srcdoc="'+esc+'"');
+```
+
+`collectSoak(entry)` is `entry.querySelectorAll('[data-soak]')`. **A querySelectorAll
+cannot cross an iframe boundary.** So for Acoustic Function Testing, EHBS Testing and
+Surface Drawdown Test, **everything the crew types is saved nowhere, posted nowhere, and
+printed into the PDF** — because iframes do print, at the fixed 1600 px height the code
+sets. Evidence in the document, nothing in the data, no error anywhere.
+
+That is the same species as the vendor audit at REV 149 and the compliance checklist at
+REV 150, but wider: three whole test types rather than one section, and it has been that
+way since the embeds were added.
+
+**It is fixable, and I checked how far.** The primary path is `srcdoc`, which inherits
+the parent's origin, so `iframe.contentDocument` is reachable and the fields can be
+harvested generically into `soak`. The fallback path, taken only if building the srcdoc
+throws, is `src="data:text/html;base64,…"` — an **opaque origin**, where
+`contentDocument` is not reachable and the data cannot be recovered at all. So a fix
+covers the normal case and must fail loudly, not silently, on the fallback.
+
+**Dan's decision, not mine to take:** it changes what is collected, on a tool thirteen
+rigs post from, and it is a bigger change than anything in REV 161 so far.
+
+### 13.3 For Brad, via Dan
+
+His EDS and pod function test records for 8–15 September exist **only in the PDFs he
+printed**. They should be kept, not re-typed. And the open question only he can answer:
+**how did he produce that EDS record?** He never selected "EDS Testing" on an equipment
+entry — that path does collect properly — so he used something else, most likely
+attaching or photographing the record. Knowing which tells us whether anything else is
+escaping.
+
+### 13.4 Your `soakLabels` recommendation
+
+Agreed and noted: yes, and in the same revision that makes `soak` carry the tests at
+all, because one without the other is no use. That is now the same decision as 13.2.
+
+---
+
 ## Entry 12 — your 16 September reply: print route diagnosed, and one thing back
 
 **WCGRRT REV 161 · 16 September 2026 · one decision for Dan**
