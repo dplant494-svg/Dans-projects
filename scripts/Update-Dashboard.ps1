@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.50'
+$ScriptVersion = '2.51'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -1260,11 +1260,16 @@ foreach ($f in $files) {
 
     $tilesRaw = Get-Prop $json 'tiles'
     $tileCount = 0
-    # v2.50: a daily report's date is the first entry's tileDate (what the PDF header
-    # prints); meta.date is the visit start and a whole visit shares it. Fallback
-    # meta.date, so every older report keeps the date it always had.
-    $reportDateV = ''
-    if ($tilesRaw) { foreach ($t0 in @($tilesRaw)) { $td0 = [string](Get-Prop $t0 'tileDate'); if ($td0 -match '^\d{4}-\d{2}-\d{2}$') { $reportDateV = $td0; break } } }
+    # v2.50/v2.51: a daily report's date. meta.reportDate when the tool sends one
+    # (WCGRRT REV 161 adds a Report Date field), else the NEWEST tileDate - Brad's
+    # real 15 Sep report carries entries dated 14 and 15 and is the 15th's report,
+    # so the first tile would file it a day early - else meta.date (the visit
+    # start, shared by a whole visit), so every older report keeps its date.
+    $reportDateV = [string](Get-Prop $meta 'reportDate')
+    if ($reportDateV -notmatch '^\d{4}-\d{2}-\d{2}$') {
+        $reportDateV = ''
+        if ($tilesRaw) { foreach ($t0 in @($tilesRaw)) { $td0 = [string](Get-Prop $t0 'tileDate'); if ($td0 -match '^\d{4}-\d{2}-\d{2}$' -and $td0 -gt $reportDateV) { $reportDateV = $td0 } } }
+    }
     if (-not $reportDateV) { $reportDateV = [string](Get-Prop $meta 'date') }
     if ($tilesRaw -is [System.Array]) { $tileCount = $tilesRaw.Length }
     elseif ($null -ne $tilesRaw) { $tileCount = 1 }

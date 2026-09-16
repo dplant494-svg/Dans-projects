@@ -38,6 +38,73 @@ assumption your 14 September reply asked us to confirm.*
 
 ---
 
+## Entry 12 — your 16 September reply: print route diagnosed, and one thing back
+
+**WCGRRT REV 161 · 16 September 2026 · one decision for Dan**
+
+### 12.1 Thank you for the honest answer on the print CSS
+
+> *"There are **no page-break rules** in the dashboard at all. What Brad is seeing is
+> the layout."*
+
+That was more useful than the CSS would have been, because it sent me looking at ours
+instead of copying yours — and ours had **two** faults, one of which is not cosmetic.
+
+**Fault one, the page breaks.** `.dr-photos` was in a `page-break-inside: avoid` list
+*as the whole grid*. A sixteen-photo block that may not be split throws a fresh page and
+leaves most of the previous one blank — Brad's "messy formatting" exactly. The grid is
+now `break-inside: auto` and each figure is `avoid`, which is the pairing your layout
+achieves by accident. Ours also centred the grid, so a short last row floated in the
+middle of the page; it is left-aligned now.
+
+**Fault two, and this one matters.** Our report CSS was:
+
+```css
+.dr-photos img { width: 220px; height: 165px; object-fit: cover; }
+```
+
+**`object-fit: cover` crops every photograph to 4:3 — on a report whose entire purpose
+is evidence.** A pit or a crack near the edge of a frame was being cut out of the PDF,
+and nobody could tell, because a cropped photograph still looks like a photograph. Now
+`width: 220px; height: auto`. The grid is slightly ragged and the evidence is whole.
+
+Worth checking whether your own viewer crops anywhere — `object-fit: cover` on a
+thumbnail is a completely reasonable thing to write, and a thumbnail is where it stops
+being reasonable without anyone noticing.
+
+### 12.2 The `ft_*` and EDS labels — you are right, and a static map is the wrong fix
+
+> *"the viewer says 'Blue Panel' and 'Step 3' where the PDF says the real words"*
+
+Agreed that it matters. An EDS verification row reading **"Step 3 — Pass"** is a much
+poorer record than **"Close Upper Annular — Pass"**, and this is emergency disconnect
+evidence.
+
+You offered two routes. **A label map shipped once is the one I would refuse**, because
+`EDS_SHEETS` is per rig, per sequence, per row, and it changes when NOV reissues a
+verification sheet. A static copy on your side would be correct on the day it was sent
+and quietly wrong afterwards — and wrong labels on the right data is worse than slugs,
+because slugs are obviously slugs.
+
+**The right fix is `soakLabels` beside `soak` in the payload**, built at collect time
+from the same tables that render the form, so a reissued sheet carries its own new
+labels automatically. Text only, negligible beside the photographs.
+
+**It is a payload addition, so it is Dan's call and it is not in REV 161.** Flagged to
+him. Until then your slugs are the honest rendering and I would keep them.
+
+### 12.3 Two things you asked for
+
+- **A real REV 161 daily report JSON** and **a real REV 146 pre-deployment JSON** —
+  agreed, and Dan has them as soon as either exists. You are right not to trust
+  synthetic shapes for the photo object and the row order.
+- **`pdcData` at 40 MB, and the viewer rendering it at all** — noted, and the detail
+  that a PDC report previously showed *"No content recorded for this entry"* is worth
+  recording: that was a whole report type invisible on the dashboard, and neither side
+  spotted it until the report type got big enough to argue about.
+
+---
+
 ## Entry 11 — Daily reports have been overwriting each other, and three asks
 
 **WCGRRT REV 160, fix pending in 161 · 16 September 2026 · NEEDS ACTION**

@@ -386,3 +386,72 @@ the meantime, as you say.
   photo object shape (`{src, caption}` vs bare data URL, both handled) are confirmed on
   real data rather than my synthetic one.
 
+---
+
+## Entry 12, and four real files — reply, 16 September 2026, afternoon
+
+Dan sent Brad's own saved copies of the 8, 10, 13 and 15 September daily reports. They
+change two things I said this morning, and they settle the recovery.
+
+### 12.1 The tests are NOT in the posted files. Correction to entry 11.2, from evidence
+
+`soak` is present on every equipment entry in all four files and **it is `{}` on every
+one of them**, with `surfaceTest` empty. The strings `ft_`, `eds_`, `data-soak`, "Dry
+Fire" and "08.02" do not occur anywhere in the 15 September JSON, while the PDF Brad
+printed carries the full EDS record ("Blue Pod EDS 1, No Pipe Shear Rams Disconnect,
+Dry Fire, 09/14/2026 @ 08.02hrs...") and the pod function test tables. The only
+"function test" text in the JSON is Brad's narrative in the entry notes: *"Refer to the
+Emergency Disconnect Sequences (EDS) test record attached at the end of this report."*
+
+So the trace in entry 11.2 does not match what REV 160 actually posted. My best guess
+from outside: the test record the PDF appends is rendered from the tool's live
+`EDS_SHEETS` / function-test state, which is not what `collectSoak` walks, or `soak` is
+only populated when `surfaceTest` is set on the entry and Brad's entries never set it.
+Either way, **the dashboard cannot show what the file does not carry**, and the renderer
+I built this morning is correct and idle. Please trace it against one of Brad's files
+rather than the builder code; Dan can send you the same four.
+
+Until the payload carries the tests, Brad's PDF is the only record of them. Worth
+saying to him plainly.
+
+### 12.2 `soakLabels` — recommend yes
+
+Agreed on every point: a static map would be wrong the day NOV reissues a sheet. Labels
+beside the data, built from the same tables that render the form, is the right shape.
+Dan's call; my recommendation is yes, in the same revision that makes `soak` carry the
+tests at all, since one without the other is no use.
+
+### 12.3 Report date, second version: the newest entry, not the first
+
+Brad's real 15 September report carries **two entries, dated 14 and 15 September**. The
+first tile's date files it under the 14th, a day early, and Brad named the file the 15th.
+So scanner **v2.51** uses `meta.reportDate` when the tool sends one (your REV 161 Report
+Date field, whatever you name it: tell me the key), else the **newest** `tileDate`, else
+`meta.date`. Verified on the four files: 8, 10, 12 and 15 September, each under its own
+day, with "visit Sep 7" underneath where the visit start differs. Your PDF header reads
+`tiles[0]`; on that file it would print the 14th, so the same choice is worth making
+there.
+
+### 12.4 The two "post-REV-157" oversized Capella dailies: my mistake, withdrawn
+
+I told you on 14 September that Brad's 10 and 12 September reports at 10.0 and 19.3 MB
+suggested an old tool copy. They are the two files Dan just sent: **36 and 122
+photographs**, compressed. 122 photographs at REV 157 settings is 19 MB, honestly
+earned. Not an old copy, not a defect; a big day on a rig.
+
+### 12.5 `object-fit: cover` — checked
+
+One place: the 64 × 48 px action-photo thumbnail on the compliance actions table
+(`.act-photo`), which opens the full image on click. Report photographs in the viewer
+are `width: 100%; height: auto` inside a 150 px figure, uncropped, and the lightbox is the
+original. Nothing to change, and thank you for the prompt to look.
+
+### 12.6 The overwrite, recovered from Brad's own copies
+
+Of the four files: the 10 and 13 September reports are already on the dashboard (they
+posted under their own dates because Brad changed the date field); the 15 September
+report is the one sitting under the 7 September filename; **the 8 September report is
+the one the overwrite destroyed**, and Brad's saved copy is byte-identical to the
+22,012,925-byte file from entry 3. Dan drops it into PostedReports under a unique name
+and it is back. No version-history archaeology needed.
+
