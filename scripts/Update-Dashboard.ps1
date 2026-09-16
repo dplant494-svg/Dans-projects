@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.49'
+$ScriptVersion = '2.50'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 
 # Any unexpected failure: report the exact line so it can be diagnosed remotely.
@@ -580,6 +580,8 @@ function Write-ReportDigest {
     if (-not $rig) { $rig = 'Unattributed' }
     $rtype = if ($Rec) { [string]$Rec.reporttype } else { [string](Get-ReportType -Meta $Meta -Tiles (Get-Prop $Json 'tiles')) }
     $date = [string](Get-Prop $Meta 'date'); if (-not $date) { $date = [string](Get-Prop $Meta 'logDate') }
+    $visitStart = ''
+    if ($Rec -and $Rec.reportDate -and ([string]$Rec.reportDate) -ne $date) { $visitStart = $date; $date = [string]$Rec.reportDate }   # v2.50: report date first, visit start beside it
     $dateEnd = [string](Get-Prop $Meta 'dateend')
     $lead = if ($Rec) { [string]$Rec.wce } else { [string](Get-Prop $Meta 'wce') }
     $location = [string](Get-Prop $Meta 'location')
@@ -594,7 +596,7 @@ function Write-ReportDigest {
     [void]$sb.Append('<table>')
     $hdr = @(
         @('Rig', $rig), @('Report type', $rtype), @('Visit type', [string](Get-Prop $Meta 'type')), @('Discipline', [string](Get-Prop $Meta 'discipline')),
-        @('Date', $date), @('Date end', $dateEnd), @('Completed by', $lead), @('Location', $location), @('Well', $well),
+        @('Date', $date), @('Visit start', $visitStart), @('Date end', $dateEnd), @('Completed by', $lead), @('Location', $location), @('Well', $well),
         @('Schedule', [string](Get-Prop $Meta 'schedule')), @('BOP', [string](Get-Prop $Meta 'bop')), @('Source file', $File.Name),
         @('Posted', $File.LastWriteTime.ToString('yyyy-MM-dd HH:mm'))
     )
@@ -1123,7 +1125,10 @@ foreach ($f in $files) {
     # everything, 40 MB for CBM Inspection (see $LargeCbmReportBytes). Over
     # the ceiling the file is still ingested - it is a warning, not a rejection.
     $sizeType = [string](Get-ReportType -Meta $meta -Tiles (Get-Prop $json 'tiles'))
-    $sizeCap = if ($sizeType -eq 'CBM Inspection') { $LargeCbmReportBytes } else { $LargeReportBytes }
+    # v2.50: the pre-deployment checklist carries 2 x cavities x 3 sections of mandatory
+    # photographs by design (SSORT REV 146, rolling handoff entry 10), so it shares the
+    # CBM ceiling. Detection is by the parsed pdcData tile, never the filename.
+    $sizeCap = if ($sizeType -eq 'CBM Inspection' -or $sizeType -eq 'Pre-Deployment Checklist') { $LargeCbmReportBytes } else { $LargeReportBytes }
     if ($f.Length -gt $sizeCap) {
         $sizeMb = [math]::Round($f.Length / 1MB, 1); $capMb = [int]($sizeCap / 1MB)
         Write-Warning "Large report: $($f.Name) ($sizeType) is $sizeMb MB ($($f.Length) bytes) - over the $capMb MB ceiling; ingested, but photos or attachments should be reduced at source"
@@ -1255,6 +1260,12 @@ foreach ($f in $files) {
 
     $tilesRaw = Get-Prop $json 'tiles'
     $tileCount = 0
+    # v2.50: a daily report's date is the first entry's tileDate (what the PDF header
+    # prints); meta.date is the visit start and a whole visit shares it. Fallback
+    # meta.date, so every older report keeps the date it always had.
+    $reportDateV = ''
+    if ($tilesRaw) { foreach ($t0 in @($tilesRaw)) { $td0 = [string](Get-Prop $t0 'tileDate'); if ($td0 -match '^\d{4}-\d{2}-\d{2}$') { $reportDateV = $td0; break } } }
+    if (-not $reportDateV) { $reportDateV = [string](Get-Prop $meta 'date') }
     if ($tilesRaw -is [System.Array]) { $tileCount = $tilesRaw.Length }
     elseif ($null -ne $tilesRaw) { $tileCount = 1 }
 
@@ -1967,6 +1978,7 @@ foreach ($f in $files) {
             location      = [string](Get-Prop $meta 'location')     # well name / location
             schedule      = [string](Get-Prop $meta 'schedule')     # P6 schedule name (Planning reports; title on the dashboard)
             date          = [string](Get-Prop $meta 'date')         # visit start
+            reportDate    = $reportDateV                              # v2.50: the report's own date (first tile's tileDate), else the visit start - rolling handoff entry 11.3
             dateEnd       = [string](Get-Prop $meta 'dateend')      # visit end
             exportedAt    = [string](Get-Prop $json 'exportedAt')
             modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
@@ -2005,7 +2017,7 @@ foreach ($f in $files) {
 # 'Argument types do not match' on JSON-derived object graphs.
 $sortedList = New-Object System.Collections.Generic.List[object]
 $reports | Sort-Object -Property @{ Expression = {
-    if ($_.date) { [string]$_.date } else { $_.modified }
+    if ($_.reportDate) { [string]$_.reportDate } elseif ($_.date) { [string]$_.date } else { $_.modified }
 } } -Descending | ForEach-Object { $sortedList.Add($_) | Out-Null }
 
 # Daily-log / lessons search index: flatten the deduped entries + R53 events.

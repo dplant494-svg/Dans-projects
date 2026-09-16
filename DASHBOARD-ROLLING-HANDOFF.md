@@ -18,6 +18,8 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
+| 11 | **Daily reports have been OVERWRITING each other** — and you are rendering everything except the surface tests | WCGRRT REV 160 → 161 | **NEEDS ACTION** — three things from you, and one warning about your history |
+| 10 | **Pre-deployment checklist: mandatory packer attestation + 2× cavity photographs per BOP** — new keys, and a posted PDC is now guaranteed complete | SSORT REV 146 | **NEEDS ACTION** — new keys, ram serials move, and `pdcData` needs your 40 MB ceiling |
 | 9 | **CBM ceiling mirrored in `sdSizeOk` — but at 40 MB, not your 30** | SSORT REV 146 | **NEEDS DECISION** — your 30 was sized at photo quality 0.70 and SSORT is now 0.82 |
 | 8 | **Defect in our REV 145 potable-water items: two comment inputs on one key** — a typed ✗ reason is discarded | SSORT REV 147 (pending) | **FYI** — nothing to build. Your rule is unaffected; answer to your `yn` question inside |
 | 7 | **Two new readings on every daily-check round, on all three rig specs** — and a bare tick on them is meaningful | SSORT REV 145 | ✅ **CLOSED** — built your side 14 Sep, rule inverted as asked, `yn` literals confirmed in entry 8 |
@@ -33,6 +35,202 @@ our side of that exchange: the one piece of work the reply said was still owed b
 Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.
 Entries 8 and 9 are ours: both were found by reading our own code to answer the single
 assumption your 14 September reply asked us to confirm.*
+
+---
+
+## Entry 11 — Daily reports have been overwriting each other, and three asks
+
+**WCGRRT REV 160, fix pending in 161 · 16 September 2026 · NEEDS ACTION**
+
+Raised by **Brad on West Capella** this morning, reviewing his own posts. Four
+observations; three turned out to be the same defect and it is ours.
+
+### 11.1 The defect, and what it means for your history
+
+Our posted filename is built from the field labelled **"Visit Start Date"**:
+
+```js
+const date = document.getElementById('meta-date')?.value ...   // Visit Start Date
+filename = `seadrill-report_${rig}_${date}_daily-report.json`;
+```
+
+So across a two-week visit, **every daily report posts to the same filename and
+overwrites the previous one.** An overwrite is not a file creation, which is why it has
+been silent — the same reason your precharge flow trigger never fired on a re-issued
+sheet at Rev 80.
+
+**The warning about your data:** for any multi-day visit where the crew left the visit
+start date alone, **you have only ever held the last daily report of that visit**, filed
+under the visit start date. Not a scanner fault and nothing you could have detected —
+one filename, one file. Brad's earlier reports survived only because he happened to
+change that date field, which he had been apologising for.
+
+**After REV 161 ships, expect the volume of daily reports to rise sharply** — one per
+rig per day rather than one per visit. That is the defect ending, not a new problem.
+
+**Fix, decided by Dan:** the filename takes the **report's own date**, so one file per
+rig per day, and a corrected re-post of the same day deliberately replaces it — the same
+rig + date replacement model you already use for compliance checklists. WCGRRT also
+gains a proper **Report Date** field, so "Visit Start Date" keeps its real meaning.
+
+### 11.2 Ask one: please render `equipEntries[].soak`
+
+Brad's EDS and BOP function test sections appear in the PDF and are missing from the
+dashboard. **The data is in every file he has posted** — I traced it end to end.
+`functionTestHTML` and `edsSeqTableHTML` put every input behind `data-soak`, including
+the Pass / Fail / N/A buttons:
+
+```js
+function ftPfButtons(key, val) {
+  return '<input type="hidden" data-soak="'+key+'" value="'+escAttr(val)+'">' + ...
+}
+```
+
+and the payload collects them per entry, in **both** the save and post builders:
+
+```js
+soak: collectSoak(e)     // every [data-soak] input in the entry
+```
+
+Your 9 September reply listed what you render from `equipEntries` — *"`type` /
+`manualName`, `notes` (HTML), `photos[]` with `captions[]`, and the `flagCrit` /
+`flagEot` tags"*. **`soak` is not on that list**, which fits the symptom exactly: the
+report renders, and the tests at the end of it do not.
+
+Key shapes: function test keys are `ft_*` (`ft_date`, `ft_well`, `ft_blue_panel`…); EDS
+keys are `eds_seq` plus `eds_<rig>_<seq>_r<n>_v` / `_t` / `_rk` for verified, actual time
+and remarks. **`collectSoak` omits empty values**, so an absent key means "not answered"
+— the same convention as REV 150's empty statuses, not a zero.
+
+### 11.3 Ask two: show the report date, not the visit start date
+
+You read `meta.date`, which is the visit start. The PDF header uses something better,
+and **it is already in the payload**:
+
+```js
+// WCGRRT line 3641 — what the PDF header prints
+const reportDate = tiles[0].querySelector('.tile-date-input')?.value || today;
+```
+
+posted as `tiles[].tileDate` (line 9384, both builders). So **use `tiles[0].tileDate`
+as a daily report's date**, falling back to `meta.date`.
+
+Brad suggested the posting date. It answers a real question — *did today's report
+arrive?* — but as the record date it drifts: a report written on the 15th and posted on
+the 16th after a comms outage would be filed under the wrong day. **Both is the right
+answer**: the report date as the record date, the posted timestamp beside it. You
+already know the second.
+
+Once 161 ships the filename will carry the report date too, so your rig + date matching
+should key on `tileDate` rather than `meta.date` or it will still group a whole visit
+together.
+
+### 11.4 Ask three: send us your print stylesheet
+
+Brad found that **your** PDF/print button formats photographs and page breaks better
+than our own "Generate Daily Report" route, and he has switched to it. That is a free
+improvement sitting in your file rather than a defect in ours. Please send whatever you
+do around photo blocks and page breaks — `break-inside: avoid` on the photo figures, at
+a guess — and we will port it into the tool's print path so both routes match. He should
+keep using yours in the meantime.
+
+---
+
+## Entry 10 — Pre-deployment: the packer attestation is mandatory, and the photographs are counted
+
+**SSORT REV 146 · 15 September 2026 · NEEDS ACTION**
+
+A VP-level requirement via Dan: the pre-deployment checklist must carry a **confirmation
+that every ram packer is installed correctly with its orientation checked**, and
+**pictorial evidence to back it up** — and neither is optional.
+
+### 10.1 The count is derived from the stack, not typed
+
+A ram sits in a cavity with a door either side. So its packer, the cavity sealing face
+and the door sealing face **each exist twice — forward and aft**. A 7-cavity BOP
+therefore has 14 doors, 14 sealing faces and 7 packer pairs, and the required photo
+count is **2 × cavities in each of three sections**:
+
+| Cavities | Photos per section | Total for that BOP |
+|---|---|---|
+| 7 | 14 | 42 |
+| 6 | 12 | 36 |
+| 5 | 10 | 30 |
+
+It is computed from `pdcbop_s{n}_cav`, never written down, so it cannot drift from the
+stack the form has built. **You can derive the expected count the same way.**
+
+### 10.2 New keys
+
+Photographs are now **per BOP**, because a Dual stack needs its own evidence:
+
+| Key | Contents |
+|---|---|
+| `pdcbop_s{n}_ph_rams` | ram packer photographs |
+| `pdcbop_s{n}_ph_cavities` | cavity sealing face photographs |
+| `pdcbop_s{n}_ph_doors` | door sealing face photographs |
+| `pdcbop_s{n}_packers_ok` | `"Yes"` / `"No"` / `""` — the attestation |
+| `pdcbop_s{n}_packers_rem` | who confirmed it, free text |
+
+`{n}` is `1`, or `1` and `2` on a Dual BOP. **Every photo caption is pre-filled with the
+position it belongs to** — `UBSR — FWD`, `CSR — AFT` — so a caption identifies its
+subject without you needing to know the slot order. A crew can overwrite a caption, and
+if they do, the photograph is preserved and shown but no longer machine-identifiable.
+
+**The three old shared arrays `pdcbop_ph_rams` / `_ph_cavities` / `_ph_doors` still
+exist** and still render, so a checklist begun on the previous form keeps its evidence.
+Treat them as legacy — new records will not use them.
+
+### 10.3 Ram serial numbers have moved — this one will bite if you read `_serial`
+
+A ram packer is a pair, and the part number is sometimes one assembly number for both
+sides and sometimes one per side. So on a **ram** row:
+
+| Was | Now |
+|---|---|
+| `pdcbop_s{n}_r{i}_serial` | `_pnf` · `_pna` · `_snf` · `_sna` (Part/Serial, FWD/AFT) |
+
+On a **non-ram** row (UA, RC, LA, WHC) `_serial` is unchanged and `_pn` is added.
+Whether a row is a ram is decided by its **selected position**, not its index —
+`UBSR CSR LBSR EPR UPR MPR LPR TPR` are rams.
+
+**Migration:** when an older record loads, a ram row's legacy `_serial` seeds
+`_snf`, so nothing already recorded is orphaned. If you read `_serial` on ram rows
+today, fall back through `_snf` then `_serial`.
+
+### 10.4 What "mandatory" means, and what you can now rely on
+
+- **Posting is blocked** unless, for every BOP: a cavity count is chosen, the packer
+  question is answered **Yes**, and all three sections hold their full count. The
+  message names the missing positions — *"door sealing face photographs: 13 of 14.
+  Missing: MPR — FWD."*
+- **Saving is not blocked.** It warns and proceeds. A crew interrupted mid-call with the
+  BOP on deck must be able to park their work, and losing an afternoon of photographs to
+  a validation rule would be a worse outcome than an incomplete local file.
+- **So: any pre-deployment checklist that reaches you is complete.** You do not need a
+  "missing evidence" state for posted records. If you ever see one short, that is a
+  defect on our side and we want to know.
+
+### 10.5 One thing we need from you
+
+**`pdcData` needs the same 40 MB ceiling as `cbmData`.** A 7-cavity pre-deployment now
+carries 42 mandatory photographs by design, plus the EWS, insulation and fibre grids —
+roughly **20–22 MB** at quality 0.82. Our `sdSizeOk` already exempts it; without the
+same on your side, every single pre-deployment checklist lands in the oversize list.
+The regex we use is `/"(cbmData|pdcData)"\s*:\s*\{/` — note the `\{`, so
+`"pdcData":null` is correctly *not* exempt.
+
+### 10.6 Verified
+
+Tested by running the new functions in a browser against a synthetic form, twelve
+groups, all passing: the 14/12/10 counts derive correctly; labels exclude UA/RC/LA/WHC
+and **follow a ram moved to a different position**; a part-filled grid reloads each
+photograph into its **own** box rather than shifting them all up (index-based placement
+would have silently mislabelled evidence — the bug this design exists to avoid); an
+unmatched caption is kept rather than dropped; the legacy serial migrates; an empty
+7-cavity yields exactly four blockers; a complete one yields none; one photo short is
+caught and named; a Dual BOP names which stack; and **a report with no PDC tile is never
+blocked**.
 
 ---
 

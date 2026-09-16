@@ -293,3 +293,96 @@ exists to protect is worse than a generous one.
   delete or retake photographs to get under it" in front of the person holding the
   iPad is exactly where that sentence belongs.
 
+---
+
+## Entries 10 and 11 — reply, 16 September 2026: all three asks built, the ceiling matched, and one warning taken seriously
+
+Scanner **v2.50** and `dashboard.html` of 16 September. Verified here on synthetic
+posts shaped exactly as entries 10 and 11 describe; the first real REV 161 daily report
+and the first real REV 146 pre-deployment checklist are the real tests, and I would
+like a copy of each JSON when they exist.
+
+### Entry 11.1 — the overwrite. Understood, and the history is what it is
+
+Agreed on every point, and thank you for saying it plainly to Brad. On our side: the
+scanner cannot recover what a later post overwrote; one filename, one file, and the
+sync client delivered exactly what SharePoint held. **Dan's check** is the SharePoint
+version history on `seadrill-report_West-Capella_2026-09-07_daily-report.json`: if
+versioning is on for PostedReports (it is on by default), every overwritten daily
+report is still there as a prior version and can be restored one by one. That is the
+whole recovery, and it is Dan's to do from the library's **Version history** menu.
+
+When REV 161 ships, the volume rise is expected and costs nothing: v2.45's short cut
+means a quiet scan is one second regardless of count, and the digests, copies and
+Copilot all scale per file.
+
+### Entry 11.2 — `equipEntries[].soak` is rendered
+
+The full-report viewer now draws a **BOP function test** table (every `ft_*` key, label
+from the slug, Pass/Fail coloured) and an **Emergency disconnect sequence** table
+(`eds_seq` as the heading; one row per `_r<n>` with Verified, Actual time and Remarks
+from `_v`, `_t`, `_rk`), after the entry's notes and photographs. Anything else in
+`soak` lands in an "Other test fields" table, so a new key shows up without a change.
+Absent keys render as nothing, per your "not answered" convention.
+
+**Two things I would take from you, not build against a guess:** the printed labels
+for the `ft_*` keys and the step names for the EDS rows. The payload carries only slugs
+and row numbers, so the viewer says "Blue Panel" and "Step 3" where the PDF says the
+real words. If REV 161 can add a `label` beside each key, or ship a label map once, the
+viewer will use it; until then the slugs are readable and correct. The digests already
+carried `soak` (the generic walker), so Copilot has had the tests all along.
+
+### Entry 11.3 — the report date, both facts
+
+- Scanner: `reports[].reportDate` = the first entry's `tileDate` when it is a real
+  `yyyy-mm-dd`, else `meta.date`. `date` stays the visit start, unchanged.
+- Report List: sorted and filtered by `reportDate`; the Dates column shows the report
+  date, and underneath, in small type, **"visit 7 Sep – 20 Sep · posted 16 Sep 13:06"**
+  when the report date differs from the visit start. Brad's "yesterday's report shows
+  the 7th" becomes "15 Sep, visit from 7 Sep, posted 16 Sep".
+- Digests: "Date" is the report date, "Visit start" beside it when different, so
+  Copilot files the day correctly too.
+- Nothing keys on `meta.date` for daily reports any more. Compliance still keys on its
+  own `rig | date`, which is a report date already.
+
+### Entry 11.4 — the print stylesheet, honestly
+
+There are **no page-break rules** in the dashboard at all. What Brad is seeing is the
+layout: photographs are a flex grid of fixed-width figures (150 px wide, caption
+underneath), so the browser never has a full-width image to split, and each equipment
+entry is its own bordered block. The whole of it:
+
+```css
+.rv-photos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.rv-photos figure { margin: 0; width: 150px; }
+.rv-photos img { width: 150px; height: 110px; object-fit: cover; border-radius: 3px; border: 1px solid #d5dbe4; }
+.rv-photos figcaption { font-size: 11px; color: #5a6478; margin-top: 2px; }
+@media print {
+  .report-overlay { position: static; overflow: visible; }
+  .report-close, .report-print { display: none !important; }
+  /* added 16 Sep, belt and braces */
+  .rv-photos figure, .rv-equip, .rv-soak table, .rv-tile-head { break-inside: avoid; page-break-inside: avoid; }
+}
+```
+
+Port the grid and the last rule and your route will match. Brad keeps using ours in
+the meantime, as you say.
+
+### Entry 10 — the pre-deployment checklist
+
+- **`pdcData` has the 40 MB ceiling** (v2.50), keyed on the parsed tile like CBM; a
+  `"pdcData": null` tile does not detect as a PDC, so it cannot inherit it.
+- **The viewer now renders `pdcData` at all.** It did not before: a PDC report showed
+  "No content recorded for this entry." Now, per BOP (`s1`, `s2` on a Dual): cavity
+  count and the packer attestation in the heading, the fields, each `_r{i}` row with
+  `_pnf` / `_pna` / `_snf` / `_sna` labelled FWD/AFT (and `_pn` / `_serial` on non-ram
+  rows), and the three photograph sections with their captions and a count against the
+  expected `2 × cavities`. The legacy shared arrays still render, labelled legacy.
+  Generic by design: a new `pdcbop_` key appears without a change here.
+- Your "any PDC that reaches you is complete" is taken as the rule: the count is shown
+  as `n of 2×cav`, not as a warning. If it is ever short, that is your defect and I will
+  say so.
+- **One ask back:** a real REV 146 PDC post, once one exists, so the row order and the
+  photo object shape (`{src, caption}` vs bare data URL, both handled) are confirmed on
+  real data rather than my synthetic one.
+

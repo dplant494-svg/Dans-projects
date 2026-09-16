@@ -82,6 +82,12 @@
     margin-bottom: 10px;
   }
   .source-line { color: var(--sd-text-light); font-size: 11px; margin: -4px 0 16px; }
+  .date-sub { font-size: 10.5px; color: var(--sd-text-light); margin-top: 2px; white-space: nowrap; }
+  .rv-soak table { border-collapse: collapse; font-size: 12px; margin: 4px 0 10px; }
+  .rv-soak th, .rv-soak td { border: 1px solid var(--sd-border); padding: 3px 8px; text-align: left; vertical-align: top; }
+  .rv-soak th { background: var(--sd-bg); font-weight: 700; }
+  .rv-soak td.pass { color: var(--sd-pass); font-weight: 700; }
+  .rv-soak td.fail { color: var(--sd-fail); font-weight: 700; }
   .oem-chip { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: 600; color: #1b5e20; background: #e8f5e9; border: 1px solid #a5d6a7; border-radius: 10px; padding: 1px 8px; }
   .errors-btn { margin-left: auto; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #fff; background: #c0392b; border: 1.5px solid #c0392b; border-radius: 20px; padding: 7px 16px; cursor: pointer; }
   .errors-btn:hover { background: #a93226; }
@@ -284,6 +290,8 @@
     }
     body.no-scroll .report-head .rh-sub { color: #333; }
     .report-close, .report-print { display: none !important; }
+    /* 16 Sep 2026: keep a photo, an equipment entry or a table whole on a page (rolling handoff entry 11.4). */
+    .rv-photos figure, .rv-equip, .rv-soak table, .rv-tile-head { break-inside: avoid; page-break-inside: avoid; }
   }
   .rv-loading, .rv-error { color: var(--sd-text-light); padding: 32px 0; text-align: center; }
   .rv-error { color: var(--sd-fail); }
@@ -773,8 +781,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     return new Date(s);
   }
 
+  // The report's own date (scanner v2.50 reportDate = first entry's tileDate),
+  // falling back to the visit start date and then the file time. Rolling
+  // handoff entry 11.3: a whole visit shares meta.date, so a daily report
+  // must not be filed under it.
   function reportDate(r) {
-    var d = parseDate(r.date || r.modified);
+    var d = parseDate(r.reportDate || r.date || r.modified);
     return isNaN(d) ? parseDate(r.modified) : d;
   }
 
@@ -838,6 +850,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   function fmtVisitSpan(r) {
     var start = reportDate(r);
     var startTxt = start.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+    // An entry-dated report (daily report inside a visit) is one day; the
+    // visit span goes on the line underneath, not across the report date.
+    if (r.reportDate && r.date && r.reportDate !== r.date) return startTxt;
     if (!r.dateEnd) return startTxt;
     var end = parseDate(r.dateEnd);
     if (isNaN(end)) return startTxt;
@@ -1278,7 +1293,16 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       tr.appendChild(tdRig);
 
       var tdDates = document.createElement('td');
-      tdDates.textContent = fmtVisitSpan(r);
+      tdDates.appendChild(document.createTextNode(fmtVisitSpan(r)));
+      // Entry 11.3: both facts, honestly - the report date above, and when it
+      // landed (and the visit start, when it differs) underneath.
+      var sub = [];
+      if (r.reportDate && r.date && r.reportDate !== r.date) {
+        var vs = parseDate(r.date), ve = r.dateEnd ? parseDate(r.dateEnd) : null;
+        sub.push('visit ' + fmtDate(vs) + (ve && !isNaN(ve) && r.dateEnd !== r.date ? ' \u2013 ' + fmtDate(ve) : ''));
+      }
+      if (r.modified) { var pm = parseDate(r.modified); if (!isNaN(pm)) sub.push('posted ' + fmtDate(pm) + ' ' + pm.toTimeString().slice(0, 5)); }
+      if (sub.length) tdDates.appendChild(mk('div', 'date-sub', sub.join(' \u00B7 ')));
       tr.appendChild(tdDates);
 
       var tdWce = document.createElement('td');
@@ -1502,6 +1526,118 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
     span.appendChild(document.createTextNode(statusText));
     return span;
+  }
+
+  // ---------- Surface tests behind equipEntries[].soak (WCGRRT, rolling handoff entry 11.2) ----------
+  // Every input of the BOP function test and EDS sequence tables is posted as a
+  // flat key/value map: ft_* for the function test, eds_seq plus
+  // eds_<rig>_<seq>_r<n>_v / _t / _rk (verified, actual time, remarks) for the
+  // EDS rows. collectSoak omits empty values, so an absent key is "not answered".
+  // Labels are derived from the key slugs; the tool holds the printed labels.
+  var SOAK_LABELS = { cav: 'Cavities', packers_ok: 'Packers installed, orientation checked', packers_rem: 'Confirmed by', pos: 'Position',
+    pnf: 'Part no (FWD)', pna: 'Part no (AFT)', snf: 'Serial (FWD)', sna: 'Serial (AFT)', pn: 'Part no', serial: 'Serial', well: 'Well', date: 'Date' };
+  function soakLabel(slug) {
+    var s = String(slug || '').replace(/^ft_/, '');
+    if (SOAK_LABELS[s]) return SOAK_LABELS[s];
+    return s.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+  }
+  function soakValueCell(v) {
+    var td = document.createElement('td'); var s = String(v == null ? '' : v);
+    var low = s.trim().toLowerCase();
+    if (low === 'pass' || low === 'yes' || low === 'ok') td.className = 'pass';
+    else if (low === 'fail' || low === 'no') td.className = 'fail';
+    td.textContent = s;
+    return td;
+  }
+  function rvSoak(soak, body) {
+    var keys = Object.keys(soak).filter(function (k) { return soak[k] !== '' && soak[k] != null; });
+    if (!keys.length) return;
+    var ft = keys.filter(function (k) { return /^ft_/.test(k); });
+    var eds = keys.filter(function (k) { return /^eds_/.test(k); });
+    var other = keys.filter(function (k) { return !/^(ft|eds)_/.test(k); });
+    var wrap = mk('div', 'rv-soak');
+    if (ft.length) {
+      wrap.appendChild(mk('div', 'rv-section-label', 'BOP function test (' + ft.length + ' fields)'));
+      var t = mk('table', ''); 
+      ft.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k))); tr.appendChild(soakValueCell(soak[k])); t.appendChild(tr); });
+      wrap.appendChild(t);
+    }
+    if (eds.length) {
+      var seq = soak.eds_seq ? String(soak.eds_seq) : '';
+      var rows = {};
+      eds.forEach(function (k) {
+        var m = /^eds_(.*)_r(\d+)_(v|t|rk)$/.exec(k);
+        if (!m) return;
+        var n = Number(m[2]); rows[n] = rows[n] || { n: n, prefix: m[1] };
+        rows[n][m[3]] = soak[k];
+      });
+      var ns = Object.keys(rows).map(Number).sort(function (a, b) { return a - b; });
+      wrap.appendChild(mk('div', 'rv-section-label', 'Emergency disconnect sequence' + (seq ? ' \u2014 ' + seq : '') + (ns.length ? ' (' + ns.length + ' steps recorded)' : '')));
+      if (ns.length) {
+        var et = mk('table', ''); var hr = mk('tr', '');
+        ['Step', 'Verified', 'Actual time', 'Remarks'].forEach(function (h) { hr.appendChild(mk('th', '', h)); });
+        et.appendChild(hr);
+        ns.forEach(function (n) { var r = rows[n]; var tr = mk('tr', '');
+          tr.appendChild(mk('td', '', 'Step ' + n)); tr.appendChild(soakValueCell(r.v || '')); tr.appendChild(mk('td', '', r.t || '')); tr.appendChild(mk('td', '', r.rk || ''));
+          et.appendChild(tr); });
+        wrap.appendChild(et);
+      }
+      var edsOther = eds.filter(function (k) { return k !== 'eds_seq' && !/_r\d+_(v|t|rk)$/.test(k); });
+      if (edsOther.length) { var ot = mk('table', ''); edsOther.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k.replace(/^eds_/, '')))); tr.appendChild(soakValueCell(soak[k])); ot.appendChild(tr); }); wrap.appendChild(ot); }
+    }
+    if (other.length) {
+      wrap.appendChild(mk('div', 'rv-section-label', 'Other test fields'));
+      var xt = mk('table', ''); other.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k))); tr.appendChild(soakValueCell(soak[k])); xt.appendChild(tr); }); wrap.appendChild(xt);
+    }
+    body.appendChild(wrap);
+  }
+
+  // ---------- Pre-deployment checklist (SSORT pdcData, rolling handoff entry 10) ----------
+  // A flat key map. Keys are pdcbop_s{n}_... per BOP (s1, s2 on a Dual stack):
+  // _cav cavity count, _packers_ok / _packers_rem the mandatory attestation,
+  // _ph_rams / _ph_cavities / _ph_doors the photograph arrays (captions carry
+  // the position, e.g. "UBSR - FWD"), _r{i}_... the ram/component rows (ram
+  // rows carry _pnf/_pna/_snf/_sna, others _pn/_serial). Everything else is a
+  // field. Rendered generically so a new key shows up without a change here.
+  function rvPdc(pdc, body) {
+    var keys = Object.keys(pdc || {});
+    if (!keys.length) return;
+    body.appendChild(mk('div', 'rv-section-label', 'Pre-deployment checklist'));
+    var isPhotoArr = function (v) { return Array.isArray(v) && v.length && v.every(function (x) { return (typeof x === 'string' && x.indexOf('data:image') === 0) || (x && typeof x === 'object' && typeof x.src === 'string'); }); };
+    var stacks = {}; var general = [];
+    keys.forEach(function (k) { var m = /^pdcbop_s(\d+)_(.*)$/.exec(k); if (m) { (stacks[m[1]] = stacks[m[1]] || []).push([m[2], k]); } else general.push(k); });
+    function fieldsTable(pairs) {
+      var t = mk('table', ''); var n = 0;
+      pairs.forEach(function (p) { var v = pdc[p[1]]; if (v === '' || v == null || isPhotoArr(v) || (Array.isArray(v) && !v.length)) return;
+        var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(p[0]))); tr.appendChild(soakValueCell(Array.isArray(v) ? v.join(', ') : v)); t.appendChild(tr); n++; });
+      return n ? t : null;
+    }
+    var wrap = mk('div', 'rv-soak');
+    Object.keys(stacks).sort().forEach(function (sn) {
+      var pairs = stacks[sn];
+      var cav = pdc['pdcbop_s' + sn + '_cav'], ok = pdc['pdcbop_s' + sn + '_packers_ok'];
+      var head = 'BOP ' + sn + (cav ? ' \u00B7 ' + cav + ' cavities' : '') + (ok ? ' \u00B7 packers confirmed: ' + ok : '');
+      wrap.appendChild(mk('div', 'rv-section-label', head));
+      var rows = {}; var plain = [];
+      pairs.forEach(function (p) { var m = /^r(\d+)_(.*)$/.exec(p[0]); if (m) { (rows[m[1]] = rows[m[1]] || []).push([m[2], p[1]]); } else plain.push(p); });
+      var ft = fieldsTable(plain); if (ft) wrap.appendChild(ft);
+      Object.keys(rows).map(Number).sort(function (a, b) { return a - b; }).forEach(function (i) {
+        var rt = fieldsTable(rows[i]); if (rt) { wrap.appendChild(mk('div', 'rv-notes', 'Row ' + i)); wrap.appendChild(rt); }
+      });
+      [['ph_rams', 'Ram packer photographs'], ['ph_cavities', 'Cavity sealing face photographs'], ['ph_doors', 'Door sealing face photographs']].forEach(function (s) {
+        var arr = pdc['pdcbop_s' + sn + '_' + s[0]];
+        if (isPhotoArr(arr)) { wrap.appendChild(mk('div', 'rv-notes', s[1] + ' (' + arr.length + (cav ? ' of ' + (2 * Number(cav)) : '') + ')')); var ph = rvPhotos(arr, []); if (ph) wrap.appendChild(ph); }
+      });
+    });
+    // legacy shared arrays and everything not per-stack
+    [['pdcbop_ph_rams', 'Ram packer photographs (legacy)'], ['pdcbop_ph_cavities', 'Cavity sealing face photographs (legacy)'], ['pdcbop_ph_doors', 'Door sealing face photographs (legacy)']].forEach(function (s) {
+      var arr = pdc[s[0]]; if (isPhotoArr(arr)) { wrap.appendChild(mk('div', 'rv-notes', s[1] + ' (' + arr.length + ')')); var ph = rvPhotos(arr, []); if (ph) wrap.appendChild(ph); }
+    });
+    var gen = general.filter(function (k) { return !/^pdcbop_ph_/.test(k); }).map(function (k) { return [k.replace(/^pdc(bop)?_/, ''), k]; });
+    var gt = fieldsTable(gen); if (gt) { wrap.appendChild(mk('div', 'rv-section-label', 'Checklist fields')); wrap.appendChild(gt); }
+    var genPhotos = general.filter(function (k) { return isPhotoArr(pdc[k]) && !/^pdcbop_ph_/.test(k); });
+    genPhotos.forEach(function (k) { wrap.appendChild(mk('div', 'rv-notes', soakLabel(k.replace(/^pdc_?/, '')) + ' (' + pdc[k].length + ')')); var ph = rvPhotos(pdc[k], []); if (ph) wrap.appendChild(ph); });
+    body.appendChild(wrap);
   }
 
   function rvVsr(vsr, body) {
@@ -3315,10 +3451,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         if (e.notes && e.notes.replace(/<[^>]*>/g, '').trim()) eq.appendChild(rvNotes(e.notes));
         var ph = rvPhotos(e.photos, e.captions);
         if (ph) eq.appendChild(ph);
+        if (e.soak && typeof e.soak === 'object') rvSoak(e.soak, eq);   // entry 11.2: EDS and function tests
         tb.appendChild(eq);
       });
 
       if (tile.vsrData) rvVsr(tile.vsrData, tb);
+      if (tile.pdcData) rvPdc(tile.pdcData, tb);   // entry 10: pre-deployment checklist
       if (tile.cbmData) rvCbm(tile.cbmData, tb);
       if (tile.marineData) rvMarine(tile.marineData, tb);
       if (tile.topsetData) rvTopset(tile.topsetData, tb);
