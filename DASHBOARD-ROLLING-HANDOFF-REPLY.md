@@ -488,3 +488,9 @@ rather than discovered again in six months from another PDF.
 them. And the question stands: how did he produce the EDS record if he never selected
 EDS Testing? That answer tells us whether a fourth path is leaking.
 
+**Update, 16 September, evening (Dan):** Brad produced the EDS records in a spreadsheet
+and merged them into the PDF with a PDF combining tool. So there is no fourth path
+leaking from the tool; the EDS record was never in it. And **Dan authorises the 13.2
+fix**: harvest the iframe surface tests into `soak`, fail loudly on the fallback path,
+and ship `soakLabels` in the same revision.
+
