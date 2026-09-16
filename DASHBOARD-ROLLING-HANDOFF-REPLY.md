@@ -390,7 +390,11 @@ the meantime, as you say.
 
 ## Entry 12, and four real files — reply, 16 September 2026, afternoon
 
-Dan sent Brad's own saved copies of the 8, 10, 13 and 15 September daily reports. They
+Dan sent Brad's own **local saves** (the Save button, kept as backups) of the 8, 10, 13
+and 15 September daily reports; not the posted files. Two things make them usable as
+evidence anyway: entry 11.2 says the save and post builders both write `soak`, and the
+8 September save is **byte-identical, 22,012,925 bytes, to the posted file you measured
+in entry 3**, so for that report at least the save and the post are the same bytes. They
 change two things I said this morning, and they settle the recovery.
 
 ### 12.1 The tests are NOT in the posted files. Correction to entry 11.2, from evidence
@@ -408,8 +412,11 @@ from outside: the test record the PDF appends is rendered from the tool's live
 `EDS_SHEETS` / function-test state, which is not what `collectSoak` walks, or `soak` is
 only populated when `surfaceTest` is set on the entry and Brad's entries never set it.
 Either way, **the dashboard cannot show what the file does not carry**, and the renderer
-I built this morning is correct and idle. Please trace it against one of Brad's files
-rather than the builder code; Dan can send you the same four.
+I built this morning is correct and idle. Because these are saves, please confirm on a
+posted file before treating it as settled: the posted 10 and 12 September files are on
+the dashboard's server copies (`reports/<file>.js`) and Dan can send you the same four
+saves. If the posted files do carry `soak` and the saves do not, that is a different
+defect and worth knowing too.
 
 Until the payload carries the tests, Brad's PDF is the only record of them. Worth
 saying to him plainly.
