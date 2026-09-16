@@ -189,6 +189,9 @@ enough. See §7, item 5.
 
 ## 6. Bringing up loop two: the checklist
 
+> **Added 16 Sep 2026:** every loop reads the `Settings` table first and obeys `TestMode`
+> (`NOTIFICATION-TEST-MODE-GUIDE.md`). A loop that ignores the switch is not finished.
+
 For SSCE release, daily-log, CoC expiry and R53, in order of what to settle first:
 
 1. **Does the tool post a unique filename per event?** If not, stop and get that fixed.
