@@ -13,6 +13,11 @@
     Oversized reports are real reports, on the dashboard, and this script
     never touches them (Dan, 14 Sep 2026). There is no switch for it.
 
+    -IncludeUnattributed (17 Sep 2026) also moves reports that carry no rig
+    identity at all (meta.asset blank): posts from before the tools enforced a
+    rig, shown on the dashboard under 'Unattributed', where nobody finds them.
+    A file that is both oversized and unattributed moves with this switch.
+
     Each file goes to <archive>\<today>\<kind>\<file name>, and a line is
     appended to <archive>\ARCHIVED.log saying where it came from and why.
     Nothing is deleted. The archive folder must not be inside a report
@@ -27,6 +32,10 @@
     Where to put the files. Defaults to 'archivePath' in config.json, else
     <repository root>\archive (C:\TSC-Dashboard\archive on the scanner PC).
 
+.PARAMETER IncludeUnattributed
+    Also move reports with no rig identity (listed as 'unattributed' in
+    scan-problems.json by scanner v2.55+).
+
 .PARAMETER Yes
     Do not ask for confirmation.
 
@@ -37,6 +46,7 @@
 param(
     [string]$ConfigPath = '',
     [string]$ArchivePath = '',
+    [switch]$IncludeUnattributed,
     [switch]$Yes
 )
 
@@ -89,11 +99,23 @@ function Format-Stamp { param($Value)   # ConvertFrom-Json hands ISO dates back 
 $stamp = Format-Stamp $data.generatedAt
 Write-Host "Errors list from the scan of $stamp ($($all.Count) entries)"
 
-$toMove = @($all | Where-Object { [string]$_.kind -ne 'large' })
-$leftAlone = @($all | Where-Object { [string]$_.kind -eq 'large' })
-if ($leftAlone.Count) {
-    Write-Host "$($leftAlone.Count) oversized report(s) stay where they are: they are real reports, on the dashboard. This script never moves them." -ForegroundColor Yellow
+# One decision per file: an unattributed file moves only with the switch (even if it
+# is also oversized); an oversized rig report never moves; everything else moves.
+$byPath = [ordered]@{}
+foreach ($e in $all) { $k = [string]$e.path; if (-not $byPath.Contains($k)) { $byPath[$k] = New-Object System.Collections.Generic.List[object] }; $byPath[$k].Add($e) | Out-Null }
+$toMove = New-Object System.Collections.Generic.List[object]; $leftLarge = 0; $leftUnattributed = 0
+foreach ($k in $byPath.Keys) {
+    $kinds = @($byPath[$k] | ForEach-Object { [string]$_.kind })
+    $entry = $byPath[$k][0]
+    if ($kinds -contains 'unattributed') {
+        if ($IncludeUnattributed) { $entry = ($byPath[$k] | Where-Object { [string]$_.kind -eq 'unattributed' })[0]; $toMove.Add($entry) | Out-Null } else { $leftUnattributed++ }
+    }
+    elseif ($kinds -contains 'large') { $leftLarge++ }
+    else { $toMove.Add($entry) | Out-Null }
 }
+$toMove = @($toMove.ToArray())
+if ($leftLarge) { Write-Host "$leftLarge oversized report(s) stay where they are: they are real reports, on the dashboard. This script never moves them." -ForegroundColor Yellow }
+if ($leftUnattributed) { Write-Host "$leftUnattributed report(s) with no rig identity stay where they are. Run again with -IncludeUnattributed to move them." -ForegroundColor Yellow }
 if (-not $toMove.Count) {
     Write-Host "Nothing to archive: no unusable files in the last scan." -ForegroundColor Green
     exit 0

@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.54'
+$ScriptVersion = '2.55'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1320,6 +1320,10 @@ foreach ($f in $files) {
         # DASHBOARD-UNKNOWN-FILES-HANDOFF-REQUEST.md).
         $rig = 'Unattributed'
         Write-Warning "No rig identity in $($f.Name) (meta.asset blank) - listed under 'Unattributed' instead of inventing a rig from the filename; the posting tool should set meta.asset"
+        # v2.55: listed in scan-problems.json (not on the dashboard's Errors button - the
+        # report IS shown, under Unattributed) so Archive-ProblemFiles.ps1 -IncludeUnattributed
+        # can move these pre-rig-guard posts out of the folders on Dan's say-so.
+        $problemFiles.Add(@{ file = $f.Name; path = $f.FullName; kind = 'unattributed'; why = 'no rig identity (meta.asset blank) - a post from before the rig guard, shown under Unattributed'; bytes = [long]$f.Length; modified = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
     }
     # WCGRRT REV 153: 'SSCE Equipment' is the deliberate non-rig choice for
     # corporate/vendor-premises work (a fleet bucket, not a rig - the
