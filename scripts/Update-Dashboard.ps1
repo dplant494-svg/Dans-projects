@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.56'
+$ScriptVersion = '2.57'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -777,7 +777,7 @@ function Get-ScannedFiles {
                 $excluded = $false
                 foreach ($d in $dirParts) { if ($excludeFolders -contains $d) { $excluded = $true; break } }
                 (-not $excluded) -and ($_.Name -ne 'config.json') -and ($_.Name -ne 'package.json') -and ($_.Name -ne 'notified-state.json') -and
-                ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json') -and ($_.Name -ne 'scan-state.json')
+                ($_.Name -ne 'break-ins-pending.json') -and ($_.Name -ne 'break-ins-notified-state.json') -and ($_.Name -ne 'scan-state.json') -and ($_.Name -ne 'scan-lock.json')
             } | ForEach-Object { $list.Add($_) | Out-Null }
     }
     return $list.ToArray()
@@ -915,6 +915,40 @@ if ($scanUnchanged) {
         Write-Warning "Could not refresh the data stamp ($($_.Exception.Message)) - full scan instead"
     }
 }
+
+# ---------------------------------------------------------------------------
+# v2.57: one full scan at a time. The scheduled task ignores a second start of
+# itself, but a scan run by hand while the task's scan is going (or the other
+# way round) had both reading all 290 files at once: on Dan's PC that made a
+# 340 s scan take 539 s. The lock is a small file with this process id; a lock
+# whose process is gone (a killed or crashed run) is stale and is taken over.
+# ---------------------------------------------------------------------------
+$scanLockFile = Join-Path $repoRoot 'scan-lock.json'
+$scanLockHeld = $false
+$scanLockBusy = ''
+try {
+    if (Test-Path -Path $scanLockFile) {
+        $lockPrev = Get-Content -Path $scanLockFile -Raw | ConvertFrom-Json
+        $lockPid = 0; try { $lockPid = [int]$lockPrev.pid } catch { }
+        $lockProc = $null
+        if ($lockPid -gt 0 -and $lockPid -ne $PID) { $lockProc = Get-Process -Id $lockPid -ErrorAction SilentlyContinue }
+        $lockStarted = $lockPrev.started   # ConvertFrom-Json hands ISO dates back as [datetime]
+        if ($lockStarted -is [datetime]) { $lockStarted = $lockStarted.ToString('HH:mm:ss') }
+        if ($lockProc -and $lockProc.ProcessName -match '^(powershell|pwsh)') {
+            $scanLockBusy = "Another scan (started $lockStarted, process $lockPid) is still running - stopping here so the two do not slow each other down. It publishes the same result; run again after it prints 'Scan finished' if you want to see this run's output."
+        }
+        else {
+            Write-Host "Stale scan lock from process $lockPid (no longer running) - taking over" -ForegroundColor DarkGray
+        }
+    }
+    if (-not $scanLockBusy) {
+        $lockRec = [pscustomobject]@{ pid = $PID; started = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); note = 'Written by Update-Dashboard.ps1 while a full scan runs; removed when it finishes. Safe to delete if no scan is running.' }
+        [System.IO.File]::WriteAllText($scanLockFile, ($lockRec | ConvertTo-Json), (New-Object System.Text.UTF8Encoding($false)))
+        $scanLockHeld = $true
+    }
+}
+catch { Write-Warning "Scan lock not taken ($($_.Exception.Message)) - continuing without it" }
+if ($scanLockBusy) { Write-Host $scanLockBusy -ForegroundColor Yellow; exit 0 }
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
@@ -2885,4 +2919,5 @@ elseif ($scanFingerprint -and (Test-Path -Path $scanStateFile)) {
     # behind, or the next run would trust it.
     try { Remove-Item -Path $scanStateFile -Force } catch { }
 }
+if ($scanLockHeld) { try { Remove-Item -Path $scanLockFile -Force } catch { } }
 Write-Host ("Scan finished in {0:N0} s" -f $scanClock.Elapsed.TotalSeconds) -ForegroundColor Green

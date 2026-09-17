@@ -6,3 +6,5 @@ precharge/calculator.html
 precharge/set-password.html
 # written by Update-Dashboard.ps1 v2.45 next to config.json; per-installation, never committed
 scan-state.json
+# written by Update-Dashboard.ps1 v2.57 while a full scan runs; removed at the end
+scan-lock.json
