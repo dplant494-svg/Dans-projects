@@ -52,7 +52,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.55'
+$ScriptVersion = '2.56'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -2620,6 +2620,38 @@ else {
             Write-Host "SSCE COC write-back: no approved requests to apply" -ForegroundColor Yellow
         }
         else {
+            # v2.56: the review copy carries a stamp of the COC dashboard it was made
+            # from (size + last write) and of the approved list applied to it. When
+            # both still match, nothing is re-read, re-parsed or rewritten: this
+            # block cost 143 s of every full scan on Dan's PC with one approved item.
+            $cocSrc = Get-Item -Path $cocDashboardPath
+            $cocReviewPath = Join-Path (Split-Path -Parent $cocDashboardPath) 'Seadrill_WCE_COC_Dashboard_PENDING_REVIEW.html'
+            $stampLines = New-Object System.Collections.Generic.List[string]
+            foreach ($rec in $approved) {
+                $stampLines.Add(('{0}|{1}|{2}|{3}|{4}' -f [string]$rec.requestId, [string](Get-Prop $rec.ssceItem 'asset'), [string](Get-Prop $rec.ssceItem 'oem'), [string](Get-Prop $rec.ssceItem 'serial'), [string](Get-Prop $rec.applicant 'siteUnit')))
+            }
+            $stampLines.Sort([StringComparer]::Ordinal)
+            $stampSha = [System.Security.Cryptography.SHA256]::Create()
+            $approvedHash = [BitConverter]::ToString($stampSha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes(($stampLines -join "`n")))).Replace('-', '').Substring(0, 16)
+            $stampSha.Dispose()
+            $cocStamp = '<!-- coc-writeback-stamp: {0}|{1}|{2}|w1 -->' -f $cocSrc.Length, $cocSrc.LastWriteTimeUtc.Ticks, $approvedHash
+            $cocUpToDate = $false
+            if (Test-Path -Path $cocReviewPath) {
+                try {
+                    # Only the first few KB of the review copy: it is a multi-megabyte
+                    # page on a network share.
+                    $sr = New-Object System.IO.StreamReader($cocReviewPath, [System.Text.Encoding]::UTF8)
+                    $buf = New-Object char[] 4096
+                    $n = $sr.Read($buf, 0, $buf.Length)
+                    $sr.Close()
+                    $head = New-Object string($buf, 0, $n)
+                    if ($head.IndexOf($cocStamp) -ge 0) { $cocUpToDate = $true }
+                } catch { $cocUpToDate = $false }
+            }
+            if ($cocUpToDate) {
+                Write-Host "SSCE COC write-back: review copy already current for $($approved.Count) approved request(s) - nothing rewritten" -ForegroundColor Green
+            }
+            else {
             $cocHtml = [System.IO.File]::ReadAllText($cocDashboardPath)
             $appDataMatch = [regex]::Match($cocHtml, '(<script id="app-data">\s*const APP_DATA = )([\s\S]*?)(;\s*const SFI_GROUPS)')
             if (-not $appDataMatch.Success) {
@@ -2665,9 +2697,13 @@ else {
 
             $newAppData = ConvertTo-ReportJson $appData
             $newCocHtml = $cocHtml.Substring(0, $appDataMatch.Index) + $appDataMatch.Groups[1].Value + $newAppData + $appDataMatch.Groups[3].Value + $cocHtml.Substring($appDataMatch.Index + $appDataMatch.Length)
-            $cocReviewPath = Join-Path (Split-Path -Parent $cocDashboardPath) 'Seadrill_WCE_COC_Dashboard_PENDING_REVIEW.html'
+            # The stamp goes straight after <head> (or at the very top when there is
+            # no head tag); a comment there is harmless to the page.
+            $headTag = [regex]::Match($newCocHtml, '<head[^>]*>', 'IgnoreCase')
+            if ($headTag.Success) { $newCocHtml = $newCocHtml.Insert($headTag.Index + $headTag.Length, $cocStamp) } else { $newCocHtml = $cocStamp + $newCocHtml }
             [System.IO.File]::WriteAllText($cocReviewPath, $newCocHtml, (New-Object System.Text.UTF8Encoding($false)))
             Write-Host "SSCE COC write-back: $appliedCount item(s) marked unavailable in review copy $cocReviewPath" -ForegroundColor Green
+            }
         }
     }
     catch {
@@ -2757,15 +2793,21 @@ elseif ($deployPath) {
         if (-not (Test-Path -Path $reportsDir)) {
             New-Item -ItemType Directory -Path $reportsDir -Force | Out-Null
         }
+        # v2.56: one directory listing of the server folder, then compare in
+        # memory. Test-Path + Get-Item per file was two network round trips for
+        # each of ~290 copies: 89 s of every full scan to find nothing to copy.
+        $onServer = @{}
+        foreach ($have in (Get-ChildItem -Path $reportsDir -File)) { $onServer[$have.Name] = $have }
         $copied = 0
         foreach ($f in $files) {
             # Restricted TOPSET bodies must never reach the open share; also
             # excluded from $expected below so a copy from before the file
             # became restricted gets cleaned up as stale.
             if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name)) { continue }
-            $dest = Join-Path $reportsDir ($f.Name + '.js')
-            if (-not (Test-Path -Path $dest) -or ($f.LastWriteTime -gt (Get-Item -Path $dest).LastWriteTime)) {
-                Copy-Item -Path $f.FullName -Destination $dest -Force
+            $destName = $f.Name + '.js'
+            $have = $onServer[$destName]
+            if (-not $have -or ($f.LastWriteTime -gt $have.LastWriteTime)) {
+                Copy-Item -Path $f.FullName -Destination (Join-Path $reportsDir $destName) -Force
                 $copied++
             }
         }
@@ -2774,7 +2816,7 @@ elseif ($deployPath) {
             if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name)) { continue }
             $expected[$f.Name + '.js'] = $true
         }
-        foreach ($old in Get-ChildItem -Path $reportsDir -File) {
+        foreach ($old in @($onServer.Values)) {
             if (-not $expected.ContainsKey($old.Name)) {
                 Remove-Item -Path $old.FullName -Force
                 Write-Host "Removed stale report copy: $($old.Name)"
