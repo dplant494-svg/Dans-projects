@@ -74,17 +74,18 @@ Placeholders that must be swapped before launch are listed in the checklist belo
    - [x] Fictional property-services site: Pinar Property Care (`site/work/pinar-property/`)
 2. **Own studio site**
    - [x] Built, bilingual, hreflang correct
-   - [ ] Placeholders swapped (see checklist)
-   - [ ] Deployed
+   - [x] Domain bought and swapped in (plantworksstudio.com)
+   - [ ] Remaining placeholders swapped (see checklist)
+   - [ ] Deployed (see Deploying below)
 3. **Legal**: register as autónomo once resident (gestor to set up; monthly social security; reduced flat rate first year). Add NIF and registered address to the site footer once registered.
 4. **First clients**: walk-ins to expat businesses with weak sites, Costa del Sol expat Facebook groups, launch pricing.
 5. **Every job**: Google review and referral ask.
 
 ## Pre-launch checklist for the studio site
 
-- [ ] **Domain**. `plantworks.studio` is used as a placeholder in canonical, hreflang, sitemap and structured data across both pages. Verify availability (the environment this was built in blocks WHOIS/RDAP lookups, so this is **unverified**). Fallbacks: `plantworksstudio.com`, `plantworks.es`. If the domain changes, search-and-replace `https://plantworks.studio/` in `site/index.html`, `site/es/index.html` and `site/sitemap.xml`.
+- [x] **Domain**. `plantworksstudio.com`, registered at Namecheap (Sept 2026). Every canonical, hreflang, Open Graph URL, structured-data URL and the sitemap use it. `www` should redirect to the bare domain (Netlify and Cloudflare Pages both do this once the bare domain is set as primary).
 - [ ] **Name clash**. A web search for "Plantworks Studio" and "Plantworks" web design found no existing web studio, but this is a weak signal. Do a Spanish trademark search (OEPM, oepm.es) and an EUIPO search before printing anything.
-- [ ] **Email**. `hello@plantworks.studio` is a placeholder in the contact form, the mailto link and the structured data on both pages.
+- [ ] **Email**. `hello@plantworksstudio.com` is used in the contact form, the mailto link and the structured data on both pages. It doesn't exist yet: set up mail on the domain (Namecheap Private Email, or free email forwarding in the Namecheap domain panel to an existing inbox) and confirm the address.
 - [ ] **Founder name**. "Dan Plant" appears in the about section and structured data. Confirm spelling and whether to show it.
 - [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
 - [ ] **WhatsApp**. Add a `wa.me` link next to the email once there is a Spanish number.
@@ -92,6 +93,20 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys. The two demo cards link relatively into `work/`, so they work as soon as `site/` is deployed.
 - [ ] **Legal footer**. Add NIF, address and a privacy note once registered as autónomo.
 - [ ] **Google Business Profile** for the studio itself, in Marbella.
+
+## Deploying the studio site
+
+Netlify drag-and-drop, DNS stays at Namecheap. About fifteen minutes.
+
+1. Log in to Netlify, go to Sites, drag the whole `site/` folder onto the page. Netlify gives it a `something.netlify.app` address. Check the site, both languages and both demos work there.
+2. In that site's settings, Domain management, add custom domain `plantworksstudio.com`. Netlify will show which records it wants.
+3. In Namecheap, Domain List, Manage, Advanced DNS. Delete the parking records Namecheap put there. Add:
+   - `A` record, host `@`, value `75.2.60.5` (Netlify's load balancer; use whatever address Netlify showed in step 2 if different).
+   - `CNAME` record, host `www`, value `<your-site>.netlify.app`.
+4. Back in Netlify, once DNS has propagated (minutes to an hour), it issues the HTTPS certificate itself. Set `plantworksstudio.com` as the primary domain so `www` redirects to it.
+5. Google Search Console: add the property, verify by DNS TXT record at Namecheap, submit `https://plantworksstudio.com/sitemap.xml`.
+
+To update the site later, drag the folder again. Netlify keeps the domain and certificate. Cloudflare Pages works the same way if preferred, but it wants the nameservers moved to Cloudflare, which is a bigger change.
 
 ## Working conventions
 
