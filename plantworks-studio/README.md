@@ -102,6 +102,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [x] **Founder name**. Removed from the site and the structured data; the site speaks as a company.
 - [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
 - [x] **WhatsApp**. `wa.me/447464435081` (UK mobile) is on both pages and in the structured data as `telephone`. Swap to the Spanish number when it exists: search-and-replace `447464435081` and `+44 7464 435081` in `site/index.html` and `site/es/index.html`.
+- [ ] **Spanish**. Nobody on the team speaks it. Written Spanish (WhatsApp, email) is handled with translation tools; the site says calls are in English. A bilingual freelancer is needed for the proofread below and for any Spanish-language client call, budgeted per job.
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
 - [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys. The two demo cards link relatively into `work/`, so they work as soon as `site/` is deployed.
 - [ ] **Legal footer**. Add NIF, address and a privacy note once registered as autónomo.
