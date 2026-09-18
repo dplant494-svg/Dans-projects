@@ -88,7 +88,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [ ] **Email**. `hello@plantworksstudio.com` is used in the contact form, the mailto link and the structured data on both pages. It doesn't exist yet: set up mail on the domain (Namecheap Private Email, or free email forwarding in the Namecheap domain panel to an existing inbox) and confirm the address.
 - [ ] **Founder name**. "Dan Plant" appears in the about section and structured data. Confirm spelling and whether to show it.
 - [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
-- [ ] **WhatsApp**. Add a `wa.me` link next to the email once there is a Spanish number.
+- [x] **WhatsApp**. `wa.me/447464435081` (UK mobile) is on both pages and in the structured data as `telephone`. Swap to the Spanish number when it exists: search-and-replace `447464435081` and `+44 7464 435081` in `site/index.html` and `site/es/index.html`.
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
 - [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys. The two demo cards link relatively into `work/`, so they work as soon as `site/` is deployed.
 - [ ] **Legal footer**. Add NIF, address and a privacy note once registered as autónomo.
