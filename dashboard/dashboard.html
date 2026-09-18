@@ -290,8 +290,13 @@
     }
     body.no-scroll .report-head .rh-sub { color: #333; }
     .report-close, .report-print { display: none !important; }
-    /* 16 Sep 2026: keep a photo, an equipment entry or a table whole on a page (rolling handoff entry 11.4). */
-    .rv-photos figure, .rv-equip, .rv-soak table, .rv-tile-head { break-inside: avoid; page-break-inside: avoid; }
+    /* 16 Sep 2026: keep a photo, an equipment entry or a table whole on a page (rolling handoff entry 11.4).
+       18 Sep 2026: an entry is kept whole only when it is short (.rv-keep, set at render time). A long
+       photo-heavy entry kept whole cannot fit the rest of a page, so it jumped to a new one and left
+       the page above it blank: Brad's 12 Sep Capella daily printed 8 pages where 6 held the content.
+       Long entries now split, but never straight after their heading. */
+    .rv-photos figure, .rv-equip.rv-keep, .rv-soak table, .rv-tile-head { break-inside: avoid; page-break-inside: avoid; }
+    .rv-equip-head, .rv-section-label, .rv-tile-head { break-after: avoid; page-break-after: avoid; }
     /* REPORT-PHOTO-RENDERING-HANDOFF.md, 16 Sep 2026, traps 2 and 3, belt and braces:
        a photograph is never height-capped against its pinned width (that squashes
        the aspect ratio, measured at 87% error by the tool session), and a bare <img>
@@ -3446,6 +3451,10 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
       (tile.equipEntries || []).forEach(function (e) {
         var eq = mk('div', 'rv-equip');
+        // Print: keep short entries whole on a page (up to four photos, a short note); long ones may split.
+        var photoCount = (e.photos || []).filter(function (p) { var src = (typeof p === 'string') ? p : (p && p.src); return src && src.indexOf('data:image') === 0; }).length;
+        var noteLen = e.notes ? String(e.notes).replace(/<[^>]*>/g, '').length : 0;
+        if (photoCount <= 4 && noteLen < 700 && !(e.soak && typeof e.soak === 'object' && Object.keys(e.soak).length)) eq.className += ' rv-keep';
         var eh = mk('div', 'rv-equip-head');
         var name = e.manual ? (e.manualName || 'Manual entry') : (e.type || 'Equipment');
         eh.appendChild(document.createTextNode(name));
