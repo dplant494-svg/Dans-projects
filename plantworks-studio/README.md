@@ -105,7 +105,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
 - [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys. The two demo cards link relatively into `work/`, so they work as soon as `site/` is deployed.
 - [ ] **Legal footer**. Add NIF, address and a privacy note once registered as autónomo.
-- [ ] **Google Business Profile** for the studio. Without a Spanish business address this is a service-area listing at best; decide whether it is worth it, and never use the family home address unless work genuinely happens there.
+- [ ] **Google Business Profile** for the studio. Without a Spanish business address this is a service-area listing at best; decide whether it is worth it, and only use an address where work genuinely happens.
 
 ## Deploying the studio site
 
