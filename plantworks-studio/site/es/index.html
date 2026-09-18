@@ -38,9 +38,11 @@
   "priceRange": "€€",
   "founder": {"@type": "Person", "name": "Dan Plant"},
   "makesOffer": [
-    {"@type": "Offer", "name": "Web de una página", "priceCurrency": "EUR", "price": "500", "priceSpecification": {"@type": "PriceSpecification", "minPrice": "500", "maxPrice": "800", "priceCurrency": "EUR"}},
-    {"@type": "Offer", "name": "Web bilingüe de varias páginas", "priceCurrency": "EUR", "price": "1200", "priceSpecification": {"@type": "PriceSpecification", "minPrice": "1200", "maxPrice": "2000", "priceCurrency": "EUR"}},
-    {"@type": "Offer", "name": "Plan de mantenimiento", "priceCurrency": "EUR", "price": "30", "priceSpecification": {"@type": "UnitPriceSpecification", "minPrice": "30", "maxPrice": "50", "priceCurrency": "EUR", "unitText": "mes"}}
+    {"@type": "Offer", "name": "Web de una página, español", "price": "600", "priceCurrency": "EUR"},
+    {"@type": "Offer", "name": "Web de una página, bilingüe", "price": "800", "priceCurrency": "EUR"},
+    {"@type": "Offer", "name": "Web bilingüe de varias páginas, hasta ocho páginas", "price": "1500", "priceCurrency": "EUR"},
+    {"@type": "Offer", "name": "Plan de mantenimiento", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "40", "priceCurrency": "EUR", "unitText": "mes"}},
+    {"@type": "Offer", "name": "Plan de mantenimiento Plus", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "75", "priceCurrency": "EUR", "unitText": "mes"}}
   ]
 }
 </script>
@@ -166,6 +168,7 @@
   .addon strong{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600}
   .addon p{flex:1;min-width:18rem;color:var(--ink-soft);font-size:.98rem}
   .fine{margin-top:1.2rem;font-size:.9rem;color:var(--ink-soft)}
+  .fine b,.addon b{color:var(--ink);font-weight:600}
 
   .process{background:var(--sand)}
   .pid{display:block;width:100%;height:auto;max-width:66rem;margin:2.6rem auto 0}
@@ -345,16 +348,16 @@
   <div class="container">
     <span class="mono tag">Tarifas</span>
     <h2>Precio cerrado. Sin cuota mensual de plataforma. Todo es tuyo.</h2>
-    <p class="lede">Precios de lanzamiento mientras el estudio construye su primera cartera de clientes en la Costa del Sol. Cada precio se presupuesta por adelantado y no se mueve.</p>
+    <p class="lede">Cada precio de abajo es el precio. Se presupuesta por escrito antes de empezar y no se mueve, salvo que se mueva el alcance.</p>
     <div class="tiers">
       <div class="tier">
         <span class="mono">Opción 1</span>
         <h3>Web de una página</h3>
-        <div class="price">500 &ndash; 800 &euro;</div>
+        <div class="price">600 &euro; <small>español &middot; 800 &euro; bilingüe</small></div>
         <p class="for">Para un negocio que necesita que lo encuentren, que confíen en él y que lo contacten. Oficios, servicios locales, una apertura nueva.</p>
         <ul>
           <li>Una página larga, diseñada en torno a tu marca</li>
-          <li>Español, con inglés como opción</li>
+          <li>Versión en inglés al lado por 200 &euro; más, con hreflang</li>
           <li>Formulario, llamada directa, WhatsApp, mapa</li>
           <li>SEO on-page y perfil de Google Business</li>
           <li>Dominio y alojamiento conectados, HTTPS activo</li>
@@ -364,7 +367,7 @@
       <div class="tier featured">
         <span class="mono">Opción 2 &middot; la más elegida</span>
         <h3>Web bilingüe de varias páginas</h3>
-        <div class="price">1.200 &ndash; 2.000 &euro;</div>
+        <div class="price">1.500 &euro; <small>hasta ocho páginas</small></div>
         <p class="for">Para restaurantes, inmobiliarias y clínicas con más que contar. Español e inglés completos, hecha para posicionar en los dos.</p>
         <ul>
           <li>Hasta ocho páginas, cada una en los dos idiomas</li>
@@ -377,8 +380,8 @@
       </div>
       <div class="tier">
         <span class="mono">Opción 3 &middot; continuo</span>
-        <h3>Plan de mantenimiento</h3>
-        <div class="price">30 &ndash; 50 &euro; <small>/ mes</small></div>
+        <h3>Mantenimiento</h3>
+        <div class="price">40 &euro; <small>/ mes</small></div>
         <p class="for">Alojamiento, cambios y ajustes resueltos, para que la web siga funcionando y tú no tengas que pensar en ella.</p>
         <ul>
           <li>Alojamiento, renovación del dominio y HTTPS gestionados</li>
@@ -391,11 +394,16 @@
       </div>
     </div>
     <div class="addon">
-      <strong>Extra: búsqueda local</strong>
-      <p>Gestión del perfil de Google Business, solicitud de reseñas y directorios locales como cuota mensual. Para negocios a los que sus clientes llegan buscando "cerca de mí".</p>
+      <strong>Mantenimiento Plus &middot; 75 &euro; / mes</strong>
+      <p>Todo lo del Mantenimiento, más tu perfil de Google Business gestionado: publicaciones, fotos, horarios, respuestas a reseñas y una solicitud de reseña tras cada trabajo. Para negocios a los que sus clientes llegan buscando «cerca de mí».</p>
       <a class="btn btn-dark" href="#contact">Preguntar por esto</a>
     </div>
-    <p class="fine">Precios sin IVA. Fotografía, redacción e idiomas adicionales se presupuestan aparte.</p>
+    <div class="addon">
+      <strong>Oferta de lanzamiento</strong>
+      <p>Las cinco primeras webs de varias páginas salen por <b>1.200 &euro;</b> en lugar de 1.500 &euro;, a cambio de una reseña en Google y de poder mostrar la web aquí. La oferta termina cuando firme la quinta.</p>
+      <a class="btn btn-dark" href="#contact">Reservar plaza</a>
+    </div>
+    <p class="fine">Precios sin IVA. La mitad al empezar, la mitad al publicar; el Mantenimiento se factura cada mes. El trabajo fuera de paquete son 45 &euro; la hora, presupuestados antes de empezar. Fotografía, redacción, idiomas adicionales y cualquier servicio de terceros de pago se repercuten a precio de coste.</p>
   </div>
 </section>
 

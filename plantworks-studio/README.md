@@ -39,16 +39,22 @@ Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect
 
 **Build philosophy**: single-file or minimal static sites, no frameworks unless needed, brand-driven design over templates, CSS-first interactivity, progressive enhancement. AI-assisted in the workshop, sold and supported as a personal service.
 
-## Offer and pricing (launch pricing, ex-IVA)
+## Offer and pricing (ex-IVA, decided Sept 2026)
 
 | Package | Price | What it is |
 |---|---|---|
-| One-page site | €500–800 | Long single page, EN with ES optional, contact/WhatsApp/map, on-page SEO, GBP setup, domain+hosting connected |
-| Multi-page bilingual site | €1,200–2,000 | Up to 8 pages in both languages, hreflang + structured data + sitemap, booking/enquiry flow, native-speaker proofread of ES copy |
-| Care plan | €30–50/month | Hosting, domain, HTTPS managed; content changes within 2 working days; monthly speed/links/search check; small tweaks; cancel any month |
-| Add-on: local search | monthly retainer, TBD | Google Business Profile, review requests, citations |
+| One-page site, English | €600 | Long single page, contact/WhatsApp/map, on-page SEO, GBP setup, domain+hosting connected |
+| One-page site, bilingual | €800 | Same page with Spanish alongside, hreflang done |
+| Multi-page bilingual site | €1,500 | Up to 8 pages in both languages, hreflang + structured data + sitemap, booking/enquiry flow, native-speaker proofread of ES copy. Beyond 8 pages: quoted |
+| Care | €40/month | Hosting, domain, HTTPS managed; content changes within 2 working days; monthly speed/links/search check; small tweaks; cancel any month |
+| Care Plus | €75/month | Care plus Google Business Profile managed (posts, photos, hours, review replies) and a review request after every job |
+| Extra work | €45/hour | Anything outside a package, quoted before it starts |
 
-The care plan is the recurring-revenue engine. Twenty care-plan clients is a steady baseline.
+**Launch offer**: first five multi-page sites at €1,200 in return for a Google review and portfolio permission. Ends when the fifth signs. Stated as such on the site.
+
+**Terms**: half on brief, half on launch. Care billed monthly, cancel any month. Photography, copywriting, extra languages and paid third-party services passed on at cost.
+
+The care plan is the recurring-revenue engine. Twenty Care clients is about €800/month before building anything; Care Plus nearly doubles that per client for roughly an hour a month on their Google listing, so offer it at every hand-over.
 
 **In every build**: on-page SEO (meta, structured data, speed), mobile-first, static hosting (~zero cost), bilingual with hreflang where sold, native-speaker proofread on paid translated copy.
 

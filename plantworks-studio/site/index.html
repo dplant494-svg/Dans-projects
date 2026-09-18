@@ -37,9 +37,11 @@
   "priceRange": "€€",
   "founder": {"@type": "Person", "name": "Dan Plant"},
   "makesOffer": [
-    {"@type": "Offer", "name": "One-page website", "priceCurrency": "EUR", "price": "500", "priceSpecification": {"@type": "PriceSpecification", "minPrice": "500", "maxPrice": "800", "priceCurrency": "EUR"}},
-    {"@type": "Offer", "name": "Multi-page bilingual website", "priceCurrency": "EUR", "price": "1200", "priceSpecification": {"@type": "PriceSpecification", "minPrice": "1200", "maxPrice": "2000", "priceCurrency": "EUR"}},
-    {"@type": "Offer", "name": "Care plan", "priceCurrency": "EUR", "price": "30", "priceSpecification": {"@type": "UnitPriceSpecification", "minPrice": "30", "maxPrice": "50", "priceCurrency": "EUR", "unitText": "month"}}
+    {"@type": "Offer", "name": "One-page website, English", "price": "600", "priceCurrency": "EUR"},
+    {"@type": "Offer", "name": "One-page website, bilingual", "price": "800", "priceCurrency": "EUR"},
+    {"@type": "Offer", "name": "Multi-page bilingual website, up to eight pages", "price": "1500", "priceCurrency": "EUR"},
+    {"@type": "Offer", "name": "Care plan", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "40", "priceCurrency": "EUR", "unitText": "month"}},
+    {"@type": "Offer", "name": "Care Plus plan", "priceSpecification": {"@type": "UnitPriceSpecification", "price": "75", "priceCurrency": "EUR", "unitText": "month"}}
   ]
 }
 </script>
@@ -171,6 +173,7 @@
   .addon strong{font-family:'Fraunces',serif;font-size:1.2rem;font-weight:600}
   .addon p{flex:1;min-width:18rem;color:var(--ink-soft);font-size:.98rem}
   .fine{margin-top:1.2rem;font-size:.9rem;color:var(--ink-soft)}
+  .fine b,.addon b{color:var(--ink);font-weight:600}
 
   /* ---------- Process (P&ID) ---------- */
   .process{background:var(--sand)}
@@ -354,18 +357,18 @@
   <div class="container">
     <span class="mono tag">Packages</span>
     <h2>Fixed prices. No monthly platform fee. You own the lot.</h2>
-    <p class="lede">Launch pricing while the studio builds its first Costa del Sol portfolio. Every price is quoted up front and doesn't move.</p>
+    <p class="lede">Every price below is the price. Quoted in writing before we start, and it doesn't move unless the scope does.</p>
     <div class="tiers">
       <div class="tier">
         <span class="mono">Package 1</span>
         <h3>One-page site</h3>
-        <div class="price">&euro;500 &ndash; 800</div>
+        <div class="price">&euro;600 <small>English &middot; &euro;800 bilingual</small></div>
         <p class="for">For a business that needs to be found, trusted and contacted. Trades, single-location services, a new opening.</p>
         <ul>
           <li>One long page, designed around your brand</li>
-          <li>English, with Spanish as an option</li>
+          <li>Spanish version alongside for &euro;200 more, hreflang done</li>
           <li>Contact form, click-to-call, WhatsApp, map</li>
-          <li>On-page SEO and Google Business setup</li>
+          <li>On-page SEO and Google Business Profile setup</li>
           <li>Domain and hosting connected, HTTPS on</li>
         </ul>
         <a class="btn btn-dark" href="#contact">Ask about this</a>
@@ -373,7 +376,7 @@
       <div class="tier featured">
         <span class="mono">Package 2 &middot; most chosen</span>
         <h3>Multi-page bilingual site</h3>
-        <div class="price">&euro;1,200 &ndash; 2,000</div>
+        <div class="price">&euro;1,500 <small>up to eight pages</small></div>
         <p class="for">For restaurants, property firms and clinics with more to say. Full English and Spanish, built to rank in both.</p>
         <ul>
           <li>Up to eight pages, each in both languages</li>
@@ -386,8 +389,8 @@
       </div>
       <div class="tier">
         <span class="mono">Package 3 &middot; ongoing</span>
-        <h3>Care plan</h3>
-        <div class="price">&euro;30 &ndash; 50 <small>/ month</small></div>
+        <h3>Care</h3>
+        <div class="price">&euro;40 <small>/ month</small></div>
         <p class="for">Hosting, updates and tweaks handled, so the site keeps working and you never have to think about it.</p>
         <ul>
           <li>Hosting, domain renewals and HTTPS managed</li>
@@ -400,11 +403,16 @@
       </div>
     </div>
     <div class="addon">
-      <strong>Add-on: local search</strong>
-      <p>Google Business Profile management, review requests and local directory listings as a monthly retainer. For businesses where "near me" is how customers find them.</p>
+      <strong>Care Plus &middot; &euro;75 / month</strong>
+      <p>Everything in Care, plus your Google Business Profile managed: posts, photos, hours, replies to reviews, and a review request after every job. For businesses where "near me" is how customers find them.</p>
       <a class="btn btn-dark" href="#contact">Ask about this</a>
     </div>
-    <p class="fine">Prices exclude IVA. Photography, copywriting and extra languages quoted separately.</p>
+    <div class="addon">
+      <strong>Launch offer</strong>
+      <p>The first five multi-page sites go for <b>&euro;1,200</b> instead of &euro;1,500, in return for a Google review and permission to show the site here. The offer ends when the fifth signs.</p>
+      <a class="btn btn-dark" href="#contact">Claim a place</a>
+    </div>
+    <p class="fine">Prices exclude IVA. Half on brief, half on launch; Care billed monthly. Extra work outside a package is &euro;45 an hour, quoted before it starts. Photography, copywriting, extra languages and any paid third-party service are passed on at cost.</p>
   </div>
 </section>
 
