@@ -1,6 +1,6 @@
 # Plantworks Studio
 
-Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: Marbella. This folder is the whole business: the studio's own site, every client site, and the plan.
+Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: UK (sole trader); family on the coast, so on the coast every few weeks within the 90/180-day rule. This folder is the whole business: the studio's own site, every client site, and the plan.
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
@@ -83,7 +83,12 @@ Placeholders that must be swapped before launch are listed in the checklist belo
    - [x] Domain bought and swapped in (plantworksstudio.com)
    - [ ] Remaining placeholders swapped (see checklist)
    - [ ] Deployed (see Deploying below)
-3. **Legal**: register as autónomo once resident (gestor to set up; monthly social security; reduced flat rate first year). Add NIF and registered address to the site footer once registered.
+3. **Legal** (decided Sept 2026: UK sole trader, not autónomo)
+   - [x] Registered for HMRC self assessment. Plantworks income goes on the self-employment pages alongside the oil and gas work.
+   - [ ] Confirm with a cross-border gestor that the Spanish tax-residency presumption for someone whose spouse and minor children live in Spain does not bite, and get a UK certificate of tax residence from HMRC to hand to any Spanish client's accountant who asks.
+   - [ ] Confirm the old autónomo registration was properly closed (baja in Hacienda and Seguridad Social), so nothing is still accruing.
+   - [ ] Invoicing: no UK VAT below the threshold. Services to Spanish businesses are supplied where the customer is, so state "reverse charge" and the client's NIF-IVA on the invoice. Keep sterling equivalents for the HMRC records.
+   - [ ] Add a short privacy line and the trading name/address line to the site footer.
 4. **First clients**: walk-ins to expat businesses with weak sites, Costa del Sol expat Facebook groups, launch pricing.
 5. **Every job**: Google review and referral ask.
 
@@ -98,7 +103,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
 - [ ] **Case-study link**. The Fifth Quarter card links to `https://the5thquarter.co.uk/`, which is not live yet. Fine to leave; it'll resolve when the client site deploys. The two demo cards link relatively into `work/`, so they work as soon as `site/` is deployed.
 - [ ] **Legal footer**. Add NIF, address and a privacy note once registered as autónomo.
-- [ ] **Google Business Profile** for the studio itself, in Marbella.
+- [ ] **Google Business Profile** for the studio. Without a Spanish business address this is a service-area listing at best; decide whether it is worth it, and never use the family home address unless work genuinely happens there.
 
 ## Deploying the studio site
 
