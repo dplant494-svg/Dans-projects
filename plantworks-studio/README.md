@@ -1,6 +1,6 @@
 # Plantworks Studio
 
-Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: UK (sole trader); family on the coast, so on the coast every few weeks within the 90/180-day rule. This folder is the whole business: the studio's own site, every client site, and the plan.
+Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: UK limited company (planned); founder is on the coast every few weeks within the 90/180-day rule, with family living there. This folder is the whole business: the studio's own site, every client site, and the plan.
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
@@ -83,12 +83,14 @@ Placeholders that must be swapped before launch are listed in the checklist belo
    - [x] Domain bought and swapped in (plantworksstudio.com)
    - [ ] Remaining placeholders swapped (see checklist)
    - [ ] Deployed (see Deploying below)
-3. **Legal** (decided Sept 2026: UK sole trader, not autónomo)
-   - [x] Registered for HMRC self assessment. Plantworks income goes on the self-employment pages alongside the oil and gas work.
-   - [ ] Confirm with a cross-border gestor that the Spanish tax-residency presumption for someone whose spouse and minor children live in Spain does not bite, and get a UK certificate of tax residence from HMRC to hand to any Spanish client's accountant who asks.
-   - [ ] Confirm the old autónomo registration was properly closed (baja in Hacienda and Seguridad Social), so nothing is still accruing.
-   - [ ] Invoicing: no UK VAT below the threshold. Services to Spanish businesses are supplied where the customer is, so state "reverse charge" and the client's NIF-IVA on the invoice. Keep sterling equivalents for the HMRC records.
-   - [ ] Add a short privacy line and the trading name/address line to the site footer.
+3. **Legal** (Sept 2026: founder is UK non-resident under the automatic overseas test, paid from the US for oil and gas work; family lives in Spain on a non-lucrative visa; no tax home anywhere. A non-resident sole trader gets no UK-Spain treaty protection, so the plan is a **UK limited company**, which is UK-resident by incorporation and does.)
+   - [ ] Incorporate a UK Ltd (Plantworks Studio Ltd or similar), registered office at a UK address (an accountant's registered-office service is fine).
+   - [ ] Appoint a small-business accountant to run it: annual accounts, corporation tax return, confirmation statement. Budget roughly one care-plan client a month.
+   - [ ] Business bank account in the company's name. Invoice all clients from the company, in EUR where the client is Spanish.
+   - [ ] No fixed place of business in Spain: meet clients at their premises or a café, not "from" the family home. Keep a note that company decisions are taken from the UK. Both protect the company's UK residence and avoid a Spanish permanent establishment.
+   - [ ] Ask the accountant, once, whether the studio changes anything about the personal non-resident position given the family in Spain. Get the answer in writing.
+   - [ ] Footer: company name, registered number and a privacy line once incorporated.
+   - Not needed: UK VAT below the threshold; Spanish autónomo; anything on the personal self-assessment return for this business.
 4. **First clients**: walk-ins to expat businesses with weak sites, Costa del Sol expat Facebook groups, launch pricing.
 5. **Every job**: Google review and referral ask.
 
