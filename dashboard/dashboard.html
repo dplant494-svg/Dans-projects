@@ -283,6 +283,9 @@
     body.no-scroll .report-overlay {
       position: static; inset: auto; background: none; overflow: visible;
     }
+    /* 18 Sep 2026: nothing on the page may clip the printed flow. */
+    html, body.no-scroll { overflow: visible !important; height: auto !important; }
+    body.no-scroll .rv-tile, body.no-scroll .report-frame, body.no-scroll .report-body { overflow: visible; }
     body.no-scroll .report-frame { max-width: 100%; margin: 0; box-shadow: none; border-radius: 0; }
     body.no-scroll .report-head {
       position: static; background: #fff; color: #000;
@@ -3561,7 +3564,27 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       close();
     }
     closeBtn.addEventListener('click', close);
-    printBtn.addEventListener('click', function () { window.print(); });
+    // 18 Sep 2026: photos are lazy-loaded for the screen, and the browser's print engine
+    // does not load a lazy image it has not scrolled to: Brad's dashboard PDF had captions
+    // with no photographs from page 5 on. Load and decode every photo, then print.
+    function printReport() {
+      var imgs = Array.prototype.slice.call(body.querySelectorAll('img'));
+      imgs.forEach(function (im) { im.loading = 'eager'; });
+      printBtn.textContent = 'Preparing ' + imgs.length + ' photo' + (imgs.length === 1 ? '' : 's') + '…';
+      printBtn.disabled = true;
+      Promise.all(imgs.map(function (im) { return (im.decode ? im.decode() : Promise.resolve()).catch(function () {}); }))
+        .then(function () { return new Promise(function (r) { setTimeout(r, 150); }); })
+        .then(function () {
+          printBtn.textContent = 'Print / Save as PDF';
+          printBtn.disabled = false;
+          window.print();
+        });
+    }
+    printBtn.addEventListener('click', printReport);
+    // Ctrl+P / browser menu: at least switch the photos to eager before the preview renders.
+    window.addEventListener('beforeprint', function () {
+      body.querySelectorAll('img').forEach(function (im) { im.loading = 'eager'; });
+    });
     overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
 
