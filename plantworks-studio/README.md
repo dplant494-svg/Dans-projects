@@ -48,6 +48,7 @@ Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect
 | Multi-page bilingual site | €1,500 | Up to 8 pages in both languages, hreflang + structured data + sitemap, booking/enquiry flow, native-speaker proofread of ES copy. Beyond 8 pages: quoted |
 | Care | €40/month | Hosting, domain, HTTPS managed; content changes within 2 working days; monthly speed/links/search check; small tweaks; cancel any month |
 | Care Plus | €75/month | Care plus Google Business Profile managed (posts, photos, hours, review replies) and a review request after every job |
+| Take payments online | €150 setup | Stripe Payment Link or Buy Button on the client's own Stripe account for deposits, vouchers, single products; booking deposits via their booking system. Full shop quoted separately. Client money never passes through the studio |
 | Extra work | €45/hour | Anything outside a package, quoted before it starts |
 
 **Launch offer**: first five multi-page sites at €1,200 in return for a Google review and portfolio permission. Ends when the fifth signs. Stated as such on the site.
