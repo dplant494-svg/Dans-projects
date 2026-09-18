@@ -1,6 +1,6 @@
 # Plantworks Studio
 
-Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: UK limited company (planned); founder is on the coast every few weeks within the 90/180-day rule, with family living there. This folder is the whole business: the studio's own site, every client site, and the plan.
+Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: UK limited company (planned), working in the UK and on the Costa del Sol. This folder is the whole business: the studio's own site, every client site, and the plan.
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
@@ -31,9 +31,9 @@ Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect
 
 ## Positioning
 
-> "I spent two decades maintaining offshore systems that couldn't be allowed to fail. Now I build websites the same way."
+> "We spent eighteen years building and maintaining digital systems that weren't allowed to fail. We build websites the same way."
 
-**Name**: Plantworks Studio. Plant is the surname; a plant is industrial machinery (the engineering heritage); plants grow (what client businesses do). "Works" doubles as a quality claim.
+**Voice**: company, never a person. Engineers based in the UK and on the Costa del Sol; over eighteen years in digital and IT systems; now applying AI to web and small-business automation. No founder name, no personal history, no home life on the site or in structured data (decided Sept 2026).
 
 **Niche**: English/Spanish bilingual sites for expat-owned businesses on the Costa del Sol. Restaurants, property services, health/wellness, trades. Most local web shops do bilingual badly. Proper hreflang is both the product and the SEO edge.
 
@@ -83,12 +83,12 @@ Placeholders that must be swapped before launch are listed in the checklist belo
    - [x] Domain bought and swapped in (plantworksstudio.com)
    - [ ] Remaining placeholders swapped (see checklist)
    - [ ] Deployed (see Deploying below)
-3. **Legal** (Sept 2026: founder is UK non-resident under the automatic overseas test, paid from the US for oil and gas work; family lives in Spain on a non-lucrative visa; no tax home anywhere. A non-resident sole trader gets no UK-Spain treaty protection, so the plan is a **UK limited company**, which is UK-resident by incorporation and does.)
+3. **Legal** (Sept 2026: the business will be a **UK limited company**. It is UK-resident by incorporation and gets UK-Spain treaty protection regardless of anyone's personal position, which is the point.)
    - [ ] Incorporate a UK Ltd (Plantworks Studio Ltd or similar), registered office at a UK address (an accountant's registered-office service is fine).
    - [ ] Appoint a small-business accountant to run it: annual accounts, corporation tax return, confirmation statement. Budget roughly one care-plan client a month.
    - [ ] Business bank account in the company's name. Invoice all clients from the company, in EUR where the client is Spanish.
-   - [ ] No fixed place of business in Spain: meet clients at their premises or a café, not "from" the family home. Keep a note that company decisions are taken from the UK. Both protect the company's UK residence and avoid a Spanish permanent establishment.
-   - [ ] Ask the accountant, once, whether the studio changes anything about the personal non-resident position given the family in Spain. Get the answer in writing.
+   - [ ] No fixed place of business in Spain: meet clients at their premises or a café. Keep a note that company decisions are taken from the UK. Both protect the company's UK residence and avoid a Spanish permanent establishment.
+   - [ ] Ask the accountant, once, whether the studio changes anything about the directors' personal tax positions. Get the answer in writing.
    - [ ] Footer: company name, registered number and a privacy line once incorporated.
    - Not needed: UK VAT below the threshold; Spanish autónomo; anything on the personal self-assessment return for this business.
 4. **First clients**: walk-ins to expat businesses with weak sites, Costa del Sol expat Facebook groups, launch pricing.
@@ -99,7 +99,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [x] **Domain**. `plantworksstudio.com`, registered at Namecheap (Sept 2026). Every canonical, hreflang, Open Graph URL, structured-data URL and the sitemap use it. `www` should redirect to the bare domain (Netlify and Cloudflare Pages both do this once the bare domain is set as primary).
 - [ ] **Name clash**. A web search for "Plantworks Studio" and "Plantworks" web design found no existing web studio, but this is a weak signal. Do a Spanish trademark search (OEPM, oepm.es) and an EUIPO search before printing anything.
 - [ ] **Email**. `hello@plantworksstudio.com` is used in the contact form, the mailto link and the structured data on both pages. It doesn't exist yet: set up mail on the domain (Namecheap Private Email, or free email forwarding in the Namecheap domain panel to an existing inbox) and confirm the address.
-- [ ] **Founder name**. "Dan Plant" appears in the about section and structured data. Confirm spelling and whether to show it.
+- [x] **Founder name**. Removed from the site and the structured data; the site speaks as a company.
 - [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
 - [x] **WhatsApp**. `wa.me/447464435081` (UK mobile) is on both pages and in the structured data as `telephone`. Swap to the Spanish number when it exists: search-and-replace `447464435081` and `+44 7464 435081` in `site/index.html` and `site/es/index.html`.
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
