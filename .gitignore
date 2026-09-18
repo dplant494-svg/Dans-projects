@@ -8,3 +8,5 @@ precharge/set-password.html
 scan-state.json
 # written by Update-Dashboard.ps1 v2.57 while a full scan runs; removed at the end
 scan-lock.json
+# written by Update-Dashboard.ps1 v2.58: photo-stripped report copies for faster scans; per-installation
+scan-cache/

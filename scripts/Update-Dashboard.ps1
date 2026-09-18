@@ -38,6 +38,11 @@
     run (v2.45 remembers a fingerprint of every input file in scan-state.json
     next to config.json and otherwise only refreshes the 'Data updated' stamp).
 
+.PARAMETER NoCache
+    Read every report from its real file instead of the photo-stripped copy
+    in scan-cache\ (v2.58). The copies are still rewritten. Use it once if a
+    report ever looks wrong on the dashboard and you want the cache ruled out.
+
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File .\scripts\Update-Dashboard.ps1
 #>
@@ -48,11 +53,14 @@ param(
     # is launched via 'powershell.exe -File' (which is how Task Scheduler runs it).
     [string]$ConfigPath = '',
     # v2.45: skip the nothing-changed short cut and do a full scan regardless.
-    [switch]$Force
+    [switch]$Force,
+    # v2.58: read every report from its real file, ignoring the photo-stripped
+    # copies in scan-cache\ (they are still refreshed). For a one-off check only.
+    [switch]$NoCache
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.57'
+$ScriptVersion = '2.58'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -577,10 +585,134 @@ function Write-DigestValue {
 # relies on). An unchanged source file with a digest written at this schema is
 # not rebuilt: on Dan's PC building 285 digests took 560 s of a 1,122 s scan.
 $DigestSchema = 3
+# v2.58: the digest stamp check, on its own, so the report cache can require a
+# current digest before it serves a photo-stripped copy (a stale digest needs the
+# real file to rebuild). A file found current here is not re-read by Write-ReportDigest.
+$script:digestCurrent = @{}
+function Test-DigestCurrent {
+    param($File)
+    if (-not $digestPath) { return $true }
+    $dest = Join-Path $digestPath ($File.Name + '.html')
+    $sourceStamp = '{0}|{1}|d{2}' -f $File.Length, $File.LastWriteTimeUtc.Ticks, $DigestSchema
+    if (Test-Path -Path $dest) {
+        try {
+            $sr = New-Object System.IO.StreamReader($dest, [System.Text.Encoding]::UTF8)
+            $buf = New-Object char[] 600
+            $n = $sr.Read($buf, 0, $buf.Length)
+            $sr.Close()
+            $head = New-Object string($buf, 0, $n)
+            if ($head.IndexOf('<meta name="source-stamp" content="' + $sourceStamp + '">') -ge 0) { $script:digestCurrent[$File.Name] = $true; return $true }
+        } catch { }
+    }
+    return $false
+}
+
+# ---------------------------------------------------------------------------
+# v2.58: report cache. A report's photographs are most of its bytes and the
+# scanner never needs them (they stay in the real file, which is what the
+# dashboard's report copy and the digest are made from). After a report has
+# been read once, a copy with every photograph replaced by a short marker is
+# written to scan-cache\ next to config.json, named after the report and keyed
+# by its size and last-write time. The next full scan reads that copy instead:
+# on Dan's PC reading the JSON was 53 s of a 204 s scan, all of it base64.
+# The copy is only used while the digest for that file is current; anything
+# that needs the real file (a new digest schema, a changed report) reads it.
+# ---------------------------------------------------------------------------
+$CacheSchema = 1
+$CacheMinBytes = 200KB
+$scanCacheDir = Join-Path $repoRoot 'scan-cache'
+$script:cacheExpected = @{}
+$script:cacheHits = 0
+$script:cacheWrites = 0
+function Get-CacheKey { param($File) return ('{0}|{1}|c{2}' -f $File.Length, $File.LastWriteTimeUtc.Ticks, $CacheSchema) }
+function Get-CachePath {
+    param($File)
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $h = [BitConverter]::ToString($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($File.FullName))).Replace('-', '').Substring(0, 8)
+    $sha.Dispose()
+    $name = $File.Name + '.' + $h + '.json'
+    $script:cacheExpected[$name] = $true
+    return (Join-Path $scanCacheDir $name)
+}
+function ConvertTo-CacheShape {
+    # A copy of the parsed report with every long base64 string (data: URIs and
+    # bare base64) replaced by a short marker that still starts the same way.
+    param($Value)
+    if ($null -eq $Value) { return $null }
+    if ($Value -is [string]) {
+        if ($Value.Length -gt 1000) {
+            if ($Value.StartsWith('data:')) {
+                $comma = $Value.IndexOf(',')
+                if ($comma -gt 0 -and $comma -lt 120) { return ($Value.Substring(0, $comma + 1) + 'CACHED') }
+                return 'data:application/octet-stream;base64,CACHED'
+            }
+            if ($Value.Length -gt 4000 -and $Value -notmatch '\s') { return 'CACHED-BASE64' }
+        }
+        return $Value
+    }
+    if ($Value -is [System.Collections.IDictionary]) {
+        $o = [ordered]@{}
+        foreach ($k in @($Value.Keys)) { $o[[string]$k] = ConvertTo-CacheShape $Value[$k] }
+        return $o
+    }
+    if ($Value -is [pscustomobject]) {
+        $o = [ordered]@{}
+        foreach ($pp in $Value.PSObject.Properties) { $o[$pp.Name] = ConvertTo-CacheShape $pp.Value }
+        return $o
+    }
+    if (($Value -is [System.Collections.IEnumerable]) -and -not ($Value -is [string])) {
+        $l = New-Object System.Collections.Generic.List[object]
+        foreach ($x in $Value) { $l.Add((ConvertTo-CacheShape $x)) }
+        return ,$l.ToArray()
+    }
+    return $Value
+}
+function Read-CachedReport {
+    # The parsed photo-stripped copy for this file, or $null when there is none,
+    # it is for a different version of the file, or the digest is not current.
+    param($File)
+    try {
+        $path = Get-CachePath $File
+        if (-not (Test-Path -Path $path)) { return $null }
+        $key = Get-CacheKey $File
+        $sr = New-Object System.IO.StreamReader($path, [System.Text.Encoding]::UTF8)
+        $buf = New-Object char[] 200
+        $n = $sr.Read($buf, 0, $buf.Length)
+        $sr.Close()
+        $head = New-Object string($buf, 0, $n)
+        if ($head.IndexOf('"cacheKey":"' + $key + '"') -lt 0) { return $null }
+        if (-not (Test-DigestCurrent $File)) { return $null }
+        $wrapped = ConvertFrom-ReportJsonText -Raw ([System.IO.File]::ReadAllText($path))
+        $rep = Get-Prop $wrapped 'report'
+        if ($null -eq $rep) { return $null }
+        $script:cacheHits++
+        return $rep
+    }
+    catch { return $null }
+}
+function Write-CachedReport {
+    param($File, $Json)
+    try {
+        if (-not (Test-Path -Path $scanCacheDir)) { New-Item -ItemType Directory -Path $scanCacheDir -Force | Out-Null }
+        $path = Get-CachePath $File
+        $wrapped = [ordered]@{
+            cacheKey = (Get-CacheKey $File)
+            source   = $File.FullName
+            written  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+            note     = 'Photo-stripped copy of the report, written by Update-Dashboard.ps1 v2.58 for faster scans. Safe to delete; the next scan rebuilds it from the real file.'
+            report   = (ConvertTo-CacheShape $Json)
+        }
+        [System.IO.File]::WriteAllText($path, (ConvertTo-ReportJson $wrapped), (New-Object System.Text.UTF8Encoding($false)))
+        $script:cacheWrites++
+    }
+    catch { Write-Warning "Report cache not written for $($File.Name) ($($_.Exception.Message)) - the scan is unaffected" }
+}
+
 function Write-ReportDigest {
     param($File, $Json, $Meta, $Rec)
     $dest = Join-Path $digestPath ($File.Name + '.html')
     $script:digestExpected[$File.Name + '.html'] = $true
+    if ($script:digestCurrent.ContainsKey($File.Name)) { return }   # v2.58: already checked this run
     $sourceStamp = '{0}|{1}|d{2}' -f $File.Length, $File.LastWriteTimeUtc.Ticks, $DigestSchema
     if (Test-Path -Path $dest) {
         try {
@@ -756,9 +888,9 @@ $recurse = $false
 if ($config.PSObject.Properties['recurse'] -and $config.recurse) { $recurse = $true }
 
 # Folders that hold this project's own files, never reports.
-$excludeFolders = @('dashboard', 'scripts', 'sample-reports', 'node_modules', '.git')
+$excludeFolders = @('dashboard', 'scripts', 'sample-reports', 'node_modules', '.git', 'scan-cache')
 if ($config.PSObject.Properties['excludeFolders'] -and $config.excludeFolders) {
-    $excludeFolders = @($config.excludeFolders)
+    $excludeFolders = @($config.excludeFolders) + @('scan-cache')   # v2.58: the cache folder is never a report folder
 }
 
 # Shared by every file-discovery pass (JSON reports, weekly BWM Excel
@@ -1132,9 +1264,15 @@ $phaseClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.53: where a full
 $digestSeconds = 0.0
 $parseSeconds = 0.0
 foreach ($f in $files) {
+    $fromCache = $false
     try {
         $parseSw = [System.Diagnostics.Stopwatch]::StartNew()
-        $json = Read-ReportJson -Path $f.FullName
+        $json = $null
+        if (-not $NoCache -and $f.Length -ge $CacheMinBytes) {
+            $json = Read-CachedReport -File $f   # v2.58: photo-stripped copy when current
+            if ($null -ne $json) { $fromCache = $true }
+        }
+        if ($null -eq $json) { $json = Read-ReportJson -Path $f.FullName }
         $parseSeconds += $parseSw.Elapsed.TotalSeconds
     }
     catch {
@@ -2056,6 +2194,9 @@ foreach ($f in $files) {
             actionItems   = $actionItems.ToArray()
         }
         $reports.Add($summaryRec) | Out-Null
+        # v2.58: remember a photo-stripped copy for the next scan (report files only;
+        # OEM copies and precharge requests left the loop above and are never cached).
+        if (-not $fromCache -and $f.Length -ge $CacheMinBytes) { Write-CachedReport -File $f -Json $json }
     }
     # Digest for Copilot (v2.43): same exclusions as the deployed report copies
     # (restricted TOPSET bodies and precharge request payloads never leave the
@@ -2137,7 +2278,19 @@ $complianceSorted = New-Object System.Collections.Generic.List[object]
 $complianceList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $complianceSorted.Add($_) | Out-Null }
 
-Write-Host ("Timing: {0} files read and summarised in {1:N0} s (reading JSON {2:N0} s, writing digests {3:N0} s)" -f @($files | Where-Object { $_ }).Count, $phaseClock.Elapsed.TotalSeconds, $parseSeconds, $digestSeconds) -ForegroundColor DarkGray
+Write-Host ("Timing: {0} files read and summarised in {1:N0} s (reading JSON {2:N0} s, {4} from the cache, writing digests {3:N0} s)" -f @($files | Where-Object { $_ }).Count, $phaseClock.Elapsed.TotalSeconds, $parseSeconds, $digestSeconds, $script:cacheHits) -ForegroundColor DarkGray
+# v2.58: drop cache copies whose report is gone or no longer cacheable, then report.
+$cacheRemoved = 0
+if (-not $NoCache -and (Test-Path -Path $scanCacheDir)) {
+    try {
+        foreach ($cf in (Get-ChildItem -Path $scanCacheDir -File -Filter '*.json')) {
+            if (-not $script:cacheExpected.ContainsKey($cf.Name)) { Remove-Item -Path $cf.FullName -Force; $cacheRemoved++ }
+        }
+    } catch { Write-Warning "Report cache tidy-up skipped ($($_.Exception.Message))" }
+}
+if ($script:cacheHits -or $script:cacheWrites -or $cacheRemoved) {
+    Write-Host "Report cache: $($script:cacheHits) read from cache, $($script:cacheWrites) written, $cacheRemoved removed in $scanCacheDir" -ForegroundColor DarkGray
+}
 $phaseClock.Restart()
 
 # Digest folder housekeeping (v2.43): the scanner is the sole writer there,

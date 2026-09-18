@@ -156,3 +156,20 @@ update — the scanner and dashboard live in the
 3. Open the dashboard: the visit appears with rig/dates/WCE/critical/action
    values filled in, and **View full report** renders the entries, notes,
    and photos.
+
+## Scanner report cache (v2.58, 18 Sep 2026)
+
+The scanner keeps a photo-stripped copy of every report over 200 KB in `scan-cache\` next
+to config.json and reads that copy on later scans (see HANDOFF.md). Two consequences for
+anyone changing the scanner or the posting tools:
+
+- **The per-file loop in `Update-Dashboard.ps1` must never need the bytes of a photograph
+  or any other base64 blob.** In the cached copy every `data:` string over 1,000 chars is
+  `data:<type>;base64,CACHED` and every bare base64 string over 4,000 chars is
+  `CACHED-BASE64`. Counting photos (array length) is fine; measuring them is not. Anything
+  that needs the real bytes (the report copy on the server, the Copilot digest) reads the
+  real file, which is unchanged.
+- **New long-string fields posted by a tool are stripped the same way.** If a tool ever
+  posts a large non-base64 string that the scanner must read whole, bump `$CacheSchema` and
+  teach `ConvertTo-CacheShape` about it. Nothing in the current payloads needs that.
+
