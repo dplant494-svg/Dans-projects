@@ -323,6 +323,7 @@
   }
   .rv-tile-head .t-title { font-weight: 700; color: var(--sd-blue); flex: 1; }
   .rv-tile-head .t-date, .rv-tile-head .t-fodb { font-size: 11px; color: var(--sd-text-light); }
+  .rv-tile-head .t-stale { flex-basis: 100%; font-size: 11px; color: #8a5a00; background: #fff4d6; border: 1px solid #f0d48a; border-radius: 3px; padding: 2px 8px; }
   .rv-tile-body { padding: 12px 14px; }
   .rv-notes { white-space: pre-wrap; font-size: 13px; margin-bottom: 10px; }
   .rv-notes:last-child { margin-bottom: 0; }
@@ -3454,6 +3455,15 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (chip) head.appendChild(chip);
       if (tile.fodb) head.appendChild(mk('span', 't-fodb', 'FODB: ' + tile.fodb));
       if (tile.tileDate) head.appendChild(mk('span', 't-date', tile.tileDate));
+      // 19 Sep 2026 (reporting-tools reply, REV 162 item 6): a resumed draft keeps each entry's
+      // date while the tool's Report Date moves to today, so an entry can sit two days behind
+      // the report. Flag it quietly when the gap is more than a day; a report that genuinely
+      // spans two days (14th and 15th) is left alone.
+      var rd = rec && (rec.reportDate || '');
+      if (tile.tileDate && /^\d{4}-\d{2}-\d{2}$/.test(tile.tileDate) && /^\d{4}-\d{2}-\d{2}$/.test(rd)) {
+        var gapDays = Math.round((Date.parse(rd) - Date.parse(tile.tileDate)) / 86400000);
+        if (gapDays > 1) head.appendChild(mk('span', 't-stale', 'entry dated ' + tile.tileDate + ', report date ' + rd + ' \u2014 check the entry date in the tool'));
+      }
       t.appendChild(head);
 
       var tb = mk('div', 'rv-tile-body');

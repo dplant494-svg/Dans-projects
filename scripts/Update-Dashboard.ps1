@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.59'
+$ScriptVersion = '2.60'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -135,10 +135,16 @@ function Get-Prop {
     # PSObjects. Use ContainsKey (public on Dictionary/Hashtable, binds on
     # Windows PowerShell 5.1 where .Contains(string) does not), with a key
     # scan as the fallback for any other IDictionary implementation.
+    # v2.60: case-insensitive, like PSObject property lookup already is. The exact
+    # lookup stays as the fast path; a miss falls through to one scan of the keys
+    # (PowerShell's -eq on strings ignores case). WCGRRT REV 161 writes 'reportdate'
+    # and the scanner asked for 'reportDate': on Windows PowerShell the dictionary
+    # said no and a week of daily reports was filed under the wrong day, silently.
+    # The reporting-tools session keeps its keys lower case from here; this end
+    # simply does not care.
     if ($Object -is [System.Collections.IDictionary]) {
         try {
             if ($Object.ContainsKey($Name)) { return $Object[$Name] }
-            return $null
         } catch { }
         foreach ($k in $Object.Keys) {
             if ([string]$k -eq $Name) { return $Object[$k] }
