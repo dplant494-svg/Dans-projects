@@ -1,6 +1,6 @@
 # Plantworks Studio
 
-Bilingual (EN/ES) web studio for small businesses on the Costa del Sol. Base: UK limited company (planned), working in the UK and on the Costa del Sol. This folder is the whole business: the studio's own site, every client site, and the plan.
+Web studio for small businesses in the UK and on the Costa del Sol, remote everywhere, with bilingual EN/ES as the specialism. Base: UK limited company (decided Sept 2026, for tax reasons); the team works from the Costa del Sol and abroad, meeting clients in person on the coast or in the UK. This folder is the whole business: the studio's own site, every client site, and the plan.
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
@@ -35,7 +35,7 @@ Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect
 
 **Voice**: company, never a person. Engineers based in the UK and on the Costa del Sol; over eighteen years in digital and IT systems; now applying AI to web and small-business automation. No founder name, no personal history, no home life on the site or in structured data (decided Sept 2026).
 
-**Niche**: English/Spanish bilingual sites for expat-owned businesses on the Costa del Sol. Restaurants, property services, health/wellness, trades. Most local web shops do bilingual badly. Proper hreflang is both the product and the SEO edge.
+**Frame** (widened Sept 2026): two home markets, the UK and the Costa del Sol, and remote work anywhere. Same four sectors in both: restaurants, property services, health/wellness, trades. The bilingual EN/ES work stays the specialism and the search edge on the coast, not the whole offer. UK clients invoiced in GBP.
 
 **Build philosophy**: single-file or minimal static sites, no frameworks unless needed, brand-driven design over templates, CSS-first interactivity, progressive enhancement. AI-assisted in the workshop, sold and supported as a personal service.
 
@@ -84,7 +84,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
    - [x] Domain bought and swapped in (plantworksstudio.com)
    - [ ] Remaining placeholders swapped (see checklist)
    - [ ] Deployed (see Deploying below)
-3. **Legal** (Sept 2026: the business will be a **UK limited company**. It is UK-resident by incorporation and gets UK-Spain treaty protection regardless of anyone's personal position, which is the point.)
+3. **Legal** (decided Sept 2026: a **UK limited company**, for tax reasons. It is UK-resident by incorporation and gets UK-Spain treaty protection regardless of where the team happens to be working.)
    - [ ] Incorporate a UK Ltd (Plantworks Studio Ltd or similar), registered office at a UK address (an accountant's registered-office service is fine).
    - [ ] Appoint a small-business accountant to run it: annual accounts, corporation tax return, confirmation statement. Budget roughly one care-plan client a month.
    - [ ] Business bank account in the company's name. Invoice all clients from the company, in EUR where the client is Spanish.
