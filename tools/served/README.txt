@@ -1,0 +1,1 @@
+Drop the reporting tool HTML files to be served from the sacred server in this folder (e.g. WCGRRT_REV162.html). Deploy-Dashboard.ps1 publishes every .html here to sacred\tools\ as-is. See REPORT-LOAD-LATEST-TOOL-HANDOFF.md.

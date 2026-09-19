@@ -97,6 +97,26 @@ else {
 }
 
 
+# Reporting tools served from the server (19 Sep 2026, REPORT-LOAD-LATEST-TOOL-HANDOFF.md):
+# any .html Dan drops into C:\TSC-Dashboard\tools\served\ is published AS-IS to
+# <deployPath>\..\tools (i.e. sacred\tools, http://sdrlazneuiis01d.corp.local:8080/sacred/tools/<file>),
+# or to 'toolsDeployPath' from config.json when set. This is how an iPad on rig Wi-Fi opens
+# WCGRRT: Safari will not run a local HTML file, so the tool needs an address. The tool's
+# Post and Load-latest calls go to Power Automate from wherever it is opened, unchanged.
+$toolsSrcDir = Join-Path $repoRoot 'tools\served'
+if (Test-Path -Path $toolsSrcDir) {
+    $toolsDeployDir = Join-Path (Split-Path -Parent $DeployPath) 'tools'
+    if ($config -and $config.PSObject.Properties['toolsDeployPath'] -and $config.toolsDeployPath) { $toolsDeployDir = [Environment]::ExpandEnvironmentVariables($config.toolsDeployPath) }
+    $toolFiles = @(Get-ChildItem -Path $toolsSrcDir -File -Filter '*.html')
+    if ($toolFiles.Count) {
+        if (-not (Test-Path -Path $toolsDeployDir)) { New-Item -ItemType Directory -Path $toolsDeployDir -Force | Out-Null }
+        foreach ($tf in $toolFiles) {
+            Copy-Item -Path $tf.FullName -Destination (Join-Path $toolsDeployDir $tf.Name) -Force
+            Write-Host "Published tools\served\$($tf.Name) to $toolsDeployDir" -ForegroundColor Green
+        }
+    }
+}
+
 # Precharge Pro (formerly DeepCharge Pro) / BOP Precharge Calculator. 'prechargeDeployPath' names the
 # folder the calculator is served from (the scanner writes its requests\
 # subfolder there). Every page in it is built by the calculator session and
