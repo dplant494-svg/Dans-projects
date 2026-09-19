@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.58'
+$ScriptVersion = '2.59'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -667,6 +667,22 @@ function ConvertTo-CacheShape {
     }
     return $Value
 }
+$script:previousCounts = @{}
+function Get-ReportCounts {
+    # Entries and photographs in a report (real or photo-stripped copy: markers count).
+    param($Json)
+    $entries = 0; $photos = 0
+    foreach ($t in @(Get-Prop $Json 'tiles')) {
+        if ($null -eq $t) { continue }
+        foreach ($e in @(Get-Prop $t 'equipEntries')) {
+            if ($null -eq $e) { continue }
+            $entries++
+            foreach ($ph in @(Get-Prop $e 'photos')) { if (($ph -is [string]) -and $ph.StartsWith('data:image')) { $photos++ } }
+        }
+    }
+    foreach ($pd in @(Get-Prop $Json 'photoDump')) { if ($null -ne $pd -and ([string](Get-Prop $pd 'src')).StartsWith('data:image')) { $photos++ } }
+    return @{ entries = $entries; photos = $photos }
+}
 function Read-CachedReport {
     # The parsed photo-stripped copy for this file, or $null when there is none,
     # it is for a different version of the file, or the digest is not current.
@@ -680,7 +696,17 @@ function Read-CachedReport {
         $n = $sr.Read($buf, 0, $buf.Length)
         $sr.Close()
         $head = New-Object string($buf, 0, $n)
-        if ($head.IndexOf('"cacheKey":"' + $key + '"') -lt 0) { return $null }
+        if ($head.IndexOf('"cacheKey":"' + $key + '"') -lt 0) {
+            # v2.59: the file changed since this copy was made. Keep the copy's counts so
+            # the loop can tell when a post REPLACED a bigger one (the West Capella
+            # 17-19 Sep overwrite: 13 MB / 6 entries / 45 photos replaced by 2.2 MB / 1 / 12).
+            try {
+                $prevWrapped = ConvertFrom-ReportJsonText -Raw ([System.IO.File]::ReadAllText($path))
+                $prevRep = Get-Prop $prevWrapped 'report'
+                if ($null -ne $prevRep) { $script:previousCounts[$File.FullName] = Get-ReportCounts $prevRep }
+            } catch { }
+            return $null
+        }
         if (-not (Test-DigestCurrent $File)) { return $null }
         $wrapped = ConvertFrom-ReportJsonText -Raw ([System.IO.File]::ReadAllText($path))
         $rep = Get-Prop $wrapped 'report'
@@ -1458,6 +1484,10 @@ foreach ($f in $files) {
     # so the first tile would file it a day early - else meta.date (the visit
     # start, shared by a whole visit), so every older report keeps its date.
     $reportDateV = [string](Get-Prop $meta 'reportDate')
+    # v2.59: WCGRRT REV 161 writes the key as 'reportdate' (lower case). Dictionary lookups on
+    # Windows PowerShell 5.1 are case-sensitive, so on Dan's PC the field was never seen and the
+    # 18 and 19 Sep Capella dailies were filed under their tile date, 17 Sep. Both spellings now.
+    if (-not $reportDateV) { $reportDateV = [string](Get-Prop $meta 'reportdate') }
     if ($reportDateV -notmatch '^\d{4}-\d{2}-\d{2}$') {
         $reportDateV = ''
         if ($tilesRaw) { foreach ($t0 in @($tilesRaw)) { $td0 = [string](Get-Prop $t0 'tileDate'); if ($td0 -match '^\d{4}-\d{2}-\d{2}$' -and $td0 -gt $reportDateV) { $reportDateV = $td0 } } }
@@ -2169,6 +2199,11 @@ foreach ($f in $files) {
     # topsetInvestigations[] is their sole presence on the dashboard.
     $summaryRec = $null
     if (-not $isPlanningOnly -and -not $restrictedTopsetFiles.ContainsKey($f.Name)) {
+        # v2.59: WCGRRT REV 161 attachments[] ({name,type,note,bytes,data}); the count only,
+        # the files stay in the report copy on the server and the dashboard serves them from there.
+        $attArr = Get-Prop $json 'attachments'
+        $attachCount = 0
+        if (($attArr -is [System.Collections.IEnumerable]) -and -not ($attArr -is [string])) { $attachCount = @($attArr | Where-Object { $_ }).Count }
         $summaryRec = [pscustomobject]@{
             file          = $f.Name
             rig           = [string]$rig
@@ -2184,6 +2219,7 @@ foreach ($f in $files) {
             exportedAt    = [string](Get-Prop $json 'exportedAt')
             modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
             tileCount     = $tileCount
+            attachments   = $attachCount                             # v2.59: REV 161 attachments[] count
             criticalTotal = $criticalItems.Count
             criticalOpen  = $criticalOpen
             actionsTotal  = $actionItems.Count
@@ -2194,6 +2230,19 @@ foreach ($f in $files) {
             actionItems   = $actionItems.ToArray()
         }
         $reports.Add($summaryRec) | Out-Null
+        # v2.59: a post that replaced a bigger one under the same filename. The tool names
+        # a daily report by its tile date; a tile date left unchanged from one day to the
+        # next makes each post overwrite the last. Listed on the Errors button (kind
+        # 'shrunk', still shown), never archived; the previous copy is kept on the server
+        # under reports\_replaced\ by the deploy step.
+        if ($script:previousCounts.ContainsKey($f.FullName)) {
+            $prevC = $script:previousCounts[$f.FullName]; $nowC = Get-ReportCounts $json
+            if (($nowC.entries -lt $prevC.entries) -or ($nowC.photos -lt $prevC.photos)) {
+                $shrinkWhy = "replaced by a smaller post: was $($prevC.entries) entries / $($prevC.photos) photos, now $($nowC.entries) / $($nowC.photos). A daily report posted with the tile date left on an earlier day overwrites that day's file; the previous copy is in reports\_replaced on the server"
+                Write-Warning "$($f.Name): $shrinkWhy"
+                $problemFiles.Add(@{ file = $f.Name; path = $f.FullName; kind = 'shrunk'; why = $shrinkWhy; bytes = [long]$f.Length; modified = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
+            }
+        }
         # v2.58: remember a photo-stripped copy for the next scan (report files only;
         # OEM copies and precharge requests left the loop above and are never cached).
         if (-not $fromCache -and $f.Length -ge $CacheMinBytes) { Write-CachedReport -File $f -Json $json }
@@ -2994,6 +3043,15 @@ elseif ($deployPath) {
             $destName = $f.Name + '.js'
             $have = $onServer[$destName]
             if (-not $have -or ($f.LastWriteTime -gt $have.LastWriteTime)) {
+                if ($have) {
+                    # v2.59: never lose the previous version of a re-posted report. The old
+                    # copy moves to reports\_replaced\<name>.<its posted time>.js.
+                    try {
+                        $replacedDir = Join-Path $reportsDir '_replaced'
+                        if (-not (Test-Path -Path $replacedDir)) { New-Item -ItemType Directory -Path $replacedDir -Force | Out-Null }
+                        Move-Item -Path $have.FullName -Destination (Join-Path $replacedDir ($f.Name + '.' + $have.LastWriteTime.ToString('yyyyMMdd-HHmmss') + '.js')) -Force
+                    } catch { Write-Warning "Previous copy of $($f.Name) not kept ($($_.Exception.Message))" }
+                }
                 Copy-Item -Path $f.FullName -Destination (Join-Path $reportsDir $destName) -Force
                 $copied++
             }

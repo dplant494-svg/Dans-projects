@@ -173,3 +173,18 @@ anyone changing the scanner or the posting tools:
   posts a large non-base64 string that the scanner must read whole, bump `$CacheSchema` and
   teach `ConvertTo-CacheShape` about it. Nothing in the current payloads needs that.
 
+## WCGRRT REV 161 fields the dashboard reads (19 Sep 2026)
+
+- **`meta.reportdate`** (lower case) is the tool's report date; the scanner reads it first,
+  then the newest valid `tileDate`, then `meta.date`. Both spellings are accepted because
+  dictionary lookups on Windows PowerShell 5.1 are case-sensitive.
+- **`attachments[]`**, top level beside `photoDump`, absent on older reports:
+  `{ name, type, note, bytes, data }` with `data` a data URL of any file type (warn at 8 MB in
+  the tool; the report ceiling still governs the post). The scanner records the count only
+  (`reports[].attachments`) and never needs the bytes; the viewer shows images inline and
+  everything else as a download link built from the report copy on the server. An entry with
+  empty `data` (the tool's crash-restore case) shows the name with "file not in this post".
+- **`scan-problems.json` kind `shrunk`**: a post that replaced a bigger one under the same
+  filename. Shown on the dashboard, never archived; the previous copy is under
+  `reports\_replaced\` on the server.
+

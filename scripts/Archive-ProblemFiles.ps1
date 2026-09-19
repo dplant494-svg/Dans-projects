@@ -103,7 +103,7 @@ Write-Host "Errors list from the scan of $stamp ($($all.Count) entries)"
 # is also oversized); an oversized rig report never moves; everything else moves.
 $byPath = [ordered]@{}
 foreach ($e in $all) { $k = [string]$e.path; if (-not $byPath.Contains($k)) { $byPath[$k] = New-Object System.Collections.Generic.List[object] }; $byPath[$k].Add($e) | Out-Null }
-$toMove = New-Object System.Collections.Generic.List[object]; $leftLarge = 0; $leftUnattributed = 0
+$toMove = New-Object System.Collections.Generic.List[object]; $leftLarge = 0; $leftUnattributed = 0; $leftShrunk = 0
 foreach ($k in $byPath.Keys) {
     $kinds = @($byPath[$k] | ForEach-Object { [string]$_.kind })
     $entry = $byPath[$k][0]
@@ -111,10 +111,12 @@ foreach ($k in $byPath.Keys) {
         if ($IncludeUnattributed) { $entry = ($byPath[$k] | Where-Object { [string]$_.kind -eq 'unattributed' })[0]; $toMove.Add($entry) | Out-Null } else { $leftUnattributed++ }
     }
     elseif ($kinds -contains 'large') { $leftLarge++ }
+    elseif ($kinds -contains 'shrunk') { $leftShrunk++ }   # v2.59: a real report that replaced a bigger one; on the dashboard, never moved
     else { $toMove.Add($entry) | Out-Null }
 }
 $toMove = @($toMove.ToArray())
 if ($leftLarge) { Write-Host "$leftLarge oversized report(s) stay where they are: they are real reports, on the dashboard. This script never moves them." -ForegroundColor Yellow }
+if ($leftShrunk) { Write-Host "$leftShrunk report(s) that replaced a bigger post stay where they are: they are on the dashboard. The earlier version is under reports\_replaced on the server." -ForegroundColor Yellow }
 if ($leftUnattributed) { Write-Host "$leftUnattributed report(s) with no rig identity stay where they are. Run again with -IncludeUnattributed to move them." -ForegroundColor Yellow }
 if (-not $toMove.Count) {
     Write-Host "Nothing to archive: no unusable files in the last scan." -ForegroundColor Green

@@ -346,6 +346,12 @@
   }
   .rv-photos figcaption { font-size: 11px; color: var(--sd-text-light); margin-top: 3px; line-height: 1.3; }
   .rv-dump figure { width: 220px; }
+  .rv-attachments { list-style: none; margin: 6px 0 0; padding: 0; }
+  .rv-attachments li { padding: 6px 0; border-top: 1px solid var(--sd-grid); font-size: 13px; }
+  .rv-attachments li:first-child { border-top: 0; }
+  .rv-attachments a { color: var(--sd-blue); font-weight: 600; }
+  .rv-attachments .meta { color: var(--sd-text-light); font-size: 11px; margin-left: 8px; }
+  .rv-attachments .note { color: var(--sd-text); font-size: 12px; margin-top: 2px; }
   .rv-dump img { height: 165px; }
   .rv-dump-note {
     flex-basis: 100%; font-size: 12px; padding: 6px 10px;
@@ -3518,6 +3524,49 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (dumpWrap.childNodes.length) body.appendChild(dumpWrap);
     }
 
+    // Attachments (WCGRRT REV 161, 19 Sep 2026): [{ name, type, note, bytes, data: <data URL> }].
+    // Images show inline at the dump size; anything else is a download link built from the
+    // data URL that travels in the report copy on the server. Absent on older reports.
+    var atts = (full.attachments || []).filter(function (a) { return a && (a.data || a.name); });
+    if (atts.length) {
+      body.appendChild(mk('div', 'rv-section-label', 'Attachments (' + atts.length + ')'));
+      var attFigs = mk('div', 'rv-photos rv-dump');
+      var attList = mk('ul', 'rv-attachments');
+      atts.forEach(function (a) {
+        var data = String(a.data || ''), name = String(a.name || 'attachment'), note = String(a.note || '');
+        var bytes = Number(a.bytes || 0);
+        var sizeTxt = bytes ? (bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB') : '';
+        if (data.indexOf('data:image') === 0) {
+          var fig = document.createElement('figure');
+          var img = document.createElement('img');
+          img.src = data;
+          img.alt = name;
+          img.addEventListener('click', function () { openLightbox(data); });
+          fig.appendChild(img);
+          fig.appendChild(mk('figcaption', '', name + (note ? ' \u2014 ' + note : '')));
+          attFigs.appendChild(fig);
+          return;
+        }
+        var li = document.createElement('li');
+        if (data.indexOf('data:') === 0) {
+          var link = document.createElement('a');
+          link.href = data;
+          link.download = name;
+          link.textContent = name;
+          li.appendChild(link);
+        } else {
+          li.appendChild(mk('span', '', name));
+          li.appendChild(mk('span', 'meta', '(file not in this post)'));
+        }
+        var meta = [a.type || '', sizeTxt].filter(Boolean).join(' \u00B7 ');
+        if (meta) li.appendChild(mk('span', 'meta', meta));
+        if (note) li.appendChild(mk('div', 'note', note));
+        attList.appendChild(li);
+      });
+      if (attFigs.childNodes.length) body.appendChild(attFigs);
+      if (attList.childNodes.length) body.appendChild(attList);
+    }
+
     var critRows = full.criticalRows || [];
     if (critRows.length) {
       body.appendChild(mk('div', 'rv-section-label', 'Critical equipment items'));
@@ -4092,18 +4141,19 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   var errorsState = { problems: [] };
   function renderProblems(problems) {
     var btn = $('errors-btn');
-    var bad = problems.filter(function (p) { return p.kind !== 'large'; });
-    var large = problems.filter(function (p) { return p.kind === 'large'; });
+    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk'; });
+    var shown = problems.filter(function (p) { return p.kind === 'large' || p.kind === 'shrunk'; });   // on the dashboard, but flagged
     errorsState.problems = problems;
-    if (!bad.length && !large.length) { btn.hidden = true; return; }
+    if (!bad.length && !shown.length) { btn.hidden = true; return; }
     btn.hidden = false;
     btn.className = 'errors-btn' + (bad.length ? '' : ' warn');
-    btn.textContent = (bad.length ? '\u26A0 ' : '') + 'Errors (' + (bad.length + large.length) + ')';
+    btn.textContent = (bad.length ? '\u26A0 ' : '') + 'Errors (' + (bad.length + shown.length) + ')';
   }
   function openErrorsModal() {
     var problems = errorsState.problems || [];
-    var bad = problems.filter(function (p) { return p.kind !== 'large'; });
+    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk'; });
     var large = problems.filter(function (p) { return p.kind === 'large'; });
+    var shrunk = problems.filter(function (p) { return p.kind === 'shrunk'; });   // v2.59: replaced by a smaller post
     var overlay = mk('div', 'report-overlay');
     var frame = mk('div', 'report-frame');
     frame.style.maxWidth = '860px';
@@ -4111,7 +4161,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var title = mk('div', 'rh-title');
     title.appendChild(mk('div', 'rh-rig', 'Errors'));
     title.appendChild(mk('div', 'rh-sub', (bad.length ? bad.length + ' posted file(s) could not be read and are NOT on this dashboard' : '') +
-      (bad.length && large.length ? ' \u00B7 ' : '') + (large.length ? large.length + ' oversized report(s), shown but over the ceiling' : '')));
+      (bad.length && large.length ? ' \u00B7 ' : '') + (large.length ? large.length + ' oversized report(s), shown but over the ceiling' : '') +
+      ((bad.length || large.length) && shrunk.length ? ' \u00B7 ' : '') + (shrunk.length ? shrunk.length + ' report(s) replaced by a smaller post' : '')));
     head.appendChild(title);
     var closeBtn = mk('button', 'report-close', '\u2715');
     closeBtn.type = 'button';
@@ -4135,6 +4186,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
     section('Not on this dashboard', 'These files are in the report folders but could not be used: usually a post cut short in transit, or a file that is not a report export. Run scripts\\Archive-ProblemFiles.ps1 on the scanner PC to move them out of the folders into the archive; the poster can re-send the report.', bad);
     section('Oversized, still shown', 'Over the ceiling (10 MB, or 40 MB for CBM inspections). The report is on the dashboard; the photos or attachments need reducing at source in the reporting tool.', large);
+    section('Replaced by a smaller post, still shown', 'A later post under the same filename had fewer entries or photos than the one before it. This happens when a daily report is posted with its tile date left on an earlier day: the tool names the file by that date and overwrites it. The earlier version is kept on the server under reports\\_replaced; re-post each day with its own tile date.', shrunk);
     overlay.appendChild(frame);
     document.body.appendChild(overlay);
     document.body.classList.add('no-scroll');
