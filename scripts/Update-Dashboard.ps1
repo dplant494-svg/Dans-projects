@@ -1113,6 +1113,14 @@ try {
 }
 catch { Write-Warning "Scan lock not taken ($($_.Exception.Message)) - continuing without it" }
 if ($scanLockBusy) { Write-Host $scanLockBusy -ForegroundColor Yellow; exit 0 }
+# v2.60: a run that dies on an unhandled error (Dan's PC, 19 Sep: the share vanished
+# mid-deploy and the task's run ended without reaching the end of the script) must not
+# leave its lock behind. The next run would still take a dead process's lock over, but
+# this saves it the wait and the message.
+trap {
+    if ($scanLockHeld) { try { Remove-Item -Path $scanLockFile -Force } catch { } }
+    break
+}
 
 $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
