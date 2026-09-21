@@ -188,3 +188,12 @@ anyone changing the scanner or the posting tools:
   filename. Shown on the dashboard, never archived; the previous copy is under
   `reports\_replaced\` on the server.
 
+## Acoustic soak keys: do not build a renderer yet (rolling handoff entry 15, 21 Sep 2026)
+
+WCGRRT REV 163/164 declares `acousticTestHTML` twice and the old ROV clone wins, so an
+acoustic entry writes `acoustic_sheet` plus `ac_<sheet>_r<n>_v/_t/_rk` in the ROV shape. That
+is a defect, fixed first in REV 165, and the final acoustic keys (with `soakLabels`) will be
+announced in the rolling handoff before a rig sees them. Until then the dashboard renders
+`ft_*` and `eds_*` only. Any acoustic soak block from West Neptune or West Vela before REV 165
+is an artefact of the defect (neither rig has an acoustic system), not a record of a test.
+
