@@ -168,7 +168,7 @@ The field tables are in `INTEGRATION-CONTRACT.md`. The rules that matter:
   scanner counts them, the viewer renders images inline and the rest as download links
   built from the report copy.
 - **Soak / function tests:** `equipEntries[].soak` (with `soakLabels` promised) rendered by
-  `rvSoak`; empty in every file to date because the tool's harvest ships in REV 162/163.
+  `rvSoak`; empty in every file to date because the tool's harvest ships after REV 161 (acoustic native in 163).
 - **Precharge exports** (`meta.reporttype: "Precharge"`): flow through the generic path;
   `meta.moc`, `waterDepth`, `requiredShear`, `mawhp` ride along unused.
 
@@ -228,7 +228,7 @@ useful record.
   changed."** Half right. The filename comes from `reportdate`, which was correct, so no
   overwrite happened; the wrong filing was the case-sensitivity fault above. The tile-date
   observation was real and exposed a separate tool defect (a resumed draft keeps yesterday's
-  entry dates), now flagged amber on the dashboard until REV 162 fixes it in the tool.
+  entry dates), now flagged amber on the dashboard until the tool's fix (queued after REV 161) is in the field.
 - **Withdrawn: "the empty photo slots mean no photo was lost."** The slots were unused,
   which turned out true, but the reasoning (no caption means no photo) was unsafe, because
   the tool's caption placeholder also exports as empty. The photo-for-photo comparison of
@@ -329,7 +329,7 @@ dashboard link, and a fallback mail to the Office table when a sheet is missing.
 
 ## 10. What is coming from the other side, and what is open here
 
-Promised by the reporting-tools session for REV 162/163: `soak` populated (acoustic first,
+Promised by the reporting-tools session for the revisions after 161 (their reply of 19 Sep said 162; on 21 Sep the folder was at 164 and acoustic soak native in 163, so read the folder and `meta.rev`, not a number in a handoff): `soak` populated (acoustic first,
 then EHBS and Drawdown: "expect the first one to surprise you"), `soakLabels`, a `counts`
 block `{entries, photographs, attachments}` from the same code as the crew's post receipt,
 the post receipt with a replaces line, an unposted-changes mark, the attachments block hidden

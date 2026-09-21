@@ -59,7 +59,9 @@ Then do these, in this order, and STOP after each for me to check:
      them without touching anything else. Change nothing.
   3. Show me the corrupted CBM grade strings listed in the tools handoff §10 as a before/after
      table. Change nothing.
-  4. List the REV 162 items as the tools session queued them (iframe harvest into soak with
+  4. List the items the tools session queued after REV 161 (their 19 Sep reply called the
+     next revision 162; by 21 Sep the folder was at 164 and acoustic soak was native in 163,
+     so use the folder and meta.rev, not the number in any handoff). The items: iframe harvest into soak with
      soakLabels, the post receipt with the replaces line and the unposted-changes mark, the
      three print rules, #attachments-block hidden in report mode, stale entry dates with the
      amber mark and one-click set, the counts block, the Load latest posted button) and for
@@ -69,7 +71,7 @@ Then do these, in this order, and STOP after each for me to check:
 
 Rules for every step after that, none negotiable:
 
-  - Work only in the new REV folder I name. Never edit a deployed REV folder.
+  - Work only in the current REV folder I name (164 as of 21 September). Never edit a deployed REV folder.
   - Never change the posting path, the Post payload's existing keys, the filename logic, the
     photo compression (0.82) or the size ceilings (10 MB, 40 MB for CBM and PDC). New keys
     only, lower case, additive, announced.
@@ -98,7 +100,7 @@ Start with the reading and the confirmations. Do not start step 1 until I say go
   writes a line.
 - **A confirmation on the fields the dashboard reads**, so a rename or a re-nesting cannot
   slip through as a "tidy-up".
-- **Step 4, the REV 162 map**, so every payload change is known and named before it ships,
+- **Step 4, the map of the queued items**, so every payload change is known and named before it ships,
   and the rolling handoff gets it.
 - **A test rule that never posts.** Local saves on "Training Rig" prove a build; posting
   from a test would put a training report on the fleet dashboard.
