@@ -54,9 +54,12 @@ Then do these, in this order, and STOP after each for me to check:
 
   1. Run node --check on every <script> block in the current revision of both tools and report
      anything it finds. Change nothing.
-  2. Tell me exactly how many bytes the unreferenced base64 blobs are costing
-     (PRECHARGE_HTML_B64, CONDUIT_FLUSH_HTML_B64, ACOUSTIC_TEST_B64) and propose how to strip
-     them without touching anything else. Change nothing.
+  2. Two base64 blobs are genuinely unreferenced and three are not. In SSORT, measure
+     PRECHARGE_HTML_B64 and CONDUIT_FLUSH_HTML_B64 (about 325 KB together) and propose how
+     to strip them. Do NOT touch ACOUSTIC_TEST_B64, EHBS_TEST_B64 or DRAWDOWN_TEST_B64 in
+     WCGRRT: all three are still read by makeEquipEntry, and removing one throws a
+     ReferenceError that stops every equipment entry from rendering (tools handoff §8.2).
+     Prove by search, show me the byte count before and after. Change nothing.
   3. Show me the corrupted CBM grade strings listed in the tools handoff §10 as a before/after
      table. Change nothing.
   4. List the items the tools session queued after REV 161 (their 19 Sep reply called the
@@ -84,7 +87,8 @@ Rules for every step after that, none negotiable:
     the result saved locally. Do not post anything from a test; posting is mine to do, on a
     real rig name, when I say.
   - Any base64 blob you strip: show me the byte count before and after and prove by search
-    that nothing references it.
+    that nothing references it. "Unreferenced" is proven by grep on the current revision,
+    never taken from a list in a handoff (the first list was wrong).
   - If a template or source document contradicts the current tool, ask me first. The
     templates were deliberately modified and are not like-for-like.
   - Deliverables are files with their production names, saved into the REV folder. Tell me
