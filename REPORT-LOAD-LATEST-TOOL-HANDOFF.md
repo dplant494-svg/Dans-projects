@@ -68,9 +68,11 @@ Two smaller things: put the flow URL and the secret in the same place in the fil
 Post URL, with the same "never in a screenshot" comment; and if the person is offline the
 button should say so in one line, not spin.
 
-## 3. iPad: the tool must be opened from an address
+## 3. The tool is opened from an address on the rigs, not as a local file
 
-Safari on an iPad does not run a local HTML file with its script. Dan drops the tool file
+Dan, 21 Sep: rig Wi-Fi and the corporate network run everywhere on the rigs, so the served copy
+is the normal way the tool is opened there, on PCs and iPads alike. Safari on an iPad does not
+run a local HTML file with its script in any case. Dan drops the tool file
 into `C:\TSC-Dashboard\tools\served\` and `Deploy-Dashboard.ps1` publishes it as-is to
 `http://sdrlazneuiis01d.corp.local:8080/sacred/tools/<file>`, which rig Wi-Fi reaches. Post
 and Load latest go to Power Automate from there exactly as from a local file. Nothing in the
