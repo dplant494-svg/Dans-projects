@@ -64,7 +64,7 @@ the repository root is cleaned before a commit.
 | BOP Fleet Planning Dashboard | `sacred\BOP Fleet Planning Dashboard.html` + `bop-planning-data.js` + `xlsx.full.min.js` | |
 | SSCE Requests Dashboard | `sacred\SSCE Requests Dashboard.html` + `ssce-requests-data.js` | |
 | Precharge Pro | `sacred\precharge\calculator.html`, `set-password.html`, `gate-config.js`, `gate-fragment.html`; inbox `sacred\precharge\requests\index.json` + payloads, written only by the scanner | |
-| Served reporting tools (new, empty today) | `sacred\tools\<file>.html` from `C:\TSC-Dashboard\tools\served\` | |
+| Served reporting tools (found by the Code session, 21 Sep) | WCGRRT: `sacred\WCE Rig Vist Reporting Tool V0.html` (sic), sha-identical to the REV 164 folder. `sacred\index.html` is SSORT REV 116 of 15 Aug and is NOT confirmed as the rigs' route; Dan to confirm how rigs open SSORT. `Deploy-Dashboard.ps1` publishes any `.html` in `C:\TSC-Dashboard\tools\served\` to the sacred root under the same name | `http://sdrlazneuiis01d.corp.local:8080/sacred/<file>` |
 | COC dashboard (SSORT share, a different share) | `\\sdrlazneuiis01d.corp.local\SSORT\Seadrill_WCE_COC_Dashboard_REV6 1.html` (`cocDashboardPath`) and the scanner's review copy `Seadrill_WCE_COC_Dashboard_PENDING_REVIEW.html` beside it | |
 
 **SharePoint:** site WellControl, library PostedReports (every post lands here), folder

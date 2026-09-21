@@ -72,9 +72,11 @@ button should say so in one line, not spin.
 
 Dan, 21 Sep: rig Wi-Fi and the corporate network run everywhere on the rigs, so the served copy
 is the normal way the tool is opened there, on PCs and iPads alike. Safari on an iPad does not
-run a local HTML file with its script in any case. Dan drops the tool file
-into `C:\TSC-Dashboard\tools\served\` and `Deploy-Dashboard.ps1` publishes it as-is to
-`http://sdrlazneuiis01d.corp.local:8080/sacred/tools/<file>`, which rig Wi-Fi reaches. Post
+run a local HTML file with its script in any case. The Code session found the rigs already
+open WCGRRT at `http://sdrlazneuiis01d.corp.local:8080/sacred/WCE Rig Vist Reporting Tool V0.html`
+(sha-identical to REV 164). Keep that filename: a new revision is published over it. Dan drops
+the file into `C:\TSC-Dashboard\tools\served\` and `Deploy-Dashboard.ps1` publishes it as-is,
+same name, to the sacred root. Post
 and Load latest go to Power Automate from there exactly as from a local file. Nothing in the
 tool needs to know it is served, but if there is any code path that assumes `file://` (a
 relative `<script src>`, a local fragment fetch), it will show up here first.

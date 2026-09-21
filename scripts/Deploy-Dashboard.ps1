@@ -97,15 +97,16 @@ else {
 }
 
 
-# Reporting tools served from the server (19 Sep 2026, REPORT-LOAD-LATEST-TOOL-HANDOFF.md):
-# any .html Dan drops into C:\TSC-Dashboard\tools\served\ is published AS-IS to
-# <deployPath>\..\tools (i.e. sacred\tools, http://sdrlazneuiis01d.corp.local:8080/sacred/tools/<file>),
-# or to 'toolsDeployPath' from config.json when set. This is how an iPad on rig Wi-Fi opens
-# WCGRRT: Safari will not run a local HTML file, so the tool needs an address. The tool's
-# Post and Load-latest calls go to Power Automate from wherever it is opened, unchanged.
+# Reporting tools served from the server (19 Sep 2026, REPORT-LOAD-LATEST-TOOL-HANDOFF.md;
+# corrected 21 Sep): the rigs already open WCGRRT from the sacred ROOT as
+# 'WCE Rig Vist Reporting Tool V0.html' (sic), so any .html Dan drops into
+# C:\TSC-Dashboard\tools\served\ is published AS-IS, same name, to the sacred root
+# (the parent of deployPath), or to 'toolsDeployPath' from config.json when set. Keep the
+# filename the rigs have bookmarked. The tool's Post and Load-latest calls go to Power
+# Automate from wherever it is opened, unchanged.
 $toolsSrcDir = Join-Path $repoRoot 'tools\served'
 if (Test-Path -Path $toolsSrcDir) {
-    $toolsDeployDir = Join-Path (Split-Path -Parent $DeployPath) 'tools'
+    $toolsDeployDir = Split-Path -Parent $DeployPath
     if ($config -and $config.PSObject.Properties['toolsDeployPath'] -and $config.toolsDeployPath) { $toolsDeployDir = [Environment]::ExpandEnvironmentVariables($config.toolsDeployPath) }
     $toolFiles = @(Get-ChildItem -Path $toolsSrcDir -File -Filter '*.html')
     if ($toolFiles.Count) {

@@ -527,3 +527,13 @@ we just want it to print like that."* So 150 px figures for entry photographs, 2
 for the photo dump, captions under, nothing bigger on paper. The 40 mm question is
 answered by the customer: match the dashboard, including the 220 px dump figures.
 
+## Entry 14 (from the dashboard side, 21 Sep 2026): SSORT should write `meta.rev`
+
+The Code session on the tools found that SSORT never writes `meta.rev`; `SSORT_REV` only
+feeds the on-screen badge. WCGRRT writes it, and it is the only way the dashboard side can
+tell which revision a post came from (it is how the reportdate finding was pinned to REV
+161). Ask: SSORT writes `meta.rev` = its `SSORT_REV` string on every post, additive, lower
+case key, nothing else changed. The scanner ignores it today and will record it on the
+summary once it appears. Also noted: WCGRRT REV 163 carried `TOOL_REV = 'REV 162'`, so 162
+and 163 posts are indistinguishable; fine, as long as 165 stamps correctly.
+
