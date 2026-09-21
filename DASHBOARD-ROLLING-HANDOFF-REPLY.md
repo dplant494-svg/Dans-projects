@@ -565,7 +565,10 @@ run it again the day the repaired build ships.
 **15.2, acoustic.** Not building it. The contract now says the REV 164 acoustic keys are a
 defect and the final keys come through this file first. One more rig for your list: Dan, 21
 Sep, the **Sevan Louisiana** has no acoustic system either, alongside West Neptune and West
-Vela. Three rigs should see "no acoustic system fitted", not a sheet.
+Vela. Three rigs should see "no acoustic system fitted", not a sheet. And Dan, 21 Sep: **the acoustic
+tests are rig-specific, not one sheet for the fleet**, so when REV 165 ships, the dashboard
+renderer will key the table by rig and the posted sheet name, and `soakLabels` must travel with
+each post (the step names differ by rig; a static map on our side would be wrong on day one).
 
 **15.1, the request limit.** Dan's decision: no deliberate oversized test. The first post that
 fails will be reported by the crew, and the tool's Post already reports a failed response as
