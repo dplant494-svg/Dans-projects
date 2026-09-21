@@ -77,9 +77,12 @@ Rules for every step after that, none negotiable:
     only, lower case, additive, announced.
   - Never use mode:'no-cors' on any fetch. The Post contract explains why.
   - node --check passes on every <script> block before anything is called done. Then open
-    the built file in a browser, create one report of each type on the rig name "Training
-    Rig", save it locally, and show me the saved JSON's meta block and the counts for each.
-    Do not post anything from a test; posting is mine to do, on a real rig name, when I say.
+    the built file in a browser, create one report of each type with the asset "SSCE
+    Equipment" (the tools handoff §8: the asset list is fixed, there is no training rig and
+    none is to be added), save it locally, and show me the saved JSON's meta block and the
+    counts for each. Rig-keyed forms (acoustic, EDS, cavity) need a real rig selected and
+    the result saved locally. Do not post anything from a test; posting is mine to do, on a
+    real rig name, when I say.
   - Any base64 blob you strip: show me the byte count before and after and prove by search
     that nothing references it.
   - If a template or source document contradicts the current tool, ask me first. The
@@ -102,8 +105,9 @@ Start with the reading and the confirmations. Do not start step 1 until I say go
   slip through as a "tidy-up".
 - **Step 4, the map of the queued items**, so every payload change is known and named before it ships,
   and the rolling handoff gets it.
-- **A test rule that never posts.** Local saves on "Training Rig" prove a build; posting
-  from a test would put a training report on the fleet dashboard.
+- **A test rule that never posts.** Local saves on "SSCE Equipment" prove a build (the asset
+  list is fixed; a training rig would appear on thirteen rigs' dropdowns); posting from a
+  test would put a test report on the fleet dashboard.
 - **The channel rule.** Findings for the dashboard go in the rolling handoff file, which is
   what both sides already read; chat is where things got lost.
 
