@@ -109,3 +109,37 @@ by one run of `D:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1`.
 ## Rollback
 
 Re-enable the task on Dan's PC and disable the server one. Nothing else.
+
+---
+
+## Addendum, 21 September 2026 — what changed since this page was written (scanner v2.60)
+
+Read with the steps above; nothing above is withdrawn.
+
+- **`Register-DashboardTask.ps1` now sets the 60-minute time limit and "do not start a new
+  instance" itself**, so IT can use it instead of creating the task by hand, provided it is
+  run as the service account (it registers the task for the account running it). The action
+  and start-in folder are as in step 5.
+- **`config.server.json` has three more keys** than the 9 September copy: `digestPath` (the
+  Copilot digests library, which the scanner writes and Copilot indexes, so the mirror for
+  that one must sync **back** to SharePoint, not only down), `dashboardUrl`, and `copilotUrl`
+  (copy the value from Dan's `config.json`). IT fills `digestPath` with the same method as
+  the report folders.
+- **Files the server rebuilds on its first run, safe to copy or not:** `scan-state.json`,
+  `scan-lock.json`, the `scan-cache\` folder (photo-stripped report copies, up to a few
+  hundred MB), `notified-state.json`, `break-ins-*.json`, `ssce-notified-state.json`. The
+  `archive\` folder holds posts Dan moved out of the report folders on 17 September (one is
+  74.8 MB); it is not needed on the server.
+- **A new `tools\served\` folder** in the package: any `.html` in it is published by
+  `Deploy-Dashboard.ps1` to `sacred\tools\` for the reporting tools to be opened from an
+  address on the rigs. Empty today apart from a README.
+- **The scanner's own lock** (`scan-lock.json`) makes a second scan started while one is
+  running stop with one line, and a run that dies releases it, so the task's "do not start a
+  new instance" and the lock cover each other.
+- **Two scanners in parallel remain safe** while Dan's PC task is still enabled: both write
+  the same outputs, and the server's `reports\_replaced\` folder keeps any report copy that
+  gets overwritten, so nothing is lost while both run.
+- **Timing to expect on the server's first full scan:** every report read once and cached,
+  every digest written once: on Dan's PC that took about 18 minutes before the caches, and
+  93 to 126 s on every full scan after. The 60-minute limit covers it.
+

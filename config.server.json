@@ -1,5 +1,5 @@
 {
-  "_comment": "Server copy of config.json for D:\\TSC-Dashboard on sdrlazneuiis01d. IT: replace the three reportFolders entries with the server-local folders that mirror the SharePoint libraries (read-only sync, see SCANNER-SERVER-MIGRATION-IT-HANDOFF §2). Every other path already works from the server as a UNC path; switch to local paths later if wanted.",
+  "_comment": "Server copy of config.json for D:\\TSC-Dashboard on sdrlazneuiis01d (refreshed 21 Sep 2026 for scanner v2.60). IT: replace the three reportFolders entries and digestPath with the server-local folders that mirror the SharePoint libraries (read-only sync, see SCANNER-SERVER-MIGRATION-IT-HANDOFF s2). Every other path already works from the server as a UNC path; switch to local paths later if wanted. scan-state.json, scan-lock.json and the scan-cache folder are rebuilt by the first run.",
   "reportFolders": [
     "<<IT: server-local mirror of the 'TSC REPORTING' SharePoint library>>",
     "<<IT: server-local mirror of the 'PLANNING REPORTING' SharePoint library>>",
@@ -14,5 +14,10 @@
   "requestsDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred",
   "prechargeDeployPath": "\\\\sdrlazneuiis01d.corp.local\\sacred\\precharge",
   "cocDashboardPath": "\\\\sdrlazneuiis01d.corp.local\\SSORT\\Seadrill_WCE_COC_Dashboard_REV6 1.html",
-  "notifications": { "enabled": false }
+  "notifications": {
+    "enabled": false
+  },
+  "digestPath": "<<IT: server-local mirror of the 'WellControl - Digests' SharePoint library, Reports folder (the scanner is its only writer; it must sync BACK to SharePoint for Copilot)>>",
+  "dashboardUrl": "http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html",
+  "copilotUrl": "<<copy the copilotUrl value from C:\\TSC-Dashboard\\config.json on Dan's PC>>"
 }
