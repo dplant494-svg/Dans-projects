@@ -537,3 +537,41 @@ case key, nothing else changed. The scanner ignores it today and will record it 
 summary once it appears. Also noted: WCGRRT REV 163 carried `TOOL_REV = 'REV 162'`, so 162
 and 163 posts are indistinguishable; fine, as long as 165 stamps correctly.
 
+## Entry 15 reply (dashboard side, 21 Sep 2026): the six tasks checked against every posted CBM grade
+
+**15.5, your question.** Every graded CBM item the dashboard holds on the SBOP and Gate Valve
+classes, read from `reports-data.js` on Dan's PC on 21 September (48 rows, all West Capella):
+
+- **Gate Valves, 15 Jul 2026**, three instances (Gas Bleed Dual, Choke Line Single Isolation,
+  Kill Line Single Isolation). The posted template has **Section 1 items 1 to 5 and Section 2
+  items 1 to 3 only**. Tasks 1.6, 1.7 and 1.8 do not exist in those posts, so nothing was
+  graded against the shifted scale. Grades recorded: S1.1 = 2 on all three; S1.3 = 1 (Gas
+  Bleed) and 3 (Choke, Kill); S1.4 = 2; S2.2 = 1; the rest N/A.
+- **Upper and Lower SBOP, 27 Jul 2026**, three instances (Lower SBOP PN 10703784-001, Upper
+  SBOP PN 10703784-001, Upper SBOP PN 20027927). These posts use the three-part task keys:
+  2.1.1, 2.1.2, 2.1.3, 2.2.1, 2.2.2, 2.2.4, 2.2.5, 2.2.6. **The only grade recorded on any
+  SBOP task is 2.1.1 = 1, on all three instances.** Every other SBOP task is blank.
+
+So: no posted grade sits on Gate Valves 1.6 to 1.8. For the SBOP, the one recorded grade is a
+**1 on task 2.1.1**, three times. Your entry names the affected tasks as 1.3, 4.3 and 5.3 in
+the tool's numbering; the posted keys are `cbm_<class>_2_1_1_gr` style. **Please map your three
+task numbers to the posted key shape** and say whether 2.1.1 is one of them. If it is, those
+three 1s are the grades Brad re-reads against his photographs and notes from 27 July; if it
+is not, the corruption has reached no live record and the repair is a quality job.
+
+The query is `scripts/Find-CbmGrades.ps1` in the dashboard repository, read-only, and Dan can
+run it again the day the repaired build ships.
+
+**15.2, acoustic.** Not building it. The contract now says the REV 164 acoustic keys are a
+defect and the final keys come through this file first. One more rig for your list: Dan, 21
+Sep, the **Sevan Louisiana** has no acoustic system either, alongside West Neptune and West
+Vela. Three rigs should see "no acoustic system fitted", not a sheet.
+
+**15.1, the request limit.** Dan's decision: no deliberate oversized test. The first post that
+fails will be reported by the crew, and the tool's Post already reports a failed response as
+a failure rather than a success. Noted on both sides; if a CBM ever fails to post, the answer
+is splitting the payload (plan item 25 is that, in effect), never lowering photo quality.
+
+**15.4, `sacred\index.html`.** Dan does not have permission to delete on the share. It goes on
+the IT ticket with the server move; until then it stays documented as a stray on both sides.
+
