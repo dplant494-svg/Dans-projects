@@ -3,6 +3,9 @@
 **For:** Dan · **Date:** 15 September 2026 · **Week plan item 14**
 **Needs first:** SSORT's **Post to OEM** button (`CBM-OEM-HANDOFF.md`, reporting-tools
 session). The flow can be built now and sits idle until the first OEM post arrives.
+**Status, 22 September 2026:** built by Dan and tested end to end with a synthetic
+`seadrill-oem_SSCE-Equipment_*` post (one-page TEST PDF): OEM email sent to the NOV
+sheet's addresses, office in CC, PDF attached and opening. Live, waiting for the button.
 **Pattern:** the same as Precharge Notifications and the rig-visit flow, with a PDF
 attached the way the precharge ISSUED email attaches one.
 
@@ -70,8 +73,10 @@ and(startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'sead
    `join(body('OemEmails'),';')`.
 9. **OfficeRows** / **OfficeEmails** / **OfficeList**: exactly as in the precharge flow
    (table **Office**, map `item()?['Email']`, join with `;`).
-10. **Condition** named **HasRecipients**: fx `outputs('OemList')` **is not equal to**
-    an empty right box.
+10. **Condition** named **HasRecipients**: left box fx `length(outputs('OemList'))`,
+    operator **is greater than**, right box `0`. (The first build used *is not equal to*
+    an empty box and went False with seven addresses in the list; the length test is
+    what passed on 22 Sep.)
 11. **True**: **Send an email (V2)**. To: custom value, fx `outputs('OemList')`. CC: fx
     `outputs('OfficeList')`. Subject: `[Seadrill CBM Report for OEM review] @{outputs('Subject')}`.
     Body (code view):
@@ -81,7 +86,7 @@ and(startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'sead
 <p><b>@{outputs('Subject')}</b><br>Rig: @{outputs('RigName')}<br>Completed by: @{body('Parse_JSON')?['meta']?['wce']}</p>
 <p>Please review and respond to the Seadrill Technical Services contacts in copy. This is an automated distribution; replies go to the people in copy, not to this mailbox.</p>
 <p>Seadrill readers: <a href="@{outputs('Link')}">open this report on the Rig Visit Dashboard</a> (internal network only).</p>
-<p>Technical Services - Subsea<br>Daniel Plant - daniel.plant@seadrill.com<br>Lee Arnold - lee.arnold@seadrill.com<br>Joao Almeida - Joao.Almeida@seadrill.com</p>
+<p>Technical Services - Subsea<br>Daniel Plant - daniel.plant@seadrill.com<br>Lee Arnold - lee.arnold@seadrill.com<br>Joao Almeida - Joao.Almeida@seadrill.com<br>Ronnie Peeples - ronnie.peeples@seadrill.com</p>
 ```
 
     **Attachments**: click **Show all**, then **+ Add new item**. Name: fx
@@ -103,11 +108,19 @@ base64ToBinary(if(equals(outputs('HasPdf'), true), body('Parse_JSON')?['pdf'], '
 
 1. On the NOV sheet, temporarily replace every address with your own (personal and
    Seadrill). Close the workbook.
-2. Ask the reporting-tools session for a test post, or, once the button exists, press
-   **Post to OEM** on any CBM report from SSORT.
+2. Until the button exists, upload a synthetic post: the dashboard session makes a
+   `seadrill-oem_SSCE-Equipment_<date>_flow-test_<stamp>_cbm.json` with a one-page TEST
+   PDF inside (asset `SSCE Equipment`, so the scanner records it as an OEM copy and never
+   as a rig report). **Upload** it into PostedReports in the browser. Once the button
+   exists, press **Post to OEM** on any CBM report from SSORT instead.
+   The addresses go in the **Email** column (B), not the Name column: the flow reads
+   `Email` only. Watch the spelling.
 3. The run goes green; your inbox gets the email with the PDF attached; the PDF opens
    and matches the Download. The dashboard row shows **Sent to NOV**.
-4. Put the real addresses back. Close the workbook.
+4. Put the real addresses back. Close the workbook. Delete the test file from
+   PostedReports and the two test emails.
+5. To rerun without uploading again: open the run in the flow's run history, top right
+   **Resubmit**.
 
 ## If it misfires
 
@@ -118,4 +131,9 @@ base64ToBinary(if(equals(outputs('HasPdf'), true), body('Parse_JSON')?['pdf'], '
 - **Bounced by NOV:** the PDF is over their inbound limit. Note the size from the
   bounce; that is the number the tool's warning gets set to.
 - **Went to NO OEM RECIPIENTS:** the sheet is not named exactly `NOV`, or the table
-  inside it is not named `NOV`, or the workbook was open.
+  inside it is not named `NOV`, or the workbook was open, or the addresses are in the
+  Name column instead of Email. To find which: open the run, click **OemRows** (Inputs
+  show the table name it used, raw Outputs show the rows), then **OemEmails** (raw
+  Outputs show the address list), then **HasRecipients** (expressionResult).
+- **"A table cannot overlap another table" in Excel:** the list is already a table.
+  Click OK; nothing to do.
