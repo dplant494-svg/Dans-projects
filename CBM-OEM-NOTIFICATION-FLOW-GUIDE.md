@@ -131,21 +131,27 @@ base64ToBinary(if(equals(outputs('HasPdf'), true), body('Parse_JSON')?['pdf'], '
 
 ## Part C — test before NOV sees anything
 
-1. On the NOV sheet, temporarily replace every address with your own (personal and
-   Seadrill). Close the workbook.
+Since 22 Sep the flow has test mode (`NOTIFICATION-TEST-MODE-GUIDE.md`): cards
+**SettingsRow** and **TestMode** after Parse JSON, **CcList** after RigCc, and the OEM
+Email's To, CC, Subject and Body wrapped on `outputs('TestMode')`. So:
+
+1. Workbook, **Settings** sheet, **B2** = `Yes`. Close the workbook. No address on any
+   sheet is touched.
 2. Until the button exists, upload a synthetic post: the dashboard session makes a
-   `seadrill-oem_SSCE-Equipment_<date>_flow-test_<stamp>_cbm.json` with a one-page TEST
-   PDF inside (asset `SSCE Equipment`, so the scanner records it as an OEM copy and never
-   as a rig report). **Upload** it into PostedReports in the browser. Once the button
+   `seadrill-oem_<Rig>_<date>_flow-test_<stamp>_cbm.json` with a one-page TEST PDF
+   inside. Use a real rig name to prove that rig's CC row; `SSCE Equipment` proves the
+   rest without a rig. **Upload** it into PostedReports in the browser. Once the button
    exists, press **Post to OEM** on any CBM report from SSORT instead.
-   The addresses go in the **Email** column (B), not the Name column: the flow reads
-   `Email` only. Watch the spelling.
-3. The run goes green; your inbox gets the email with the PDF attached; the PDF opens
-   and matches the Download. The dashboard row shows **Sent to NOV**.
-4. Put the real addresses back. Close the workbook. Delete the test file from
-   PostedReports and the two test emails.
+3. The run goes green; the four on the Office sheet get the email, `[TEST MODE]` in the
+   subject, the PDF attached, and a red line at the top listing who the real run would
+   have gone To (the NOV sheet) and CC (office, superintendents, the rig's five).
+4. Settings **B2** = `No`. Close the workbook. Delete the test file from PostedReports
+   and the test emails.
 5. To rerun without uploading again: open the run in the flow's run history, top right
    **Resubmit**.
+
+Before test mode existed (22 Sep morning) the test was done by putting your own address
+in the NOV sheet's **Email** column; that is no longer needed and should not be done.
 
 ## If it misfires
 
@@ -155,6 +161,8 @@ base64ToBinary(if(equals(outputs('HasPdf'), true), body('Parse_JSON')?['pdf'], '
   `base64ToBinary(...)` wrap.
 - **Bounced by NOV:** the PDF is over their inbound limit. Note the size from the
   bounce; that is the number the tool's warning gets set to.
+- **Mail arrived with [TEST MODE] on it and only the office got it:** Settings B2 says
+  Yes. Set it to No and close the workbook.
 - **Went to NO OEM RECIPIENTS:** the sheet is not named exactly `NOV`, or the table
   inside it is not named `NOV`, or the workbook was open, or the addresses are in the
   Name column instead of Email. To find which: open the run, click **OemRows** (Inputs
