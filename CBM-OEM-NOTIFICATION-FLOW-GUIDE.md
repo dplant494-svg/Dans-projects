@@ -29,8 +29,11 @@ Open `PostedReports/Notifications/WCE_Precharge_Notification.xlsx` in the browse
 
 3. Select A1 to B8, **Insert** tab, **Table**, tick *My table has headers*, OK. Click in
    the table, **Table Design**, and set the table name (top left) to `NOV`.
-4. **Office** sheet: make sure Dan, Ronnie, Lee and Joao are on it. They are the CC on
-   every OEM mail, the same list the precharge mails use.
+4. **Office** sheet: Dan, Lee, Joao, Ronnie and, from 22 Sep, the subsea superintendents
+   (Brad Waldron, Paul Calhoun, Jacob James, Eric Rachall, Stephen Sagerian, Steve Rice,
+   Siti Yusree). They are the CC on every OEM mail, and the same table feeds the precharge
+   and rig-visit mails and the fallback mails, so a name added here is on all of them.
+   To extend the table: click the last Email cell, press Tab, type name, Tab, email.
 5. Close the workbook.
 
 ## Part B — the flow (15 minutes)
@@ -86,7 +89,7 @@ and(startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'sead
 <p><b>@{outputs('Subject')}</b><br>Rig: @{outputs('RigName')}<br>Completed by: @{body('Parse_JSON')?['meta']?['wce']}</p>
 <p>Please review and respond to the Seadrill Technical Services contacts in copy. This is an automated distribution; replies go to the people in copy, not to this mailbox.</p>
 <p>Seadrill readers: <a href="@{outputs('Link')}">open this report on the Rig Visit Dashboard</a> (internal network only).</p>
-<p>Technical Services - Subsea<br>Daniel Plant - daniel.plant@seadrill.com<br>Lee Arnold - lee.arnold@seadrill.com<br>Joao Almeida - Joao.Almeida@seadrill.com<br>Ronnie Peeples - ronnie.peeples@seadrill.com</p>
+<p>Technical Services - Subsea<br>Lee Arnold - lee.arnold@seadrill.com<br>Joao Almeida - Joao.Almeida@seadrill.com<br>Ronnie Peeples - ronnie.peeples@seadrill.com</p>
 ```
 
     **Attachments**: click **Show all**, then **+ Add new item**. Name: fx
