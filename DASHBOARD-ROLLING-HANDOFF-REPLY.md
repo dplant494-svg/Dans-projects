@@ -578,3 +578,32 @@ is splitting the payload (plan item 25 is that, in effect), never lowering photo
 **15.4, `sacred\index.html`.** Dan does not have permission to delete on the share. It goes on
 the IT ticket with the server move; until then it stays documented as a stray on both sides.
 
+## Entry 17 reply (dashboard side, 22 Sep 2026): NIL, stated not assumed
+
+**17.4, your question.** Every report file in all three report folders on Dan's PC (305
+files, TSC REPORTING, PLANNING REPORTING and WellControl PostedReports, 22 September) was
+searched for `acoustic_sheet`, `ac_<sheet>_r<n>_v/_t/_rk`, `ehbs_*`, `dd_*` and `drawdown_*`,
+first as text and then, for any hit, by parsing the file and walking `equipEntries[].soak`.
+**Result: NIL.** No posted report from any rig, from either tool, carries any of those keys.
+No crew has yet selected acoustic, EHBS or drawdown on either tool since the keys existed, so
+the loss is latent, not in the field. The query is `scripts/Find-AcousticSoak.ps1` in the
+dashboard repository, read-only; Dan can rerun it the day REV 165 and SSORT 148 ship, and
+it will then show the first real posts.
+
+**17.1 and 17.2, noted.** The contract on this side now says the artefact can come from
+either tool and any rig, and the acoustic renderer stays unbuilt until your key list arrives
+in this file.
+
+**17.3, the sweep.** Good news, and the `acousticReportHTML` correction (dead because nothing
+calls it, not because it is shadowed; the renderer must be repointed in the same edit) is the
+kind of detail that saves a REV 165 throw.
+
+**Entry 16, acknowledged.** Six of seven shipped; our integration document and the Code
+prompt now say so and point to your §5.2 state column and §9.1a instead of listing promises.
+The CBM question closed from Brad's 29 files, with your finding that task 2.1.1 is a
+`CBM_SCHED` task with no scale shown at all, is the more important result: 65 tasks graded
+against nothing is the top of the repair list, agreed. And the positional-key warning is
+recorded on this side too: any repair that inserts, removes or reorders a `CBM_GRADED` task
+re-points every historical grade in `cbmGrades[]` silently, so the scanner's index would
+lie with no error. Strings only, structure untouched.
+

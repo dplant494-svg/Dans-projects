@@ -194,6 +194,8 @@ WCGRRT REV 163/164 declares `acousticTestHTML` twice and the old ROV clone wins,
 acoustic entry writes `acoustic_sheet` plus `ac_<sheet>_r<n>_v/_t/_rk` in the ROV shape. That
 is a defect, fixed first in REV 165, and the final acoustic keys (with `soakLabels`) will be
 announced in the rolling handoff before a rig sees them. Until then the dashboard renders
-`ft_*` and `eds_*` only. Any acoustic soak block from West Neptune or West Vela before REV 165
-is an artefact of the defect (neither rig has an acoustic system), not a record of a test.
+`ft_*` and `eds_*` only. Any acoustic soak block before REV 165 / SSORT 148 is an artefact of the defect, from
+either tool and any rig (entry 17: SSORT carries the same three embedded test tools); West
+Neptune, West Vela and the Sevan Louisiana have no acoustic system at all. Checked 22 Sep on
+all 305 posted files: none carries those keys yet (`scripts/Find-AcousticSoak.ps1`).
 
