@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AAB loop flowchart</title>
+<style>
+  :root { --navy:#002C77; --gold:#EDB71E; --ink:#0a1530; --muted:#5a6880; --border:#d0d8e8; --bg:#F1F3F6; --green:#16683a; --red:#b3261e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI",Arial,Helvetica,sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:var(--navy); color:#fff; padding:16px 28px 14px; border-bottom:3px solid var(--gold); display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; }
+  header .eyebrow { display:block; color:var(--gold); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  header h1 { margin:0; font-size:20px; font-weight:600; }
+  header p { margin:4px 0 0; color:#C9D4EA; font-size:13px; }
+  .rev { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.35); font-size:12px; font-weight:600; padding:5px 12px; border-radius:4px; white-space:nowrap; }
+  main { max-width:1240px; margin:0 auto; padding:20px 16px 60px; }
+  .card { background:#fff; border:1px solid var(--border); border-top:3px solid var(--navy); border-radius:8px; padding:16px 18px; margin-bottom:16px; }
+  .card h2 { font-size:15px; margin:0 0 10px; color:var(--navy); border-bottom:2px solid var(--gold); padding-bottom:6px; }
+  svg { width:100%; height:auto; display:block; }
+  .legend { display:flex; gap:18px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); margin-top:8px; }
+  .legend span::before { content:""; display:inline-block; width:14px; height:14px; border-radius:3px; margin-right:6px; vertical-align:-2px; }
+  .legend .s1::before { background:#e8eefb; border:1px solid var(--navy); }
+  .legend .s2::before { background:#fff7e0; border:1px solid var(--gold); }
+  .legend .s3::before { background:#e9f5ec; border:1px solid var(--green); }
+  .legend .s4::before { background:#fdecea; border:1px solid var(--red); }
+  ol { font-size:13.5px; line-height:1.55; padding-left:20px; margin:0; }
+  @media print { body { background:#fff; } header { -webkit-print-color-adjust:exact; print-color-adjust:exact; } .card { break-inside:avoid; } }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <span class="eyebrow">Well Control Equipment — Technical Services</span>
+    <h1>The AAB loop — issue, notify, acknowledge, report back</h1>
+    <p>Seadrill Bulletin Board (Eric) → estate → rig acknowledgement page → dashboard. Companion to AAB-LOOP-PLAN.md.</p>
+  </div>
+  <span class="rev">22 Sep 2026 · Rev 1</span>
+</header>
+<main>
+<div class="card">
+  <h2>Flow</h2>
+  <svg viewBox="0 0 1200 780" xmlns="http://www.w3.org/2000/svg" font-family="Segoe UI, Arial, Helvetica, sans-serif" font-size="13">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#002C77"/></marker>
+      <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16683a"/></marker>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#b3261e"/></marker>
+    </defs>
+
+    <!-- lanes -->
+    <rect x="10" y="10" width="360" height="760" rx="8" fill="#f7f8fb" stroke="#d0d8e8"/>
+    <rect x="390" y="10" width="420" height="760" rx="8" fill="#f7f8fb" stroke="#d0d8e8"/>
+    <rect x="830" y="10" width="360" height="760" rx="8" fill="#f7f8fb" stroke="#d0d8e8"/>
+    <text x="190" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">OFFICE — Eric, gatekeeper</text>
+    <text x="600" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">ESTATE — trigger, SharePoint, flow, scanner</text>
+    <text x="1010" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">RIG — Subsea Supervisor / OIM</text>
+
+    <!-- 1 Bulletin Board -->
+    <rect x="40" y="60" width="300" height="118" rx="6" fill="#e8eefb" stroke="#002C77" stroke-width="1.5"/>
+    <text x="190" y="82" text-anchor="middle" font-weight="700">1 · Seadrill Bulletin Board Rev 5</text>
+    <text x="55" y="102">AAB number, revision, title, SFI codes</text>
+    <text x="55" y="119">three sections, references, due date</text>
+    <text x="55" y="136">rigs it applies to · PDFs · photographs</text>
+    <text x="55" y="158" font-weight="600">[Save JSON] always · [Post AAB]</text>
+
+    <!-- 2 trigger + library -->
+    <rect x="420" y="60" width="360" height="74" rx="6" fill="#fff7e0" stroke="#EDB71E" stroke-width="1.5"/>
+    <text x="600" y="82" text-anchor="middle" font-weight="700">2 · HTTP trigger → WellControl / PostedReports</text>
+    <text x="600" y="102" text-anchor="middle">seadrill-aab_&lt;number&gt;_&lt;rev&gt;_&lt;stamp&gt;.json</text>
+    <text x="600" y="120" text-anchor="middle" fill="#5a6880">the file is the event · never modified afterwards</text>
+    <line x1="340" y1="119" x2="420" y2="97" stroke="#002C77" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- 3 flow issued -->
+    <rect x="420" y="170" width="170" height="122" rx="6" fill="#fff7e0" stroke="#EDB71E" stroke-width="1.5"/>
+    <text x="505" y="192" text-anchor="middle" font-weight="700">3 · AAB flow</text>
+    <text x="505" y="210" text-anchor="middle" font-weight="600">"issued" branch</text>
+    <text x="430" y="230">per applicable rig: SS,</text>
+    <text x="430" y="246">TSL, OIM, ARM, Rig Mgr</text>
+    <text x="430" y="262">CC Office + Eric</text>
+    <text x="430" y="278">PDFs attached + link</text>
+    <line x1="520" y1="134" x2="505" y2="170" stroke="#002C77" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- 4 scanner -->
+    <rect x="610" y="170" width="170" height="122" rx="6" fill="#e9f5ec" stroke="#16683a" stroke-width="1.5"/>
+    <text x="695" y="192" text-anchor="middle" font-weight="700">4 · Scanner (10 min)</text>
+    <text x="620" y="212">aabRecords[] grouped</text>
+    <text x="620" y="228">by number, highest rev</text>
+    <text x="620" y="244">aab-data.js for the rig</text>
+    <text x="620" y="260">page · dashboard AAB tab:</text>
+    <text x="620" y="276">overdue first, then % ack</text>
+    <line x1="680" y1="134" x2="695" y2="170" stroke="#002C77" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- email to rig -->
+    <path d="M505,292 L505,335 L900,335 L900,312" fill="none" stroke="#002C77" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#a)"/>
+    <text x="700" y="350" text-anchor="middle" fill="#5a6880" font-size="12">email, one per applicable rig, PDFs attached</text>
+
+    <!-- 5 rig page -->
+    <rect x="860" y="170" width="300" height="140" rx="6" fill="#e8eefb" stroke="#002C77" stroke-width="1.5"/>
+    <text x="1010" y="192" text-anchor="middle" font-weight="700">5 · sacred/aab/acknowledge.html?rig=</text>
+    <text x="875" y="214">open AABs for this rig · text · PDF · photos</text>
+    <text x="875" y="238" font-weight="600">[Acknowledge]  name, role, date</text>
+    <text x="875" y="256" font-weight="600">[Close action]  name, date, comment,</text>
+    <text x="875" y="272" font-weight="600">                        evidence photographs</text>
+    <text x="875" y="296" fill="#5a6880" font-size="12">West Gemini: PDF by email, ack by reply (item 24)</text>
+
+    <!-- 6 ack post -->
+    <rect x="420" y="360" width="360" height="74" rx="6" fill="#fff7e0" stroke="#EDB71E" stroke-width="1.5"/>
+    <text x="600" y="382" text-anchor="middle" font-weight="700">6 · HTTP trigger → PostedReports (same trigger)</text>
+    <text x="600" y="402" text-anchor="middle">seadrill-aab-ack_&lt;number&gt;_&lt;rev&gt;_&lt;rigKey&gt;_&lt;stamp&gt;.json</text>
+    <text x="600" y="420" text-anchor="middle" fill="#5a6880">a second file; the AAB file is never touched</text>
+    <path d="M1010,310 L1010,397 L780,397" fill="none" stroke="#16683a" stroke-width="1.5" marker-end="url(#ag)"/>
+
+    <!-- 7 flow ack branch -->
+    <rect x="420" y="470" width="170" height="96" rx="6" fill="#fff7e0" stroke="#EDB71E" stroke-width="1.5"/>
+    <text x="505" y="492" text-anchor="middle" font-weight="700">7 · AAB flow</text>
+    <text x="505" y="510" text-anchor="middle" font-weight="600">"acknowledged" branch</text>
+    <text x="430" y="532">email Eric + Office:</text>
+    <text x="430" y="548">"&lt;rig&gt; acknowledged</text>
+    <text x="430" y="562">&lt;number&gt; Rev &lt;n&gt;"</text>
+    <line x1="520" y1="434" x2="505" y2="470" stroke="#002C77" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- 8 scanner status -->
+    <rect x="610" y="470" width="170" height="96" rx="6" fill="#e9f5ec" stroke="#16683a" stroke-width="1.5"/>
+    <text x="695" y="492" text-anchor="middle" font-weight="700">8 · Scanner</text>
+    <text x="620" y="512">aabAcks[] joined on</text>
+    <text x="620" y="528">number + rev + rigKey</text>
+    <text x="620" y="544">→ status per rig:</text>
+    <text x="620" y="560">outstanding · ack · closed</text>
+    <line x1="680" y1="434" x2="695" y2="470" stroke="#002C77" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- email back to Eric -->
+    <path d="M420,518 L360,518 L360,150 L342,150" fill="none" stroke="#002C77" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#a)"/>
+    <text x="392" y="510" text-anchor="middle" fill="#5a6880" font-size="12">email</text>
+    <text x="392" y="524" text-anchor="middle" fill="#5a6880" font-size="12">to Eric</text>
+
+    <!-- 9 dashboard -->
+    <rect x="40" y="560" width="300" height="96" rx="6" fill="#e9f5ec" stroke="#16683a" stroke-width="1.5"/>
+    <text x="190" y="582" text-anchor="middle" font-weight="700">9 · Dashboard AAB tab (Eric, Dan, office)</text>
+    <text x="55" y="604">KPI: overdue count, then % acknowledged</text>
+    <text x="55" y="620">per AAB: rig chips by status, revisions,</text>
+    <text x="55" y="636">acknowledgement history, PDFs, photographs</text>
+    <path d="M640,566 L640,596 L342,596" fill="none" stroke="#16683a" stroke-width="1.5" marker-end="url(#ag)"/>
+
+    <!-- 10 overdue -->
+    <rect x="420" y="620" width="360" height="110" rx="6" fill="#fdecea" stroke="#b3261e" stroke-width="1.5"/>
+    <text x="600" y="642" text-anchor="middle" font-weight="700" fill="#b3261e">10 · Overdue chase</text>
+    <text x="430" y="664">scanner writes aab-overdue-pending.json (past due,</text>
+    <text x="430" y="680">not acknowledged), once per AAB per rig per day</text>
+    <text x="430" y="696">flow "chase" branch: rig contacts, CC Eric + Office,</text>
+    <text x="430" y="712">subject [OVERDUE AAB] · stops when the ack arrives</text>
+    <line x1="695" y1="566" x2="695" y2="620" stroke="#b3261e" stroke-width="1.5" marker-end="url(#ar)"/>
+    <path d="M780,675 L1080,675 L1080,312" fill="none" stroke="#b3261e" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#ar)"/>
+    <text x="930" y="667" text-anchor="middle" fill="#5a6880" font-size="12">chase email, daily until acknowledged</text>
+
+    <!-- revision loop note -->
+    <rect x="40" y="220" width="300" height="86" rx="6" fill="#fff" stroke="#d0d8e8"/>
+    <text x="190" y="242" text-anchor="middle" font-weight="700" fill="#002C77">Revision</text>
+    <text x="55" y="262">[Load AAB file] → Rev n+1 → Post: a new file,</text>
+    <text x="55" y="278">"requires re-acknowledgement" resets every rig</text>
+    <text x="55" y="294">to outstanding; earlier acks kept as history</text>
+    <line x1="190" y1="220" x2="190" y2="178" stroke="#002C77" stroke-width="1.5" marker-end="url(#a)"/>
+  </svg>
+  <div class="legend">
+    <span class="s1">people and pages</span>
+    <span class="s2">transport and flow (Power Automate)</span>
+    <span class="s3">scanner and dashboard</span>
+    <span class="s4">overdue chase</span>
+  </div>
+</div>
+
+<div class="card">
+  <h2>The ten steps in words</h2>
+  <ol>
+    <li><b>Eric issues</b> from the Bulletin Board: SFI codes, rigs, due date, PDFs, photographs. Save JSON always works; Post sends it.</li>
+    <li><b>The post lands</b> in PostedReports as one file per revision. It is never edited afterwards.</li>
+    <li><b>The flow emails each applicable rig</b> its contacts from the Rigs sheet, PDFs attached, link to the AAB on the dashboard, Eric and the office in copy.</li>
+    <li><b>The scanner records the AAB</b>, groups revisions by number, and writes the data file the rig page reads and the dashboard tab shows.</li>
+    <li><b>The rig acknowledges</b> on the sacred page: name, role, date. Later it closes the action with a comment and evidence photographs.</li>
+    <li><b>The acknowledgement posts</b> as its own file through the same trigger.</li>
+    <li><b>The flow tells Eric</b> and the office that the rig has acknowledged.</li>
+    <li><b>The scanner joins</b> acknowledgements to AABs and computes each rig's status.</li>
+    <li><b>The dashboard shows it</b>: overdue count first, then percent acknowledged, then the detail.</li>
+    <li><b>Overdue is chased</b> daily until the acknowledgement arrives.</li>
+  </ol>
+</div>
+</main>
+</body>
+</html>

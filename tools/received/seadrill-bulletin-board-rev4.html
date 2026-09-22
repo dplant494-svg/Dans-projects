@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seadrill Bulletin Board</title>
+<style>
+  :root{
+    --navy:#002C77;
+    --navy-dark:#001D52;
+    --gold:#EDB71E;
+    --gold-dark:#C89614;
+    --orange:#E25303;
+    --bg:#F1F3F6;
+    --card:#FFFFFF;
+    --border:#D0D8E8;
+    --ink:#0A1530;
+    --text:#0A1530;
+    --muted:#5A6880;
+    --danger:#C62828;
+    --danger-bg:#FDECEA;
+    --warn:#E25303;
+    --warn-bg:#FDEBE0;
+    --ok:#1B5E20;
+    --ok-bg:#E8F5E9;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI",Arial,Helvetica,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:var(--navy);
+    color:#fff;
+    padding:18px 32px 16px;
+    border-bottom:3px solid var(--gold);
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  header .eyebrow{
+    display:block;
+    color:var(--gold);
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin-bottom:4px;
+  }
+  header h1{
+    margin:0;
+    font-size:22px;
+    font-weight:600;
+    letter-spacing:.2px;
+  }
+  header p{
+    margin:4px 0 0;
+    color:#C9D4EA;
+    font-size:13px;
+  }
+  .rev-tag{
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.35);
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+    padding:5px 12px;
+    border-radius:4px;
+    white-space:nowrap;
+  }
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:24px 24px 80px;
+    display:grid;
+    grid-template-columns:1fr 340px;
+    gap:20px;
+  }
+  @media (max-width:900px){
+    .wrap{grid-template-columns:1fr;}
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-top:3px solid var(--navy);
+    border-radius:8px;
+    padding:20px 22px;
+    margin-bottom:18px;
+  }
+  .card h2{
+    font-size:15px;
+    margin:0 0 14px;
+    color:var(--navy);
+    border-bottom:2px solid var(--gold);
+    padding-bottom:8px;
+  }
+  .row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .row3{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:14px;
+  }
+  .field{margin-bottom:14px;}
+  label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--navy-dark);
+    margin-bottom:4px;
+  }
+  label .req{color:var(--danger); margin-left:2px;}
+  label .opt{color:var(--muted); font-weight:400; font-size:11.5px;}
+  input[type=text],input[type=email],input[type=date],input[type=number],textarea{
+    width:100%;
+    padding:8px 10px;
+    border:1px solid var(--border);
+    border-radius:4px;
+    font-size:13.5px;
+    font-family:inherit;
+    background:#fff;
+    color:var(--text);
+  }
+  input:focus,textarea:focus{
+    outline:2px solid var(--navy);
+    outline-offset:1px;
+    border-color:var(--navy);
+  }
+  textarea{resize:vertical; min-height:70px;}
+  input[readonly]{background:#EEF1F5; color:var(--muted);}
+  .hint{font-size:11.5px; color:var(--muted); margin-top:3px;}
+  .warn-inline{font-size:11.5px; color:var(--warn); margin-top:3px; display:none;}
+  .warn-inline.show{display:block;}
+  .level-badge{
+    display:inline-block;
+    background:var(--gold);
+    color:var(--navy-dark);
+    font-weight:700;
+    font-size:13px;
+    padding:6px 14px;
+    border-radius:4px;
+    letter-spacing:.3px;
+  }
+  .rig-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px 14px;
+    margin-top:8px;
+  }
+  .rig-item{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:13px;
+    padding:4px 0;
+  }
+  .rig-item input{width:auto;}
+  .rig-tools{display:flex; gap:8px; margin-bottom:6px;}
+  .btn{
+    border:none;
+    border-radius:4px;
+    padding:9px 16px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .btn-navy{background:var(--navy); color:#fff;}
+  .btn-navy:hover{background:var(--navy-dark);}
+  .btn-gold{background:var(--gold); color:var(--navy-dark);}
+  .btn-gold:hover{background:var(--gold-dark);}
+  .btn-outline{background:#fff; color:var(--navy); border:1px solid var(--navy);}
+  .btn-outline:hover{background:#EEF1F8;}
+  .btn-sm{padding:5px 10px; font-size:12px;}
+  .sidebar-card{position:sticky; top:16px;}
+  .actions{display:flex; flex-direction:column; gap:10px;}
+  .actions .btn{width:100%; text-align:center;}
+  .msg{
+    border-radius:5px;
+    padding:10px 12px;
+    font-size:12.5px;
+    margin-top:10px;
+    display:none;
+    line-height:1.5;
+  }
+  .msg.show{display:block;}
+  .msg-error{background:var(--danger-bg); color:var(--danger); border:1px solid #F1B6B0;}
+  .msg-warn{background:var(--warn-bg); color:var(--warn); border:1px solid #F0D998;}
+  .msg-ok{background:var(--ok-bg); color:var(--ok); border:1px solid #B7DDB9;}
+  .msg ul{margin:6px 0 0; padding-left:18px;}
+  .file-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .file-info{font-size:12.5px; color:var(--muted);}
+  .checkbox-row{display:flex; align-items:center; gap:8px; font-size:13px;}
+  .checkbox-row input{width:auto;}
+  .modal-bg{
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(10,15,30,.55);
+    z-index:50;
+    align-items:flex-start;
+    justify-content:center;
+    padding:30px 16px;
+    overflow-y:auto;
+  }
+  .modal-bg.show{display:flex;}
+  .modal{
+    background:#fff;
+    max-width:720px;
+    width:100%;
+    border-radius:6px;
+    overflow:hidden;
+  }
+  .modal-header{
+    background:var(--navy);
+    color:#fff;
+    padding:18px 24px;
+    border-bottom:4px solid var(--gold);
+  }
+  .modal-header .tag{
+    display:inline-block;
+    background:var(--gold);
+    color:var(--navy-dark);
+    font-weight:700;
+    font-size:12px;
+    padding:3px 10px;
+    border-radius:3px;
+    margin-bottom:8px;
+  }
+  .modal-header h3{margin:0; font-size:19px;}
+  .modal-header .sub{color:#C9D4EA; font-size:12.5px; margin-top:4px;}
+  .modal-body{padding:22px 24px;}
+  .p-section{margin-bottom:18px;}
+  .p-section h4{
+    margin:0 0 6px;
+    font-size:12.5px;
+    text-transform:none;
+    color:var(--navy);
+    border-left:3px solid var(--gold);
+    padding-left:8px;
+  }
+  .p-section p, .p-section div{font-size:13.5px; line-height:1.55; white-space:pre-wrap;}
+  .p-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 20px; font-size:13px; margin-bottom:16px;}
+  .p-grid .k{color:var(--muted); font-size:11.5px;}
+  .rig-chip-list{display:flex; flex-wrap:wrap; gap:6px;}
+  .rig-chip{
+    background:#EEF1F8;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:3px 10px;
+    font-size:12px;
+    color:var(--navy-dark);
+  }
+  .modal-close{
+    background:none; border:none; color:#fff; font-size:20px; cursor:pointer;
+    float:right; line-height:1;
+  }
+  .footer-note{font-size:11.5px; color:var(--muted); margin-top:24px; text-align:center;}
+
+  @media print{
+    .noprint{display:none !important;}
+    body{background:#fff;}
+    .wrap{grid-template-columns:1fr; padding:0;}
+    .card{border:1px solid #999; page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <span class="eyebrow">Well Control Equipment — Technical Services</span>
+    <h1>Seadrill Bulletin Board</h1>
+    <p>Level 3 Advisory AAB — issue, attach, select rigs, and post</p>
+  </div>
+  <span class="rev-tag">Rev 4</span>
+</header>
+
+<div class="wrap">
+  <div>
+
+    <div class="card">
+      <h2>Identification</h2>
+      <div class="row3">
+        <div class="field">
+          <label>AAB Number <span class="req">*</span></label>
+          <input type="text" id="aabNumber" placeholder="e.g. C10250746">
+          <div class="warn-inline" id="warn-aabNumber">Doesn't match the usual format (a letter followed by 8 digits). Posting anyway is fine if this one's different.</div>
+        </div>
+        <div class="field">
+          <label>Revision</label>
+          <input type="number" id="revision" min="0" value="0">
+        </div>
+        <div class="field">
+          <label>Level</label>
+          <input type="text" value="LEVEL 3 — ADVISORY" readonly>
+        </div>
+      </div>
+      <div class="field">
+        <label>Title <span class="req">*</span></label>
+        <input type="text" id="title" placeholder="Short descriptive title of the advisory">
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Category / Equipment Area <span class="req">*</span></label>
+          <input type="text" id="category" placeholder="e.g. BOP — Ram Packers, Riser — Tension Ring">
+        </div>
+        <div class="field">
+          <label>&nbsp;</label>
+          <div class="checkbox-row" style="margin-top:8px;">
+            <input type="checkbox" id="requiresReack" checked>
+            <label for="requiresReack" style="margin:0; font-weight:500;">This revision requires re-acknowledgement</label>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Issue Date <span class="req">*</span></label>
+          <input type="date" id="issueDate">
+        </div>
+        <div class="field">
+          <label>Due Date <span class="req">*</span></label>
+          <input type="date" id="dueDate">
+          <div class="warn-inline" id="warn-dueDate">This due date is in the past.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Originator</h2>
+      <div class="row">
+        <div class="field">
+          <label>Name <span class="req">*</span></label>
+          <input type="text" id="originatorName" value="Eric Rachall">
+        </div>
+        <div class="field">
+          <label>Email <span class="req">*</span></label>
+          <input type="email" id="originatorEmail" value="eric.rachall@seadrill.com">
+          <div class="warn-inline" id="warn-email">This doesn't look like a valid email address.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Advisory Content</h2>
+      <div class="field">
+        <label>What has happened <span class="req">*</span></label>
+        <textarea id="advWhat" placeholder="Describe the event, finding, or issue that triggered this advisory."></textarea>
+      </div>
+      <div class="field">
+        <label>Why it matters <span class="req">*</span></label>
+        <textarea id="advWhy" placeholder="Explain the risk or consequence if this is not addressed."></textarea>
+      </div>
+      <div class="field">
+        <label>What the rig must do <span class="req">*</span></label>
+        <textarea id="advAction" placeholder="Specific, actionable instructions for the rig."></textarea>
+      </div>
+      <div class="field">
+        <label>Reference documents / OEM bulletin numbers <span class="opt">(one per line, optional)</span></label>
+        <textarea id="refDocs" placeholder="e.g. NOV SB-2024-118&#10;API 16A 4th Ed. Section 7.3" style="min-height:56px;"></textarea>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Bulletin PDF</h2>
+      <div class="file-row noprint">
+        <input type="file" id="pdfFile" accept="application/pdf">
+        <span class="file-info" id="fileInfo"></span>
+      </div>
+      <div class="warn-inline noprint" id="warn-pdfSize">This PDF is larger than 5 MB — the JSON record will be large too. Still fine to post, just flagging it.</div>
+      <div class="checkbox-row noprint" style="margin-top:10px;">
+        <input type="checkbox" id="noPdf">
+        <label for="noPdf" style="margin:0; font-weight:500;">This AAB has no separate PDF attachment</label>
+      </div>
+    </div>
+
+  </div>
+
+  <div>
+    <div class="card sidebar-card">
+      <h2>Applies to</h2>
+      <div class="rig-tools noprint">
+        <button class="btn btn-outline btn-sm" id="selectAllRigs" type="button">All rigs</button>
+        <button class="btn btn-outline btn-sm" id="clearRigs" type="button">Clear</button>
+      </div>
+      <div class="rig-grid" id="rigGrid"></div>
+
+      <h2 style="margin-top:22px;" class="noprint">Actions</h2>
+      <div class="actions noprint">
+        <button class="btn btn-outline" id="btnPreview" type="button">Preview AAB</button>
+        <button class="btn btn-navy" id="btnCreateFile" type="button">Create AAB file</button>
+        <button class="btn btn-gold" id="btnPost" type="button">Post AAB</button>
+      </div>
+      <div class="file-row noprint" style="margin-top:10px; justify-content:space-between;">
+        <span class="file-info" id="endpointStatus">Endpoint: not set</span>
+        <button class="btn btn-outline btn-sm" id="btnSetEndpoint" type="button">Set endpoint</button>
+      </div>
+      <div class="msg msg-error noprint" id="msgError"></div>
+      <div class="msg msg-warn noprint" id="msgWarn"></div>
+      <div class="msg msg-ok noprint" id="msgOk"></div>
+      <p class="hint noprint" style="margin-top:12px;">
+        <strong>Post AAB</strong> sends the record over HTTPS to the AAB
+        intake endpoint, which files it for the dashboard scanner. Click
+        "Set endpoint" once Dan gives you the URL — it's stored only in
+        this browser, never in this file. If a post fails, the record is
+        downloaded locally instead so nothing is lost.
+        <strong>Create AAB file</strong> always just downloads it, no
+        endpoint needed.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note noprint">Seadrill Bulletin Board — works fully offline. No data leaves this browser except the file you save or post.</div>
+
+<div class="modal-bg" id="previewModal">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-close noprint" id="closePreview" type="button">&times;</button>
+      <span class="tag">LEVEL 3 — ADVISORY</span>
+      <h3 id="pv-title">—</h3>
+      <div class="sub" id="pv-subline">—</div>
+    </div>
+    <div class="modal-body" id="pv-body"></div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// OPEN DECISIONS — pending Dan / directive review. Everything below is a
+// placeholder default so the tool works today without guessing at a real
+// answer. When a decision lands, change it here — nothing else in the
+// file needs to change.
+// =====================================================================
+
+// 1. Level 3 response period: directive doesn't yet specify one. This is
+//    the number of days added to Issue Date to pre-fill Due Date. Still
+//    fully editable per-AAB; this only sets the starting point.
+const DEFAULT_RESPONSE_PERIOD_DAYS = 14;
+
+// 2. Which role acknowledges for a rig (OIM / Subsea Supervisor / TSL /
+//    rig's choice) isn't decided. This string is carried in every posted
+//    record as `expectedAcknowledgerRole` so the dashboard team's
+//    acknowledgement-page wording has something to key off, even though
+//    the value itself is a placeholder until the decision is made.
+const EXPECTED_ACKNOWLEDGER_ROLE = "TBD \u2014 pending decision (OIM / Subsea Supervisor / TSL / rig's choice)";
+
+// 3. Notification matrix (who's emailed on post, who's chased on overdue)
+//    is intentionally NOT modeled here. It's held as a workbook outside
+//    this tool and outside the Power Automate flow, so a crew change is a
+//    cell edit, not a rebuild. This tool posts the record; it does not
+//    send or address any notification itself.
+
+// 4. Whether an AAB can be withdrawn, and what that does to existing
+//    acknowledgements, isn't decided. No withdrawal UI exists yet. The
+//    record below carries a reserved `status` field (always "active"
+//    today) purely so that whichever answer lands, it can be represented
+//    without a breaking schema change for the dashboard team.
+
+// 5. Whether the dashboard AAB section gets its own acknowledgement page
+//    or reuses an existing one is the dashboard team's call — nothing in
+//    this tool depends on that choice.
+// =====================================================================
+
+const RIGS = [
+  {name:"West Neptune", code:"nov"},
+  {name:"West Auriga", code:"auriga"},
+  {name:"West Saturn", code:"saturn"},
+  {name:"West Jupiter", code:"jupiter"},
+  {name:"West Tellus", code:"tellus"},
+  {name:"West Carina", code:"carina"},
+  {name:"West Polaris", code:"polaris"},
+  {name:"West Vela", code:"vela"},
+  {name:"West Gemini", code:"gemini"},
+  {name:"West Capella", code:"capella"},
+  {name:"Sonangol Libongos", code:"libongos"},
+  {name:"Sonangol Quenguela", code:"quenguela"},
+  {name:"Sevan Louisiana", code:"cam"}
+];
+
+const PDF_WARN_BYTES = 5 * 1024 * 1024;
+
+const $ = id => document.getElementById(id);
+
+// ---------- Build rig checkboxes ----------
+const rigGrid = $("rigGrid");
+RIGS.forEach(rig => {
+  const div = document.createElement("div");
+  div.className = "rig-item";
+  div.innerHTML = `<input type="checkbox" id="rig-${rig.code}" data-code="${rig.code}" data-name="${rig.name}">
+                    <label for="rig-${rig.code}" style="margin:0; font-weight:400;">${rig.name}</label>`;
+  rigGrid.appendChild(div);
+});
+$("selectAllRigs").onclick = () => RIGS.forEach(r => $(`rig-${r.code}`).checked = true);
+$("clearRigs").onclick = () => RIGS.forEach(r => $(`rig-${r.code}`).checked = false);
+
+function selectedRigs(){
+  return RIGS.filter(r => $(`rig-${r.code}`).checked);
+}
+
+// ---------- Default dates ----------
+let dueDateTouched = false;
+$("dueDate").addEventListener("change", () => { dueDateTouched = true; });
+
+function addDays(dateStr, days){
+  const d = new Date(dateStr + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0,10);
+}
+
+(function initDates(){
+  const today = new Date().toISOString().slice(0,10);
+  $("issueDate").value = today;
+  $("dueDate").value = addDays(today, DEFAULT_RESPONSE_PERIOD_DAYS);
+})();
+
+$("issueDate").addEventListener("change", () => {
+  if (dueDateTouched) return; // don't clobber a due date the user already set deliberately
+  const iso = $("issueDate").value;
+  if (iso) $("dueDate").value = addDays(iso, DEFAULT_RESPONSE_PERIOD_DAYS);
+});
+
+// ---------- PDF handling ----------
+let pdfData = null; // {filename, mimeType, sizeBytes, base64, objectUrl}
+
+$("pdfFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  $("warn-pdfSize").classList.remove("show");
+  if (!file) { pdfData = null; $("fileInfo").textContent = ""; return; }
+  const sizeKB = (file.size / 1024).toFixed(0);
+  $("fileInfo").textContent = `${file.name} (${sizeKB} KB)`;
+  if (file.size > PDF_WARN_BYTES) $("warn-pdfSize").classList.add("show");
+
+  const dataUrl = await new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = () => res(reader.result);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+  const base64 = dataUrl.split(",")[1];
+  pdfData = {
+    filename: file.name,
+    mimeType: file.type || "application/pdf",
+    sizeBytes: file.size,
+    base64: base64,
+    objectUrl: URL.createObjectURL(file)
+  };
+});
+
+// ---------- Inline warnings (live) ----------
+$("aabNumber").addEventListener("input", () => {
+  const v = $("aabNumber").value.trim();
+  const ok = /^[A-Za-z]\d{8}$/.test(v);
+  $("warn-aabNumber").classList.toggle("show", v.length > 0 && !ok);
+});
+$("originatorEmail").addEventListener("input", () => {
+  const v = $("originatorEmail").value.trim();
+  const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  $("warn-email").classList.toggle("show", v.length > 0 && !ok);
+});
+$("dueDate").addEventListener("input", () => {
+  const v = $("dueDate").value;
+  const today = new Date().toISOString().slice(0,10);
+  $("warn-dueDate").classList.toggle("show", v && v < today);
+});
+
+// ---------- Validation ----------
+function validate(){
+  const errors = [];
+  const warnings = [];
+
+  const aabNumber = $("aabNumber").value.trim();
+  const title = $("title").value.trim();
+  const category = $("category").value.trim();
+  const issueDate = $("issueDate").value;
+  const dueDate = $("dueDate").value;
+  const originatorName = $("originatorName").value.trim();
+  const originatorEmail = $("originatorEmail").value.trim();
+  const advWhat = $("advWhat").value.trim();
+  const advWhy = $("advWhy").value.trim();
+  const advAction = $("advAction").value.trim();
+  const rigs = selectedRigs();
+  const noPdf = $("noPdf").checked;
+
+  if (!aabNumber) errors.push("AAB Number is required.");
+  if (!title) errors.push("Title is required.");
+  if (!category) errors.push("Category / Equipment Area is required.");
+  if (!issueDate) errors.push("Issue Date is required.");
+  if (!dueDate) errors.push("Due Date is required.");
+  if (issueDate && dueDate && dueDate < issueDate) errors.push("Due Date cannot be before Issue Date.");
+  if (!originatorName) errors.push("Originator name is required.");
+  if (!originatorEmail) errors.push("Originator email is required.");
+  if (!advWhat) errors.push('"What has happened" is required.');
+  if (!advWhy) errors.push('"Why it matters" is required.');
+  if (!advAction) errors.push('"What the rig must do" is required.');
+  if (rigs.length === 0) errors.push("At least one rig must be selected.");
+  if (!pdfData && !noPdf) errors.push('A bulletin PDF is required, or check "This AAB has no separate PDF attachment".');
+
+  if (aabNumber && !/^[A-Za-z]\d{8}$/.test(aabNumber)) warnings.push("AAB Number doesn't match the usual format (a letter + 8 digits).");
+  if (originatorEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(originatorEmail)) warnings.push("Originator email doesn't look valid.");
+  if (pdfData && pdfData.sizeBytes > PDF_WARN_BYTES) warnings.push(`Attached PDF is ${(pdfData.sizeBytes/1024/1024).toFixed(1)} MB — larger than usual.`);
+  if (dueDate && dueDate < new Date().toISOString().slice(0,10)) warnings.push("Due Date is in the past.");
+
+  return {errors, warnings};
+}
+
+function showMsg(id, text){
+  const el = $(id);
+  if (!text){ el.classList.remove("show"); el.innerHTML=""; return; }
+  el.classList.add("show");
+  el.innerHTML = text;
+}
+function clearMsgs(){
+  showMsg("msgError", null);
+  showMsg("msgWarn", null);
+  showMsg("msgOk", null);
+}
+
+function errorListHtml(title, items){
+  return `<strong>${title}</strong><ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>`;
+}
+
+// ---------- Build record ----------
+function generateId(){
+  if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  return "aab-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+}
+
+function buildRecord(){
+  const rigs = selectedRigs();
+  const rigStatus = {};
+  rigs.forEach(r => {
+    rigStatus[r.code] = {
+      rigName: r.name,
+      acknowledged: { by: null, at: null },
+      actionClosed: { by: null, at: null, comment: null }
+    };
+  });
+
+  const refDocs = $("refDocs").value.split("\n").map(s=>s.trim()).filter(Boolean);
+
+  return {
+    schemaVersion: "1.0",
+    recordType: "AAB",
+    recordId: generateId(),
+    aabNumber: $("aabNumber").value.trim(),
+    revision: Number($("revision").value || 0),
+    title: $("title").value.trim(),
+    level: 3,
+    category: $("category").value.trim(),
+    issueDate: $("issueDate").value,
+    dueDate: $("dueDate").value,
+    requiresReacknowledgement: $("requiresReack").checked,
+    originator: {
+      name: $("originatorName").value.trim(),
+      email: $("originatorEmail").value.trim()
+    },
+    advisory: {
+      whatHappened: $("advWhat").value.trim(),
+      whyItMatters: $("advWhy").value.trim(),
+      requiredAction: $("advAction").value.trim()
+    },
+    referenceDocuments: refDocs,
+    bulletin: pdfData ? {
+      filename: pdfData.filename,
+      mimeType: pdfData.mimeType,
+      sizeBytes: pdfData.sizeBytes,
+      base64: pdfData.base64
+    } : null,
+    rigsApplicable: rigs.map(r => r.code),
+    rigStatus: rigStatus,
+    expectedAcknowledgerRole: EXPECTED_ACKNOWLEDGER_ROLE,
+    status: "active",
+    postedAt: new Date().toISOString(),
+    postedBy: $("originatorEmail").value.trim(),
+    toolVersion: "1.1"
+  };
+}
+
+function fileNameFor(record){
+  const ts = record.postedAt.replace(/[-:]/g,"").replace(/\.\d+Z$/,"Z");
+  const safeAab = (record.aabNumber || "UNNUMBERED").replace(/[^A-Za-z0-9]/g,"");
+  return `AAB-${safeAab}-Rev${record.revision}-${ts}.json`;
+}
+
+function downloadRecord(record){
+  const filename = fileNameFor(record);
+  const blob = new Blob([JSON.stringify(record, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  return filename;
+}
+
+// ---------- IndexedDB helper for remembering the intake endpoint (this browser only) ----------
+function idbOpen(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open("aabBulletinBoard", 1);
+    req.onupgradeneeded = () => req.result.createObjectStore("kv");
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbGet(key){
+  try{
+    const db = await idbOpen();
+    return await new Promise((resolve,reject)=>{
+      const tx = db.transaction("kv","readonly");
+      const req = tx.objectStore("kv").get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  }catch(e){ return null; }
+}
+async function idbSet(key,val){
+  try{
+    const db = await idbOpen();
+    return await new Promise((resolve,reject)=>{
+      const tx = db.transaction("kv","readwrite");
+      tx.objectStore("kv").put(val,key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => reject(tx.error);
+    });
+  }catch(e){ return false; }
+}
+
+// ---------- AAB intake endpoint (Power Automate) ----------
+// The URL is never written into this file. It's entered once per browser/device
+// and kept only in this browser's IndexedDB, so the file itself stays safe to
+// hand around even though it can post into the estate once configured.
+let cachedEndpoint = null;
+
+async function getEndpoint(){
+  if (cachedEndpoint) return cachedEndpoint;
+  cachedEndpoint = await idbGet("postEndpoint");
+  return cachedEndpoint;
+}
+
+async function setEndpoint(url){
+  cachedEndpoint = url;
+  await idbSet("postEndpoint", url);
+  refreshEndpointStatus();
+}
+
+function refreshEndpointStatus(){
+  idbGet("postEndpoint").then(ep => {
+    $("endpointStatus").textContent = ep ? "Endpoint: configured" : "Endpoint: not set";
+    $("endpointStatus").style.color = ep ? "var(--ok)" : "var(--muted)";
+  });
+}
+
+$("btnSetEndpoint").onclick = async () => {
+  const current = await getEndpoint();
+  const entered = window.prompt(
+    current
+      ? "Update the AAB intake endpoint URL for this browser:"
+      : "Paste the AAB intake endpoint URL Dan gave you. It's stored only in this browser, never in the file itself:"
+  );
+  if (entered === null) return; // cancelled
+  const trimmed = entered.trim();
+  if (!trimmed) return;
+  if (!/^https:\/\//i.test(trimmed)){
+    showMsg("msgError", "That doesn't look like an HTTPS URL — endpoint not saved.");
+    return;
+  }
+  await setEndpoint(trimmed);
+  showMsg("msgOk", "Endpoint saved for this browser.");
+};
+refreshEndpointStatus();
+
+// UTF-8 safe base64, per the fixed body-shape spec
+function toBase64Utf8(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+// Sanitise one filename component to A-Z a-z 0-9 . _ -
+function sanitiseComponent(s){
+  return String(s).replace(/[^A-Za-z0-9._-]+/g, "_");
+}
+
+// Builds the fixed FileName the estate expects: seadrill-aab_<number>_<rev>_<yyyyMMdd-HHmmss>.json
+function estateFileName(record){
+  const d = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const ts = `${d.getUTCFullYear()}${pad(d.getUTCMonth()+1)}${pad(d.getUTCDate())}-${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}`;
+  const number = sanitiseComponent(record.aabNumber || "UNNUMBERED");
+  const rev = sanitiseComponent(record.revision);
+  return sanitiseComponent(`seadrill-aab_${number}_${rev}_${ts}.json`);
+}
+
+// ---------- Button handlers ----------
+$("btnCreateFile").onclick = () => {
+  const {errors, warnings} = validate();
+  clearMsgs();
+  if (errors.length){
+    showMsg("msgError", errorListHtml("Can't create the file — fix these first:", errors));
+    return;
+  }
+  const record = buildRecord();
+  const filename = downloadRecord(record);
+  if (warnings.length){
+    showMsg("msgWarn", errorListHtml("Saved, with these things worth a second look:", warnings));
+  }
+  showMsg("msgOk", `Saved <strong>${filename}</strong> to your downloads.`);
+};
+
+$("btnPost").onclick = async () => {
+  const {errors, warnings} = validate();
+  clearMsgs();
+  if (errors.length){
+    showMsg("msgError", errorListHtml("Can't post — fix these first:", errors));
+    return;
+  }
+  const record = buildRecord();
+
+  const endpoint = await getEndpoint();
+  if (!endpoint){
+    const filename = downloadRecord(record);
+    showMsg("msgError",
+      `<strong>No intake endpoint configured yet.</strong> Click "Set endpoint" once Dan gives it to you.<br>` +
+      `I've downloaded <strong>${filename}</strong> instead so nothing is lost.`);
+    if (warnings.length) showMsg("msgWarn", errorListHtml("Also worth a look:", warnings));
+    return;
+  }
+
+  const json = JSON.stringify(record);
+  const envelope = {
+    FileName: estateFileName(record),
+    ContentType: "application/json",
+    FileContent: toBase64Utf8(json)
+  };
+
+  try{
+    const resp = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(envelope)
+    });
+
+    if (resp.ok){
+      showMsg("msgOk", `Posted — <strong>${envelope.FileName}</strong> sent to the intake endpoint (HTTP ${resp.status}).`);
+      if (warnings.length) showMsg("msgWarn", errorListHtml("Worth a second look:", warnings));
+    } else {
+      let bodyText = "";
+      try{ bodyText = await resp.text(); }catch(e){ /* ignore */ }
+      const fname = downloadRecord(record);
+      showMsg("msgError",
+        `<strong>Post failed — HTTP ${resp.status} ${resp.statusText}.</strong>` +
+        (bodyText ? `<br>Server said: ${bodyText.slice(0,400)}` : "") +
+        `<br>I've downloaded <strong>${fname}</strong> instead.`);
+      if (warnings.length) showMsg("msgWarn", errorListHtml("Also worth a look:", warnings));
+    }
+  }catch(err){
+    const fname = downloadRecord(record);
+    showMsg("msgError",
+      `<strong>Post failed:</strong> ${err.name}: ${err.message}<br>` +
+      `This often means a network problem or the endpoint blocking browser calls (CORS) — check with Dan if it persists.<br>` +
+      `I've downloaded <strong>${fname}</strong> instead.`);
+    if (warnings.length) showMsg("msgWarn", errorListHtml("Also worth a look:", warnings));
+  }
+};
+
+// ---------- Preview ----------
+$("btnPreview").onclick = () => {
+  const {errors} = validate();
+  clearMsgs();
+  if (errors.length){
+    showMsg("msgError", errorListHtml("Fill these in before previewing:", errors));
+    return;
+  }
+  const record = buildRecord();
+  $("pv-title").textContent = `${record.aabNumber} Rev ${record.revision} — ${record.title}`;
+  $("pv-subline").textContent = `${record.category} · Issued ${record.issueDate} · Due ${record.dueDate}`;
+
+  const rigChips = record.rigsApplicable.map(code => {
+    const r = RIGS.find(x=>x.code===code);
+    return `<span class="rig-chip">${r ? r.name : code}</span>`;
+  }).join("");
+
+  const refDocsHtml = record.referenceDocuments.length
+    ? `<ul>${record.referenceDocuments.map(d=>`<li>${d}</li>`).join("")}</ul>`
+    : `<div style="color:var(--muted); font-size:13px;">None listed.</div>`;
+
+  const pdfHtml = pdfData
+    ? `<a href="${pdfData.objectUrl}" target="_blank" style="color:var(--navy); font-weight:600;">${pdfData.filename}</a> <span style="color:var(--muted); font-size:12px;">(${(pdfData.sizeBytes/1024).toFixed(0)} KB)</span>`
+    : `<div style="color:var(--muted); font-size:13px;">No PDF attached to this AAB.</div>`;
+
+  $("pv-body").innerHTML = `
+    <div class="p-grid">
+      <div><div class="k">Originator</div>${record.originator.name} (${record.originator.email})</div>
+      <div><div class="k">Re-acknowledgement required</div>${record.requiresReacknowledgement ? "Yes" : "No"}</div>
+      <div><div class="k">Expected acknowledger</div>${record.expectedAcknowledgerRole}</div>
+    </div>
+    <div class="p-section"><h4>What has happened</h4><p>${record.advisory.whatHappened}</p></div>
+    <div class="p-section"><h4>Why it matters</h4><p>${record.advisory.whyItMatters}</p></div>
+    <div class="p-section"><h4>What the rig must do</h4><p>${record.advisory.requiredAction}</p></div>
+    <div class="p-section"><h4>Reference documents / OEM bulletins</h4>${refDocsHtml}</div>
+    <div class="p-section"><h4>Bulletin attachment</h4>${pdfHtml}</div>
+    <div class="p-section"><h4>Applies to</h4><div class="rig-chip-list">${rigChips}</div></div>
+  `;
+  $("previewModal").classList.add("show");
+};
+$("closePreview").onclick = () => $("previewModal").classList.remove("show");
+$("previewModal").addEventListener("click", (e) => {
+  if (e.target.id === "previewModal") $("previewModal").classList.remove("show");
+});
+</script>
+</body>
+</html>
