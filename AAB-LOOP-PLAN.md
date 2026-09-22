@@ -147,6 +147,10 @@ file.
   acknowledgement page: the current AABs, their text, attachments and photos, per-rig
   status. Attachments and photos are in it (the rig needs the PDF); size is bounded by
   the 30 MB post guard per AAB and by AABs being few.
+- Three rules from the HAZID (`AAB-HAZID-DRAFT.md` §4): `Archive-ProblemFiles.ps1` never
+  moves an AAB or an acknowledgement file; "acknowledged, action open" is its own state and
+  colour, distinct from closed; the dashboard shows a stale-data banner when the scanner has
+  not run for two hours.
 - `aab-overdue-pending.json` into the repo root, like `ssce-notifications-pending.json`,
   one row per AAB per rig that is past due and not acknowledged, written once per day per
   row, for the chase branch of the flow.
