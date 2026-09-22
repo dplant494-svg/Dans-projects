@@ -621,3 +621,79 @@ on the flow or dashboard side is waiting. Two things the test confirmed for the 
 `subject` and `pdfName` are used exactly as posted, so the tool builds both; and the flow
 sends whatever is in `pdf`, so the 20 MB warn / 30 MB refuse on the button is the only size
 guard there is.
+
+## Entries 18, 19 and 20 reply (dashboard side, 22 Sep 2026, evening): the splice was real, and it is now kept apart
+
+**19.3, your question, answered from the code.** `cbmGrades[].itemLabel` is derived from the
+key alone and from nothing else: a positional key `cbm_<class>_g<s>_<i>` becomes
+`Section <s+1> . Item <i+1>`, an id key `<class>_<a>_<b>_<c>` becomes `a.b.c`. The scanner
+never attaches a task description, because the payload carries none. So the label was opaque
+rather than wrong, which is the better failure, exactly as you said. But the rest of 19.3 was
+right too: the heatmap groups by instance + `itemKey` and the history drill-down by rig +
+instance + `itemKey`, with no regard to date, so across the July boundary the same positional
+key really was one row and one history line for two different tasks.
+
+**Fixed, scanner v2.61 and the dashboard of the same build, both tested on the test set.**
+The rule, written into `INTEGRATION-CONTRACT.md` under `cbmGrades[]`:
+
+- A positional (`o:`) key on a post whose `cbmData.date` is before **19 July 2026** is kept
+  apart under `itemKey` `o:<s>.<i>@pre80`, labelled `Section N . Item M (template before
+  19 Jul 2026)`, with `era: 'pre80'` and `postedKey` (the key as posted) on the row. It sorts
+  directly under the current row of the same number, and the heatmap legend explains the
+  marking when any such row is present. Id (`n:`) keys and every row after the boundary are
+  untouched, `era` blank.
+- The same proxy you used: the inspection date on the post, not a revision, since SSORT posts
+  carry no `meta.rev`.
+- The honest cost until your mapping arrives: the 27 keys that still resolve are split at the
+  boundary too, because from the dashboard's side a positional key before 19 July cannot be
+  trusted without your table. A split is a labelled gap; a merge was a wrong trend. We took
+  the gap.
+
+**19.5, please send the mapping, as a file.** The scanner reads an optional
+`cbm-key-map.json` beside `config.json`:
+
+```
+{ "boundary": "2026-07-19",
+  "classes": {
+    "Riser Adapter": { "boundary": "2026-07-19",
+                       "map": { "o:1.0": "o:0.3", "o:2.2": null, "o:0.2": "o:0.2" } },
+    "Gate Valves":   { "map": { "o:1.1": "o:2.4" } }
+  } }
+```
+
+`class` is `cbmData.equip` exactly as posted. A key mapped to a current index is re-pointed
+(`era: 'remapped'`, `postedKey` kept, label and sort from the new index). A key mapped to
+`null` stays apart with `era: 'removed'` and the label `(task removed in the 19 Jul 2026
+template)`. A key you say still resolves goes in as itself (`"o:0.2": "o:0.2"`) and that
+removes its split. A per-class `boundary` is there because you said other classes moved too;
+if any class moved at a different revision, give its date and the rule uses it for that
+class. Anything not in the file stays kept apart, so a partial map is safe to send early.
+Tested: remapped, removed and unmapped on the same post, all three shapes correct.
+
+**19.4, agreed and recorded:** the grades are sound, the 107 id-based grades are untouched,
+and the two Grade 3 photograph candidates are in the same-task group. Nothing on this side
+treats the data as junk; the rows are marked, not dropped.
+
+**Entry 18, one thing done and one nothing.** 18.3 withdrawn, understood: no key removed, no
+key added. But 18.5 says the stored value is a bare `'1'` to `'5'`, and this side's contract
+and dashboard only knew `'1'` to `'4'`: a posted 5 rendered as a neutral, uncoloured cell,
+indistinguishable from ungraded. Fixed the same build: 3, 4 and 5 are the fail bucket, the
+legend says so, the contract row says `'1'`–`'5'`. If SSORT 148 turns grades 4 and 5 into
+"Not acceptable" on screen, the dashboard now agrees with it. Nothing else to build for 18.
+
+**Entry 20, acknowledged, and one confession.** Two revisions, not one: agreed, and 19 is the
+proof. We wait for the `acst_*` key list before building anything acoustic. Integer revision
+numbers: agreed, for the reason given, `meta.rev` is our only way back from a file to a build.
+The confession: **today two `seadrill-oem_*` files with `meta.kind: 'oem-copy'` were uploaded
+to PostedReports by Dan for the CBM to OEM flow test, one with `meta.asset` `SSCE Equipment`
+and one with `West Vela`, each carrying a one-page TEST PDF, and both were deleted the same
+afternoon.** They were OEM copies, not CBM or rig-visit posts, the scanner records OEM copies
+outside `reports[]`, and neither came from a tool. Said here so that if a scan log or a
+PostedReports version history shows them, nobody thinks the SSCE Equipment rule was broken by
+a tool build. The flow itself is live (previous entry); the button can ship.
+
+**20.1, an offer, not a request.** "Server build is not last-posted build." The dashboard
+already stores `meta.rev` on every WCGRRT post; a small per-rig line "last post from REV n on
+date" is a few lines on the Fleet view and would show which rigs are still opening a cached
+older copy. Say if it is worth having and it goes on the plan; it needs SSORT to write
+`meta.rev` (your item 7) to be worth anything for SSORT.

@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.60'
+$ScriptVersion = '2.61'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1179,6 +1179,82 @@ $LargeReportBytes = 10MB
 # cannot meet 10 MB without degrading the evidence, so they get their own
 # ceiling instead of a warning that always fires. Everything else stays at 10 MB.
 $LargeCbmReportBytes = 40MB   # v2.48: 40, matching SSORT REV 146 (rolling handoff entry 9) - the 30 was sized at photo quality 0.70, SSORT is now 0.82
+
+# v2.61: positional ("o:") CBM_GRADED keys changed meaning when SSORT rebuilt
+# the templates at REV 80 (19 Jul 2026; rolling handoff entry 19: 38 of the 65
+# posted positional keys now point at a different task, or at none). A grade
+# recorded before the rebuild must not share a heatmap row or a history line
+# with a grade recorded after it. Until the tools session's then->now mapping
+# arrives (cbm-key-map.json beside config.json), every positional key dated
+# before the boundary is kept apart under "@pre80" and labelled as the earlier
+# template. With the mapping, a known key is re-pointed to its current index;
+# a key mapped to null (the task no longer exists) stays apart. Id-based ("n:")
+# keys are never touched. Format of cbm-key-map.json:
+#   { "boundary": "2026-07-19",
+#     "classes": { "Riser Adapter": { "boundary": "2026-07-19",
+#                                     "map": { "o:1.0": "o:0.3", "o:2.2": null } } } }
+$CbmTemplateBoundary = [datetime]'2026-07-19'
+$cbmKeyMap = $null
+$cbmKeyMapPath = Join-Path $repoRoot 'cbm-key-map.json'
+if (Test-Path -Path $cbmKeyMapPath) {
+    try {
+        $cbmKeyMap = ConvertFrom-ReportJsonText -Raw ([System.IO.File]::ReadAllText($cbmKeyMapPath))
+        $mapBoundary = [string](Get-Prop $cbmKeyMap 'boundary')
+        if ($mapBoundary) { $CbmTemplateBoundary = [datetime]::ParseExact($mapBoundary, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture) }
+        Write-Host ("CBM key map: {0} class(es) from {1}" -f @(Get-KeyNames (Get-Prop $cbmKeyMap 'classes')).Count, $cbmKeyMapPath) -ForegroundColor Cyan
+    } catch {
+        Write-Warning ("cbm-key-map.json could not be read ({0}); positional keys before {1:yyyy-MM-dd} are kept apart unmapped" -f $_.Exception.Message, $CbmTemplateBoundary)
+        $cbmKeyMap = $null
+    }
+}
+
+# Returns the item unchanged, or a copy re-pointed / kept apart per the rule above.
+function Resolve-CbmItemEra {
+    param($Item, [string]$Class, [string]$Date)
+    if ($Item.itemShape -ne 'old') { return $Item }
+    $d = [datetime]::MinValue
+    $parsed = [datetime]::TryParse([string]$Date, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::None, [ref]$d)
+    if (-not $parsed) { return $Item }   # no usable date: nothing can be said, leave the key alone
+    $boundary = $CbmTemplateBoundary
+    $classMap = $null
+    if ($cbmKeyMap) {
+        $classes = Get-Prop $cbmKeyMap 'classes'
+        $classMap = Get-Prop $classes $Class
+        if ($classMap) {
+            $cb = [string](Get-Prop $classMap 'boundary')
+            if ($cb) { $boundary = [datetime]::ParseExact($cb, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture) }
+        }
+    }
+    if ($d -ge $boundary) { return $Item }
+    $stamp = $boundary.ToString('d MMM yyyy', [Globalization.CultureInfo]::InvariantCulture)
+    $copy = $Item | Select-Object *
+    $copy | Add-Member -NotePropertyName postedKey -NotePropertyValue $Item.itemKey -Force
+    $mapped = $false; $target = $null
+    if ($classMap) {
+        $map = Get-Prop $classMap 'map'
+        if ($map -and ((Get-KeyNames $map) -contains $Item.itemKey)) { $mapped = $true; $target = Get-Prop $map $Item.itemKey }
+    }
+    if ($mapped -and $target) {
+        $t = [string]$target
+        if ($t -match '^o:(\d+)\.(\d+)$') {
+            $copy.itemKey = $t
+            $copy.sortKey = @([int]$Matches[1], [int]$Matches[2])
+            $copy.itemLabel = "Section $([int]$Matches[1] + 1) . Item $([int]$Matches[2] + 1)"
+            $copy | Add-Member -NotePropertyName era -NotePropertyValue 'remapped' -Force
+            return $copy
+        }
+    }
+    $copy.itemKey = $Item.itemKey + '@pre80'
+    $copy.sortKey = @($Item.sortKey[0], $Item.sortKey[1], 1)   # sorts directly after the current row of the same number
+    if ($mapped) {
+        $copy.itemLabel = "$($Item.itemLabel) (task removed in the $stamp template)"
+        $copy | Add-Member -NotePropertyName era -NotePropertyValue 'removed' -Force
+    } else {
+        $copy.itemLabel = "$($Item.itemLabel) (template before $stamp)"
+        $copy | Add-Member -NotePropertyName era -NotePropertyValue 'pre80' -Force
+    }
+    return $copy
+}
 function Add-Problem { param($File, [string]$Kind, [string]$Why)
     $problems.Add(@{ file = $File.Name; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
     # v2.46: the same list with full paths, for scripts\Archive-ProblemFiles.ps1.
@@ -1833,7 +1909,8 @@ foreach ($f in $files) {
                     -Serial ([string](Get-Prop $cbm 'rcpt_serial')) -FallbackClass $cbmClass
                 $cbmDate = [string](Get-Prop $cbm 'date')
                 if (-not $cbmDate) { $cbmDate = [string](Get-Prop $meta 'date') }
-                foreach ($it in (Get-CbmGradedItems -Cbm $cbm)) {
+                foreach ($it0 in (Get-CbmGradedItems -Cbm $cbm)) {
+                    $it = Resolve-CbmItemEra -Item $it0 -Class $cbmClass -Date $cbmDate   # v2.61
                     $key = "$rig|$cbmClass|$cbmEquip|$($it.itemKey)|$cbmDate"
                     $rec = [pscustomobject]@{
                         rig       = [string]$rig
@@ -1848,6 +1925,8 @@ foreach ($f in $files) {
                         photos    = $it.photos
                         date      = $cbmDate
                         file      = $f.Name
+                        era       = [string](Get-Prop $it 'era')        # v2.61: '', 'pre80', 'removed', 'remapped'
+                        postedKey = [string](Get-Prop $it 'postedKey')  # v2.61: the key as posted, when era is set
                     }
                     $existing = $cbmGradeEntries[$key]
                     if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {

@@ -1711,7 +1711,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var g = String(grade || '').trim();
     if (g === '1') return 'g1';
     if (g === '2') return 'g2';
-    if (g === '3' || g === '4') return 'g34';
+    if (g === '3' || g === '4' || g === '5') return 'g34';   // NOV's §7 guide is a five-level scale; 4 and 5 are 'Not acceptable' (rolling handoff entry 18.5)
     return '';   // '', 'N/A', or anything else -> neutral bucket
   }
 
@@ -1819,10 +1819,16 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     table.appendChild(tbody);
     wrap.appendChild(table);
 
-    [['g1', 'Grade 1'], ['g2', 'Grade 2'], ['g34', 'Grade 3 / 4'], ['', 'Ungraded / N/A']].forEach(function (p) {
+    [['g1', 'Grade 1'], ['g2', 'Grade 2'], ['g34', 'Grade 3 / 4 / 5'], ['', 'Ungraded / N/A']].forEach(function (p) {
       legend.appendChild(mk('span', 'cbm-grade' + (p[0] ? ' ' + p[0] : ''), p[1]));
     });
     legend.appendChild(mk('span', '', 'Blank cell = no item reported at that position for that equipment'));
+    // v2.61 (scanner): positional keys recorded before SSORT rebuilt the CBM
+    // templates (19 Jul 2026) are kept on their own rows, because the same
+    // number means a different task after the rebuild (rolling handoff entry 19).
+    if (entries.some(function (e) { return e.era === 'pre80' || e.era === 'removed'; })) {
+      legend.appendChild(mk('span', '', 'Rows marked "template before 19 Jul 2026" are grades recorded on the earlier SSORT checklist; the numbering changed, so they are kept apart from the current rows rather than merged into one history'));
+    }
   }
 
   function cbmHeatCell(entry, rig) {
