@@ -34,7 +34,7 @@ Open `PostedReports/Notifications/WCE_Precharge_Notification.xlsx` in the browse
    all of those.
 4a. **Superintendents** sheet (22 Sep): `Name`, `Email`, the eight subsea
    superintendents (Brad Waldron, Paul Calhoun, Jacob James, Eric Rachall, Stephen
-   Sagerian, Steve Rice, Siti Yusree and one more), made into a table named
+   Sagerian, Steve Rice, Siti Yusree, Brent Sherman), made into a table named
    `Superintendents`. Read by this flow only, for the CC. A future flow that should
    reach them reads the same table.
 4b. **Rigs** sheet (22 Sep): headers after `TslEmail` are `OIMEmail`, `RigEngineerEmail`,
