@@ -18,10 +18,13 @@ The recipients live in the workbook you already have,
 `PostedReports/Notifications/WCE_Precharge_Notification.xlsx`. Open it from the
 SharePoint site in the browser, not from the synced folder.
 
-1. **Rigs** sheet. In the first empty header cell to the right of `TslEmail` (that is
-   **F1**) type `OIMEmail`. In **G1** type `RigEngineerEmail`. In **H1** type `ARMEmail`
-   (the Assistant Rig Manager; also wanted on the precharge emails, week plan item 12,
-   so add it now and the column is there for both). The blue table extends itself to
+1. **Rigs** sheet. **Done 22 Sep while building the CBM to OEM flow:** the headers after
+   `TslEmail` are `OIMEmail`, `RigEngineerEmail`, `ARMEmail`, `RigManagerEmail`,
+   `ESVEmail`, `DSLEmail`, `MPDEmail`. OIM, Rig Engineer, ARM and Rig Manager are filled.
+   ESV (Electrical Supervisor), DSL (Drilling Section Leader) and MPD (MPD Supervisor)
+   are empty and are for this flow: fill them in Part A, and the RigTo expression in
+   Part D step 11 gains those three columns plus `RigManagerEmail`, the same
+   `coalesce(first(body('RigRow')?['value'])?['<column>'],'')` piece per column. The blue table extends itself to
    include them; if it does not, click any cell in the table, **Table Design**,
    **Resize Table**, and drag the range to column H.
 2. Fill in the OIM, Rig Engineer and ARM addresses for each vessel you want to receive

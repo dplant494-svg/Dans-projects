@@ -29,11 +29,19 @@ Open `PostedReports/Notifications/WCE_Precharge_Notification.xlsx` in the browse
 
 3. Select A1 to B8, **Insert** tab, **Table**, tick *My table has headers*, OK. Click in
    the table, **Table Design**, and set the table name (top left) to `NOV`.
-4. **Office** sheet: Dan, Lee, Joao, Ronnie and, from 22 Sep, the subsea superintendents
-   (Brad Waldron, Paul Calhoun, Jacob James, Eric Rachall, Stephen Sagerian, Steve Rice,
-   Siti Yusree). They are the CC on every OEM mail, and the same table feeds the precharge
-   and rig-visit mails and the fallback mails, so a name added here is on all of them.
-   To extend the table: click the last Email cell, press Tab, type name, Tab, email.
+4. **Office** sheet: Dan, Lee, Joao, Ronnie only. It is the To of the precharge and
+   rig-visit mails and of every fallback mail, so nobody goes on it who should not get
+   all of those.
+4a. **Superintendents** sheet (22 Sep): `Name`, `Email`, the eight subsea
+   superintendents (Brad Waldron, Paul Calhoun, Jacob James, Eric Rachall, Stephen
+   Sagerian, Steve Rice, Siti Yusree and one more), made into a table named
+   `Superintendents`. Read by this flow only, for the CC. A future flow that should
+   reach them reads the same table.
+4b. **Rigs** sheet (22 Sep): headers after `TslEmail` are `OIMEmail`, `RigEngineerEmail`,
+   `ARMEmail`, `RigManagerEmail`, `ESVEmail`, `DSLEmail`, `MPDEmail`. This flow copies the
+   Subsea Supervisor, TSL, ARM, Rig Manager and Rig Engineer of the report's rig; blank
+   cells are skipped (the Rig Engineer exists on the Brazil rigs only). ESV, DSL and MPD
+   are for the rig-visit flow later.
 5. Close the workbook.
 
 ## Part B — the flow (15 minutes)
@@ -76,12 +84,26 @@ and(startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'sead
    `join(body('OemEmails'),';')`.
 9. **OfficeRows** / **OfficeEmails** / **OfficeList**: exactly as in the precharge flow
    (table **Office**, map `item()?['Email']`, join with `;`).
+9a. **SupRows** / **SupEmails** / **SupList**: the same three cards again, table
+    **Superintendents**, From `body('SupRows')?['value']`, Map `item()?['Email']`,
+    Compose `join(body('SupEmails'),';')`.
+9b. **RigRow**: `List rows present in a table`, table **Rigs**, Advanced parameters:
+    **Filter Query** fx `concat('Vessel eq ''', trim(outputs('RigName')), '''')`,
+    **Top Count** `1`.
+9c. **RigCc**: Compose. Joins the five rig addresses, each prefixed with `;`, skipping
+    blanks, so a rig with no row or no Rig Engineer is not an error:
+
+```
+concat(if(empty(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],'')),'',concat(';',first(body('RigRow')?['value'])?['SubseaSupervisorEmail'])),if(empty(coalesce(first(body('RigRow')?['value'])?['TslEmail'],'')),'',concat(';',first(body('RigRow')?['value'])?['TslEmail'])),if(empty(coalesce(first(body('RigRow')?['value'])?['ARMEmail'],'')),'',concat(';',first(body('RigRow')?['value'])?['ARMEmail'])),if(empty(coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],'')),'',concat(';',first(body('RigRow')?['value'])?['RigManagerEmail'])),if(empty(coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],'')),'',concat(';',first(body('RigRow')?['value'])?['RigEngineerEmail'])))
+```
+
 10. **Condition** named **HasRecipients**: left box fx `length(outputs('OemList'))`,
     operator **is greater than**, right box `0`. (The first build used *is not equal to*
     an empty box and went False with seven addresses in the list; the length test is
     what passed on 22 Sep.)
 11. **True**: **Send an email (V2)**. To: custom value, fx `outputs('OemList')`. CC: fx
-    `outputs('OfficeList')`. Subject: `[Seadrill CBM Report for OEM review] @{outputs('Subject')}`.
+    `concat(outputs('OfficeList'), ';', outputs('SupList'), outputs('RigCc'))` (office,
+    superintendents, the rig's five). Subject: `[Seadrill CBM Report for OEM review] @{outputs('Subject')}`.
     Body (code view):
 
 ```
