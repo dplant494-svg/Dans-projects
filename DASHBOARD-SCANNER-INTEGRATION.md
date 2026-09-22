@@ -329,7 +329,7 @@ dashboard link, and a fallback mail to the Office table when a sheet is missing.
 
 ## 10. What is coming from the other side, and what is open here
 
-Promised by the reporting-tools session for the revisions after 161 (their reply of 19 Sep said 162; on 21 Sep the folder was at 164 and acoustic soak native in 163, so read the folder and `meta.rev`, not a number in a handoff): `soak` populated (acoustic first,
+Rolling handoff entry 16 (21 Sep, evening) corrected the state of the tools' queue: shipped in REV 162 to 164 are the post receipt with the replaces line, the unposted-changes mark, the `counts` block, the three print rules, the attachments block hidden in report mode, and the stale entry date mark. Still queued: `soakLabels`, the real acoustic keys (the REV 163 form never ran, entry 15), SSORT writing `meta.rev` (SSORT 148), EHBS and Drawdown native in both tools (entry 17: SSORT carries the same three embedded test tools), Ram Cavity, Load latest posted. Read their handoff's §5.2 state column and §9.1a rather than this list. As previously promised: `soak` populated (acoustic first,
 then EHBS and Drawdown: "expect the first one to surprise you"), `soakLabels`, a `counts`
 block `{entries, photographs, attachments}` from the same code as the crew's post receipt,
 the post receipt with a replaces line, an unposted-changes mark, the attachments block hidden

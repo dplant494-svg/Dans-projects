@@ -62,15 +62,16 @@ Then do these, in this order, and STOP after each for me to check:
      Prove by search, show me the byte count before and after. Change nothing.
   3. Show me the corrupted CBM grade strings listed in the tools handoff §10 as a before/after
      table. Change nothing.
-  4. List the items the tools session queued after REV 161 (their 19 Sep reply called the
-     next revision 162; by 21 Sep the folder was at 164 and acoustic soak was native in 163,
-     so use the folder and meta.rev, not the number in any handoff). The items: iframe harvest into soak with
-     soakLabels, the post receipt with the replaces line and the unposted-changes mark, the
-     three print rules, #attachments-block hidden in report mode, stale entry dates with the
-     amber mark and one-click set, the counts block, the Load latest posted button) and for
-     each say which files and functions it touches and whether it changes the posted payload.
-     Anything that adds a key to the payload gets its key name written here, lower case, so I
-     can send it to the dashboard session before it ships.
+  4. From the tools handoff §9.1 and §9.1a, list what is still queued (acoustic: delete the
+     shadowing duplicate and convert makeEquipEntry, in BOTH tools per rolling handoff entry
+     17; EHBS and Drawdown native, both tools; Ram Cavity; soakLabels; SSORT writing meta.rev;
+     Load latest posted; the CBM criteria repair and the reference photographs) and confirm
+     by grep, not from the handoff, which items §9.1a says shipped in 162 to 164 really are in
+     REV 164 (post receipt, unposted mark, counts, print rules, attachments block hidden in
+     report mode, stale entry dates). For each queued item say which files and functions it
+     touches and whether it changes the posted payload. Anything that adds a key to the
+     payload gets its key name written here, lower case, so I can send it to the dashboard
+     session before it ships.
 
 Rules for every step after that, none negotiable:
 
