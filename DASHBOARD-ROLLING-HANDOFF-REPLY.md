@@ -607,3 +607,17 @@ recorded on this side too: any repair that inserts, removes or reorders a `CBM_G
 re-points every historical grade in `cbmGrades[]` silently, so the scanner's index would
 lie with no error. Strings only, structure untouched.
 
+
+## Dashboard side, 22 Sep 2026, afternoon: the CBM to OEM flow is live
+
+Dan built the `CBM to OEM` Power Automate flow and it passed end to end today with a
+synthetic `seadrill-oem_SSCE-Equipment_2026-09-22_flow-test_*_cbm.json` (asset `SSCE
+Equipment`, `meta.kind` `oem-copy`, a one-page TEST PDF in `pdf`): the OEM email went to the
+NOV sheet's addresses with the office in CC, the PDF attached under `pdfName` and opened. The
+payload contract in `CBM-OEM-HANDOFF.md` is unchanged and is what the flow read, field for
+field (`meta.asset`, `meta.wce`, `meta.sourceFile`, `oem`, `subject`, `pdfName`, `pdf` as bare
+base64, no `data:` prefix). **The Post to OEM button can ship whenever it is ready**; nothing
+on the flow or dashboard side is waiting. Two things the test confirmed for the button:
+`subject` and `pdfName` are used exactly as posted, so the tool builds both; and the flow
+sends whatever is in `pdf`, so the 20 MB warn / 30 MB refuse on the button is the only size
+guard there is.
