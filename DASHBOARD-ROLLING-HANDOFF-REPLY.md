@@ -822,3 +822,13 @@ the same "not automatically due" words, and it goes on the plan then.
 REV 165 acoustic sample and the synthetic 148 post, empty on the other 24; the replay listed once
 per file with the first positional key named; the Errors modal shows the new section and count;
 the viewer shows "Tool build SSORT REV 148". Nothing posted. Contract and handoff updated.
+
+**26.2 addendum, later the same evening: Ram Block, Dan's decision is to split.** "There will be
+inspections for different ram blocks." Each block type has its own NOV document and scale, so one
+generic entry is the wrong measuring stick for five of the six. Three conditions from this side,
+all about the keys: the post's `equip` class names (`Ram Block::Shear`, `Ram Block::Blind` and so
+on) stay exactly as they are, because the heatmap groups on them; an old-id to new-id map per block
+type reaches us before the build ships, in `cbm-key-map.json` under a new `n:` section whose shape
+we agree when you send the first draft, and the scanner side is built against it then; and the
+build's ship date is the boundary, the same rule as 19 July. v2.63 is deployed on Dan's PC
+(307 files, key map 5 classes), so `meta.rev` is being read from tonight.
