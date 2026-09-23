@@ -1,7 +1,8 @@
 # Seadrill Bulletin Board Rev 5 — what to build next, for Eric's Claude session
 
 **From:** the dashboard session, via Dan · **Date:** 22 September 2026
-**Read with:** `AAB-LOOP-PLAN.md` (the whole loop, the decisions, who builds what)
+**Read with:** `AAB-LOOP-PLAN.md` (the whole loop, the decisions, who builds what) · **Supplied with it:** `aab-logo-600.jpg` (the logo), `sample-reports\aab\` (four test records and a README)
+**Posting:** the same HTTP intake URL every tool on the estate uses (Dan gives it directly, never in a file); the post lands in SharePoint WellControl / PostedReports, where the scanner and the flow read it. Nothing about the envelope changes.
 **Rev 4 status:** read in full against Dan's 15 September brief. It meets the brief. Rev 5 is
 the estate integration plus four things Dan asked for on 22 September: SFI codes, photographs,
 several attachments, and load/save of the record.
@@ -69,14 +70,42 @@ below. Bump the header tag to Rev 5 and toolVersion to "2.0".
     sections, references, applicable rigs, photographs as a contact sheet, attachments as
     a list of names. The PDF is the bulletin; do not redraw it.
 
+11. GENERATE PDF. One function, buildAabPdf(), renders the AAB itself as a PDF with jsPDF
+    embedded in the file (not loaded from a CDN, so it works from disk with no network;
+    Precharge Pro Rev 81 embeds it the same way for its sheetPdf): the AAB logo top left
+    (see LOGO below), Seadrill navy header bar, "LEVEL 3 ADVISORY" tag, number, revision,
+    title, issue and due dates, originator, SFI codes and category, the three sections in
+    order, reference documents, applicable rigs, photographs at a fixed height with their
+    captions, and a list of the attachment names. It never redraws the bulletin PDF; that
+    stays as its own attachment. Two buttons call the same function: "Download PDF" saves
+    it locally; "Post AAB" calls it and puts the result in the record as
+      pdf:     <bare base64 of the PDF bytes, no data: prefix>
+      pdfName: "Seadrill_AAB_<number>_Rev<n>.pdf"
+    exactly as the CBM to OEM record carries pdf / pdfName. The notification flow attaches
+    it to every rig email beside the bulletin, and the dashboard shows it. Include it in the
+    size guard of step 6.
+
+12. LOGO. Embed the Seadrill Bulletin Board logo (aab-logo-600.jpg, supplied with this
+    handoff, ~110 KB) as a base64 constant AAB_LOGO_B64 at the top of the script. Use it in
+    the page header beside the title, on the printed cover, and in the PDF. It is the one
+    image in the file; do not embed the 600 px PNG (600 KB).
+
+13. TEST RECORDS. Four synthetic files come with this handoff (sample-reports\aab\ in the
+    dashboard repository, README beside them): an AAB at revision 0, its revision 1, an
+    acknowledgement and an action closure from West Vela. Load AAB file (step 7) must open
+    the two AAB files and fill the form completely; Create AAB file on the loaded revision 0
+    must produce a record with the same keys. The acknowledgement files are the dashboard
+    side's shape, shown so both ends agree; the tool never reads them. Do not upload any of
+    the four to PostedReports.
+
 After each step: node --check on the script block, open the file from disk, create one
 AAB on the rig "West Vela" only with a small PDF and one photograph, press "Create AAB
 file", and show me the saved record's meta, sfi, attachments (name/type/bytes only) and
 photos (name/caption only). Do NOT press Post on any test; posting is Dan's, on his say-so.
 
 When Rev 5 is done, update AAB-Dashboard-Handoff.md to schemaVersion 2.0: the meta block,
-rigNames, sfi, attachments[], photos[], the removal of rigStatus and bulletin, and a
-sentence that the acknowledgement is a separate posted file computed by the dashboard.
+rigNames, sfi, attachments[], photos[], pdf / pdfName, the removal of rigStatus and bulletin,
+and a sentence that the acknowledgement is a separate posted file computed by the dashboard.
 ```
 
 ## 1. The record after Rev 5, for reference
@@ -107,6 +136,8 @@ sentence that the acknowledgement is a separate posted file computed by the dash
   "rigNames": { "vela": "West Vela", "capella": "West Capella" },
   "expectedAcknowledgerRole": "Subsea Supervisor",
   "status": "active",
+  "pdfName": "Seadrill_AAB_C10250746_Rev0.pdf",
+  "pdf": "<bare base64 of the AAB PDF built by buildAabPdf()>",
   "postedAt": "2026-09-22T15:04:00Z",
   "postedBy": "eric.rachall@seadrill.com",
   "toolVersion": "2.0"

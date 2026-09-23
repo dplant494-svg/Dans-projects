@@ -155,7 +155,13 @@ file.
   one row per AAB per rig that is past due and not acknowledged, written once per day per
   row, for the chase branch of the flow.
 
-**Dashboard, AAB tab:** the KPI is **overdue count first, then % acknowledged** (Dan, 15
+**The AAB is a PDF too (Dan, 23 Sep):** Rev 5 renders the advisory itself with jsPDF, one
+function for the Download PDF button and for the record (`pdf`, `pdfName`, the CBM to OEM shape),
+so the rig email carries the AAB cover beside the bulletin and the dashboard shows it. The
+Seadrill Bulletin Board logo (`tools/received/aab-logo-600.jpg`) goes on the tool header, the
+PDF, the rig email and the dashboard tab.
+
+**Dashboard, AAB tab (Dan, 23 Sep: yes, beside Rig Monitoring and the others):** the KPI is **overdue count first, then % acknowledged** (Dan, 15
 Sep: one old unacknowledged AAB must be visible, not averaged away). Then the list: number,
 revision, title, SFI, issued, due, applicable rigs as chips coloured by status, open the
 record (three sections, references, photos, attachments with download links, the same
@@ -186,8 +192,8 @@ by name and role, and the record is the audit trail. Add the gate later if Dan w
 
 | Step | Owner | Needs first | Deliverable |
 |---|---|---|---|
-| 1 | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack) | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, one saved test record on rigs `West Vela` only with a small PDF, **not posted** |
-| 2 | dashboard session | the test record | scanner `aabRecords[]` / `aabAcks[]` / `aabStatus[]`, `aab-data.js`, the AAB tab, the acknowledgement page; tested on the test set with a synthetic ack |
+| 1 | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack), the logo, `sample-reports/aab/` | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, `pdf`/`pdfName`, Load AAB file proven on the two test records, one saved test record on `West Vela` only, **not posted** |
+| 2 | dashboard session | `sample-reports/aab/` (four records, expected state in its README) | scanner `aabRecords[]` / `aabAcks[]` / `aabStatus[]`, `aab-data.js`, the AAB tab, the acknowledgement page; tested on the test set with a synthetic ack |
 | 3 | Dan, guide from us | steps 1 and 2 | **AAB Notifications** flow: issued branch, acknowledged/closed branch, overdue chase; test mode from the first minute; `Settings` obeyed |
 | 4 | Dan + Eric | step 3 in test mode | end to end: Eric posts a real AAB on one rig with Dan's address on that rig's row; acknowledge from the page; the chase fires on a due date set to yesterday |
 | 5 | Eric | live | the directive advisory and the draft MOC his brief already asks for, now written against how the loop actually runs |

@@ -1,0 +1,18 @@
+{
+ "meta": {
+  "kind": "aab-ack",
+  "tool": "AAB Acknowledgement",
+  "rev": 1,
+  "asset": "West Vela",
+  "rigkey": "vela",
+  "saved": "2026-09-24T08:12:00Z"
+ },
+ "aabNumber": "C10250746",
+ "revision": 0,
+ "action": "acknowledge",
+ "by": "A. Small",
+ "role": "Subsea Supervisor",
+ "at": "2026-09-24",
+ "comment": "",
+ "photos": []
+}
