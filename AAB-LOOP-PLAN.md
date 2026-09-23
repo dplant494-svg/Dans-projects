@@ -9,29 +9,33 @@ tool still needs, how the return leg works, where it lives, and who builds which
 
 ---
 
-## 0. The decision: its own tool, not a WCGRRT tile
+## 0. The decision: a passworded Bulletin Board on sacred, like the precharge pages, not a WCGRRT tile
 
-**Issue from Eric's own tool. Acknowledge on the dashboard. Show open AABs inside WCGRRT
-later, read-only.** Three reasons:
+**Dan, 23 Sep (evening), replacing the 22 Sep wording:** the Seadrill Bulletin Board is **a separate,
+passworded requests dashboard on the sacred server, the way the precharge pages are** (`sacred\aab\`
+beside `sacred\precharge\`). AABs are **created there** by Eric as gatekeeper; **all the subsea
+superintendents and the offices have access** to it and see the register; the rigs acknowledge on
+its acknowledgement page. It is not a mailbox and not a WCGRRT tile. The main WCE Dashboard keeps a
+read-only **AAB tab** for the fleet compliance view. Both read the same `aab-data.js` the scanner
+writes. Three reasons the shape holds:
 
 1. **Different user, different side.** WCGRRT is a rig-side reporting tool that thirteen rigs
-   download; an AAB is issued from the office by one gatekeeper. Putting the issuing form in
-   WCGRRT gives thirteen rigs a button only Eric should press, and puts Eric's changes on the
-   posting path of every rig report. The ownership rule in the brief already says it: if it
-   renders in Eric's tool it is his; if it moves or names a file it is ours.
-2. **The acknowledgement is a dashboard act, exactly as the precharge request is.** The rig
-   does not need a tool install to acknowledge; a page on `sacred` under `aab\`, like the
-   precharge request form under `precharge\`, posts the acknowledgement through the same HTTP
-   trigger. Any rig browser can do it. (West Gemini cannot reach `sacred` today, item 24; the
-   email carries the PDF so Gemini still gets the advisory, and acknowledges by reply until the
-   route is fixed.)
-3. **WCGRRT gets the read-only view for free later.** Once the scanner writes `aab-data.js`, a
-   WCGRRT tile "Open AABs for this rig" during a rig visit is a fetch of one file, no posting,
-   no keys. That is a REV item for the tools session after the loop is live, not before.
+   download; an AAB is issued from the office by one gatekeeper. The Bulletin Board is an office
+   app served from the estate, with the same password gate the precharge pages carry (the Precharge
+   Pro session's gate handoff, step 15 of Eric's handoff); Eric's tool file is its source.
+2. **The acknowledgement is a dashboard act, exactly as the precharge request is.** The rig does
+   not need a tool install; `sacred\aab\acknowledge.html` shares the gate and the origin with the
+   Bulletin Board, so one unlock opens both. (West Gemini cannot reach `sacred` today, item 24; the
+   email carries the PDF and Gemini acknowledges by reply until the route is fixed.)
+3. **WCGRRT gets a read-only "open AABs for this rig" view later**, a fetch of `aab-data.js`, no
+   posting, no keys; a REV item for the tools session after the loop is live.
 
-So: **Bulletin Board Rev 5** (Eric's, issuing) · **AAB Acknowledgement page** (ours, on
-`sacred`) · **scanner + dashboard AAB tab** (ours) · **AAB Notifications flow** (Dan builds,
-guide from us). Same four parts as the precharge loop.
+So: **Bulletin Board Rev 5** (Eric's source; served gated under `sacred\aab\`: create, register,
+per-rig status) · **acknowledgement page** (ours, same folder, same gate) · **scanner + `aab-data.js`
++ the read-only AAB tab on the main dashboard** (ours) · **AAB Notifications flow** (Dan builds from
+our guide; one email per applicable rig and one to the office, from the existing notification
+workbook's Rigs, Office and Superintendents sheets, the same pattern as the precharge and CBM to
+OEM flows). Same four parts as the precharge loop.
 
 ## 1. The loop, as it will run
 
@@ -168,13 +172,14 @@ record (three sections, references, photos, attachments with download links, the
 Attachments renderer as reports), revision history, acknowledgement history per rig.
 Fleet view and per-rig view, the way the rest of the dashboard works.
 
-**Acknowledgement page, `aab\acknowledge.html` on `sacred`:** rig from `?rig=<key>` or a
+**Acknowledgement page, `aab\acknowledge.html` on `sacred`, sharing the Bulletin Board's password gate and origin (one unlock opens both):** rig from `?rig=<key>` or a
 dropdown; lists that rig's open AABs from `aab-data.js` with the text, the photos and the
 PDF; **Acknowledge** (name, role, crew A or B, date; DIR-37-0161 §2.2.4 wants both crews' TSLs on a Priority 3) and **Close action** (name,
 date, comment, up to six photos as evidence); posts `seadrill-aab-ack_<no>_<rev>_<rigKey>_
 <stamp>.json` through the HTTP trigger read from `gate-config.js`, and downloads the file
-instead on any failure. Rev tag in the header. No password gate: acknowledging is signed
-by name and role, and the record is the audit trail. Add the gate later if Dan wants it.
+instead on any failure. Rev tag in the header. Behind the same gate as the Bulletin Board (Dan, 23 Sep: the board is
+passworded like the precharge pages); acknowledging is signed by name, role and crew, and the
+record is the audit trail.
 
 ## 5. Decisions Dan owns (updated 23 Sep after DIR-37-0161 v6.07 and DIR-37-0015 v1.08 were read)
 
@@ -188,8 +193,8 @@ by name and role, and the record is the audit trail. Add the gate later if Dan w
 | 6 | SFI list | Dan sends the 331 to 336 code list with names |
 | 7 | Chase cadence | daily at 07:00 |
 | 8 | **Terminology** | the directive's word is **Priority** (1 Safety Alert, 2 Bulletin / Product Obsolescence, 3 Notification / Advisory). Tool, record, documents and dashboard say Priority 3 Advisory; the record keeps `level: 3` and adds `priority: 3` |
-| 9 | **Scope** | **open:** WCE-originated Priority 3 advisories only (Eric as gatekeeper, draft 2 of the MOC assumes this), or every Priority 3 including OEM notifications received through the common mailbox, which brings the Document Controller into the loop |
-| 10 | **Maximo parent case** | **open:** keep the parent AAB case for the corporate evaluation trail (DIR-37-0161 §2.2.2 "all AABs will be entered into Maximo"), marked "distributed via the Seadrill Bulletin Board", with the child cases and acknowledgement on the dashboard; or let the dashboard record replace it. eDocs filing continues either way; the record carries the eDocs reference |
+| 9 | **Scope** | **Settled, Dan 23 Sep:** every Priority 3 advisory that WCE Technical Services issues is created on the Bulletin Board by the gatekeeper, including ones he derives from OEM notifications. The board is not a mailbox: the common mailbox, the Document Controller's eDocs filing and the Maximo parent case stay exactly as DIR-37-0161 says; the board replaces the Maximo child cases and the tick-box acknowledgement for this priority |
+| 10 | **Maximo parent case** | **Settled, Dan 23 Sep: yes.** The parent AAB case is kept for the corporate evaluation trail (DIR-37-0161 §2.2.2), marked "distributed via the Seadrill Bulletin Board"; the child cases and the acknowledgement are on the board and the dashboard. eDocs filing continues; the record carries the eDocs reference and the Maximo parent number |
 | 11 | **Route to go-live** | **Settled, Dan 23 Sep: always a pilot under a documented DIR-00-0011 deviation, with the MOC and the HAZID as its basis**, while the DIR-37-0161 revision (owner Arnaud Gabaut, approver VP Technical Services & ISIT) goes through. The deviation case is connected to the MOC case; its end date is the directive revision date |
 | 12 | **Synergi case type** | **open:** the Seadrill-change (system change) type name in Synergi; the CAR26 example is the Physical Changes type, which is not ours |
 

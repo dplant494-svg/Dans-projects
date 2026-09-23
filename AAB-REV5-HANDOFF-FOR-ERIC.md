@@ -137,6 +137,24 @@ below. Bump the header tag to Rev 5 and toolVersion to "2.0".
     unverified against the source you used. The tool's SFI_CODES list and the dashboard's
     test records both wait on it.
 
+17. THE BOARD IS A SERVED, PASSWORDED DASHBOARD (Dan, 23 Sep). The gated build from step 15
+    is published on the sacred server under aab\ beside the precharge pages and is the
+    Seadrill Bulletin Board itself: Eric creates AABs there; every subsea superintendent and
+    the offices open it to read. So the page gains a REGISTER view above the create form:
+    it fetches aab-data.js from the same folder (written by the dashboard scanner every ten
+    minutes; the dashboard side supplies the file's shape with the acknowledgement page)
+    and lists every AAB: number, current revision, title, priority, issue and due dates,
+    applicable rigs as chips coloured by state (outstanding / partly acknowledged / fully
+    acknowledged / action open / closed / overdue), with the PDF and the bulletin to open.
+    "New AAB" opens the create form; "Revise" loads that AAB into the form as revision n+1
+    (step 7). The register is read-only; nothing on it edits a posted file. When
+    aab-data.js is absent (a copy opened from disk) the register says so and the create
+    form still works. Keep the file self-contained apart from gate-config.js and
+    aab-data.js, both loaded relatively from the same folder.
+    Record: add maximoParent: "<Maximo parent AAB case number>" (text, optional): Dan keeps
+    the Maximo parent case for the corporate evaluation trail; the board replaces the child
+    cases and the tick-box acknowledgement for Priority 3.
+
 After each step: node --check on the script block, open the file from disk, create one
 AAB on the rig "West Vela" only with a small PDF and one photograph, press "Create AAB
 file", and show me the saved record's meta, sfi, attachments (name/type/bytes only) and
@@ -176,6 +194,7 @@ and a sentence that the acknowledgement is a separate posted file computed by th
   "priority": 3,
   "corporateMandatory": false,
   "edocsRef": "",
+  "maximoParent": "",
   "actionRequested": false,
   "expectedAcknowledgerRole": "Technical Section Leader (each crew)",
   "status": "active",
