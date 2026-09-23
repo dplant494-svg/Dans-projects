@@ -1,6 +1,6 @@
 # Management of Change — Priority 3 Advisory AABs distributed and acknowledged through the Seadrill Bulletin Board and the WCE Dashboard
 
-**Draft 2 for the Synergi case** · **Date:** 23 September 2026 (draft 1 was 22 September, before the directives were in hand)
+**Draft 3 for the Synergi case** · **Date:** 23 September 2026 (draft 1 was 22 September, before the directives; draft 2 after them; draft 3 with Dan's rule that the HAZID is gospel and the case carries approvals plus HAZID actions only)
 **Change originator / MOC owner:** Daniel Plant, Subsea Superintendent, Technical Services · **Initiator:** Eric Rachall, AAB gatekeeper
 **Governed by:** DIR-37-0015 Management of Change v1.08 (Peter Smith; approved Torsten Sauer-Petersen) · **Directive changed:** DIR-37-0161 Management of Technical Alerts, Advisories and Bulletins v6.07 (Arnaud Gabaut; approved Torsten Sauer-Petersen)
 **Attachments:** `AAB-HAZID.docx` (Seadrill HAZID, DIR-37-0147), `AAB-LOOP-PLAN.md`, `AAB-LOOP-FLOWCHART.html`, `AAB-REV5-HANDOFF-FOR-ERIC.md`
@@ -21,7 +21,7 @@ Read against DIR-37-0161 v6.07 and DIR-37-0015 v1.08 on 23 September:
 | **Every AAB is filed in eDocs** and entered in Maximo for evaluation, "regardless of relevance or applicability" | §2.2.2 | The Bulletin Board record carries the **eDocs reference** and the Maximo parent case number. **Dan, 23 Sep: the Maximo parent case is kept** for the corporate evaluation trail, marked "distributed via the Seadrill Bulletin Board"; the child cases and the acknowledgement move to the board and the dashboard |
 | **What kind of change this is** | DIR-37-0015 §2: a Synergi MOC is required for major **people, process or system** changes; **System Changes** include "changes / introduction of new Seadrill systems … e.g. MAXIMO to develop and track Maintenance Work Orders"; **Procedural Changes** (implementation of directives, procedures) are covered by DIR-00-0001. §3 Technical / Physical changes do not apply: no equipment, drawing or system program changes | This is a **Seadrill System Change** (introduction of a new system for the distribution and acknowledgement of Priority 3 AABs) with a **procedural change** (the revision of DIR-37-0161) handled under DIR-00-0001. The Synergi case type is the one for Seadrill changes, **[Dan: the exact type name in the Synergi "new case" list; the CAR26 example is "Management of Change - Physical Changes", which is not ours]** |
 | **Deviation until the directive is revised** | DIR-37-0015 §3 note: "Changes to, or deviations from, Seadrill directives … shall be handled according to DIR-00-0011 Handling of non-conformities" | Running Priority 3 AABs outside Maximo before DIR-37-0161 is revised is a deviation. **Dan, 23 Sep: the route is a pilot under a documented DIR-00-0011 deviation, using this MOC and the HAZID as its basis, while the directive revision goes through.** The deviation case is raised alongside this MOC and connected to it (§6); its end date is the date the revised directive is issued |
-| **HAZID and actions** | DIR-37-0015 §3.4: the HAZID is Seadrill's standard HAZID; every action listed in it gets a Synergi action titled **"HAZID Action # (number)"** with an action responsible, verified complete by the MOC owner before close | `AAB-HAZID.docx` is the HAZID; its fifteen entries become fifteen Synergi actions (§4 below) |
+| **HAZID and actions** | DIR-37-0015 §3.4: the HAZID is Seadrill's standard HAZID; every action listed in it gets a Synergi action titled **"HAZID Action # (number)"** with an action responsible, verified complete by the MOC owner before close | `AAB-HAZID.docx` is the HAZID; its sixteen entries become sixteen Synergi actions (§4.2), beside the six approval actions (§4.1), and nothing else |
 | **Supporting documents** | §3.3: attached to the case or referenced by eDocs number | §6 below |
 | **Scope of the change** | DIR-37-0161 covers internal and external AABs for all equipment, single point of entry `aab.operations.excellence@seadrill.com` | **Dan, 23 Sep: every Priority 3 advisory WCE Technical Services issues is created on the Bulletin Board by the gatekeeper, including ones derived from OEM notifications.** The board is a separate passworded requests dashboard on the sacred server, like the precharge pages, open to all subsea superintendents and the offices; it is not a mailbox. The common mailbox, eDocs filing and the Maximo parent case are unchanged |
 
@@ -43,24 +43,19 @@ Read against DIR-37-0161 v6.07 and DIR-37-0015 v1.08 on 23 September:
 | Contact person for change | Daniel Plant |
 | Connected AAB numbers | none yet; the first Priority 3 issued through the tool is entered here, as DIR-37-0161's Synergi Number rule requires |
 
-## 2. Check list
+## 2. Check list — replaced by the HAZID (Dan, 23 Sep)
 
-The CAR26 example carries the Physical Changes checklist (authority approval, CAT, class, cost, design review, FAT, functional design spec, obsolete equipment, and so on). For a Seadrill system change the checklist is the one Synergi attaches to that type **[Dan: confirm]**; the items below are the evaluation this change needs against DIR-37-0015 §2 and the §3.5.2 guidewords that apply to a communication system, written so they drop into whichever checklist Synergi presents.
+The Synergi checklist on the CAR26 example (authority approval, CAT, class, cost, design review, FAT
+and so on) is the Physical Changes checklist and is not used for this case. **The rule for this MOC,
+and for the MOC tool that follows it: the HAZID comes first and is gospel; the MOC case is created
+from it; its actions are the mandatory approval actions DIR-37-0015 requires plus one Synergi action
+per HAZID register entry, titled "HAZID Action # n" (§3.4), and nothing else.** Whatever checklist
+Synergi attaches to the case type is answered with one line each: "see HAZID entry Hn" or "not
+applicable, see HAZID scope".
 
-| Item | Evaluation |
-|---|---|
-| Scope of work | §1 Description; the process in `AAB-LOOP-PLAN.md` and the flowchart. In scope: Priority 3 WCE advisories, thirteen units, issue, distribution, acknowledgement, optional action closure, chase, revision, withdrawal, fleet reporting. Out of scope: Priority 1 and 2, external AABs via the common mailbox, work orders, Maximo system changes |
-| Risk evaluation | HAZID attached (`AAB-HAZID.docx`, DIR-37-0147 format): 15 entries, highest untreated Yellow, all Green after the proposed measures; 15 Synergi actions in §4 |
-| Does the change require an update to the HSE Case or risk assessment documents (MAHRA, bowties)? | No. The AAB process is a communication route to the rigs; no barrier, SECE or performance standard changes. The HAZID records this at entry H8 (records) and H1 (distribution) |
-| Authority approval | Not a class, flag or regulatory matter. The directive owner (Director of Technical Services, DIR-37-0161 §1.3) and the approver (VP Technical Services & ISIT) approve the directive revision |
-| Employee participation | Subsea Superintendents consulted 22 September (recipient tables); rig TSLs are the acknowledgers and are addressed by the directive revision and a one-page rig bulletin (item 22 training pack); Eric Rachall as gatekeeper throughout |
-| Maintenance system update | None to Maximo's maintenance data. The Maximo parent AAB case is still raised for a Priority 3 (evaluation trail) and marked "distributed via the Seadrill Bulletin Board"; no child cases for this priority |
-| Documentation | DIR-37-0161 revised (§5 below); the tool's handoff, the dashboard contract and the loop documents filed in eDocs **[numbers]**; the Compliance Checklist P1 item wording "Maximo AAB Review" updated in WCGRRT |
-| Communication (DIR-37-0015 §3.5.2 guideword: "right personnel can be given information at the right time in the right way") | The email per rig with the bulletin attached and the dashboard link; NO RIG CONTACT branch so a lookup miss is a message to the office, never silence; daily overdue chase; HAZID entries H1, H12 |
-| Operator error / crew competence (§3.5.2) | Acknowledgement by name, role and crew; expected role shown on the page; second reader for advisories requiring physical intervention; training pack; HAZID H3, H10, H13, H15 |
-| Cost estimate | No purchase. Built with existing licences (Power Automate, SharePoint, the sacred server) and existing tools; effort is Technical Services time |
-| Obsolete equipment | Not applicable |
-| Temporary changes | The pilot runs under a DIR-00-0011 deviation from DIR-37-0161 §2.2.4 for WCE-originated Priority 3 advisories, connected to this case, end date = the directive revision date |
+Sequence, as it was actually done here: `AAB-HAZID.docx` (16 entries, draft 2) → this case → the
+DIR-00-0011 deviation case connected to it → the pilot when HAZID Action # 16, the go-live gate, is
+signed.
 
 ## 3. General classifications
 
@@ -72,21 +67,41 @@ The CAR26 example carries the Physical Changes checklist (authority approval, CA
 | Client / regulatory impact | None identified; Priority 3 is not mandatory and carries no operational or cost impact (DIR-37-0161 §2.2.3, both tick boxes No) |
 | Other rigs | All thirteen WCE units from the start; no rig-by-rig roll-out |
 
-## 4. Actions (each becomes a Synergi action; the HAZID ones titled "HAZID Action # n" per DIR-37-0015 §3.4)
+## 4. Actions (two kinds only)
 
-| # | Action | Responsible | Due | Evidence |
-|---|---|---|---|---|
-| A1 | Revise DIR-37-0161 §2.1 (TSL acknowledgement route), §2.2.3 (Priority 3 handling), §2.2.4 (distribution and acknowledgement for Priority 3), §4 (flowchart), §6 (references); route to the owner and the VP Technical Services & ISIT | Eric Rachall drafts; Daniel Plant | before cut-over | revised directive issued |
-| A2 | Bulletin Board Rev 5 built and tested on the saved test records (not posted) | Eric Rachall | | Rev 5 file and its schema 2.0 handoff |
-| A3 | Scanner, dashboard AAB tab, acknowledgement page with TSL name and crew; "acknowledged, action open" as its own state; stale-data banner; archive script never moves an AAB file | Daniel Plant | | test-set run, screenshots |
-| A4 | AAB Notifications flow with issued, acknowledged, NO RIG CONTACT and daily chase branches, sent-log, built in test mode | Daniel Plant | | test-mode run with the would-have recipients listed |
-| A5 | End-to-end trial on one rig in test mode: issue, email, both TSLs acknowledge, chase on a due date set to yesterday | Daniel Plant, Eric Rachall, one rig | | dashboard shows the trial; emails on file |
-| A6 | Rig bulletin: how to acknowledge, one page; office training inside the three-day class | Daniel Plant | | bulletin sent; attendance |
-| A7 | Cut-over: open Maximo Priority 3 WCE advisories listed, re-issued through the tool or closed in Maximo with a note; the date recorded in this case | Eric Rachall | | cut-over list |
-| A8 | Compliance Checklist P1 wording updated in WCGRRT to point at the dashboard AAB tab | reporting-tools session, Daniel Plant | | REV note |
-| A9 | Retention rule for PostedReports agreed with IT for at least the directive's retention period; quarterly export to the Technical Services archive | Daniel Plant, IT | | written rule |
-| A10 | West Gemini route ticket closed, or the reply route for that rig accepted in writing | Daniel Plant, IT | | ticket |
-| HAZID Action # 1 to # 15 | one per register entry H1 to H15, the proposed measure as the action text, the action party from the register | as the register | | as the register |
+### 4.1 Mandatory approval actions (DIR-37-0015 §3.1 to §3.3, §2; the ones Dan named)
+
+| # | Action | Responsible |
+|---|---|---|
+| AP1 | Technical Services review of the change and the HAZID (at least one Technical Services reviewer on every technical MOC, §3.2) | Lee Arnold, Technical Authority WCE |
+| AP2 | Corporate Reviewer (SME) review: merit of the change and effectiveness of the change management plan; evaluation of implementation on other rigs (§3.1; here all thirteen from the start) | Daniel Plant, Subsea Superintendent, as Technical Superintendent for the discipline |
+| AP3 | Directive owner's approval of the DIR-37-0161 revision route and of the pilot under a DIR-00-0011 deviation | Arnaud Gabaut, Director of Technical Services **[confirm current holder]** |
+| AP4 | Directive approver's approval of the revision when issued | Vice President Technical Services & ISIT |
+| AP5 | Assurance, Quality & Enterprise Risk / QHSE review of the deviation case and this MOC | **[name]** |
+| AP6 | MOC owner's verification that every HAZID action is complete per the change plan, then close-out (§3.4) | Daniel Plant |
+
+### 4.2 HAZID actions (one per register entry; the action text is the register's Proposed Risk Reducing Measure; the responsible is the register's action party)
+
+| Synergi action title | Register entry | Responsible |
+|---|---|---|
+| HAZID Action # 1 | H1 advisory not received: daily chase, monthly Rigs sheet review, sent-log | D. Plant |
+| HAZID Action # 2 | H2 wrong applicable rigs: SFI check, second reader for fleet-wide AABs | E. Rachall |
+| HAZID Action # 3 | H3 acknowledged but not actioned: third state on the dashboard, closure evidence review, quarterly sample | D. Plant / E. Rachall |
+| HAZID Action # 4 | H4 superseded revision in use: cover wording, current revision only in the open list | D. Plant |
+| HAZID Action # 5 | H5 wrong or missing attachment: open the attachment from the preview before posting | E. Rachall |
+| HAZID Action # 6 | H6 post fails or is cut short: confirm on the dashboard within 20 minutes, re-post from the saved file | E. Rachall |
+| HAZID Action # 7 | H7 rig cannot reach the server: West Gemini route ticket or the reply route accepted | D. Plant / IT |
+| HAZID Action # 8 | H8 loss of the register: retention rule with IT, quarterly export | D. Plant |
+| HAZID Action # 9 | H9 unauthorised or accidental issue: endpoint held by two people, test mode for every test | E. Rachall / D. Plant |
+| HAZID Action # 10 | H10 acknowledgement by the wrong person: role list from the directive, name and crew recorded | D. Plant |
+| HAZID Action # 11 | H11 two registers during cut-over: cut-over list, P1 item re-pointed, Maximo child route retired for Priority 3 | E. Rachall |
+| HAZID Action # 12 | H12 notification fatigue: quarterly recipient review, chase once a day | D. Plant |
+| HAZID Action # 13 | H13 single-person dependence: named deputy in the directive revision, handover document | E. Rachall / D. Plant |
+| HAZID Action # 14 | H14 scanner or flow stops: stale-data banner, monthly flow check | D. Plant |
+| HAZID Action # 15 | H15 advisory content wrong or unclear: second reader for advisories needing physical intervention | E. Rachall |
+| HAZID Action # 16 | H16 implemented out of order or untested: the six-point go-live gate (Rev 5 proven; dashboard side proven; flow in test mode; one advisory end to end on one rig with both TSLs and the chase; rig bulletin and office training; deviation case open) | D. Plant |
+
+The build steps of the earlier draft (Rev 5, the dashboard side, the flow, the trial, the training, the cut-over) are the content of HAZID Action # 16 and # 11, not actions of their own.
 
 ## 5. The directive revision in outline (DIR-37-0161 v6.07 → v7, Priority 3 only)
 

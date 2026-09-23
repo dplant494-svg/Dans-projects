@@ -1,6 +1,6 @@
 # HAZID — Priority 3 Advisory AABs through the Seadrill Bulletin Board and the WCE Dashboard
 
-**Draft 1 for the workshop** · **Date:** 22 September 2026, on the Seadrill template 23 September · **The document:** `AAB-HAZID.docx`, built on Lee Arnold's `Seadrill_HAZID_Template.docx` (DIR-37-0147 format: cover, revision history, introduction, requirements with the risk matrix, process basis, the 13-column register, summary, ALARP, conclusion, references, signature block). **Working register:** `AAB-HAZID-Register.xlsx`
+**Draft 2 for the workshop** (H16 added 23 Sep: Dan's rule that the HAZID is gospel and every MOC action other than the approvals derives from it) · **Date:** 22 September 2026, on the Seadrill template 23 September · **The document:** `AAB-HAZID.docx`, built on Lee Arnold's `Seadrill_HAZID_Template.docx` (DIR-37-0147 format: cover, revision history, introduction, requirements with the risk matrix, process basis, the 13-column register, summary, ALARP, conclusion, references, signature block). **Working register:** `AAB-HAZID-Register.xlsx`
 **MOC:** `AAB-MOC-DRAFT.md` · **Process:** `AAB-LOOP-PLAN.md`, `AAB-LOOP-FLOWCHART.html`
 
 Rankings use the Seadrill scale from DIR-37-0147 as the template prints it: consequence 1 (Fatality / Major) to 5 (Negligible), frequency A (Frequent) to E (Very Rare), colour from the matrix table in the template (see `hazid/README.md`). They are the drafter's and are there to be argued with in the room, not accepted. Directives read 23 Sep: DIR-37-0161 v6.07 (the AAB directive: Priority 1/2/3, not Level; both TSLs acknowledge a Priority 3) and DIR-37-0015 v1.08 (a Seadrill system change; this HAZID is the one §3.4 requires; its actions become Synergi actions titled "HAZID Action # n"). Still in **[square brackets]** in the docx: the FRM document number and the Synergi case number.
@@ -36,6 +36,7 @@ Guideword walk-through of the ten steps on the flowchart (issue, post, notify, r
 | H13 | Organisation | Dependence on one gatekeeper, one dashboard owner | two holders of tool and endpoint; documents in the repository; training | named deputy in the directive |
 | H14 | Systems | Scanner or flow stops | generated-at stamp; flow failure notification; issue email independent of the scanner | stale-data banner after 2 hours; monthly run-history check |
 | H15 | Content | Advisory content wrong or unclear | mandatory sections; preview; references; revision route | second reader for a Priority 3 needing physical intervention |
+| H16 | Implementation | Change implemented out of order or untested before go-live | build order in the plan; test mode proven on the CBM to OEM loop; HAZID and MOC before the pilot; deviation case connected | six-point go-live gate signed by the MOC owner: Rev 5 proven, dashboard side proven, flow in test mode, one advisory end to end on one rig, rig bulletin and office training, deviation case open |
 
 The register carries the full wording of causes, consequences, controls, rankings and action parties.
 

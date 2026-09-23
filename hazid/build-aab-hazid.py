@@ -169,6 +169,12 @@ REGISTER = [
   2,'C',
   'Second reader in Technical Services before posting a Priority 3 that requires physical intervention; the directive\'s review rule applied.',
   'E. Rachall: second-reader rule in the issuing procedure.',2,'E'),
+ ('H16','Change — implemented out of order or untested before go-live','The build and the cut-over',
+  'The tool, the board, the flow and the dashboard side are built by three parties; a part goes live before the others, the flow is never run in test mode, the rigs are not told how to acknowledge, the deviation case is not raised. The pilot starts with a route nobody has walked end to end.',
+  'Build order fixed in the plan (Bulletin Board Rev 5 → dashboard side → flow in test mode → end-to-end trial on one rig → rig bulletin and office training → cut-over list); test mode proven on the CBM to OEM loop; this HAZID and the MOC precede the pilot; the DIR-00-0011 deviation case is connected to the MOC.',
+  2,'C',
+  'Go-live gate: no pilot until (1) Rev 5 is proven on the saved test records, (2) the scanner, board register, acknowledgement page and AAB tab are proven on the synthetic records, (3) the AAB Notifications flow has run in test mode with the would-have recipients listed, (4) one real advisory has gone end to end on one rig in test mode, both TSLs acknowledging, the chase firing on a due date set to yesterday, (5) the rig bulletin is issued and the office trained, (6) the deviation case is open and connected.',
+  'D. Plant (MOC owner) signs the gate; E. Rachall (Rev 5, bulletin); reporting-tools session (P1 wording).',2,'E'),
 ]
 
 SUMMARY_MEASURE = {
@@ -179,8 +185,8 @@ SUMMARY_MEASURE = {
  'H9': 'Endpoint held by two people; test mode for every test', 'H10': 'Role list from the directive; gate if misused',
  'H11': 'Cut-over date; P1 item re-pointed; Maximo workflow retired', 'H12': 'Quarterly recipient review; chase once a day',
  'H13': 'Named deputy in the directive; handover document', 'H14': 'Stale-data banner; monthly flow check',
- 'H15': 'Second reader for AABs needing physical intervention'}
-SUMMARY_OWNER = {'H1':'D. Plant','H2':'E. Rachall','H3':'D. Plant / E. Rachall','H4':'D. Plant','H5':'E. Rachall','H6':'E. Rachall','H7':'D. Plant / IT','H8':'D. Plant','H9':'E. Rachall / D. Plant','H10':'D. Plant','H11':'E. Rachall','H12':'D. Plant','H13':'E. Rachall / D. Plant','H14':'D. Plant','H15':'E. Rachall'}
+ 'H15': 'Second reader for AABs needing physical intervention', 'H16': 'Six-point go-live gate before the pilot'}
+SUMMARY_OWNER = {'H1':'D. Plant','H2':'E. Rachall','H3':'D. Plant / E. Rachall','H4':'D. Plant','H5':'E. Rachall','H6':'E. Rachall','H7':'D. Plant / IT','H8':'D. Plant','H9':'E. Rachall / D. Plant','H10':'D. Plant','H11':'E. Rachall','H12':'D. Plant','H13':'E. Rachall / D. Plant','H14':'D. Plant','H15':'E. Rachall','H16':'D. Plant'}
 
 # ================= COVER =================
 x = set_para(x, '[EQUIPMENT / SYSTEM / ACTIVITY NAME]', TITLE)
@@ -262,14 +268,14 @@ for (rid, gw, src, thr, ctl, con, fr, prop, act, mcon, mfr) in REGISTER:
 x = x[:rs] + rows + x[re2:]
 
 # ================= SECTION 6, 7 =================
-x = set_para(x, '[State the overall ALARP conclusion', 'All residual risks following implementation of the proposed risk reducing measures are assessed as Green on the matrix in Section 2.1. The untreated risk of the designed process is Yellow at its highest (entries H1, H3, H2, H4, H7, H9, H11, H15) and no entry is Red, because the controls that carry the most weight are in the design itself and not left to the crew. The demonstration rests on the following:')
+x = set_para(x, '[State the overall ALARP conclusion', 'All residual risks following implementation of the proposed risk reducing measures are assessed as Green on the matrix in Section 2.1. The untreated risk of the designed process is Yellow at its highest (entries H1, H3, H2, H4, H7, H9, H11, H15, H16) and no entry is Red, because the controls that carry the most weight are in the design itself and not left to the crew. The demonstration rests on the following:')
 x = set_para(x, '[Standard compliance: identify', 'Directive compliance: the content of an AAB (the three sections, the bulletin) and the gatekeeper role are unchanged from the AAB directive; only the route changes, and the MOC amends the directive sections that describe the route;')
 x = set_para(x, '[Barrier integrity: state how', 'Barrier integrity: the advisory\'s function as a barrier (a known defect reaches the rig that carries the equipment) is verified by the acknowledgement record, the action closure record with evidence, the fleet view of what is outstanding and the daily chase, none of which the Maximo route provides;')
 x = set_para(x, '[Independent assurance: identify', 'Independent assurance: the same intake, workbook and dashboard pattern is in service for four other loops since 11 September 2026; the CBM to OEM loop was tested end to end on 22 September 2026 in test mode with the real recipient lists proven and nobody outside the office emailed;')
-x = set_para(x, '[Gap closure: list any open items', 'Gap closure before go-live: H1 (chase branch and sent-log), H3 (third state on the dashboard), H7 (West Gemini route or the reply route accepted), H8 (retention rule with IT), H11 (cut-over list) and H13 (named deputy in the directive revision) must be closed; the remaining measures are procedural and are written into the issuing procedure;')
+x = set_para(x, '[Gap closure: list any open items', 'Gap closure before go-live: H16 is the gate (six points: Rev 5 proven, dashboard side proven, flow run in test mode, one advisory end to end on one rig, rig bulletin and office training, deviation case open); H1 (chase branch and sent-log), H3 (third state on the dashboard), H7 (West Gemini route or the reply route accepted), H8 (retention rule with IT), H11 (cut-over list) and H13 (named deputy in the directive revision) must be closed; the remaining measures are procedural and are written into the issuing procedure;')
 x = set_para(x, 'Governance: acceptance is governed through Seadrill engineering acceptance / MoC', 'Governance: the change is governed through Management of Change (DIR-37-0015) with Technical Authority WCE sign-off, and all actions are transferred to Synergi.')
 x = set_para(x, '[State the overall conclusion', 'This HAZID concludes that the new route for Priority 3 Advisory AABs is acceptable, provided the gap-closure items in Section 6 are completed before the cut-over date and the procedural measures are written into the issuing procedure and the directive revision. The highest-priority actions before go-live are:')
-x = set_para(x, 'Priority 1 (Red', 'Priority 1 (Entries H1, H3): the daily overdue chase with a sent-log, and the third state "acknowledged, action open" on the dashboard, signed off by the change owner.')
+x = set_para(x, 'Priority 1 (Red', 'Priority 1 (Entries H16, H1, H3): the six-point go-live gate; the daily overdue chase with a sent-log; the third state "acknowledged, action open" on the dashboard, signed off by the change owner.')
 x = set_para(x, 'Priority 2 (Entries [X, Y])', 'Priority 2 (Entries H7, H8, H11, H13): the West Gemini route or an accepted reply route; the retention rule with IT; the cut-over list of open Maximo Priority 3 AABs; a named deputy for the gatekeeper in the directive revision.')
 x = set_para(x, 'Priority 3 (Entries [X, Y, Z])', 'Priority 3 (Entries H2, H4, H5, H6, H9, H10, H12, H14, H15): the procedural measures written into the issuing procedure, the dashboard cover wording and stale-data banner, the quarterly reviews on the Technical Services calendar.')
 x = set_para(x, 'All risk reducing measures shall be transferred to Synergi as formal action items', 'All risk reducing measures shall be transferred to Synergi as formal action items with defined owners and close-out dates, and verified complete before the new process goes live. Any subsequent field activity required by an individual AAB shall be controlled by TBRA / 5-Point Check per DIR-37-0147.')
