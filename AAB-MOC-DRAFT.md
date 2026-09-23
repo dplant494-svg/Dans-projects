@@ -20,7 +20,7 @@ Read against DIR-37-0161 v6.07 and DIR-37-0015 v1.08 on 23 September:
 | **Follow-up on a Priority 3** | §2.2.4: "Typically there is no follow up required on these AABs since they are informational only. However, the TSL has the option to add additional reviewers" | The **action-closed** state is optional on a Priority 3 and is used only when the gatekeeper marks "action requested"; it never blocks acknowledgement |
 | **Every AAB is filed in eDocs** and entered in Maximo for evaluation, "regardless of relevance or applicability" | §2.2.2 | The Bulletin Board record carries the **eDocs reference** so the filing trail is unbroken. **[Dan: does a WCE-originated Priority 3 still get a Maximo parent case for the corporate evaluation trail, marked "distributed via the Seadrill Bulletin Board", or does the dashboard record replace it? The directive's wording ("all AABs will be entered into Maximo") argues for keeping the parent case; the child cases and the acknowledgement move to the dashboard]** |
 | **What kind of change this is** | DIR-37-0015 §2: a Synergi MOC is required for major **people, process or system** changes; **System Changes** include "changes / introduction of new Seadrill systems … e.g. MAXIMO to develop and track Maintenance Work Orders"; **Procedural Changes** (implementation of directives, procedures) are covered by DIR-00-0001. §3 Technical / Physical changes do not apply: no equipment, drawing or system program changes | This is a **Seadrill System Change** (introduction of a new system for the distribution and acknowledgement of Priority 3 AABs) with a **procedural change** (the revision of DIR-37-0161) handled under DIR-00-0001. The Synergi case type is the one for Seadrill changes, **[Dan: the exact type name in the Synergi "new case" list; the CAR26 example is "Management of Change - Physical Changes", which is not ours]** |
-| **Deviation until the directive is revised** | DIR-37-0015 §3 note: "Changes to, or deviations from, Seadrill directives … shall be handled according to DIR-00-0011 Handling of non-conformities" | Running Priority 3 AABs outside Maximo before DIR-37-0161 is revised is a deviation. **[Dan: revise the directive first (owner Arnaud Gabaut, approver VP Technical Services & ISIT) and cut over after, or run a pilot on one rig under a documented DIR-00-0011 deviation while the revision goes through]** |
+| **Deviation until the directive is revised** | DIR-37-0015 §3 note: "Changes to, or deviations from, Seadrill directives … shall be handled according to DIR-00-0011 Handling of non-conformities" | Running Priority 3 AABs outside Maximo before DIR-37-0161 is revised is a deviation. **Dan, 23 Sep: the route is a pilot under a documented DIR-00-0011 deviation, using this MOC and the HAZID as its basis, while the directive revision goes through.** The deviation case is raised alongside this MOC and connected to it (§6); its end date is the date the revised directive is issued |
 | **HAZID and actions** | DIR-37-0015 §3.4: the HAZID is Seadrill's standard HAZID; every action listed in it gets a Synergi action titled **"HAZID Action # (number)"** with an action responsible, verified complete by the MOC owner before close | `AAB-HAZID.docx` is the HAZID; its fifteen entries become fifteen Synergi actions (§4 below) |
 | **Supporting documents** | §3.3: attached to the case or referenced by eDocs number | §6 below |
 | **Scope of the change** | DIR-37-0161 covers internal and external AABs for all equipment, single point of entry `aab.operations.excellence@seadrill.com` | **[Dan: does the Bulletin Board carry Priority 3 advisories originated by WCE Technical Services only (Eric as gatekeeper), or every Priority 3 AAB including OEM notifications received through the common mailbox? Draft 2 assumes WCE-originated only; the wider scope needs the Document Controller in the loop and a different owner]** |
@@ -60,7 +60,7 @@ The CAR26 example carries the Physical Changes checklist (authority approval, CA
 | Operator error / crew competence (§3.5.2) | Acknowledgement by name, role and crew; expected role shown on the page; second reader for advisories requiring physical intervention; training pack; HAZID H3, H10, H13, H15 |
 | Cost estimate | No purchase. Built with existing licences (Power Automate, SharePoint, the sacred server) and existing tools; effort is Technical Services time |
 | Obsolete equipment | Not applicable |
-| Temporary changes | None. If the pilot route in §0 is chosen, the deviation is recorded under DIR-00-0011 with an end date equal to the directive revision date |
+| Temporary changes | The pilot runs under a DIR-00-0011 deviation from DIR-37-0161 §2.2.4 for WCE-originated Priority 3 advisories, connected to this case, end date = the directive revision date |
 
 ## 3. General classifications
 
@@ -101,12 +101,12 @@ The CAR26 example carries the Physical Changes checklist (authority approval, CA
 
 ## 6. Connected cases and attachments
 
-- Connected cases: the first Priority 3 AAB issued through the tool (its number entered here); the DIR-00-0011 deviation case if the pilot route is chosen.
+- Connected cases: the DIR-00-0011 deviation case for the pilot (raised with this MOC); the first Priority 3 AAB issued through the tool (its number entered here).
 - Attachments: `AAB-HAZID.docx`; `AAB-LOOP-PLAN.md`; `AAB-LOOP-FLOWCHART.html`; `AAB-REV5-HANDOFF-FOR-ERIC.md` and Eric's schema 2.0 handoff; `INTEGRATION-CONTRACT.md` (dashboard side); the draft directive revision; the rig bulletin. Filed in eDocs **[numbers]** and referenced here.
 
 ## 7. Comments
 
-Draft 2 replaces draft 1 after DIR-37-0161 and DIR-37-0015 were read on 23 September 2026. Three things changed: the terminology (Priority, not Level), the acknowledger (both crews' TSLs, from the directive, not a decision left open), and the case type (a Seadrill system change under §2, not a technical change under §3). The five items in §0 marked for Dan are the only open points.
+Draft 2 replaces draft 1 after DIR-37-0161 and DIR-37-0015 were read on 23 September 2026. Three things changed: the terminology (Priority, not Level), the acknowledger (both crews' TSLs, from the directive, not a decision left open), and the case type (a Seadrill system change under §2, not a technical change under §3). The route to go-live is decided (pilot under deviation); the open points in §0 are scope, the Maximo parent case and the Synergi case type.
 
 ## 8. Signatures
 
