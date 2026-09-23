@@ -760,3 +760,65 @@ prints them by label. Nothing posted.
 **REV 165 and REV 166 can both ship.** Contract updated (`INTEGRATION-CONTRACT.md`, the two new
 sections after the acoustic one). Thank you for the boundary cases in 23.4; "absent means cannot
 be judged, never fail" is written in as a rule on this side too.
+
+## Entries 24 to 27 reply (dashboard side, 23 Sep 2026, evening): `meta.rev` read, decision on 25 given, a replay check, one ask
+
+**24.1, built: scanner v2.63 reads `meta.rev`.** It rides on every `reports[]` row and every
+`cbmGrades[]` row as `rev`; the dashboard prints it after the file name on the report row and as
+"Tool build" in the full-report viewer. Absent means "SSORT 147 or earlier" and shows as nothing,
+never as a fault, exactly as you asked. One correction to our own entry 20.1 reply, which said the
+dashboard "already stores `meta.rev` on every WCGRRT post": it did not. Nothing on this side read
+the key until today; WCGRRT's value was being carried in the report copy and ignored. Said plainly
+because that sentence was the basis of the "last post from REV n" offer, which is now honest for
+both tools and stays on offer, not built.
+
+**24.2, nothing cached here, and the one ask in this reply.** The scanner never attaches a task
+description, because the post carries none: `itemLabel` is derived from the key alone, so the
+heatmap reads "Section 3 . Item 2" or "7.1.2" and always has. Your eight blank labels were never
+blank here, and there is nothing to refresh. The ask, FYI-level and not blocking anything: a
+`cbmlabels` block on `cbmData`, one printed label per posted CBM key, the same shape as
+`soaklabels`, so the heatmap and the digest can show NOV's task wording beside the grade. The
+restored 47 descriptions would then reach the reader of a report as well as the crew grading it.
+If the answer is "not in 148", the dashboard is unchanged.
+
+**24.3 and 24.4, noted.** No key retires, no grade button gates to N/A, so nothing on the heatmap
+moves. There is no "notes empty" indicator on this side to go quiet; `_cm` text renders in the
+viewer and the digest when present and is absent otherwise.
+
+**24.5 and 24.6, noted.** We wait for the grade-string repair entry; "text in place only, no key
+changes" is the rule the era logic depends on, and it is written into the contract row.
+
+**25.4, the decision: (a), with you.** Reasons from this side: the scanner has kept the two
+namespaces apart since v2.26 (`itemShape` old and new, `o:` and `n:` keys, never merged); the
+era and key-map logic touches `o:` keys only and by design never an `n:` key; and (b) would put
+positional keys back on the live path, which reopens entry 19 for every future template edit.
+Entry 19 is history, agreed, and the contract's `cbmData` row now says so in those words: one
+namespace live, one historical, and why.
+
+**25.2, the integrity check, built.** v2.63 lists any post whose `meta.rev` starts `SSORT` and
+whose CBM keys are positional on the Errors button as kind `replay`: "an older file re-posted,
+not a new inspection", shown under its original date, never archived (the archive script leaves
+it, like oversized and shrunk). It needs no boundary date because 147 and earlier never wrote
+`meta.rev`, which is the one fact that makes the check safe. Proven on a synthetic SSCE Equipment
+post carrying `SSORT REV 148` and `_g0_0_` keys.
+
+**25.5, accepted.** Two populations, one live. The framing on this side is corrected in the same
+row.
+
+**26, nothing built, one thing to say back.** `grades` and `gsrc` are the crew's, on the screen,
+not posted, and the heatmap will not show criteria it has not received. The Ram Block split in
+26.2 is Dan's call and is on his list from this side too; if it goes ahead it changes ids, and on
+the live path the id is the key, so `cbm-key-map.json` needs an `n:` section before that build
+ships, and the map format gains one when you say. The note-prompt defect fix is noted: `_cm`
+fields arriving populated need nothing here.
+
+**27, nothing built, and nothing derived.** Your own rule, that a computed judgement must not be
+posted as a recorded fact, applies on the reading side as well: the dashboard shows the grade and
+the comment the crew recorded and will not list conditional-trigger tasks against a 4 or 5 from
+the schedule. If Dan wants that view later it is a display feature built from the schedule, with
+the same "not automatically due" words, and it goes on the plan then.
+
+**Verified:** scanner v2.63 on the full test set (32 files, 26 reports); `rev` present on the
+REV 165 acoustic sample and the synthetic 148 post, empty on the other 24; the replay listed once
+per file with the first positional key named; the Errors modal shows the new section and count;
+the viewer shows "Tool build SSORT REV 148". Nothing posted. Contract and handoff updated.

@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.62'
+$ScriptVersion = '2.63'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1623,6 +1623,10 @@ foreach ($f in $files) {
     if ($checksRaw) { $checksRigRaw = [string](Get-Prop $checksRaw 'rig') }
 
     $assetRaw = [string](Get-Prop $meta 'asset')
+    # v2.63: meta.rev is the build that posted (WCGRRT REV n; SSORT from REV 148, rolling
+    # handoff entry 24.1). Absent = SSORT 147 or earlier. Carried on reports[] and cbmGrades[].
+    $metaRev = ([string](Get-Prop $meta 'rev')).Trim()
+    $cbmReplayFlagged = $false
     $rig = $assetRaw
     if (-not $rig) { $rig = $checksRigRaw }
     if (-not $rig) {
@@ -1933,6 +1937,14 @@ foreach ($f in $files) {
                 if (-not $cbmDate) { $cbmDate = [string](Get-Prop $meta 'date') }
                 foreach ($it0 in (Get-CbmGradedItems -Cbm $cbm)) {
                     $it = Resolve-CbmItemEra -Item $it0 -Class $cbmClass -Date $cbmDate   # v2.61
+                    # v2.63: SSORT 148+ stamps meta.rev and can only produce id-based keys (the
+                    # positional CBM_GRADED renderer is shadowed, entry 25.2). A positional key in a
+                    # post stamped by SSORT is therefore a replay of an older file, not a new
+                    # inspection: shown, never archived, listed on the Errors button as 'replay'.
+                    if ($it0.itemShape -eq 'old' -and $metaRev -match '^SSORT' -and -not $cbmReplayFlagged) {
+                        $cbmReplayFlagged = $true
+                        Add-Problem $f 'replay' ("positional CBM key {0} in a post stamped '{1}' - a build from SSORT 148 cannot produce positional keys, so this is a replay of an older file, not a new inspection (rolling handoff entry 25.2)" -f $it0.itemKey, $metaRev)
+                    }
                     $key = "$rig|$cbmClass|$cbmEquip|$($it.itemKey)|$cbmDate"
                     $rec = [pscustomobject]@{
                         rig       = [string]$rig
@@ -1947,6 +1959,7 @@ foreach ($f in $files) {
                         photos    = $it.photos
                         date      = $cbmDate
                         file      = $f.Name
+                        rev       = $metaRev                             # v2.63
                         era       = [string](Get-Prop $it 'era')        # v2.61: '', 'pre80', 'removed', 'remapped'
                         postedKey = [string](Get-Prop $it 'postedKey')  # v2.61: the key as posted, when era is set
                     }
@@ -2332,6 +2345,7 @@ foreach ($f in $files) {
             reportDate    = $reportDateV                              # v2.50: the report's own date (first tile's tileDate), else the visit start - rolling handoff entry 11.3
             dateEnd       = [string](Get-Prop $meta 'dateend')      # visit end
             exportedAt    = [string](Get-Prop $json 'exportedAt')
+            rev           = $metaRev                                 # v2.63: the tool build that posted, '' when the tool did not write one
             modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
             tileCount     = $tileCount
             attachments   = $attachCount                             # v2.59: REV 161 attachments[] count

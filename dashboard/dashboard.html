@@ -1307,7 +1307,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       }
       var typ = document.createElement('div'); typ.className = 'visit-type';
       typ.textContent = _isPlan ? ((r.rig ? r.rig + ' · ' : '') + 'Planning Report') : (r.type || r.reporttype || 'Report');
-      var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file;
+      var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file + (r.rev ? ' \u00B7 ' + r.rev : '');   // v2.63: the tool build that posted, when the tool wrote one
       tdRig.appendChild(rig); tdRig.appendChild(typ); tdRig.appendChild(file);
       // CBM-to-OEM loop (scanner v2.49): a 'Post to OEM' from the tool leaves an
       // oemCopies[] record; show it on the report it belongs to.
@@ -3467,6 +3467,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     info.appendChild(rvField('Rig / Vessel', meta.asset || rec.rig));
     info.appendChild(rvField('Visit dates', fmtVisitSpan(rec)));
     if (rec.reporttype) info.appendChild(rvField('Report type', rec.reporttype));
+    if (meta.rev) info.appendChild(rvField('Tool build', meta.rev));   // v2.63: WCGRRT REV n / SSORT REV 148+ (rolling handoff entry 24.1); absent on SSORT 147 and earlier
     if (meta.type) info.appendChild(rvField('Classification', meta.type));
     if (meta.discipline) info.appendChild(rvField('Discipline', meta.discipline));
     if (meta.location) info.appendChild(rvField('Well / Location', meta.location));
@@ -4340,8 +4341,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   var errorsState = { problems: [] };
   function renderProblems(problems) {
     var btn = $('errors-btn');
-    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk'; });
-    var shown = problems.filter(function (p) { return p.kind === 'large' || p.kind === 'shrunk'; });   // on the dashboard, but flagged
+    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk' && p.kind !== 'replay'; });
+    var shown = problems.filter(function (p) { return p.kind === 'large' || p.kind === 'shrunk' || p.kind === 'replay'; });   // on the dashboard, but flagged
     errorsState.problems = problems;
     if (!bad.length && !shown.length) { btn.hidden = true; return; }
     btn.hidden = false;
@@ -4350,9 +4351,10 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   }
   function openErrorsModal() {
     var problems = errorsState.problems || [];
-    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk'; });
+    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk' && p.kind !== 'replay'; });
     var large = problems.filter(function (p) { return p.kind === 'large'; });
     var shrunk = problems.filter(function (p) { return p.kind === 'shrunk'; });   // v2.59: replaced by a smaller post
+    var replay = problems.filter(function (p) { return p.kind === 'replay'; });   // v2.63: old CBM keys under a newer SSORT stamp
     var overlay = mk('div', 'report-overlay');
     var frame = mk('div', 'report-frame');
     frame.style.maxWidth = '860px';
@@ -4361,7 +4363,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     title.appendChild(mk('div', 'rh-rig', 'Errors'));
     title.appendChild(mk('div', 'rh-sub', (bad.length ? bad.length + ' posted file(s) could not be read and are NOT on this dashboard' : '') +
       (bad.length && large.length ? ' \u00B7 ' : '') + (large.length ? large.length + ' oversized report(s), shown but over the ceiling' : '') +
-      ((bad.length || large.length) && shrunk.length ? ' \u00B7 ' : '') + (shrunk.length ? shrunk.length + ' report(s) replaced by a smaller post' : '')));
+      ((bad.length || large.length) && shrunk.length ? ' \u00B7 ' : '') + (shrunk.length ? shrunk.length + ' report(s) replaced by a smaller post' : '') +
+      ((bad.length || large.length || shrunk.length) && replay.length ? ' \u00B7 ' : '') + (replay.length ? replay.length + ' CBM post(s) replaying an older inspection' : '')));
     head.appendChild(title);
     var closeBtn = mk('button', 'report-close', '\u2715');
     closeBtn.type = 'button';
@@ -4386,6 +4389,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     section('Not on this dashboard', 'These files are in the report folders but could not be used: usually a post cut short in transit, or a file that is not a report export. Run scripts\\Archive-ProblemFiles.ps1 on the scanner PC to move them out of the folders into the archive; the poster can re-send the report.', bad);
     section('Oversized, still shown', 'Over the ceiling (10 MB, or 40 MB for CBM inspections). The report is on the dashboard; the photos or attachments need reducing at source in the reporting tool.', large);
     section('Replaced by a smaller post, still shown', 'A later post under the same filename had fewer entries or photos than the one before it. This happens when a daily report is posted with its tile date left on an earlier day: the tool names the file by that date and overwrites it. The earlier version is kept on the server under reports\\_replaced; re-post each day with its own tile date.', shrunk);
+    section('Replays of an older CBM inspection, still shown', 'The post is stamped by SSORT REV 148 or later but carries positional CBM keys, which no build from 148 on can produce. It is an older file re-posted, not a new inspection: the grades are shown under their original date, but check the rig has not lost a newer inspection behind it (rolling handoff entry 25.2).', replay);
     overlay.appendChild(frame);
     document.body.appendChild(overlay);
     document.body.classList.add('no-scroll');
