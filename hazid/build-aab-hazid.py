@@ -73,9 +73,9 @@ CONFILL = {'G': 'E2EFDA', 'Y': 'FBE4D5', 'R': 'F4B6B6'}
 def risk(con, freq): return NAME[GRID[int(con)][FREQ_COL[freq]]]
 
 # ================= CONTENT =================
-TITLE = 'Level 3 Advisory AABs — issue, distribution, acknowledgement and tracking through the Seadrill Bulletin Board and the WCE Dashboard'
-SUBTITLE = 'Process change risk assessment — Level 3 Advisory Technical Alerts, Advisories and Bulletins move from the Maximo workflow to the Bulletin Board tool, the notification flow and the dashboard (Management of Change under DIR-37-0015)'
-STD_LINE = 'Prepared in accordance with the Seadrill Risk Assessment Directive DIR-37-0147. Governing process documents: the Seadrill AAB directive [number to be inserted from the directive], DIR-37-0015 Management of Change Requests, DIR-00-0100 Rig Asset Management Platform.'
+TITLE = 'Priority 3 Advisory AABs — distribution, acknowledgement and tracking through the Seadrill Bulletin Board and the WCE Dashboard'
+SUBTITLE = 'Process change risk assessment — Priority 3 (Notification / Advisory) AABs originated by WCE Technical Services move from the Maximo child-case route of DIR-37-0161 to the Bulletin Board tool, the notification flow and the dashboard (a Seadrill system change under DIR-37-0015 §2)'
+STD_LINE = 'Prepared in accordance with the Seadrill Risk Assessment Directive DIR-37-0147 v2.02. Governing process documents: DIR-37-0161 Management of Technical Alerts, Advisories and Bulletins v6.07; DIR-37-0015 Management of Change v1.08; DIR-00-0100 Rig Asset Management Platform v8.06.'
 
 REGISTER = [
  # id, guideword/ref, source, threat/cause, existing controls, con, freq, proposed, action, mcon, mfreq
@@ -122,7 +122,7 @@ REGISTER = [
   'IT ticket for the West Gemini route closed before go-live or the reply route formally accepted for that rig; the acknowledgement page works from any browser on the corporate network once the route exists.',
   'D. Plant with IT: West Gemini route ticket.',2,'E'),
  ('H8','Records — loss of the AAB register','SharePoint PostedReports, scanner, retention',
-  'Maximo is no longer the register for Level 3. The SharePoint library is deleted or reorganised, the archive script moves files, or a retention policy removes them. No evidence that a rig was told or acknowledged.',
+  'Maximo is no longer the register for Priority 3. The SharePoint library is deleted or reorganised, the archive script moves files, or a retention policy removes them. No evidence that a rig was told or acknowledged.',
   'Posted files are never modified; SharePoint version history; the scanner never archives an AAB or acknowledgement file; server copies on sacred; the dashboard data is regenerated every 10 minutes from the files.',
   3,'D',
   'Retention rule for PostedReports agreed with IT for at least the directive\'s retention period; quarterly export of AAB and acknowledgement records to the Technical Services archive.',
@@ -134,16 +134,16 @@ REGISTER = [
   'Only the gatekeeper and the change owner hold the endpoint; every test is run in test mode; a withdrawal revision is the correction if a wrong AAB reaches a rig.',
   'E. Rachall / D. Plant: endpoint custody; test-mode rule in the procedure.',2,'E'),
  ('H10','Procedural — acknowledgement by the wrong person','Rig acknowledgement page',
-  'Anyone with the page can press Acknowledge and type a name. The rig is shown as acknowledged when the accountable role has not seen the advisory.',
+  'Anyone with the page can press Acknowledge and type a name. The rig is shown as acknowledged when the accountable role (both crews\' TSLs, DIR-37-0161 §2.2.4) has not seen the advisory.',
   'Name and role are required; the expected role is shown on the page and carried in the record; the acknowledgement email to the gatekeeper names who acknowledged; the Subsea Superintendent verifies on the next visit.',
   3,'C',
-  'Role list fixed to the roles the directive names; a password gate added to the page if misuse is seen.',
+  'Role list fixed to the roles DIR-37-0161 names for a Priority 3 (the TSL of each crew); the page records name and crew; a password gate added if misuse is seen.',
   'D. Plant: role list from the directive revision.',3,'D'),
  ('H11','Change — two registers during cut-over','Maximo and the tool in parallel',
-  'No cut-over date, or habit. AABs raised in both Maximo and the tool; neither register complete; a Level 3 AAB missed.',
-  'MOC implementation step: a cut-over date; open Maximo Level 3 AABs listed and re-issued through the tool or closed in Maximo; the directive revised before the date.',
+  'No cut-over date, or habit. AABs raised in both Maximo and the tool; neither register complete; a Priority 3 AAB missed.',
+  'MOC implementation step: a cut-over date; open Maximo Priority 3 AABs listed and re-issued through the tool or closed in Maximo; the directive revised before the date.',
   2,'C',
-  'Compliance Checklist P1 item re-pointed to the dashboard AAB tab; the Maximo Level 3 workflow marked retired on the cut-over date.',
+  'Compliance Checklist P1 item re-pointed to the dashboard AAB tab; the Maximo Priority 3 workflow marked retired on the cut-over date.',
   'E. Rachall: cut-over list. Reporting-tools session: P1 wording.',2,'E'),
  ('H12','Communication — notification fatigue','Recipient tables',
   'Too many recipients per AAB; fleet-wide AABs to every contact. Emails ignored; a real advisory missed.',
@@ -167,7 +167,7 @@ REGISTER = [
   'The three sections written in haste with no review before posting. The rig takes the wrong action.',
   'Mandatory fields: what has happened, why it matters, what the rig must do; preview before post; reference documents listed; the revision route for corrections.',
   2,'C',
-  'Second reader in Technical Services before posting a Level 3 that requires physical intervention; the directive\'s review rule applied.',
+  'Second reader in Technical Services before posting a Priority 3 that requires physical intervention; the directive\'s review rule applied.',
   'E. Rachall: second-reader rule in the issuing procedure.',2,'E'),
 ]
 
@@ -190,8 +190,8 @@ x = set_para(x, '[FRM/Doc No.]', 'FRM-37-XXXX (number to be allocated by documen
 x = set_para(x, '[Rev 00]', 'Rev 01 (draft for workshop)')
 x = set_para(x, '[Month Year]', 'September 2026')
 x = set_para(x, '[Risk Level', 'Risk Level: Yellow untreated, Green after the proposed measures — Confidential')
-x = set_para(x, '[Equipment, system, or activity covered', 'The process by which Level 3 Advisory AABs are issued, distributed to the thirteen WCE units, acknowledged, actioned, chased and reported. The subjects of AABs are well control equipment classified Safety Critical (SCE / SECE) under RAMP; the process itself is not an equipment item.')
-x = set_para(x, 'DIR-37-0147 (Risk Assessment); DIR-00-0100 (RAMP); [applicable API', 'DIR-37-0147 (Risk Assessment); DIR-37-0015 (Management of Change Requests); DIR-00-0100 (RAMP); Seadrill AAB directive [number to be inserted]')
+x = set_para(x, '[Equipment, system, or activity covered', 'The process by which Priority 3 (Notification / Advisory, information only) AABs originated by WCE Technical Services are issued, distributed to the thirteen WCE units, acknowledged by both crews\' Technical Section Leaders, chased and reported. The subjects of AABs are well control equipment classified Safety Critical (SCE / SECE) under RAMP; the process itself is not an equipment item.')
+x = set_para(x, 'DIR-37-0147 (Risk Assessment); DIR-00-0100 (RAMP); [applicable API', 'DIR-37-0147 v2.02 (Risk Assessment); DIR-37-0161 v6.07 (Management of Technical Alerts, Advisories and Bulletins); DIR-37-0015 v1.08 (Management of Change); DIR-00-0100 v8.06 (RAMP)')
 x = set_para(x, '[Client name', 'Seadrill fleet — thirteen WCE units, all contracts')
 x = set_para(x, '[Author / Department]', 'Daniel Plant, Subsea Superintendent, Technical Services (change owner); Eric Rachall, AAB gatekeeper (initiator)')
 
@@ -200,18 +200,18 @@ rs, re_ = row_at(x, 'Initial Issue')
 x = x[:rs] + fill_row(x[rs:re_], ['01', 'September 2026', 'Initial issue — draft for the HAZID workshop; rankings to be agreed in the room', 'D. Plant']) + x[re_:]
 
 # ================= SECTION 1 =================
-x = set_para(x, '[The purpose of this Risk Assessment / HAZID is to identify', 'The purpose of this Risk Assessment / HAZID is to identify the hazards and manage the potential risks associated with a change of process: Level 3 Advisory Technical Alerts, Advisories and Bulletins (AABs) will be issued, distributed, acknowledged, actioned and tracked through the Seadrill Bulletin Board tool, the estate\'s posting intake, the AAB Notifications flow and the Well Control Equipment (WCE) Dashboard, in place of the Maximo workflow. It is prepared in accordance with the Seadrill Risk Assessment Directive (DIR-37-0147), evaluates risk using the Seadrill Risk Matrix (FRM-37-0138) as reproduced in Section 2.1, and supports the Management of Change under DIR-37-0015. The equipment that AABs concern is Safety Critical Equipment (SCE / SECE) contributing to the loss-of-well-containment Major Accident Hazards; the process is one of the ways a known equipment defect reaches the rigs that carry the equipment.')
+x = set_para(x, '[The purpose of this Risk Assessment / HAZID is to identify', 'The purpose of this Risk Assessment / HAZID is to identify the hazards and manage the potential risks associated with a change of process: Priority 3 (Notification / Advisory, information only, DIR-37-0161 §2.2.3) AABs originated by WCE Technical Services will be issued, distributed, acknowledged, actioned and tracked through the Seadrill Bulletin Board tool, the estate\'s posting intake, the AAB Notifications flow and the Well Control Equipment (WCE) Dashboard, in place of the Maximo child AAB cases and their tick-box acknowledgement (DIR-37-0161 §2.2.4). It is prepared in accordance with the Seadrill Risk Assessment Directive (DIR-37-0147), evaluates risk using the Seadrill Risk Matrix (FRM-37-0138) as reproduced in Section 2.1, and is the HAZID DIR-37-0015 §3.4 requires for the Management of Change (a Seadrill system change under §2 of that directive). The equipment that AABs concern is Safety Critical Equipment (SCE / SECE) contributing to the loss-of-well-containment Major Accident Hazards; the process is one of the ways a known equipment defect reaches the rigs that carry the equipment.')
 x = set_para(x, '[State the specific objective', 'The objective is to demonstrate, hazard by hazard, that the new route tells every applicable rig, records that the rig has read the advisory and separately that it has acted on it, makes an unacknowledged advisory visible to Technical Services the day it goes overdue, keeps an immutable record of every issue and acknowledgement, and does so at a residual risk that is ALARP and no higher than the Maximo route it replaces. The study asks one question of every step: how could a rig fail to be told, fail to understand, fail to act, or be shown as done when it is not, and would we see it?')
-x = set_para(x, '[State exactly what this risk assessment applies to', 'This risk assessment applies to Level 3 Advisory AABs for the thirteen WCE units (West Neptune, West Auriga, West Saturn, West Jupiter, West Tellus, West Carina, West Polaris, West Vela, West Gemini, West Capella, Sonangol Libongos, Sonangol Quenguela, Sevan Louisiana) and to the four parts of the new route. Where Client requirements or local regulations differ, the more stringent applies. The scope covers:')
+x = set_para(x, '[State exactly what this risk assessment applies to', 'This risk assessment applies to Priority 3 Advisory AABs originated by WCE Technical Services for the thirteen WCE units (West Neptune, West Auriga, West Saturn, West Jupiter, West Tellus, West Carina, West Polaris, West Vela, West Gemini, West Capella, Sonangol Libongos, Sonangol Quenguela, Sevan Louisiana) and to the four parts of the new route. Where Client requirements or local regulations differ, the more stringent applies. The scope covers:')
 bul1 = ['Issue: the Seadrill Bulletin Board tool (Rev 5), its record and its Post and Save routes;',
         'Distribution: the AAB Notifications flow, the notification workbook (Office, Superintendents and Rigs tables) and the emails it sends;',
         'Acknowledgement and action closure: the acknowledgement page on the sacred server, its two records (acknowledge, close) and the evidence they carry;',
         'Reporting and chase: the dashboard scanner, the dashboard AAB tab (overdue count first, then percent acknowledged) and the daily overdue chase;',
-        'Records: the immutable posted files in SharePoint WellControl / PostedReports as the register for Level 3 AABs, and their retention.']
+        'Records: the immutable posted files in SharePoint WellControl / PostedReports as the register for Priority 3 AABs, and their retention.']
 for old, new in zip(['[Structural / mechanical integrity', '[Functional / performance testing', '[Material traceability', '[Certification, quality assurance', '[Registration of the equipment/asset'], bul1):
     x = set_para(x, old, new)
-x = set_para(x, '[State what is explicitly out of scope.]', 'Out of scope: Level 1 and Level 2 AABs, which remain in Maximo under the directive as it stands; the work orders raised as a result of an AAB, which remain in Maximo; non-WCE disciplines unless the directive is company-wide. Any field activity that an AAB requires is separately controlled by a TBRA and/or 5-Point Check at the worksite per DIR-37-0147.')
-x = set_para(x, '[Name the Technical Authority / discipline owner]', 'Lee Arnold, Technical Authority WCE, is responsible for the content of this assessment and for the acceptance decision. Daniel Plant, Subsea Superintendent, is the change owner under DIR-37-0015 and owns the dashboard side: routing, the acknowledgement page, the scanner and the KPI. Eric Rachall, AAB gatekeeper, owns the Bulletin Board tool and the record it posts, and is the only person who issues from it. Rig Managers and OIMs are responsible for their rig\'s acknowledgement and action closure. All actions arising are transferred to Synergi with owners and dates.')
+x = set_para(x, '[State what is explicitly out of scope.]', 'Out of scope: Priority 1 (Safety Alert) and Priority 2 (Bulletin, Product Obsolescence) AABs, which remain in Maximo under DIR-37-0161 as it stands; external AABs received through the common mailbox and their eDocs filing and Maximo parent case, which are unchanged; the work orders raised as a result of an AAB, which remain in Maximo; other disciplines. Any field activity that an AAB requires is separately controlled by a TBRA and/or 5-Point Check at the worksite per DIR-37-0147.')
+x = set_para(x, '[Name the Technical Authority / discipline owner]', 'Lee Arnold, Technical Authority WCE, is responsible for the content of this assessment and for the acceptance decision. Daniel Plant, Subsea Superintendent, is the change owner under DIR-37-0015 and owns the dashboard side: routing, the acknowledgement page, the scanner and the KPI. Eric Rachall, AAB gatekeeper, owns the Bulletin Board tool and the record it posts, and is the only person who issues from it. The Technical Section Leader of each crew acknowledges for the rig, as DIR-37-0161 §2.2.4 requires for a Priority 3; the Rig Manager is responsible for the directive being followed on the rig (§2.1). All actions arising are transferred to Synergi with owners and dates.')
 
 # ================= SECTION 2 tweaks =================
 x = set_para(x, 'The risk for all aspects shall be reduced to As Low As Reasonably Practicable (ALARP) before [', 'The risk for all aspects shall be reduced to As Low As Reasonably Practicable (ALARP) before the new process goes live on the cut-over date set in the MOC.')
@@ -228,7 +228,7 @@ def set_heading(x, old, new):
     return x
 x = set_heading(x, '3. Equipment and Standards Basis', '3. Process and Standards Basis')
 x = set_heading(x, '3.1 [Applicable Standard(s)', '3.1 Governing documents')
-x = set_para(x, '[Summarise the controlling clauses of each applicable industry/regulatory standard', 'The Seadrill AAB directive [number and title to be inserted] governs how a Technical Alert, Advisory or Bulletin is raised, distributed, acknowledged and tracked; the sections that describe the Maximo route for Level 3 are the ones the MOC amends (see the MOC, Appendix A, for the section list). DIR-37-0015 Management of Change Requests governs the change itself. DIR-37-0147 governs this assessment. DIR-00-0100 (RAMP) governs the equipment the advisories concern: the criticality classification stays in Maximo, and work orders arising from an AAB stay in Maximo; only the Level 3 AAB register moves.')
+x = set_para(x, '[Summarise the controlling clauses of each applicable industry/regulatory standard', 'DIR-37-0161 v6.07 governs how a Technical Alert, Advisory or Bulletin is received, filed, evaluated and distributed: three priorities (1 Safety Alert, 2 Bulletin / Product Obsolescence, 3 Notification / Advisory, information only); eDocs filing and a Maximo parent case for every AAB; Maximo child cases per site; for a Priority 3, both TSLs acknowledge by ticking the box and commenting. The MOC amends §2.1, §2.2.3, §2.2.4, §4 and §6 for WCE-originated Priority 3 advisories only (see the MOC §5). DIR-37-0015 v1.08 governs the change itself as a Seadrill system change (§2) and requires this HAZID (§3.4). DIR-37-0147 governs this assessment. DIR-00-0100 (RAMP) governs the equipment the advisories concern: the criticality classification stays in Maximo, and work orders arising from an AAB stay in Maximo; only the Priority 3 AAB register moves.')
 x = set_heading(x, '3.2 Equipment Specification and Quality Evidence', '3.2 The process as designed')
 x = set_para(x, '[Summarise the equipment/OEM specification supplied', 'The process is described in AAB-LOOP-PLAN.md and drawn in AAB-LOOP-FLOWCHART.html, both attached to the MOC. In outline: the gatekeeper raises the AAB in the Bulletin Board (number, revision, title, SFI codes, category, issue and due dates, the three advisory sections, references, the bulletin PDF and other attachments, photographs, applicable rigs) and presses Post; one record goes through the estate\'s HTTP intake to SharePoint WellControl / PostedReports and is never modified afterwards. The AAB Notifications flow emails each applicable rig\'s contacts from the notification workbook with the bulletin attached and a link to the dashboard, office and gatekeeper in copy; a rig with no contacts produces a NO RIG CONTACT email to the office. The rig acknowledges on the dashboard\'s acknowledgement page (name, role, date) and later closes the action (name, date, comment, evidence photographs); each is a second posted record. The scanner groups revisions by AAB number, joins acknowledgements to AABs per rig, computes each rig\'s state (outstanding, acknowledged, closed, overdue) and shows it on the dashboard AAB tab, overdue count first. Overdue AABs are chased daily. It is the fifth instance of the notification loop already in service for precharge (11 September 2026), rig visit reports, CBM to OEM and SSCE requests.')
 x = set_heading(x, '3.3 Alignment with the Rig Asset Management Platform', '3.3 Alignment with RAMP (DIR-00-0100) and Maximo')
@@ -236,7 +236,7 @@ x = set_para(x, '[Where the subject of this assessment is equipment, describe', 
 bul3 = ['Equipment identification and criticality stay in Maximo (SAMS); an AAB names its equipment by SFI code and description and does not create or change asset records;',
         'Work orders arising from an AAB are raised and closed in Maximo as today; the acknowledgement record on the dashboard references the AAB, not the work order;',
         'Third-party and service-provider involvement in an AAB\'s required action is managed under DIR-00-0239 as today;',
-        'The Level 3 AAB register moves from Maximo to the immutable posted files in SharePoint WellControl / PostedReports, with SharePoint version history and the dashboard as the reporting view; retention is agreed with IT (register entry H8);',
+        'The Priority 3 AAB register moves from Maximo to the immutable posted files in SharePoint WellControl / PostedReports, with SharePoint version history and the dashboard as the reporting view; retention is agreed with IT (register entry H8);',
         'Levels 1 and 2 are unchanged in Maximo.']
 for old, new in zip(['Equipment identification &#8212; asset/location record', 'Criticality and Performance Standard &#8212;', 'Third-party / service provider &#8212;', 'Certification tracking &#8212;', 'Maintenance cycle &#8212;'], bul3):
     x = set_para(x, old, new)
@@ -268,17 +268,17 @@ x = set_para(x, '[Barrier integrity: state how', 'Barrier integrity: the advisor
 x = set_para(x, '[Independent assurance: identify', 'Independent assurance: the same intake, workbook and dashboard pattern is in service for four other loops since 11 September 2026; the CBM to OEM loop was tested end to end on 22 September 2026 in test mode with the real recipient lists proven and nobody outside the office emailed;')
 x = set_para(x, '[Gap closure: list any open items', 'Gap closure before go-live: H1 (chase branch and sent-log), H3 (third state on the dashboard), H7 (West Gemini route or the reply route accepted), H8 (retention rule with IT), H11 (cut-over list) and H13 (named deputy in the directive revision) must be closed; the remaining measures are procedural and are written into the issuing procedure;')
 x = set_para(x, 'Governance: acceptance is governed through Seadrill engineering acceptance / MoC', 'Governance: the change is governed through Management of Change (DIR-37-0015) with Technical Authority WCE sign-off, and all actions are transferred to Synergi.')
-x = set_para(x, '[State the overall conclusion', 'This HAZID concludes that the new route for Level 3 Advisory AABs is acceptable, provided the gap-closure items in Section 6 are completed before the cut-over date and the procedural measures are written into the issuing procedure and the directive revision. The highest-priority actions before go-live are:')
+x = set_para(x, '[State the overall conclusion', 'This HAZID concludes that the new route for Priority 3 Advisory AABs is acceptable, provided the gap-closure items in Section 6 are completed before the cut-over date and the procedural measures are written into the issuing procedure and the directive revision. The highest-priority actions before go-live are:')
 x = set_para(x, 'Priority 1 (Red', 'Priority 1 (Entries H1, H3): the daily overdue chase with a sent-log, and the third state "acknowledged, action open" on the dashboard, signed off by the change owner.')
-x = set_para(x, 'Priority 2 (Entries [X, Y])', 'Priority 2 (Entries H7, H8, H11, H13): the West Gemini route or an accepted reply route; the retention rule with IT; the cut-over list of open Maximo Level 3 AABs; a named deputy for the gatekeeper in the directive revision.')
+x = set_para(x, 'Priority 2 (Entries [X, Y])', 'Priority 2 (Entries H7, H8, H11, H13): the West Gemini route or an accepted reply route; the retention rule with IT; the cut-over list of open Maximo Priority 3 AABs; a named deputy for the gatekeeper in the directive revision.')
 x = set_para(x, 'Priority 3 (Entries [X, Y, Z])', 'Priority 3 (Entries H2, H4, H5, H6, H9, H10, H12, H14, H15): the procedural measures written into the issuing procedure, the dashboard cover wording and stale-data banner, the quarterly reviews on the Technical Services calendar.')
 x = set_para(x, 'All risk reducing measures shall be transferred to Synergi as formal action items', 'All risk reducing measures shall be transferred to Synergi as formal action items with defined owners and close-out dates, and verified complete before the new process goes live. Any subsequent field activity required by an individual AAB shall be controlled by TBRA / 5-Point Check per DIR-37-0147.')
 
 # ================= SECTION 8 REFERENCES =================
 rs, re_ = row_at(x, '[Applicable API / industry standard reference]'); tpl_row = x[rs:re_]
 rs2, re2 = row_at(x, '[Equipment / quality documentation reference]')
-refs = [('Seadrill AAB directive [number]', 'Technical Alerts, Advisories and Bulletins — [title and revision to be inserted]; the sections describing the Level 3 route are amended by the MOC'),
-        ('MOC (Synergi case [number])', 'Management of Change: Level 3 Advisory AABs through the Seadrill Bulletin Board and the WCE Dashboard, draft 1, 22 September 2026 (AAB-MOC-DRAFT.md)'),
+refs = [('DIR-37-0161 (v6.07)', 'Management of Technical Alerts, Advisories and Bulletins; §2.1, §2.2.3, §2.2.4, §4 and §6 amended by the MOC for WCE-originated Priority 3 advisories'),
+        ('MOC (Synergi case [number])', 'Management of Change: Priority 3 Advisory AABs through the Seadrill Bulletin Board and the WCE Dashboard, draft 2, 23 September 2026 (AAB-MOC-DRAFT.md)'),
         ('AAB-LOOP-PLAN.md / AAB-LOOP-FLOWCHART.html', 'The process as designed: parts, records, decisions, build order; the printable flowchart'),
         ('AAB-REV5-HANDOFF-FOR-ERIC.md', 'The Bulletin Board Rev 5 record (schema 2.0) and the acknowledgement record'),
         ('NOTIFICATION-LOOP-PATTERN.md; NOTIFICATION-TEST-MODE-GUIDE.md', 'The notification loop design in service since 11 September 2026, and the test mode proven on 22 September 2026'),
@@ -312,7 +312,7 @@ for c in ('4F81BD', '365F91', '17365D', '1F497D', '243F60'):
     styles = styles.replace('w:val="%s"' % c, 'w:val="002C77"')
 
 # ================= HEADERS / FOOTERS =================
-HDR_TITLE = 'Title: Level 3 Advisory AABs through the Seadrill Bulletin Board and the WCE Dashboard — process change HAZID'
+HDR_TITLE = 'Title: Priority 3 Advisory AABs through the Seadrill Bulletin Board and the WCE Dashboard — process change HAZID'
 def fix_hf(t):
     t = t.replace('<w:t>Red</w:t>', '<w:t>Yellow</w:t>')
     t = re.sub(r'<w:t[^>]*>Title: Riser Running Tool \(Shaffer FT-H 1000T\) Recertification HAZID</w:t>', '<w:t xml:space="preserve">' + esc(HDR_TITLE) + '</w:t>', t)

@@ -170,23 +170,28 @@ Fleet view and per-rig view, the way the rest of the dashboard works.
 
 **Acknowledgement page, `aab\acknowledge.html` on `sacred`:** rig from `?rig=<key>` or a
 dropdown; lists that rig's open AABs from `aab-data.js` with the text, the photos and the
-PDF; **Acknowledge** (name, role from the decided list, date) and **Close action** (name,
+PDF; **Acknowledge** (name, role, crew A or B, date; DIR-37-0161 §2.2.4 wants both crews' TSLs on a Priority 3) and **Close action** (name,
 date, comment, up to six photos as evidence); posts `seadrill-aab-ack_<no>_<rev>_<rigKey>_
 <stamp>.json` through the HTTP trigger read from `gate-config.js`, and downloads the file
 instead on any failure. Rev tag in the header. No password gate: acknowledging is signed
 by name and role, and the record is the audit trail. Add the gate later if Dan wants it.
 
-## 5. Decisions Dan owns (none blocks Rev 5)
+## 5. Decisions Dan owns (updated 23 Sep after DIR-37-0161 v6.07 and DIR-37-0015 v1.08 were read)
 
-| # | Decision | Recommendation to decide against |
+| # | Decision | State |
 |---|---|---|
-| 1 | Level 3 response period | 14 days stays as the default; the due date is editable per AAB |
-| 2 | Who acknowledges for a rig | the **Subsea Supervisor** acknowledges (reads it); the **OIM** or ARM closes the action (done it). Two names, two acts, matching the two states the brief already has |
-| 3 | Notification matrix | the existing workbook: Rigs sheet columns already present (SS, TSL, OIM, ARM, Rig Manager); `Office` for the CC; Eric's address as `Originator` from the record, no table needed |
-| 4 | Withdrawal | yes, as a new revision with `status: 'withdrawn'`; acknowledgements kept as history |
-| 5 | Acknowledgement page | its own page under `aab\`, §4; not inside the precharge pages |
-| 6 | SFI list | Dan sends the 331 to 336 code list with names (the SPARC / Maximo naming); until then the six groups only |
-| 7 | Chase cadence | daily at 07:00, one email per overdue AAB per rig, to the rig contacts with Eric and Office in CC |
+| 1 | Response period | 14 days stays as the default; DIR-37-0161 sets none for a Priority 3 (the discipline manager sets a closure date per AAB, §2.2.3) |
+| 2 | Who acknowledges | **Settled by the directive:** for a Priority 3, "both TSLs must review the AAB and acknowledge" (§2.2.4). The acknowledgement page records the TSL's name and crew; a rig is fully acknowledged when both crews' TSLs have acknowledged, partially until then. The Rig Manager, ARM and OIMs acknowledge Priority 1 and 2 only, which stay in Maximo. Action closure is optional on a Priority 3 (§2.2.4: typically no follow-up) and is used when the gatekeeper marks "action requested" |
+| 3 | Notification matrix | the existing workbook: Rigs sheet columns (SS, TSL, OIM, ARM, Rig Manager, and the Rig Engineer where there is one), `Office` for the CC, Eric from the record |
+| 4 | Withdrawal | a new revision with `status: 'withdrawn'`; acknowledgements kept as history |
+| 5 | Acknowledgement page | its own page under `aab\`, §4 |
+| 6 | SFI list | Dan sends the 331 to 336 code list with names |
+| 7 | Chase cadence | daily at 07:00 |
+| 8 | **Terminology** | the directive's word is **Priority** (1 Safety Alert, 2 Bulletin / Product Obsolescence, 3 Notification / Advisory). Tool, record, documents and dashboard say Priority 3 Advisory; the record keeps `level: 3` and adds `priority: 3` |
+| 9 | **Scope** | **open:** WCE-originated Priority 3 advisories only (Eric as gatekeeper, draft 2 of the MOC assumes this), or every Priority 3 including OEM notifications received through the common mailbox, which brings the Document Controller into the loop |
+| 10 | **Maximo parent case** | **open:** keep the parent AAB case for the corporate evaluation trail (DIR-37-0161 §2.2.2 "all AABs will be entered into Maximo"), marked "distributed via the Seadrill Bulletin Board", with the child cases and acknowledgement on the dashboard; or let the dashboard record replace it. eDocs filing continues either way; the record carries the eDocs reference |
+| 11 | **Route to go-live** | **open:** revise DIR-37-0161 first (owner Arnaud Gabaut, approver VP Technical Services & ISIT) and cut over after, or pilot on one rig under a documented DIR-00-0011 deviation while the revision goes through (DIR-37-0015 §3 note) |
+| 12 | **Synergi case type** | **open:** the Seadrill-change (system change) type name in Synergi; the CAR26 example is the Physical Changes type, which is not ours |
 
 ## 6. Who builds what, in order
 

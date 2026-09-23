@@ -98,6 +98,20 @@ below. Bump the header tag to Rev 5 and toolVersion to "2.0".
     side's shape, shown so both ends agree; the tool never reads them. Do not upload any of
     the four to PostedReports.
 
+14. THE DIRECTIVE'S WORDS (DIR-37-0161 v6.07, read 23 Sep). The directive has Priorities,
+    not Levels: 1 Safety Alert, 2 Bulletin / Product Obsolescence, 3 Notification / Advisory
+    (information only). Rename every "Level 3" on screen, in the preview, the print, the PDF
+    and the header tag to "Priority 3 — Advisory". Keep level: 3 in the record and add
+      priority: 3
+      corporateMandatory: false      (a Priority 3 is "Not required by Corporate, for
+                                      information only"; carry that sentence on the PDF)
+      edocsRef: "<eDocs number>"     (text field on the Identification card, optional;
+                                      every AAB is filed in eDocs under the 0000 prefix)
+      actionRequested: false         (checkbox "This advisory asks the rig to do something";
+                                      when true the dashboard shows the action-closed state)
+    expectedAcknowledgerRole becomes the fixed string "Technical Section Leader (each crew)":
+    the directive says both TSLs acknowledge a Priority 3.
+
 After each step: node --check on the script block, open the file from disk, create one
 AAB on the rig "West Vela" only with a small PDF and one photograph, press "Create AAB
 file", and show me the saved record's meta, sfi, attachments (name/type/bytes only) and
@@ -134,7 +148,11 @@ and a sentence that the acknowledgement is a separate posted file computed by th
   "photos": [ { "name": "packer.jpg", "caption": "Extrusion at 3 o'clock", "data": "data:image/jpeg;base64,…" } ],
   "rigsApplicable": ["vela", "capella"],
   "rigNames": { "vela": "West Vela", "capella": "West Capella" },
-  "expectedAcknowledgerRole": "Subsea Supervisor",
+  "priority": 3,
+  "corporateMandatory": false,
+  "edocsRef": "",
+  "actionRequested": false,
+  "expectedAcknowledgerRole": "Technical Section Leader (each crew)",
   "status": "active",
   "pdfName": "Seadrill_AAB_C10250746_Rev0.pdf",
   "pdf": "<bare base64 of the AAB PDF built by buildAabPdf()>",
@@ -157,7 +175,8 @@ Posted by `sacred/aab/acknowledge.html` through the same trigger, filename
   "revision": 0,
   "action": "acknowledge",
   "by": "A. Small",
-  "role": "Subsea Supervisor",
+  "role": "Technical Section Leader",
+  "crew": "A",
   "at": "2026-09-24",
   "comment": "",
   "photos": []
@@ -165,7 +184,8 @@ Posted by `sacred/aab/acknowledge.html` through the same trigger, filename
 ```
 
 `action` is `acknowledge` or `close`; `close` carries the comment and up to six evidence
-photographs. Here `meta.asset` **is** present, because an acknowledgement belongs to one rig.
+photographs. `crew` is `A` or `B`: DIR-37-0161 §2.2.4 wants both crews' TSLs to acknowledge a
+Priority 3, so a rig is fully acknowledged after two acknowledgements. Here `meta.asset` **is** present, because an acknowledgement belongs to one rig.
 
 ## 3. Answers to the open points in Eric's handoff
 
@@ -180,6 +200,5 @@ photographs. Here `meta.asset` **is** present, because an acknowledgement belong
   browser, so the answer is proven: the flow handles the preflight. Never use `mode:
   'no-cors'`; a `no-cors` request cannot carry a JSON body and the flow receives nothing
   while the browser reports success.
-- **Which role acknowledges, response period, withdrawal, notification matrix:** Dan's
-  decisions, listed with recommendations in `AAB-LOOP-PLAN.md` §5. None of them changes the
-  record's shape.
+- **Which role acknowledges:** settled by DIR-37-0161 §2.2.4, both crews' TSLs (step 14).
+  Response period, withdrawal, notification matrix: Dan's decisions in `AAB-LOOP-PLAN.md` §5.
