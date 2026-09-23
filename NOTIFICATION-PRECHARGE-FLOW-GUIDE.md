@@ -9,6 +9,10 @@
 | **Request** `seadrill-request_<rig>_<well>_<date>_precharge.json` | the rig, from the SSORT request form | Office table: Dan, Lee, Joao, Ronnie | — |
 | **Issued precharge** `seadrill-report_<rig>_<date>_precharge.json` | you, from the calculator's Post to Dashboard | that rig's Subsea Supervisor, Technical Section Leader, Assistant Rig Manager and Rig Manager (Rigs table, `SubseaSupervisorEmail` + `TslEmail` + `ARMEmail` + `RigManagerEmail`, blanks skipped) | Office table |
 
+Rule (Dan, 23 Sep): the rig's people are always on **To**, never CC, because rigs may
+filter CC and a precharge must not be missed. The office rides in CC on the ISSUED email
+only; the REQUEST email is office-only.
+
 **Test mode (23 Sep):** while `Settings!TestMode` is `Yes` every one of the three emails goes
 to the Office table only, with `[TEST MODE] ` in front of the subject; the ISSUED email also
 carries a red line naming the rig addresses the real run would have used. `No` is live. See
