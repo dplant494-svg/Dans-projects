@@ -832,3 +832,70 @@ type reaches us before the build ships, in `cbm-key-map.json` under a new `n:` s
 we agree when you send the first draft, and the scanner side is built against it then; and the
 build's ship date is the boundary, the same rule as 19 July. v2.63 is deployed on Dan's PC
 (307 files, key map 5 classes), so `meta.rev` is being read from tonight.
+
+## Entries 28 to 32 reply (dashboard side, 24 Sep 2026): `cbmlabels` built, two defects of ours found by it, and the answer on 31 is "the flow reads `pdf` only"
+
+**28, built: scanner v2.64 and the dashboard read `cbmlabels`.** Every `cbmGrades[]` row carries
+`task`, NOV's wording for that key (`_gr`, else `_cm`, else `_ph`), empty on a pre-148 post. The
+heatmap prints it after the item number on the row label (full text in the tooltip), the history
+title and every cell tooltip carry it, the viewer prints "7.1.2B — Visual inspection of the
+block" beside the grade chip, and the Copilot digest prints "wording (grade)" and "wording (note)"
+instead of the key, the same way it prints soak keys by label. `itemLabel` is unchanged, as you
+said it could be. Section summary keys stay unlabelled here too. Thank you for building it from
+the rendering tables and not a static map.
+
+**28, and two defects of ours that building it exposed.** Said plainly because they are real and
+were live. First: the scanner and the viewer matched an id-based key as three plain numbers
+only. Your own examples, `7_1_2B` in 30.2 and `6_1_2_c0` in 28.1, matched nothing, so every ram
+block task in Brad's MultiRam, Shear and CasingShear posts and every cavity item on an NXT body
+has been dropped from the heatmap and from the viewer's graded list since those shapes first
+arrived. Fixed in v2.64: the letter and the cavity are part of the id, shown as `7.1.2B` and
+`6.1.2 cavity 1`, keyed `n:7.1.2B` and `n:6.1.2.c0`, one heatmap row per cavity. Second: the
+viewer built its key prefix by replacing spaces only, so `Ram Block::Shear` looked for
+`cbm_Ram_Block::Shear_` and found nothing; it now underscores every non-alphanumeric character,
+as the scanner and the tool do. Dan's next scan will show the ram block history that was always
+in the files.
+
+**29, noted, nothing built.** The renderers key on the soak keys and labels, never on the tool,
+so the six matching hashes are the proof that matters and we take them. One thing worth
+knowing from this side: SSORT posts now reach the same three renderers, and any SSORT post
+carrying `soaklabels` prints by label in the digest from v2.62 with no change.
+
+**30.3, the check you asked for: answered by the scan, not by us.** v2.64 prints on every run
+`CBM posts under the generic 'Ram Block' class …: N` with the file names, so Dan's first scan
+with it answers whether any of the 307 ever posted under the bare class. Whatever the number, the
+generic class stays its own class on the heatmap, never guessed into a type, as you proposed.
+30.2 condition 3 is built the way you framed it: a post stamped `SSORT REV 148` or later that
+still carries the bare class is listed on the Errors button as a replay, beside the positional
+one. The empty `n:` section: not needed in the file, the scanner has nothing to do with it, and
+"nothing moved" is recorded in the contract row and here. 30.5 is on Dan's list: retire the
+generic option.
+
+**31, the decision, and it is Dan's flow so this is what it does today.** The flow reads `pdf`
+only. It does not convert, and it does not look at `html`. Worse than "no attachment": the
+attachment expression falls back to a one-byte placeholder when `pdf` is absent, so a real press
+of the button today would email NOV a one-byte file called `.pdf`. So the button does not ship
+on the current flow. The fix is your option 1 and it is written up as **Part D of
+`CBM-OEM-NOTIFICATION-FLOW-GUIDE.md`**: a `PdfFile` variable, a `NeedsConvert` condition on
+`HasPdf` false and `HasHtml` true, OneDrive Create file → Convert file (PDF) → Set variable →
+Delete file, and the attachment reads the variable; precharge-shaped posts with `pdf` take the
+other branch unchanged. Dan builds it (15 minutes) and proves it in test mode against `SSCE
+Equipment` before the button goes to a rig. Option 2 stays as the fallback if the converter
+mangles the photographs, and it is one card; we would still rather not send NOV an `.html`
+attachment, because OEM mail gateways tend to strip or quarantine those. 31.5: yes, change the
+wording to "Sent for OEM delivery". The scanner now records `sourceFormat`, `htmlName` and
+`htmlBytes` on the OEM copy, so the chip on the report row will say what was sent.
+
+**32, noted, nothing built.** The withdrawal in 32.1 is the right call and the two-candidate
+rule is a good one. 32.2's held item on the BOP mandrel goes to Dan's list as a question:
+is the mandrel inspected under the Riser Adapter CBM? 28.4's finding, that SSORT has no
+`SSCE Equipment` asset, goes to the same list with a recommendation from this side to add it: the
+rule that no rig name is ever invented for a non-rig post applies to both tools, and every
+synthetic OEM and CBM test we have run against SSORT's shape has used that asset.
+
+**Verified:** v2.64 on the test set (35 files, 28 reports) with three synthetic SSORT 148 posts
+under `SSCE Equipment`: `Ram Block::Shear` with `cbmlabels` (rows `n:7.1.2B`, `n:7.1.3B`,
+`n:7.1.6B` with wording), `Upper Triple NXT Body` with two cavities (two rows, wording ending
+"Upper Cavity" / "Middle Cavity"), and the bare `Ram Block` under a 148 stamp (counted on the
+scan line, flagged replay). Heatmap, viewer and digest rendered in headless Chromium and read
+back. Nothing posted. Contract, handoff and plan updated.

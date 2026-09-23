@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.63'
+$ScriptVersion = '2.64'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -273,6 +273,8 @@ function ConvertTo-PlainText {
 #   old: cbm_<equip>_g<section>_<item>_[gr|cm|ph]           (2 numbers, "g" prefix)
 #   new: cbm_<equip>_<major>_<minor>_<item>_[gr|cm|ph]      (3 plain numbers,
 #        matching SSORT's own on-screen reference, e.g. "9.1.5")
+#        v2.64: the item may carry a letter (7_1_2B, the ram block tasks, entry 30.2)
+#        and a cavity suffix (6_1_2_c0, entry 28.1); both are part of the task id.
 # An item is real if ANY of _gr/_cm/_ph is present - most new-format rows are
 # comment-only with no grade key at all - mirroring rvCbm()'s discovery rule
 # in dashboard.html so the scanner and the full-report viewer never disagree
@@ -292,18 +294,30 @@ function Get-CbmGradedItems {
         $equipPrefix = 'cbm_' + ($equip.Trim() -replace '[^A-Za-z0-9]', '_') + '_'
     }
 
+    # v2.64: cbmData.cbmlabels (SSORT 148, rolling handoff entry 28) carries NOV's task
+    # wording for every posted task key, keyed exactly as the data (…_gr / …_cm). Read
+    # beside the keys, never required: absent means a pre-148 post, and the item's
+    # itemLabel stays derived from the key alone either way.
+    $labels = Get-Prop $Cbm 'cbmlabels'
+    if ($labels -is [string] -or $labels -is [System.Array]) { $labels = $null }
     $bases = @{}
     foreach ($k in (Get-KeyNames $Cbm)) {
         $key = [string]$k
         if ($equipPrefix -and $key.IndexOf($equipPrefix) -ne 0) { continue }
-        if ($key -match '^(.+_(\d+)_(\d+)_(\d+))_(gr|cm|ph)$') {
+        if ($key -match '^(.+_(\d+)_(\d+)_(\d+)([A-Za-z]?)(?:_c(\d+))?)_(gr|cm|ph)$') {
             $base = $Matches[1]
             if (-not $bases.ContainsKey($base)) {
+                $letter = [string]$Matches[5]
+                $cav = [string]$Matches[6]
+                $id = "$($Matches[2]).$($Matches[3]).$($Matches[4])$letter"
+                $lab = $id; if ($cav -ne '') { $lab = "$id cavity $([int]$cav + 1)" }
+                $lo = 0; if ($letter) { $lo = [int][char]$letter.ToUpperInvariant() }
+                $cv = -1; if ($cav -ne '') { $cv = [int]$cav }
                 $bases[$base] = @{
                     shape   = 'new'
-                    sortKey = @([int]$Matches[2], [int]$Matches[3], [int]$Matches[4])
-                    label   = "$($Matches[2]).$($Matches[3]).$($Matches[4])"
-                    itemKey = "n:$($Matches[2]).$($Matches[3]).$($Matches[4])"
+                    sortKey = @([int]$Matches[2], [int]$Matches[3], [int]$Matches[4], $lo, $cv)
+                    label   = $lab
+                    itemKey = "n:$id" + $(if ($cav -ne '') { ".c$cav" } else { '' })
                 }
             }
         }
@@ -334,11 +348,19 @@ function Get-CbmGradedItems {
         $photoCount = 0
         if ($photosArr -is [System.Array]) { $photoCount = $photosArr.Length }
         if (-not $grade -and -not $comment -and $photoCount -eq 0) { continue }
+        $task = ''
+        if ($labels) {
+            foreach ($sfx in @('_gr', '_cm', '_ph')) {
+                $lv = [string](Get-Prop $labels ($base + $sfx))
+                if ($lv.Trim()) { $task = $lv.Trim(); break }
+            }
+        }
         $result.Add([pscustomobject]@{
             itemKey   = $info.itemKey
             itemLabel = $info.label
             itemShape = $info.shape
             sortKey   = $info.sortKey
+            task      = $task     # v2.64: NOV's task wording from cbmlabels, '' when the post carries none
             grade     = $grade    # '1'/'2'/'3'/'4'/'N/A'/'' - passed through verbatim, never reinterpreted
             comment   = $comment
             photos    = $photoCount
@@ -459,7 +481,7 @@ function Write-DigestSection {
     if ($tmp.Length -eq 0) { return }
     [void]$Sb.Append("<$Tag>").Append((ConvertTo-HtmlText $Label)).Append("</$Tag>").Append($tmp.ToString())
 }
-$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; imgdata = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1; soaklabels = 1 }   # v2.62: soaklabels is read beside soak, never printed on its own
+$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; imgdata = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1; soaklabels = 1; cbmlabels = 1 }   # v2.62: soaklabels is read beside soak, never printed on its own; v2.64: cbmlabels likewise (SSORT 148, entry 28)
 function Test-DigestSkipKey {
     param([string]$Key)   # photo-carrying keys by name: cbm _ph, *photo*, *image*, imgData...
     $k = $Key.ToLower()
@@ -570,6 +592,11 @@ function Write-DigestValue {
     $soakLabelMap = $null
     $slv = Get-Prop $Value 'soaklabels'
     if ($null -ne $slv -and -not (Test-DigestScalar $slv) -and -not ($slv -is [System.Array])) { $soakLabelMap = $slv }
+    # v2.64: cbmData.cbmlabels (SSORT 148, entry 28): a cbm_… key with a label prints as
+    # 'NOV wording (grade)' / '(note)' so Copilot reads the task, not the key.
+    $cbmLabelMap = $null
+    $clv = Get-Prop $Value 'cbmlabels'
+    if ($null -ne $clv -and -not (Test-DigestScalar $clv) -and -not ($clv -is [System.Array])) { $cbmLabelMap = $clv }
     $scalars = New-Object System.Collections.Generic.List[object]
     $sections = New-Object System.Collections.Generic.List[object]
     foreach ($k in (Get-KeyNames $Value)) {
@@ -586,7 +613,14 @@ function Write-DigestValue {
     }
     if ($scalars.Count) {
         [void]$Sb.Append('<table>')
-        foreach ($sc in $scalars) { [void]$Sb.Append('<tr><th>').Append((ConvertTo-HtmlText $sc.k)).Append('</th><td>').Append((ConvertTo-HtmlText $sc.v)).Append('</td></tr>') }
+        foreach ($sc in $scalars) {
+            $th = $sc.k
+            if ($cbmLabelMap) {
+                $cl = [string](Get-Prop $cbmLabelMap $sc.k)
+                if ($cl.Trim()) { $th = $cl.Trim() + $(if ($sc.k -like '*_gr') { ' (grade)' } elseif ($sc.k -like '*_cm') { ' (note)' } else { '' }) }
+            }
+            [void]$Sb.Append('<tr><th>').Append((ConvertTo-HtmlText $th)).Append('</th><td>').Append((ConvertTo-HtmlText $sc.v)).Append('</td></tr>')
+        }
         [void]$Sb.Append('</table>')
     }
     foreach ($sec in $sections) {
@@ -612,7 +646,7 @@ function Write-DigestValue {
 # v2.54: bump when the digest RENDERING changes (new sections, wording Copilot
 # relies on). An unchanged source file with a digest written at this schema is
 # not rebuilt: on Dan's PC building 285 digests took 560 s of a 1,122 s scan.
-$DigestSchema = 3
+$DigestSchema = 4   # v2.64: cbm keys print NOV wording from cbmlabels
 # v2.58: the digest stamp check, on its own, so the report cache can require a
 # current digest before it serves a photo-stripped copy (a stale digest needs the
 # real file to rebuild). A file found current here is not re-read by Write-ReportDigest.
@@ -1284,6 +1318,7 @@ function Add-Problem { param($File, [string]$Kind, [string]$Why)
     $problemFiles.Add(@{ file = $File.Name; path = $File.FullName; kind = $Kind; why = $Why; bytes = [long]$File.Length; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }) | Out-Null
 }
 $problemFiles = New-Object System.Collections.Generic.List[object]
+$bareRamBlockFiles = @{}   # v2.64: CBM posts under the generic 'Ram Block' class (entry 30.3)
 
 foreach ($xf in $excelFiles) {
     try {
@@ -1445,6 +1480,9 @@ foreach ($f in $files) {
             oem        = [string](Get-Prop $json 'oem')
             pdfName    = [string](Get-Prop $json 'pdfName')
             pdfBytes   = [int][math]::Floor(([string](Get-Prop $json 'pdf')).Length * 0.75)
+            sourceFormat = [string](Get-Prop $json 'sourceFormat')   # v2.64: SSORT 148 posts 'html' (entry 31); the precharge shape posts pdf
+            htmlName   = [string](Get-Prop $json 'htmlName')
+            htmlBytes  = [int][math]::Floor(([string](Get-Prop $json 'html')).Length * 0.75)
             sent       = [string]$oemSent
             modified   = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
         }) | Out-Null
@@ -1931,6 +1969,17 @@ foreach ($f in $files) {
                     $cbmClass = $cbmClass.Trim()
                 }
                 if (-not $cbmClass) { $cbmClass = 'Unknown equipment' }
+                # v2.64: the generic 'Ram Block' class predates SSORT 148's split into six block
+                # types (entry 30). It is kept apart as its own class, never guessed into a type;
+                # counted so the scan answers 30.3, and a post stamped by SSORT 148+ that still
+                # carries it is pre-split data re-posted (30.2 condition 3), flagged like 25.2.
+                if ($cbmClass -eq 'Ram Block') {
+                    $bareRamBlockFiles[$f.Name] = $true
+                    if ($metaRev -match '^SSORT' -and -not $cbmReplayFlagged) {
+                        $cbmReplayFlagged = $true
+                        Add-Problem $f 'replay' ("graded under the generic 'Ram Block' class in a post stamped '{0}' - from SSORT 148 each block type is graded under its own class (Ram Block::Shear, ::Blind ...), so this is pre-split data re-posted, not a new inspection (rolling handoff entry 30.2)" -f $metaRev)
+                    }
+                }
                 $cbmEquip = Get-CbmInstanceLabel -Model ([string](Get-Prop $cbm 'rcpt_model')) `
                     -Serial ([string](Get-Prop $cbm 'rcpt_serial')) -FallbackClass $cbmClass
                 $cbmDate = [string](Get-Prop $cbm 'date')
@@ -1954,6 +2003,7 @@ foreach ($f in $files) {
                         itemLabel = $it.itemLabel
                         itemShape = $it.itemShape
                         sortKey   = $it.sortKey
+                        task      = [string](Get-Prop $it 'task')   # v2.64
                         grade     = $it.grade
                         comment   = $it.comment
                         photos    = $it.photos
@@ -2504,6 +2554,7 @@ $payload = [pscustomobject]@{
 # their absence is never a fault. The count answers the tool session's question.
 $marineRigCount = @($marineSorted | ForEach-Object { $_.rig } | Where-Object { $_ } | Sort-Object -Unique).Count
 if ($marineSorted.Count -gt 0) { Write-Host "Marine Integrity (archived, retired at WCGRRT REV 155): $($marineSorted.Count) record(s) across $marineRigCount rig(s)" -ForegroundColor Cyan }
+Write-Host ("CBM posts under the generic 'Ram Block' class (before the block-type split, rolling handoff entry 30.3): {0}{1}" -f $bareRamBlockFiles.Count, $(if ($bareRamBlockFiles.Count) { ' - ' + (($bareRamBlockFiles.Keys | Sort-Object) -join ', ') } else { ' - none' })) -ForegroundColor Cyan
 
 $phaseTimes = [ordered]@{}
 $jsonOut = $payload | ConvertTo-Json -Depth 10

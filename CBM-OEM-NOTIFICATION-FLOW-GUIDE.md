@@ -6,6 +6,9 @@ session). The flow can be built now and sits idle until the first OEM post arriv
 **Status, 22 September 2026:** built by Dan and tested end to end with a synthetic
 `seadrill-oem_SSCE-Equipment_*` post (one-page TEST PDF): OEM email sent to the NOV
 sheet's addresses, office in CC, PDF attached and opening. Live, waiting for the button.
+**Status, 24 September 2026:** SSORT 148's button posts **HTML, not PDF** (rolling handoff
+entry 31). **Part D below must be built and proven before the button ships**; without it a
+real press would email NOV a one-byte file named `.pdf`.
 **Pattern:** the same as Precharge Notifications and the rig-visit flow, with a PDF
 attached the way the precharge ISSUED email attaches one.
 
@@ -152,6 +155,57 @@ Email's To, CC, Subject and Body wrapped on `outputs('TestMode')`. So:
 
 Before test mode existed (22 Sep morning) the test was done by putting your own address
 in the NOV sheet's **Email** column; that is no longer needed and should not be done.
+
+## Part D — SSORT 148 posts HTML, not PDF: the convert step (15 minutes, before the button ships)
+
+**Why (rolling handoff entry 31, 24 Sep):** SSORT has no PDF renderer. Its Post to OEM sends
+`sourceFormat: "html"`, `htmlName`, `html` (base64 of a standalone HTML report) and `pdfName`,
+and **no `pdf`**. The Part B flow reads `pdf` only, so a real press of the button today would
+email NOV a one-byte file called `.pdf`. Part D makes the flow build the PDF itself with the
+OneDrive **Convert file** action, so one renderer (the tool's own report page) feeds both the
+engineer's screen and NOV's attachment. Precharge posts still carry `pdf` and are unchanged.
+
+**D1. A variable at the top.** Open the flow. Click the **+** directly under the trigger
+card (above the first Condition). Search `Initialize variable`. Name `PdfFile`, Type
+**Object**, Value empty. (Initialize variable only works at the top level, which is why it
+sits here and not inside a branch.)
+
+**D2. One more compose after HasPdf** (step 6): **HasHtml**:
+`not(empty(coalesce(body('Parse_JSON')?['html'],'')))` and **HtmlName**:
+`coalesce(body('Parse_JSON')?['htmlName'], replace(outputs('PdfName'), '.pdf', '.html'))`.
+
+**D3. Condition `NeedsConvert`**, placed straight after HtmlName: left box fx
+`and(equals(outputs('HasPdf'), false), equals(outputs('HasHtml'), true))`, **is equal to**
+`true`.
+
+**True** (an SSORT HTML post), four cards in this order:
+
+1. **Create file** (OneDrive for Business): Folder Path `/OemConvert` (make the folder once
+   in your OneDrive), File Name fx `outputs('HtmlName')`, File Content fx
+   `base64ToBinary(body('Parse_JSON')?['html'])`. Rename **HtmlFile**.
+2. **Convert file** (OneDrive for Business): File fx `outputs('HtmlFile')?['body/Id']`,
+   Target type **PDF**. Rename **ConvertedPdf**.
+3. **Set variable**: Name `PdfFile`, Value fx `body('ConvertedPdf')`.
+4. **Delete file** (OneDrive for Business): File fx `outputs('HtmlFile')?['body/Id']`.
+
+**False** (a post that carries `pdf`, the precharge shape): one card, **Set variable**:
+Name `PdfFile`, Value fx
+`base64ToBinary(if(equals(outputs('HasPdf'), true), body('Parse_JSON')?['pdf'], 'Cg=='))`.
+
+**D4. The attachment.** Open **OEM Email**, Attachments, Content: replace the expression
+with fx `variables('PdfFile')`. Name stays `outputs('PdfName')`. **Save.**
+
+**D5. Test in test mode.** Settings B2 `Yes`. Have the tools session, or SSORT 148 on your
+own PC against `SSCE Equipment`, press Post to OEM once. The office four get
+`[TEST MODE] [Seadrill CBM Report for OEM review] …` with a real multi-page PDF attached and
+the photographs in it. Open the PDF and check the photographs and the grade colours survived
+the converter; if they did not, say so and Part D switches to attaching the HTML (`HtmlName`
++ `base64ToBinary(body('Parse_JSON')?['html'])`), which is one card change. B2 `No`.
+
+**What happens if the converter refuses a file** (very large photo sets): the run fails at
+ConvertedPdf, nothing is sent to NOV, Power Automate emails you the failure, and the tool's
+button still says sent, which is why the tools session is changing that wording to
+"Sent for OEM delivery". Until Part D is proven, the button does not ship.
 
 ## If it misfires
 

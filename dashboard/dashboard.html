@@ -572,6 +572,7 @@
     position: sticky; left: 0; background: var(--sd-white);
     font-size: 11px; font-weight: 700; white-space: nowrap; padding: 4px 10px 4px 0;
   }
+  .cbm-heat-row-label .cbm-task { font-weight: 400; color: var(--sd-text-light); margin-left: 6px; }   /* v2.64: NOV task wording from cbmlabels */
   .cbm-heat-cell {
     width: 34px; height: 24px; border-radius: 3px; cursor: pointer; background: var(--sd-border);
   }
@@ -1964,11 +1965,12 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var key = e.equip + '|' + e.itemKey;
       if (!latest[key]) latest[key] = e;
       if (equips.indexOf(e.equip) === -1) equips.push(e.equip);
-      if (!itemMeta[e.itemKey]) itemMeta[e.itemKey] = { label: e.itemLabel, sortKey: e.sortKey };
+      if (!itemMeta[e.itemKey]) itemMeta[e.itemKey] = { label: e.itemLabel, sortKey: e.sortKey, task: '' };
+      if (!itemMeta[e.itemKey].task && e.task) itemMeta[e.itemKey].task = e.task;   // v2.64: newest wording wins (entries ship newest-first)
     });
     equips.sort();
     var items = Object.keys(itemMeta).map(function (k) {
-      return { key: k, label: itemMeta[k].label, sortKey: itemMeta[k].sortKey };
+      return { key: k, label: itemMeta[k].label, sortKey: itemMeta[k].sortKey, task: itemMeta[k].task };
     });
     items.sort(function (a, b) {
       var ak = a.sortKey || [], bk = b.sortKey || [];
@@ -1993,7 +1995,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var tbody = document.createElement('tbody');
     items.forEach(function (it) {
       var tr = document.createElement('tr');
-      tr.appendChild(mk('td', 'cbm-heat-row-label', it.label));
+      var rl = mk('td', 'cbm-heat-row-label', it.label);
+      if (it.task) { rl.appendChild(mk('span', 'cbm-task', it.task.length > 60 ? it.task.slice(0, 57) + '\u2026' : it.task)); rl.title = it.task; }
+      tr.appendChild(rl);
       equips.forEach(function (eq) {
         tr.appendChild(cbmHeatCell(latest[eq + '|' + it.key], rig));
       });
@@ -2023,9 +2027,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var b = cbmGradeClass(entry.grade);
     var cell = mk('div', 'cbm-heat-cell' + (b ? ' ' + b : ''), '');
     var gradeText = entry.grade === 'N/A' ? 'N/A' : (entry.grade ? 'Grade ' + entry.grade : 'Ungraded');
-    cell.title = entry.equip + ' — ' + entry.itemLabel + ' — ' + gradeText + (entry.comment ? '\n' + entry.comment : '');
+    cell.title = entry.equip + ' — ' + entry.itemLabel + (entry.task ? ' ' + entry.task : '') + ' — ' + gradeText + (entry.comment ? '\n' + entry.comment : '');
     cell.tabIndex = 0;
-    cell.addEventListener('click', function () { openCbmHistory(rig, entry.equip, entry.itemKey, entry.itemLabel); });
+    cell.addEventListener('click', function () { openCbmHistory(rig, entry.equip, entry.itemKey, entry.itemLabel + (entry.task ? ' \u2014 ' + entry.task : '')); });
     cell.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); cell.click(); } });
     td.appendChild(cell);
     return td;
@@ -3245,7 +3249,11 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // only this equipment's prefix keeps a stale historical file from
     // rendering someone else's sections under this one's header. Skipped when
     // equip is blank so nothing regresses if that field is ever missing.
-    var equipPrefix = String(cbm.equip || '').trim() ? 'cbm_' + String(cbm.equip).trim().replace(/ /g, '_') + '_' : '';
+    // Every non-alphanumeric character becomes its own underscore, as SSORT builds the
+    // key and as the scanner matches it: 'Ram Block::Shear' -> cbm_Ram_Block__Shear_
+    // (v2.64: the space-only replace here hid every item of a split ram block class).
+    var equipPrefix = String(cbm.equip || '').trim() ? 'cbm_' + String(cbm.equip).trim().replace(/[^A-Za-z0-9]/g, '_') + '_' : '';
+    var cbmLabels = (cbm.cbmlabels && typeof cbm.cbmlabels === 'object' && !Array.isArray(cbm.cbmlabels)) ? cbm.cbmlabels : {};   // v2.64: SSORT 148 task wording, keyed as the data
 
     // Collect graded tasks and the overall grade tally. Checklist items come
     // in two numbering shapes depending on SSORT version:
@@ -3258,12 +3266,15 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var itemBases = {};
     Object.keys(cbm).forEach(function (k) {
       if (equipPrefix && k.indexOf(equipPrefix) !== 0) return;
-      var mNew = /^(.+_(\d+)_(\d+)_(\d+))_(?:gr|cm|ph)$/.exec(k);
+      // v2.64: the item may carry a letter (7_1_2B, ram block tasks) and a cavity suffix
+      // (6_1_2_c0); both are part of the task id and were dropped by the old three-number match.
+      var mNew = /^(.+_(\d+)_(\d+)_(\d+)([A-Za-z]?)(?:_c(\d+))?)_(?:gr|cm|ph)$/.exec(k);
       var mOld = !mNew && /^(.+_g(\d+)_(\d+))_(?:gr|cm|ph)$/.exec(k);
       if (mNew) {
+        var idTxt = mNew[2] + '.' + mNew[3] + '.' + mNew[4] + (mNew[5] || '');
         itemBases[mNew[1]] = {
-          sortKey: [Number(mNew[2]), Number(mNew[3]), Number(mNew[4])],
-          label: mNew[2] + '.' + mNew[3] + '.' + mNew[4]
+          sortKey: [Number(mNew[2]), Number(mNew[3]), Number(mNew[4]), mNew[5] ? mNew[5].toUpperCase().charCodeAt(0) : 0, mNew[6] !== undefined ? Number(mNew[6]) : -1],
+          label: idTxt + (mNew[6] !== undefined ? ' cavity ' + (Number(mNew[6]) + 1) : '')
         };
       } else if (mOld) {
         itemBases[mOld[1]] = {
@@ -3280,6 +3291,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (grade) tally[grade] = (tally[grade] || 0) + 1;
       tasks.push({
         sortKey: info.sortKey, label: info.label, grade: grade,
+        task: String(cbmLabels[base + '_gr'] || cbmLabels[base + '_cm'] || cbmLabels[base + '_ph'] || '').trim(),
         comment: cbm[base + '_cm'] || '', photos: cbm[base + '_ph'] || []
       });
     });
@@ -3312,7 +3324,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       findings.forEach(function (t) {
         var row = mk('div', 'rv-equip');
         var head = mk('div', 'rv-equip-head');
-        head.appendChild(document.createTextNode(t.label + ' '));
+        head.appendChild(document.createTextNode(t.label + (t.task ? ' \u2014 ' + t.task : '') + ' '));
         head.appendChild(cbmGradeChip(t.grade));
         row.appendChild(head);
         if (String(t.comment).trim()) row.appendChild(rvNotes(t.comment));

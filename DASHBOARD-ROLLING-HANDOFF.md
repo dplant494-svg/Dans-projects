@@ -18,10 +18,15 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
-| 27 | **Conditional triggers now surface on a grade of 4 or 5 — as a prompt, not a ruling** | SSORT 148 | **FYI** — no key, nothing collected. Note the ceiling: **zero** of the 100 triggers name a grade |
-| 26 | **NOV’s grade criteria are now on the LIVE path — 9 of 65 migrated, with per-item document/page provenance** | SSORT 148 | **FYI** — no key changes; 314 posted keys byte-identical. Review sheet out for the other 56 |
-| 25 | **`CBM_GRADED` is dead code in the deployed build — and there are TWO CBM key namespaces, positional and id-based** | SSORT 147 · 148 | **NEEDS DECISION** — no new positional key can ever arrive; entry 19's failure mode is closed on the live path |
-| 24 | **SSORT finally posts `meta.rev` — and all 47 stripped CBM task descriptions are back, with no key changing meaning** | SSORT 148 | **NEEDS ACTION** — one new key to start reading; the N/A question from entry 18 resolves to *none of them* |
+| 32 | **Criteria coverage 41 of 101 — and a method we proposed in the review sheet was wrong, withdrawn here** | SSORT 148 | **FYI** — no keys change. More NOV wording reaches you through `cbmlabels`; the rest keeps the universal scale |
+| 31 | **Post to OEM is built — but SSORT sends `html` and your flow test read `pdf`. SSORT has no PDF renderer** | SSORT 148 | **NEEDS DECISION** — does the flow convert HTML? If not, a crew pressing the button sends NOV an email with no attachment |
+| 30 | **Ram Block split into its six types — and the `n:` key map you asked for is EMPTY, by evidence: no id moved** | SSORT 148 | **NEEDS ACTION** — one check: has any report ever posted under the bare generic `Ram Block` class? |
+| 29 | **SSORT goes native too — the last iframe in either tool is gone, and its acoustic / EHBS / drawdown keys hash IDENTICAL to WCGRRT’s** | SSORT 148 | **FYI** — no new keys, nothing to build. Your entry 22/23 renderers read SSORT unchanged. −22.9% file size |
+| 28 | **`cbmlabels` — NOV’s task wording beside every posted CBM key. Your 24.2 ask, built** | SSORT 148 | **NEEDS ACTION** — one new key, additive, lower case; 2.9–8 KB per report; `itemLabel` unchanged |
+| 27 | **Conditional triggers now surface on a grade of 4 or 5 — as a prompt, not a ruling** | SSORT 148 | **CLOSED 23 Sep** — they agree: a computed judgement is not displayed as a recorded fact either. Nothing built, nothing owed |
+| 26 | **NOV’s grade criteria are now on the LIVE path — 9 of 65 migrated, with per-item document/page provenance** | SSORT 148 | **CLOSED 23 Sep** — acknowledged. Ram Block split needs an `n:` section in `cbm-key-map.json` **before** that build ships |
+| 25 | **`CBM_GRADED` is dead code in the deployed build — and there are TWO CBM key namespaces, positional and id-based** | SSORT 147 · 148 | **CLOSED 23 Sep** — decision (a), with us. Replay check built (v2.63): a `SSORT`-stamped post with positional keys is listed as a replay |
+| 24 | **SSORT finally posts `meta.rev` — and all 47 stripped CBM task descriptions are back, with no key changing meaning** | SSORT 148 | **CLOSED 23 Sep** — `meta.rev` read (v2.63). Their one ask, `cbmlabels`, is entry 28 |
 | 23 | **EHBS and Drawdown are native too: the `ehbs_*` and `dd_*` key lists. WCGRRT now contains no iframe at all** | WCGRRT 166 | **NEEDS ACTION** — two new key families, and the drawdown posts derived PASS/FAIL verdicts |
 | 22 | **The `acst_*` key list and `soakLabels` — the announcement you have been waiting for. Build the acoustic renderer now** | WCGRRT 165 | **NEEDS ACTION** — keys and labels below; one naming question to settle before it ships |
 | 21 | **`cbm-key-map.json` delivered — plus a correction to entry 19 and a disagreement about Grade 3** | SSORT 147 | **NEEDS DECISION** — your new fail bucket puts Grade 3 on the wrong side of NOV's own scale |
@@ -48,6 +53,474 @@ our side of that exchange: the one piece of work the reply said was still owed b
 Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.
 Entries 8 and 9 are ours: both were found by reading our own code to answer the single
 assumption your 14 September reply asked us to confirm.*
+
+---
+
+## Entry 32 — criteria coverage: 41 of 101, and a correction to the method we proposed in the review sheet
+
+**Rev: SSORT 148.** Status: **FYI** — no key changes, nothing to build. Recorded because it
+changes how much wording the heatmap will see through `cbmlabels`, and because we got a
+method wrong and want that on the record rather than quietly fixed.
+
+### 32.1 The correction first
+
+`CBM-SCHED-CRITERIA-REVIEW-SHEET.html` grouped 17 unresolved tasks as NEAR and proposed
+treating them as a class: attach NOV's section-level scale to each, because the schedule is
+more granular than NOV. **That proposal was wrong and is withdrawn.** Reading the 17
+individually against the documents, they are not one class at all:
+
+| live task | best NOV match | verdict |
+|---|---|---|
+| Flexloops `23.3.2` API ring groove | `1.1` *Examine ring groove areas for mechanical wear/damage* | the same item, worded longer |
+| SBOP `2.1.1` **Bore** — dirt, corrosion, scratches, key seating | `6.2` *Visually inspect the **Sealing Element**…* | **wrong component** |
+| NXT `6.1.3` **Side plates** | `1.4` *Inspect side **outlets**.* | **wrong** — plates are not outlets |
+| NXT `6.1.8` side outlet connections | `8.2` side outlet **ring groove** | related, not the same |
+
+Applying that group as a class would have attached the sealing element's scale to a bore
+inspection. Worth saying plainly: the sheet's "After" column is evidence, and its
+*grouping* was our inference, which is a weaker thing.
+
+### 32.2 What replaced it, and its limit
+
+A second pass asks a weaker, more answerable question. Not *"which NOV item is this?"* —
+which a roll-up has no answer to — but *"do all the plausible candidates measure it the
+same way?"* If every candidate states the same scale, the measuring stick is certain even
+when the item is not, and that is honest to attach with provenance naming every item it was
+confirmed against.
+
+It found 22. **Ten of those were a set of one candidate, which agrees with itself and proves
+nothing**, so the rule now requires two or more independent NOV items. That single change
+removed SBOP `2.1.1` from the list — at the candidate floor the only item that surfaced was
+`6.2`, the sealing element, while NOV's four actual bore items (`1.2`, `2.2`, `4.2`, `5.2`)
+score below it and never appeared. One candidate is not evidence.
+
+**Twelve survived. Six were applied.** The other six were held, each for its own reason:
+
+- `Ram Block 7.1.3B`, `7.1.4B` — the **generic** ram block entry. The six types got their own
+  NOV scales in entry 30; giving the generic one borrowed from a single type would rebuild
+  the wrong measuring stick Dan just had us split away from.
+- `6.3.6 Replacement of Seal Plate` (×3) — a replacement **action** matched to inspection
+  items. Arguable, since you would grade the new plate, but a judgement rather than evidence.
+- `BOP Mandrel 21.1.4` — sits on the Riser Adapter document, which is **our inference**. Held
+  until Dan confirms the mandrel is inspected under that CBM.
+
+### 32.3 Where coverage stands
+
+| | entry 26 | entry 30 | now |
+|---|---|---|---|
+| gradeable tasks on the live path | 65 | 101 | **101** |
+| carrying NOV criteria | 9 | 35 | **41** |
+
+The rise from 65 to 101 gradeable is the ram block split: six classes where there was one.
+
+The remaining 60 keep the universal GRADE LEVEL EVALUATION GUIDE, reachable from every one
+of them via the `ⓘ scale` button. That is not a placeholder — NOV states it as the criteria
+for any item with no wording of its own.
+
+**The honest limit:** text similarity has reached the end of what it can settle. What is
+left needs a person reading the document beside the task, which is what the review sheet is
+for. We would rather stop here than keep inventing cleverer ways to guess.
+
+### 32.4 Unchanged
+
+All 392 posted keys byte-identical, task ids, descriptions and structure untouched — the run
+writes nothing if any of that moves. Posting path byte-identical to REV 147, zero `no-cors`,
+extraction reconciles, both script blocks clean, no duplicate declarations. Each new scale
+carries a `gsrc` naming every NOV item it was confirmed against, so a roll-up is visibly a
+roll-up. Nothing posted.
+
+---
+
+## Entry 31 — Post to OEM: the button is built, but it sends `html` and your flow test read `pdf`. One question before it ships
+
+**Rev: SSORT 148.** Status: **NEEDS DECISION** — this is a blocking question, and it is
+Dan's and yours rather than ours. Nothing has been sent to NOV from any test.
+
+### 31.1 The mismatch, stated plainly
+
+`CBM-OEM-HANDOFF.md` specifies, and your 22 September flow test confirms field by field:
+
+> `meta.asset`, `meta.wce`, `meta.sourceFile`, `oem`, `subject`, `pdfName`, **`pdf` as bare
+> base64, no `data:` prefix**
+
+SSORT's `postCbmToOem` posts everything on that list **except `pdf`**. What it sends instead:
+
+```
+sourceFormat : "html"
+pdfName      : "Seadrill_CBM_West-Capella_Ram-Block-Blind_2026-09-23.pdf"
+htmlName     : "Seadrill_CBM_West-Capella_Ram-Block-Blind_2026-09-23.html"
+html         : "<base64 of a standalone HTML document>"
+```
+
+**Why, and it is deliberate rather than an oversight.** SSORT has no PDF renderer. "Generate
+CBM PDF" renders the report into the page and hands it to the browser's own print-to-PDF, so
+there are no PDF bytes in JavaScript to attach. The handoff was written against the Precharge
+Pro architecture, which has jsPDF; SSORT does not. The reasoning is recorded in the tool
+above the function, and we are not going to fabricate a `pdf` field the tool cannot produce.
+
+### 31.2 The question
+
+**Does the flow convert `html` to PDF, or does it only read `pdf`?**
+
+Your message says the test passed with "a one-page TEST PDF in `pdf`" and that "the flow
+sends whatever is in `pdf`". That is evidence it reads `pdf`, and no evidence either way
+about `html`. Dan built the flow, so he may answer this in seconds.
+
+- **If the flow already converts `html`** — nothing to do on either side. Say so and the
+  button ships as it stands.
+- **If it only reads `pdf`** — then pressing the button today sends NOV an email with
+  **no attachment**, or the flow fails, and the crew sees "✓ Sent to OEM" either way,
+  because the tool can only see that the POST returned `res.ok`. That is the part worth
+  fixing before a rig ever presses it, not after.
+
+### 31.3 If the flow needs changing, three honest options
+
+1. **Add an HTML-to-PDF step in the flow.** Power Automate has one (`Convert file`), and it
+   keeps one renderer: `cbmReportHTML()` already produces both what the engineer reviews on
+   screen and what is sent. Our preference, and it needs nothing from the tool.
+2. **Attach the HTML instead of a PDF.** `htmlName` is already in the payload for exactly
+   this. NOV receives a file that opens in any browser and prints identically. Worse for an
+   OEM's document system, and Dan's call whether NOV will accept it.
+3. **Put a PDF renderer in SSORT.** We would advise against it. jsPDF plus html2canvas is
+   several hundred kilobytes added to a file thirteen rigs download, in a tool that must
+   work from `file://`, and the output for a hundred-photograph report would be worse than
+   the browser's own print — which is the thing Dan said to protect.
+
+### 31.4 What is verified on our side
+
+The tool's half was exercised on the rebuilt build without posting: a real CBM tile
+collected, `cbmReportHTML` rendered, `sdStandaloneReportDoc` wrapped it, and the payload
+assembled exactly as `postCbmToOem` assembles it.
+
+| | |
+|---|---|
+| document built | 199,879 bytes, valid standalone HTML with the page's stylesheets inlined |
+| `meta` fields | all ten present, including `sourceFile` and the new `rev` |
+| `subject` | `CBM Report - West Capella - Ram Block::Blind - 2026-09-23` |
+| `pdfName` | `Seadrill_CBM_West-Capella_Ram-Block-Blind_2026-09-23.pdf` |
+| `pdf` present | **no** |
+| `html` present | yes |
+
+Two things that also check out: the Ram Block split from entry 30 flows through correctly
+into `meta.equipment` and the filename slug; and `sdPostReport` does **not** apply
+`sdSizeOk`, so the button's own 20 MB warn / 30 MB refuse is the only size guard, exactly as
+you described it.
+
+### 31.5 One thing we will change regardless of the answer
+
+`postCbmToOem` reports success on `res.ok` alone, which is all the transport can tell it.
+If the answer to 31.2 is anything other than "the flow converts html", the button should not
+say "✓ Sent to OEM" until the flow has confirmed it could build the attachment. We are not
+changing the posting path to chase that — but the **wording** of the success message can say
+what is actually known ("Sent for OEM delivery") rather than what is not. Say the word and
+it is one string.
+
+---
+
+## Entry 30 — Ram Block is split. Your three conditions, answered — and the `n:` map you asked for is **empty, by evidence**
+
+**Rev: SSORT 148 (building).** Status: **NEEDS ACTION** — one check on your side, described in
+30.3. Nothing to build.
+
+### 30.1 Done, and it is a restoration rather than a new shape
+
+Dan's decision from your 26.2 addendum is executed. The six block types are back in the CBM
+equipment list, each mapped to its own NOV document:
+
+| class | NOV template |
+|---|---|
+| `Ram Block::MultiRam` | `D9D1008041-PRO-001_01` |
+| `Ram Block::LFS` | `D9D1008042-PRO-001_01` |
+| `Ram Block::Shear` | `D9D1008026-PRO-001_01` |
+| `Ram Block::CasingShear` | `D9D1008038-PRO-001_01` |
+| `Ram Block::LFSCSG` | `D9D1008154-PRO-001_01` |
+| `Ram Block::Blind` | `D9D1008155-PRO-001_01` |
+
+The document numbers are not our invention: `CBM_REF` in the tool already recorded one per
+block type, and has all along. The six options were collapsed into a single generic
+`Ram Block` at some point and this puts them back.
+
+### 30.2 Your three conditions
+
+**Condition 1 — the `equip` class names stay exactly as they are.** They do, and we can
+prove it from your own index rather than asserting it. Brad's posted West Capella files
+already carry `cbmData.equip` of `Ram Block::Shear`, `Ram Block::MultiRam` and
+`Ram Block::CasingShear`. These are the same strings, character for character.
+
+**Condition 2 — an old-id to new-id map per block type, before the build ships.** There is
+no id change to map, and here is the evidence rather than the claim. Brad's
+`Ram Block::MultiRam` posts already contain **id keys under the split class name**:
+
+```
+cbm_Ram_Block__MultiRam_7_1_1B_gr
+cbm_Ram_Block__MultiRam_7_1_2B_gr
+```
+
+So `CBM_SCHED` was already keyed by the split class before the collapse. The 13 task ids
+(`7.1.1B` … `7.3.2B`) are **byte-identical** in all six copies — asserted mechanically, and
+the build refuses to write if any copy's structure diverges from the generic. A post from
+SSORT 148 under `Ram Block::Shear` produces `cbm_Ram_Block__Shear_7_1_2B_gr`, which is
+exactly the shape already in your index.
+
+**So the `n:` section of `cbm-key-map.json` is empty.** Not "not sent yet" — empty, because
+nothing moved. If you would still rather have the file carry an explicit empty `n:` block so
+the scanner can record that the question was asked and answered, say the shape and it is
+yours in a minute.
+
+**Condition 3 — the build's ship date is the boundary.** Agreed, and `meta.rev` makes it
+sharper than a date: any post stamped `SSORT REV 148` or later that carries a bare
+`Ram Block` class is pre-split data being re-posted, in the same spirit as your 25.2 replay
+check.
+
+### 30.3 The one thing to check on your side
+
+We hold 29 of Brad's files; you hold 307. **Was any CBM report ever posted under the bare
+generic `Ram Block` class** — that is, `cbmData.equip === 'Ram Block'` exactly, with id keys
+`cbm_Ram_Block_7_1_*`? In our 29 there are none: every ram post uses a `::` class.
+
+If your answer is also none, the split is seamless and no history is affected at all. If any
+exist, those posts cannot be attributed to a block type by us or by you — the tool did not
+record which block it was — so they should stay apart under `Ram Block` rather than be
+guessed into a type. A labelled gap, on the same principle you used at the July boundary.
+
+### 30.4 Why the split was worth doing, measured
+
+Each block type is now graded against its own NOV document. The test of whether that matters
+is whether the scales actually differ, and they do — same task id, six classes:
+
+| task id | classes with criteria | **distinct scales** |
+|---|---|---|
+| `7.1.2B` visual inspection of the block | 6 | **4** |
+| `7.1.3B` block grooves | 6 | **5** |
+| `7.1.4B` RRA wear | 4 | **4** |
+| `7.1.5B` cross strap seal groove | 4 | **3** |
+| `7.1.6B` blades | 6 | 1 — NOV genuinely uses the same wording here |
+
+For example `7.1.3B`: a Blind block reads *"Visual signs of very light wear beginning to
+show, but still in good working condition"* from `D9D1008155` p11, while a Shear block reads
+*"Surface indications found in non-sealing area"* from `D9D1008026` p11. One generic entry
+really was the wrong measuring stick, as Dan said.
+
+Criteria on the live path are now **35** (was 9 at entry 26), of 101 gradeable tasks across
+20 equipment classes. Each carries its `gsrc` document and page.
+
+### 30.5 A defect found and fixed in the same change
+
+The equipment dropdown preselected `cbmEquipOptions(cbmFamilyOf(eqsel))`. With only the
+generic option in the list that was the only thing that could work; with the sub-types
+present it silently downgraded a saved `Ram Block::Shear` to `Ram Block` on reopen — which
+would have posted a class disagreeing with its own keys, and handed you a
+`cbm_Ram_Block__Shear_…` key under class `Ram Block` to strip a prefix from. Now the exact
+sub-type is preselected. Verified on the rebuilt tool: `cbmEquipOptions('Ram Block::Shear')`
+returns `Ram Block::Shear` selected.
+
+The generic `Ram Block` option is **retained**, so reports saved against it still open and
+still resolve. Whether it should now be retired so a crew cannot pick the generic scale
+again is Dan's call, not ours, and it is on his list.
+
+### 30.6 Unchanged
+
+Posting path byte-identical to REV 147, zero `no-cors`, extraction reconciles, both script
+blocks clean, no duplicate declarations, no cross-block collisions. No payload key is added
+by this entry. File 6,928,154 bytes — still 22% smaller than REV 147 despite everything
+added since.
+
+---
+
+## Entry 29 — SSORT goes native too. The last iframe in either tool is gone, and the keys are provably identical to WCGRRT's
+
+**Rev: SSORT 148 (building).** Status: **FYI** — **no new keys and nothing to build.** The
+renderers you built for WCGRRT in entries 22 and 23 will read SSORT's posts unchanged. That
+is the whole point of this entry, and it is asserted below rather than hoped for.
+
+### 29.1 What was wrong
+
+Entry 17 reported that SSORT carried the same three iframe surface-test blobs as WCGRRT.
+WCGRRT was fixed in 165 and 166; SSORT was not, and has been sitting on the same hole
+since: acoustic, EHBS and Surface Drawdown rendered inside an iframe, `collectSoak` is a
+`querySelectorAll` and cannot cross that boundary, so the contents printed and **were never
+saved or posted**. Same defect that cost the fleet the 8–15 September EDS and function-test
+records.
+
+Two things made it worse than WCGRRT's version:
+
+1. SSORT also held a **dead acoustic quartet** — `acousticTestHTML`, `onAcousticSheetChange`,
+   `acousticSheetTableHTML`, `acousticTestReportHTML` — rendering the old `acoustic_sheet` /
+   `ac_*` key shape that 15.2 recorded as a defect and you refused to build against. Three
+   had no caller. The fourth **was** called from the report renderer, fed by a `soak` the
+   iframe never filled, so it drew nothing, every time, silently.
+2. The report renderer had **no EHBS or drawdown branch at all**. Even a correctly filled
+   `soak` would have rendered nothing for those two.
+
+### 29.2 What was done
+
+WCGRRT 166's native region was ported **verbatim** — 932 lines, 35 new functions and data
+tables — and the deprecated quartet deleted. Verbatim was the requirement, not a
+convenience: you built one renderer for both tools, so a key that drifts here produces a
+report you cannot read. Repointed in the same edit:
+
+- the live surface-test change, all three tests
+- `makeEquipEntry`, all three — **the restore path, which is the one a crew hits after a
+  crash**, and the one missed last time this was done (§7.2)
+- the report renderer: acoustic repointed to `acousticReportHTML`, **EHBS and drawdown
+  branches added**
+
+`surfEmbed` now has no caller in either tool. Kept, not deleted, with a comment saying why
+it must never be called again.
+
+### 29.3 The proof that matters to you
+
+Both tools were loaded side by side, the same rig selected (**West Saturn**), each of the
+three tests rendered, and the `data-soak` keys and `data-soak-label` pairs sorted and
+hashed:
+
+| test | keys | key set SHA-256 (first 16) | label set SHA-256 |
+|---|---|---|---|
+| acoustic | 72 | `e07111b6f2025a3d` | `31bcbdd3d1b6fca7` |
+| EHBS | 33 | `bf55daf2608511b4` | `85a15c9769a3e70c` |
+| drawdown | 54 | `1099386ea7502318` | `0d4a2824568eab82` |
+
+**Identical for WCGRRT REV 166 and SSORT REV 148, all six hashes.** Not just the counts —
+the key names and every printed label match exactly. So the acoustic, EHBS and drawdown
+blocks you built and tested on synthetic WCGRRT posts will render SSORT posts with no
+change whatsoever.
+
+Also confirmed: `ACOUSTIC_NO_SYSTEM` carries **West Neptune, West Vela and Sevan Louisiana**
+in SSORT as well; each shows "has no acoustic system fitted" and emits **zero** keys, so
+absence stays absence and never arrives as an empty sheet.
+
+### 29.4 `soaklabels` now ships from SSORT
+
+Both SSORT payload builders emit `soaklabels` beside `soak`, lower case as settled in 22.4,
+built by the same `collectSoakLabels` from the same tables that render the form. `ftPfButtons`
+gained the optional third `label` argument and is byte-identical in output for its existing
+two-argument callers, so no other test's markup moved.
+
+### 29.5 Size, and the count that matters more
+
+| | |
+|---|---|
+| SSORT REV 147 | 8,941,320 bytes |
+| **SSORT REV 148** | **6,897,972 bytes** |
+| | **−2,043,348 (−22.9%)** |
+
+Five base64 blobs are now gone from SSORT: the three iframe tests stripped here
+(598,123 + 607,155 + 600,871 bytes) and the two dead ones from entry 24.5. **Neither tool
+contains an embedded iframe tool any more.**
+
+The count that matters more than the bytes: three surface test types across thirteen rigs
+that previously produced a printed page and an empty `soak` now produce 72, 33 and 54
+recorded values with a printed label on every one.
+
+### 29.6 Unchanged
+
+Posting path byte-identical to REV 147 — 17 transport lines, no difference. Zero `no-cors`.
+467 top-level functions, no duplicates, no cross-block collisions, extraction reconciles,
+both script blocks clean under `node --check`. The only payload keys SSORT 148 adds remain
+`meta.rev` (24.1), `cbmlabels` (28.1) and now `soaklabels`, which is not new to you — it is
+the key WCGRRT already sends.
+
+Nothing has been posted from any test.
+
+---
+
+## Entry 28 — `cbmlabels` is in 148. Your 24.2 ask, answered yes
+
+**Rev: SSORT 148 (building).** Status: **NEEDS ACTION** — one new key, lower case, additive.
+This is the announcement; it ships in the same revision.
+
+### 28.1 The key
+
+`cbmData.cbmlabels` — a flat object, one entry per posted CBM key that belongs to a task,
+keyed **exactly as the data is keyed** so you need no join rule:
+
+```
+"cbmlabels": {
+  "cbm_Gate_Valves_7_1_2_gr": "Visually inspect all external welds for pitting and corrosion",
+  "cbm_Gate_Valves_7_1_2_cm": "Visually inspect all external welds for pitting and corrosion",
+  "cbm_Upper_Triple_NXT_Body_6_1_2_c0_gr":
+      "Visually inspect and record in CBMID Seal and skid plates — Upper Cavity"
+}
+```
+
+Same shape and the same spirit as `soaklabels`: **built from the tables that render the
+form, never a static map**, for the reason you gave in 12.2 — a static map is wrong the day
+NOV reissues a sheet.
+
+Three things worth knowing before you build against it:
+
+1. **Sub-cavity keys carry the cavity name**, appended after an em dash, because the cavity
+   is not in the task wording and `_c0` on its own tells a reader nothing.
+2. **Both key shapes resolve.** Live id-based keys come from `CBM_SCHED`. Historical
+   positional `_g<s>_<i>` keys still resolve against `CBM_GRADED`, so a pre-shadowing report
+   re-opened and re-saved carries labels too. Given entry 25, a label is arguably more use
+   on an old record than a new one.
+3. **Section summary keys are deliberately unlabelled.** `cbm_<equip>_g<n>_summary` and
+   `_maximo` are not tasks and get no entry, rather than a misleading one.
+
+### 28.2 Size, since it rides on a report that already has a 40 MB ceiling
+
+Measured on the real datasets: **2.9 KB** for a full Gate Valves set (40 labels) and
+**8.0 KB** for an Upper Triple NXT Body (72 labels, three cavities). Only the equipment the
+report actually covers is labelled. Against a CBM report that runs to tens of megabytes of
+photographs this is not a consideration, and it does not move the ceiling.
+
+### 28.3 What it changes for you, and what it does not
+
+It answers 24.2 directly: your `itemLabel` stays derived from the key, so
+`Section 3 . Item 2` and `7.1.2` keep working exactly as now and nothing existing has to
+change. `cbmlabels` sits beside it, so the heatmap and the digest can print NOV's wording
+next to the grade when it is present, and print nothing different when it is not. Absent
+means a pre-148 post, never a fault — the same convention as `meta.rev`.
+
+It also closes the loop on entry 24: the 47 task descriptions restored from SSORT REV 79 and
+the NOV documents now reach **the reader of a report**, not only the crew grading it. That
+was the part of the restoration that had no route to you.
+
+### 28.4 Verification, and one thing not verified
+
+Proven by running the shipped `cbmLabelsFor` — lifted from the built file, not a
+reimplementation — over the real `CBM_SCHED` and `CBM_GRADED` datasets with a realistic
+collected key set for two equipment types:
+
+| | Gate Valves | Upper Triple NXT Body |
+|---|---|---|
+| collected `cbm_` keys | 43 | 75 |
+| labelled | 40 | 72 |
+| grade / comment keys with **no** label | **0** | **0** |
+
+The three unlabelled in each case are the section summary keys, by design.
+
+**Verified end to end as well**, by driving the built tool: a CBM section on Gate Valves, a
+grade of 3 pressed through `cbmSetGrade` and a note typed, then `collectCbm` called on the
+tile and its output read. The real `cbmData` carried `cbmlabels` with **29 labels, 2,229
+bytes**; the recorded grade `cbm_Gate_Valves_7_1_2_gr` and its `_cm` note both carried
+*"Visually inspect all external welds for pitting and corrosion"*; **zero** task keys were
+unlabelled. Nothing was saved to a file and nothing was posted — the payload was read in
+memory, which is a stronger check than a file and leaves no artefact anywhere.
+
+One incidental finding while setting that test up, recorded because it is a real gap rather
+than a test inconvenience: **SSORT has no `SSCE Equipment` asset.** WCGRRT carries it as a
+production option under an `<optgroup label="Not rig-specific">`, for work that genuinely
+belongs to no rig such as a vendor audit at an OEM's premises; SSORT's asset list is the 14
+rigs and nothing else. So a not-rig-specific SSORT report has nowhere to go, and the two
+tools disagree about what `meta.asset` can contain. Not changed — the asset list feeds the
+rig identity contract and the filename, so it is Dan's call, and it is on his list.
+
+Unchanged: posting path byte-identical to REV 147, zero `no-cors`, 432 top-level functions,
+no duplicates, no cross-block collisions. The only payload keys 148 adds are `meta.rev`
+(24.1) and this one.
+
+### 28.5 On your other points
+
+- **25.4 (a), 25.2 replay check, 21.4 Grade 3, 24.1 `meta.rev`** — all noted, nothing owed.
+  The replay check is a good use of the one fact that makes it safe, and we would not have
+  thought of it from this side.
+- **26.2, the Ram Block split** — still Dan's. Understood that it needs an `n:` section in
+  `cbm-key-map.json` **before** such a build ships, not after; that is now recorded on this
+  side as a precondition rather than a follow-up.
+- **27** — agreed, and thank you for applying the rule back at us. A computed judgement
+  should not be posted as a recorded fact *or* displayed as one.
 
 ---
 
