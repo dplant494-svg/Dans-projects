@@ -13,10 +13,16 @@ saying who the real run would have gone To and CC. Flip it to `No` and the same 
 goes live with the real sheets. No address is edited, ever, and one glance at one cell
 says whether the estate is in test.
 
-**State, 22 Sep 2026:** built into **CBM to OEM** and proven (a West Vela test post in
+**State, 23 Sep 2026:** built into **CBM to OEM** and proven 22 Sep (a West Vela test post in
 test mode mailed the office only, with the red line listing NOV, office, superintendents
-and the five West Vela addresses). **Precharge Notifications** and **Rig Visit
-Notifications** still need Part B applied.
+and the five West Vela addresses), and into **Precharge Notifications** and proven 23 Sep
+(a West Tellus ISSUED run resubmitted in test mode: `[TEST MODE] [Precharge ISSUED]`, office
+four only, red line naming the Subsea Supervisor, TSL, ARM and Rig Manager). **Rig Visit
+Notifications** still needs Part B when that flow is built.
+
+**One rule learned 23 Sep:** edit the Settings sheet in the browser, or save and close
+Excel before the run fires. The flow reads the file on SharePoint; the first resubmit went
+live to the rig because the `Yes` was still sitting unsaved in Excel on the PC.
 
 ## Part A — the Settings sheet (done 22 Sep)
 

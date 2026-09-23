@@ -1,13 +1,18 @@
 # Precharge notifications only — one small flow, click by click
 
 **For:** Dan
-**Date:** 2026-09-09
+**Date:** 2026-09-09 · **as built 23 Sep 2026** (test mode on, ARM and Rig Manager on the ISSUED To; proven with a West Tellus resubmit in test mode)
 **Scope:** every posted file whose name contains `precharge`. Two kinds:
 
 | Posted file | Who posts it | Goes TO | CC |
 |---|---|---|---|
-| **Request** `seadrill-request_<rig>_<well>_<date>_precharge.json` | the rig, from the SSORT request form | Office table: Dan, Lee, Joao | — |
-| **Issued precharge** `seadrill-report_<rig>_<date>_precharge.json` | you, from the calculator's Post to Dashboard | that rig's Subsea Supervisor **and Technical Section Leader** (Rigs table, `SubseaSupervisorEmail` + `TslEmail`) | Office table |
+| **Request** `seadrill-request_<rig>_<well>_<date>_precharge.json` | the rig, from the SSORT request form | Office table: Dan, Lee, Joao, Ronnie | — |
+| **Issued precharge** `seadrill-report_<rig>_<date>_precharge.json` | you, from the calculator's Post to Dashboard | that rig's Subsea Supervisor, Technical Section Leader, Assistant Rig Manager and Rig Manager (Rigs table, `SubseaSupervisorEmail` + `TslEmail` + `ARMEmail` + `RigManagerEmail`, blanks skipped) | Office table |
+
+**Test mode (23 Sep):** while `Settings!TestMode` is `Yes` every one of the three emails goes
+to the Office table only, with `[TEST MODE] ` in front of the subject; the ISSUED email also
+carries a red line naming the rig addresses the real run would have used. `No` is live. See
+`NOTIFICATION-TEST-MODE-GUIDE.md`; cards `SettingsRow` and `TestMode` sit after Parse JSON.
 
 **File you need:** `WCE_Precharge_Notification.xlsx` (sent with this). Two
 tables: **Office** (the three addresses, already filled) and **Rigs** (one
@@ -110,10 +115,10 @@ not touched.
     ```
     coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],'')
     ```
-13b. **Compose**, rename **RigTo** — the rig-side To line (supervisor plus
-    TSL, either may be blank). Expression:
+13b. **Compose**, rename **RigTo** — the rig-side To line (supervisor, TSL,
+    ARM and Rig Manager; any may be blank). Expression as built 23 Sep:
     ```
-    join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TslEmail'],'')),';'),json('[]')),';')
+    join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['TslEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],'')),';'),json('[]')),';')
     ```
     Then in step 14 use `outputs('RigTo')` for the ISSUED email's To, and
     test `outputs('RigTo')` (not SupervisorEmail) for the NO RIG CONTACT
@@ -125,7 +130,7 @@ not touched.
 
     **If yes** → **Send an email (V2)**:
     - To: `@{outputs('OfficeList')}`
-    - Subject: `[Precharge REQUEST] @{outputs('RigName')} — @{outputs('Well')} — BOP @{body('Parse_JSON')?['meta']?['bop']}`
+    - Subject: `@{if(equals(outputs('TestMode'), true), '[TEST MODE] ', '')}[Precharge REQUEST] @{outputs('RigName')} — @{outputs('Well')} — BOP @{body('Parse_JSON')?['meta']?['bop']}`
     - Body (HTML):
       ```html
       <p>A precharge request has been posted from <b>@{outputs('RigName')}</b>.</p>
@@ -134,38 +139,48 @@ not touched.
       <p><a href="http://sdrlazneuiis01d.corp.local:8080/sacred/precharge/calculator.html">Open Precharge Pro</a> — it is on the Requests tab within 10 minutes of posting.</p>
       ```
 
-    **If no** (an issued precharge) → **Condition**: `outputs('SupervisorEmail')`
+    **If no** (an issued precharge) → **Condition** `HasRigContact`: `outputs('RigTo')`
     **is not equal to** empty.
-    - If yes → **Send an email (V2)**: To `@{outputs('SupervisorEmail')}`,
+    - If yes → **PreCHARGE iSSUED** (Send an email V2): To
+      `@{if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('RigTo'))}`,
       CC `@{outputs('OfficeList')}`, Subject
-      `[Precharge ISSUED] @{outputs('RigName')} — @{outputs('Well')} — BOP @{body('Parse_JSON')?['meta']?['bop']}`, Body:
+      `@{if(equals(outputs('TestMode'), true), '[TEST MODE] ', '')}[Precharge ISSUED] @{outputs('RigName')} — @{outputs('Well')} — BOP @{body('Parse_JSON')?['meta']?['bop']}`, Body, first line:
+      ```
+      @{if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('RigTo'), '<br>CC: ', outputs('OfficeList'), '</b></p>'), '')}
+      ```
+      then:
       ```html
       <p>The precharge sheet for <b>@{outputs('RigName')}</b>, well @{outputs('Well')}, BOP @{body('Parse_JSON')?['meta']?['bop']} has been issued.</p>
       <p><a href="http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html?report=@{triggerOutputs()?['body/{FilenameWithExtension}']}">Open the issued sheet on the dashboard</a></p>
       ```
-    - If no → **Send an email (V2)**: To `@{outputs('OfficeList')}`, Subject
-      `[NO RIG CONTACT] Precharge issued — @{outputs('RigName')} — @{outputs('Well')}`,
+    - If no → **Send an email (V2) 2**: To `@{outputs('OfficeList')}`, Subject
+      `@{if(equals(outputs('TestMode'), true), '[TEST MODE] ', '')}[NO RIG CONTACT] Precharge issued — @{outputs('RigName')} — @{outputs('Well')}`,
       body "No Subsea Supervisor email is on the Rigs sheet for this rig."
 
 15. **Save**. Turn it on if it is not already.
 
-## Part G — test (10 minutes)
+## Part G — test (5 minutes, no address swapped)
 
-1. On the Rigs sheet put **your own** address as the Subsea Supervisor for
-   one rig, save, close.
-2. Post a request from SSORT for that rig → one email, `[Precharge REQUEST]`,
-   to Dan, Lee and Joao.
-3. Issue it from the calculator and Post to Dashboard → one email,
-   `[Precharge ISSUED]`, to you as "supervisor", CC the three; the link opens
-   the sheet.
-4. Put the real supervisor address back.
+1. Settings sheet, in the browser: **B2** `Yes`, wait for Saved. Never leave
+   the workbook open in Excel on the PC while a run fires: the flow reads the
+   file on SharePoint, not the copy on your screen, and Excel holds the edit
+   until it saves (this is exactly what happened 23 Sep: first resubmit went
+   live to West Tellus, second one after closing Excel came back in test mode).
+2. Run history: pick a run whose **Kind** output is `ISSUED` (the long ones;
+   0 s runs stopped at the first Condition because the file was not a
+   precharge) and **Resubmit**. One email, `[TEST MODE] [Precharge ISSUED]`,
+   to the office four only, red line naming the rig's four addresses.
+3. Settings **B2** `No`, wait for Saved. Live again.
 
 ## If it misfires
 
 - **Nothing arrives:** open the flow's run history. A red step names the
   problem. Most often the workbook is open, or the file name does not
-  contain `precharge`.
+  contain `precharge` (grey minus signs under True, run 0 s: not a precharge
+  file, nothing to fix, pick another run).
+- **Test mode did not take:** the workbook was open in Excel on the PC when
+  the run fired. Save, close, check B2 in the browser, resubmit.
 - **Issued mail says NO RIG CONTACT:** the Vessel on the Rigs sheet does not
-  match `meta.asset` in the file, or the yellow cell is empty.
+  match `meta.asset` in the file, or all four contact cells are empty.
 - **Request has no rig name** (older form): the RigKey column catches it as
   long as the short code (e.g. `libongos`) is on the sheet. All thirteen are.
