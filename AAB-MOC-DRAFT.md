@@ -2,7 +2,8 @@
 
 **Draft for Synergi entry** · **Date:** 22 September 2026 · **Draft 1**
 **Change owner:** Daniel Plant, Subsea Superintendent, Technical Services · **Initiator:** Eric Rachall, AAB gatekeeper
-**Companion documents:** `AAB-LOOP-PLAN.md` (the process), `AAB-LOOP-FLOWCHART.html` (the flow), `AAB-HAZID-DRAFT.md` and `AAB-HAZID-Register.xlsx` (the risk assessment)
+**Companion documents:** `AAB-LOOP-PLAN.md` (the process), `AAB-LOOP-FLOWCHART.html` (the flow), `AAB-HAZID.docx` on the Seadrill template with `AAB-HAZID-DRAFT.md` and `AAB-HAZID-Register.xlsx` (the risk assessment)
+**Governing directive for the change:** DIR-37-0015 Management of Change Requests (a Synergi MoC case, per DIR-00-0100 §4). The Synergi form fields are not in hand; the headings below follow the usual MoC content and are re-ordered to the form when Dan sends a screenshot of one.
 
 Items in **[square brackets]** are filled in from the directive or the Synergi form when Dan sends them. Nothing in brackets is invented.
 

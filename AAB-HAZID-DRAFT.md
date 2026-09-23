@@ -1,9 +1,9 @@
 # HAZID — Level 3 Advisory AABs through the Seadrill Bulletin Board and the WCE Dashboard
 
-**Draft 1 for the workshop** · **Date:** 22 September 2026 · **Register:** `AAB-HAZID-Register.xlsx` (the wide table, one row per hazard, for the Seadrill template)
+**Draft 1 for the workshop** · **Date:** 22 September 2026, on the Seadrill template 23 September · **The document:** `AAB-HAZID.docx`, built on Lee Arnold's `Seadrill_HAZID_Template.docx` (DIR-37-0147 format: cover, revision history, introduction, requirements with the risk matrix, process basis, the 13-column register, summary, ALARP, conclusion, references, signature block). **Working register:** `AAB-HAZID-Register.xlsx`
 **MOC:** `AAB-MOC-DRAFT.md` · **Process:** `AAB-LOOP-PLAN.md`, `AAB-LOOP-FLOWCHART.html`
 
-Items in **[square brackets]** come from the Seadrill HAZID template and the risk matrix when Dan sends them. The likelihood and consequence letters and numbers in the register are the drafter's on a placeholder 5×5 scale (legend sheet in the workbook) and are there to be argued with in the room, not accepted.
+Rankings use the Seadrill scale from DIR-37-0147 as the template prints it: consequence 1 (Fatality / Major) to 5 (Negligible), frequency A (Frequent) to E (Very Rare), colour from the matrix table in the template (see `hazid/README.md`). They are the drafter's and are there to be argued with in the room, not accepted. Still in **[square brackets]** in the docx: the AAB directive number and title, the FRM document number, the Synergi MOC case number.
 
 ## 1. Scope of the study
 
