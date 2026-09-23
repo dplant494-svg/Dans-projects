@@ -212,7 +212,42 @@ key that carries a value). The dashboard reads `soaklabels` and `soakLabels` ali
 absent or empty map as "no labels", never as an error. Generic: `ft_*` and `eds_*` will carry
 labels once those renderers emit them, with no change on this side.
 
-**Dashboard (23 Sep build):** the full-report viewer renders an acoustic block under the
+## EHBS and Surface Drawdown soak keys (WCGRRT REV 166, rolling handoff entry 23, 23 Sep 2026) — renderers built 23 Sep
+
+The last two iframes are native in REV 166; no posted file ever carried their keys (entry 17 NIL), so
+there is no history. Both key families sit in `equipEntries[].soak` with labels in `soaklabels`.
+
+**EHBS, `ehbs_*`, class-shaped, not rig-slugged.** `single` (Auriga, Capella, Carina, Gemini,
+Jupiter, Polaris, Tellus: 28 keys), `seq` (Libongos, Quenguela, Neptune, Saturn, Vela: 33), `dmas`
+(Sevan Louisiana only: 55). `ehbs_shear` (`UBSR` / `LBSR`, absent on DMAS); `ehbs_hdr_<date well
+operator stackTemp dcbPc>`; `ehbs_ip_<cpShear dcb podAcc podArm podDis>` plus `autoshear`,
+`stackAcc` on DMAS; `ehbs_chk_<item>` (single and seq; `ehbs_chk_shearAcc_charge` and `_isolate`
+are one item recorded in both valve positions); `ehbs_tim_<clock close>` (single) or `<clock
+csrStops shearStarts shearStops>` (seq) plus `ehbs_tim_delay` derived as `shearStarts − csrStops`;
+`ehbs_open_<shear csr ubsr lbsr>`; DMAS `ehbs_p1_*` / `ehbs_p2_*` each with `_chk_`, `_act_`,
+`_tim_` (`t0` always `"0"`); `ehbs_sig_<client|dsl|subsea>` / `_date`; `ehbs_notes`.
+
+**Drawdown, `dd_*`.** `dd_hdr_<client well date>`; `dd_st_<blue yellow dcp tcp>` = `USED` / `N/A`;
+`dd_ip_<precharge ambient initAcc manifold upperAnn lowerAnn>`; the table `dd_t_<rowid>_<c|o>_<time
+gal psi>` whose rows and labels come **only** from `dd_rows` (`"r1:Pipe Ram|r2:Annular|…"`; ids are
+never reused after a removal, so `r1|r3|r4|r5` is legitimate; never assume four rows); `dd_acc_mop`,
+`dd_acc_rwpMin` / `_rwpSec`, `dd_acc_zeroMin` / `_zeroSec`; `dd_sig_<subsea|dsl|coman>` / `_date`;
+`dd_notes`. **Derived values posted by the tool, one source of truth:** `dd_final_psi` (last
+remaining psi, row order, close before open), `dd_chk_precharge` (`PASS` when final ≥ pre-charge +
+200, API STD 53 4th ed), `dd_chk_mop` (`PASS` when final > MOP, STD 53 5th ed Annex C),
+`dd_chk_rwp` (`PASS` when recharge ≤ 900 s). Each is `PASS`, `FAIL`, or **absent = cannot be
+judged, never fail**. The dashboard shows the posted verdicts and does not recompute them.
+
+`"N/A"`, `"USED"` and `"visual"` are real values; an unanswered field is absent.
+
+**Dashboard (23 Sep build):** EHBS block (details, initial pressures, checklist, timing, ram
+opening, DMAS parts 1 and 2, signatures, notes) and Drawdown block (details and stations, the
+function table with a close or open time over its limit in red, 60 s for an annular and 45 s
+otherwise from the row label, display only as the tool does; accumulator recharge; the posted
+verdicts; signatures; notes). Tested on the synthetic sample in `sample-reports/` (seq-class EHBS,
+a drawdown with `r2` removed). REV 166 is 34.7% smaller than REV 164 (three blobs stripped).
+
+**Dashboard, acoustic (23 Sep build):** the full-report viewer renders an acoustic block under the
 equipment entry: header table, a functions table (Function · Actuated · Fwd vol · Time · Aft vol,
 the function name taken from the `_act` label before the em dash), the ASR checklist, the
 signatures, the notes. **Scanner v2.62:** the Copilot digest prints every soak key by its label

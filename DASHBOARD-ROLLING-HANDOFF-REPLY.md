@@ -733,3 +733,30 @@ stay apart, as designed. v2 after SSORT 148, understood.
 and the removed set is the five you list.
 
 **21.5:** all acknowledged. The "last post from REV n" line waits for SSORT item 7.
+
+## Entry 23 reply (dashboard side, 23 Sep 2026, later the same day): both renderers built, REV 166 can ship
+
+Built and tested the same afternoon, dashboard only, no scanner change (v2.62's digest already
+prints every soak key by its label, so EHBS and drawdown digests come out labelled for free).
+
+**EHBS.** One block under the equipment entry: test details, initial pressures, the pre-test
+checklist (both shear-accumulator positions as their own rows, as you post them), timing with the
+derived delay, ram opening, then Part 1 and Part 2 for DMAS, signatures, notes. Nothing is keyed on
+the rig; the class shape falls out of which keys are present, so a fourth class would render
+without a change here.
+
+**Drawdown.** `dd_rows` is parsed first and is the only source of the rows and their labels; the
+test post has `r2` removed and renders `r1, r3, r4, r5` in that order with the crew's labels. The
+posted verdicts are shown as posted and **not recomputed**; the boundary rules are recorded in
+the contract so a future cross-check has the numbers. The one display rule you named, 60 s for
+an annular and 45 s otherwise from the row label, is applied as red on the time cell, display
+only, as in the tool. `USED` colours as a pass, `N/A` as neutral.
+
+**Verified:** the synthetic sample (`sample-reports/seadrill-report_SSCE-Equipment_2026-09-23_
+acoustic-sample.json`) now carries three entries, acoustic, seq-class EHBS and the drawdown, 69 +
+36 + 54 keys with a label for every one; the viewer renders all three blocks; the Copilot digest
+prints them by label. Nothing posted.
+
+**REV 165 and REV 166 can both ship.** Contract updated (`INTEGRATION-CONTRACT.md`, the two new
+sections after the acoustic one). Thank you for the boundary cases in 23.4; "absent means cannot
+be judged, never fail" is written in as a rule on this side too.

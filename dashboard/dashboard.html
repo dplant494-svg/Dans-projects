@@ -1652,10 +1652,103 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   function soakValueCell(v) {
     var td = document.createElement('td'); var s = String(v == null ? '' : v);
     var low = s.trim().toLowerCase();
-    if (low === 'pass' || low === 'yes' || low === 'ok') td.className = 'pass';
+    if (low === 'pass' || low === 'yes' || low === 'ok' || low === 'used') td.className = 'pass';
     else if (low === 'fail' || low === 'no') td.className = 'fail';
     td.textContent = s;
     return td;
+  }
+  // EHBS function test (WCGRRT REV 166, rolling handoff entry 23.2): keys are ehbs_-prefixed and
+  // class-shaped, not rig-slugged. single / seq rigs: ehbs_shear, ehbs_hdr_*, ehbs_ip_*, ehbs_chk_*,
+  // ehbs_tim_* (tim_delay derived), ehbs_open_*, ehbs_sig_*, ehbs_notes. DMAS (Sevan Louisiana):
+  // no ehbs_shear, ehbs_p1_* / ehbs_p2_* each with _chk_ _act_ _tim_. Labels from soaklabels.
+  function soakKeyValueTable(soak, ks, labels, stripRe) {
+    var t = mk('table', '');
+    ks.forEach(function (k) { var tr = mk('tr', ''); var lab = soakLabel(k, labels); if (lab === k && stripRe) lab = k.replace(stripRe, '').replace(/_/g, ' '); tr.appendChild(mk('th', '', lab)); tr.appendChild(soakValueCell(soak[k])); t.appendChild(tr); });
+    return t;
+  }
+  function soakSignatures(soak, prefix, roles, labels, wrap) {
+    var sigs = roles.filter(function (r) { return soak[prefix + r] || soak[prefix + r + '_date']; });
+    if (!sigs.length) return;
+    var st = mk('table', ''); var sh = mk('tr', '');
+    ['Signed by', 'Name', 'Date'].forEach(function (h) { sh.appendChild(mk('th', '', h)); });
+    st.appendChild(sh);
+    var names = { client: 'Client', dsl: 'DSL', subsea: 'Subsea supervisor', coman: 'Company man' };
+    sigs.forEach(function (r) { var tr = mk('tr', '');
+      var lab = soakLabel(prefix + r, labels).replace(/ — Name$/, '');
+      if (lab === prefix + r) lab = names[r] || r;
+      tr.appendChild(mk('td', '', lab)); tr.appendChild(mk('td', '', String(soak[prefix + r] || ''))); tr.appendChild(mk('td', '', String(soak[prefix + r + '_date'] || '')));
+      st.appendChild(tr); });
+    wrap.appendChild(st);
+  }
+  function rvEhbs(soak, keys, labels, wrap) {
+    var ks = keys.filter(function (k) { return /^ehbs_/.test(k); });
+    var shear = soak.ehbs_shear ? String(soak.ehbs_shear) : '';
+    var isDmas = ks.some(function (k) { return /^ehbs_p[12]_/.test(k); });
+    wrap.appendChild(mk('div', 'rv-section-label', 'EHBS function test' + (shear ? ' — ' + shear : '') + (isDmas ? ' — DMAS, two parts' : '')));
+    var groups = [['ehbs_hdr_', 'Test details'], ['ehbs_ip_', 'Initial pressures'], ['ehbs_chk_', 'Pre-test checklist'], ['ehbs_tim_', 'Timing'], ['ehbs_open_', 'Ram opening']];
+    groups.forEach(function (g) {
+      var gk = ks.filter(function (k) { return k.indexOf(g[0]) === 0; });
+      if (!gk.length) return;
+      wrap.appendChild(mk('div', 'rv-notes', g[1]));
+      wrap.appendChild(soakKeyValueTable(soak, gk, labels, new RegExp('^' + g[0])));
+    });
+    ['p1', 'p2'].forEach(function (part) {
+      var pk = ks.filter(function (k) { return k.indexOf('ehbs_' + part + '_') === 0; });
+      if (!pk.length) return;
+      wrap.appendChild(mk('div', 'rv-notes', part === 'p1' ? 'Part 1' : 'Part 2'));
+      wrap.appendChild(soakKeyValueTable(soak, pk, labels, new RegExp('^ehbs_' + part + '_')));
+    });
+    soakSignatures(soak, 'ehbs_sig_', ['client', 'dsl', 'subsea'], labels, wrap);
+    if (soak.ehbs_notes) wrap.appendChild(mk('div', 'rv-notes', String(soak.ehbs_notes)));
+    var known = /^ehbs_(shear|hdr_|ip_|chk_|tim_|open_|p[12]_|sig_|notes$)/;
+    var rest = ks.filter(function (k) { return !known.test(k); });
+    if (rest.length) wrap.appendChild(soakKeyValueTable(soak, rest, labels, /^ehbs_/));
+  }
+  // Surface drawdown (REV 166, entry 23.3): dd_hdr_*, dd_st_* (USED / N/A), dd_ip_*, the table
+  // dd_t_<rowid>_<c|o>_<time|gal|psi> whose rows and labels come ONLY from dd_rows
+  // ("r1:Pipe Ram|r2:Annular|..."; ids are not reused after a removal), dd_acc_*, then the
+  // derived values posted by the tool (dd_final_psi, dd_chk_precharge / _mop / _rwp = PASS,
+  // FAIL, or absent = cannot be judged), dd_sig_*, dd_notes. Close/open time limit shown in
+  // red: 60 s for an annular, 45 s otherwise, from the row label (display only, as the tool).
+  function rvDrawdown(soak, keys, labels, wrap) {
+    var ks = keys.filter(function (k) { return /^dd_/.test(k); });
+    wrap.appendChild(mk('div', 'rv-section-label', 'Surface drawdown test'));
+    var hdr = ks.filter(function (k) { return /^dd_(hdr|st|ip)_/.test(k); });
+    if (hdr.length) wrap.appendChild(soakKeyValueTable(soak, hdr, labels, /^dd_(hdr|st|ip)_/));
+    var rows = [];
+    if (soak.dd_rows) {
+      String(soak.dd_rows).split('|').forEach(function (part) { var i = part.indexOf(':'); if (i > 0) rows.push({ id: part.slice(0, i).trim(), label: part.slice(i + 1).trim() }); });
+    } else {
+      var seen = {};
+      ks.forEach(function (k) { var m = /^dd_t_([^_]+)_(c|o)_(time|gal|psi)$/.exec(k); if (m && !seen[m[1]]) { seen[m[1]] = 1; rows.push({ id: m[1], label: m[1] }); } });
+    }
+    if (rows.length) {
+      var tt = mk('table', ''); var hr = mk('tr', '');
+      ['Function', 'Close time (s)', 'Close gal', 'Close psi', 'Open time (s)', 'Open gal', 'Open psi'].forEach(function (h) { hr.appendChild(mk('th', '', h)); });
+      tt.appendChild(hr);
+      rows.forEach(function (r) {
+        var tr = mk('tr', ''); tr.appendChild(mk('td', '', r.label));
+        var limit = /annular/i.test(r.label) ? 60 : 45;
+        ['c', 'o'].forEach(function (side) {
+          ['time', 'gal', 'psi'].forEach(function (f) {
+            var v = soak['dd_t_' + r.id + '_' + side + '_' + f]; var td = mk('td', '', v == null ? '' : String(v));
+            if (f === 'time' && v != null && v !== '' && !isNaN(Number(v)) && Number(v) > limit) { td.className = 'fail'; td.title = 'Over the ' + limit + ' s limit'; }
+            tr.appendChild(td);
+          });
+        });
+        tt.appendChild(tr);
+      });
+      wrap.appendChild(tt);
+    }
+    var acc = ks.filter(function (k) { return /^dd_(acc_|final_psi$)/.test(k); });
+    if (acc.length) { wrap.appendChild(mk('div', 'rv-notes', 'Accumulator recharge')); wrap.appendChild(soakKeyValueTable(soak, acc, labels, /^dd_(acc_)?/)); }
+    var chk = ks.filter(function (k) { return /^dd_chk_/.test(k); });
+    if (chk.length) { wrap.appendChild(mk('div', 'rv-notes', 'Acceptance (verdicts posted by the tool)')); wrap.appendChild(soakKeyValueTable(soak, chk, labels, /^dd_chk_/)); }
+    soakSignatures(soak, 'dd_sig_', ['subsea', 'dsl', 'coman'], labels, wrap);
+    if (soak.dd_notes) wrap.appendChild(mk('div', 'rv-notes', String(soak.dd_notes)));
+    var known = /^dd_(hdr_|st_|ip_|t_[^_]+_(c|o)_(time|gal|psi)$|rows$|acc_|final_psi$|chk_|sig_|notes$)/;
+    var rest = ks.filter(function (k) { return !known.test(k); });
+    if (rest.length) wrap.appendChild(soakKeyValueTable(soak, rest, labels, /^dd_/));
   }
   function rvSoak(soak, body, labels) {
     var keys = Object.keys(soak).filter(function (k) { return soak[k] !== '' && soak[k] != null; });
@@ -1663,9 +1756,13 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var ft = keys.filter(function (k) { return /^ft_/.test(k); });
     var eds = keys.filter(function (k) { return /^eds_/.test(k); });
     var acst = keys.filter(function (k) { return /^acst_/.test(k); });
-    var other = keys.filter(function (k) { return !/^(ft|eds|acst)_/.test(k); });
+    var ehbs = keys.filter(function (k) { return /^ehbs_/.test(k); });
+    var dd = keys.filter(function (k) { return /^dd_/.test(k); });
+    var other = keys.filter(function (k) { return !/^(ft|eds|acst|ehbs|dd)_/.test(k); });
     var wrap = mk('div', 'rv-soak');
     if (acst.length) rvAcoustic(soak, keys, labels, wrap);   // REV 165, rolling handoff entry 22
+    if (ehbs.length) rvEhbs(soak, keys, labels, wrap);       // REV 166, entry 23.2
+    if (dd.length) rvDrawdown(soak, keys, labels, wrap);     // REV 166, entry 23.3
     if (ft.length) {
       wrap.appendChild(mk('div', 'rv-section-label', 'BOP function test (' + ft.length + ' fields)'));
       var t = mk('table', ''); 
