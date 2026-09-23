@@ -368,8 +368,9 @@
     background: var(--sd-border); color: var(--sd-text);
   }
   .cbm-grade.g1  { background: var(--sd-blue); color: #fff; }
-  .cbm-grade.g2  { background: var(--sd-orange); color: #fff; }
-  .cbm-grade.g34 { background: var(--sd-fail); color: #fff; }
+  .cbm-grade.g2  { background: var(--sd-light-blue); color: #fff; }   /* 1 and 2: acceptable (NOV §7) */
+  .cbm-grade.g3  { background: var(--sd-monitor); color: #fff; }      /* 3: acceptable with findings, monitor (NOV §7; rolling handoff entry 21.4) */
+  .cbm-grade.g45 { background: var(--sd-fail); color: #fff; }
   .cbm-tally { margin: 10px 0 4px; font-size: 12px; }
   .cbm-tally .lbl { color: var(--sd-text-light); font-weight: 700; }
   .cbm-tally .cbm-grade { margin-left: 4px; margin-right: 2px; }
@@ -575,8 +576,9 @@
     width: 34px; height: 24px; border-radius: 3px; cursor: pointer; background: var(--sd-border);
   }
   .cbm-heat-cell.g1  { background: var(--sd-blue); }
-  .cbm-heat-cell.g2  { background: var(--sd-orange); }
-  .cbm-heat-cell.g34 { background: var(--sd-fail); }
+  .cbm-heat-cell.g2  { background: var(--sd-light-blue); }
+  .cbm-heat-cell.g3  { background: var(--sd-monitor); }
+  .cbm-heat-cell.g45 { background: var(--sd-fail); }
   .cbm-heat-cell.gnone { background: transparent; cursor: default; }
   .cbm-heat-cell:hover:not(.gnone) { outline: 2px solid var(--sd-light-blue); outline-offset: -1px; }
   .cbm-heat-empty { color: var(--sd-text-light); padding: 24px 0; text-align: center; }
@@ -1561,10 +1563,91 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   // Labels are derived from the key slugs; the tool holds the printed labels.
   var SOAK_LABELS = { cav: 'Cavities', packers_ok: 'Packers installed, orientation checked', packers_rem: 'Confirmed by', pos: 'Position',
     pnf: 'Part no (FWD)', pna: 'Part no (AFT)', snf: 'Serial (FWD)', sna: 'Serial (AFT)', pn: 'Part no', serial: 'Serial', well: 'Well', date: 'Date' };
-  function soakLabel(slug) {
+  function soakLabel(slug, labels) {
+    // WCGRRT REV 165+: equipEntries[].soaklabels (also read as soakLabels) carries one printed
+    // label per soak key, built by the tool from the same tables that render the form
+    // (rolling handoff entry 22.3). It wins over the slug-derived label whenever present.
+    if (labels && typeof labels === 'object' && labels[slug]) return String(labels[slug]);
     var s = String(slug || '').replace(/^ft_/, '');
     if (SOAK_LABELS[s]) return SOAK_LABELS[s];
     return s.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+  }
+  function soakLabelsOf(entry) {
+    if (!entry || typeof entry !== 'object') return null;
+    var l = entry.soaklabels || entry.soakLabels;
+    return (l && typeof l === 'object') ? l : null;
+  }
+  // Acoustic function test (WCGRRT REV 165, rolling handoff entry 22): every key is
+  // acst_-prefixed inside soak. acst_stack; acst_hdr_<field> (17 header fields);
+  // acst_<rigslug>_<stackslug>_f<n>_act|_fwd|_time|_aft (one function per n, row count
+  // differs by rig); acst_asr_<0-6> (ASR checklist); acst_sig_<client|dsl|subsea> and
+  // _date; acst_notes. "N/A" and "visual" are real values, not blanks. Labels come from
+  // soaklabels; the function label is the part before " \u2014 " of the _act label.
+  function rvAcoustic(soak, keys, labels, wrap) {
+    var stack = soak.acst_stack ? String(soak.acst_stack) : '';
+    var hdr = keys.filter(function (k) { return /^acst_hdr_/.test(k); });
+    var fn = {}, fnOrder = [];
+    keys.forEach(function (k) {
+      var m = /^acst_(.+)_f(\d+)_(act|fwd|time|aft)$/.exec(k);
+      if (!m) return;
+      var n = Number(m[2]);
+      if (!fn[n]) { fn[n] = { n: n }; fnOrder.push(n); }
+      fn[n][m[3]] = soak[k];
+      if (m[3] === 'act' || !fn[n].label) {
+        var lab = labels && labels[k] ? String(labels[k]) : '';
+        if (lab) fn[n].label = lab.split(' \u2014 ')[0];
+      }
+    });
+    fnOrder.sort(function (a, b) { return a - b; });
+    var asr = keys.filter(function (k) { return /^acst_asr_\d+$/.test(k); }).sort(function (a, b) { return Number(a.slice(9)) - Number(b.slice(9)); });
+    var sigs = ['client', 'dsl', 'subsea'].filter(function (r) { return soak['acst_sig_' + r] || soak['acst_sig_' + r + '_date']; });
+    var known = {};
+    hdr.forEach(function (k) { known[k] = 1; }); asr.forEach(function (k) { known[k] = 1; });
+    keys.forEach(function (k) { if (/^acst_(.+)_f\d+_(act|fwd|time|aft)$/.test(k) || /^acst_sig_/.test(k) || k === 'acst_stack' || k === 'acst_notes') known[k] = 1; });
+    var rest = keys.filter(function (k) { return /^acst_/.test(k) && !known[k]; });
+
+    wrap.appendChild(mk('div', 'rv-section-label', 'Acoustic function test' + (stack ? ' \u2014 ' + stack : '') + (fnOrder.length ? ' (' + fnOrder.length + ' functions)' : '')));
+    if (hdr.length) {
+      var ht = mk('table', '');
+      hdr.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k, labels).replace(/^acst_hdr_/, ''))); tr.appendChild(soakValueCell(soak[k])); ht.appendChild(tr); });
+      wrap.appendChild(ht);
+    }
+    if (fnOrder.length) {
+      var ft = mk('table', ''); var hr = mk('tr', '');
+      ['Function', 'Actuated', 'Fwd vol', 'Time (s)', 'Aft vol'].forEach(function (h) { hr.appendChild(mk('th', '', h)); });
+      ft.appendChild(hr);
+      fnOrder.forEach(function (n) { var r = fn[n]; var tr = mk('tr', '');
+        tr.appendChild(mk('td', '', r.label || ('Function ' + (n + 1))));
+        tr.appendChild(soakValueCell(r.act == null ? '' : r.act));
+        tr.appendChild(mk('td', '', r.fwd == null ? '' : String(r.fwd)));
+        tr.appendChild(mk('td', '', r.time == null ? '' : String(r.time)));
+        tr.appendChild(mk('td', '', r.aft == null ? '' : String(r.aft)));
+        ft.appendChild(tr); });
+      wrap.appendChild(ft);
+    }
+    if (asr.length) {
+      wrap.appendChild(mk('div', 'rv-section-label', 'ASR checklist'));
+      var at = mk('table', '');
+      asr.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k, labels).replace(/^ASR \u2014 /, ''))); tr.appendChild(soakValueCell(soak[k])); at.appendChild(tr); });
+      wrap.appendChild(at);
+    }
+    if (sigs.length) {
+      var st = mk('table', ''); var sh = mk('tr', '');
+      ['Signed by', 'Name', 'Date'].forEach(function (h) { sh.appendChild(mk('th', '', h)); });
+      st.appendChild(sh);
+      sigs.forEach(function (r) { var tr = mk('tr', '');
+        var lab = soakLabel('acst_sig_' + r, labels).replace(/ \u2014 Name$/, '');
+        if (lab === 'acst_sig_' + r) lab = { client: 'Client', dsl: 'DSL', subsea: 'Subsea supervisor' }[r];
+        tr.appendChild(mk('td', '', lab)); tr.appendChild(mk('td', '', String(soak['acst_sig_' + r] || ''))); tr.appendChild(mk('td', '', String(soak['acst_sig_' + r + '_date'] || '')));
+        st.appendChild(tr); });
+      wrap.appendChild(st);
+    }
+    if (soak.acst_notes) wrap.appendChild(mk('div', 'rv-notes', String(soak.acst_notes)));   // plain text, never HTML
+    if (rest.length) {
+      var rt = mk('table', '');
+      rest.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k, labels))); tr.appendChild(soakValueCell(soak[k])); rt.appendChild(tr); });
+      wrap.appendChild(rt);
+    }
   }
   function soakValueCell(v) {
     var td = document.createElement('td'); var s = String(v == null ? '' : v);
@@ -1574,17 +1657,19 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     td.textContent = s;
     return td;
   }
-  function rvSoak(soak, body) {
+  function rvSoak(soak, body, labels) {
     var keys = Object.keys(soak).filter(function (k) { return soak[k] !== '' && soak[k] != null; });
     if (!keys.length) return;
     var ft = keys.filter(function (k) { return /^ft_/.test(k); });
     var eds = keys.filter(function (k) { return /^eds_/.test(k); });
-    var other = keys.filter(function (k) { return !/^(ft|eds)_/.test(k); });
+    var acst = keys.filter(function (k) { return /^acst_/.test(k); });
+    var other = keys.filter(function (k) { return !/^(ft|eds|acst)_/.test(k); });
     var wrap = mk('div', 'rv-soak');
+    if (acst.length) rvAcoustic(soak, keys, labels, wrap);   // REV 165, rolling handoff entry 22
     if (ft.length) {
       wrap.appendChild(mk('div', 'rv-section-label', 'BOP function test (' + ft.length + ' fields)'));
       var t = mk('table', ''); 
-      ft.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k))); tr.appendChild(soakValueCell(soak[k])); t.appendChild(tr); });
+      ft.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k, labels))); tr.appendChild(soakValueCell(soak[k])); t.appendChild(tr); });
       wrap.appendChild(t);
     }
     if (eds.length) {
@@ -1608,11 +1693,11 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         wrap.appendChild(et);
       }
       var edsOther = eds.filter(function (k) { return k !== 'eds_seq' && !/_r\d+_(v|t|rk)$/.test(k); });
-      if (edsOther.length) { var ot = mk('table', ''); edsOther.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k.replace(/^eds_/, '')))); tr.appendChild(soakValueCell(soak[k])); ot.appendChild(tr); }); wrap.appendChild(ot); }
+      if (edsOther.length) { var ot = mk('table', ''); edsOther.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', labels && labels[k] ? String(labels[k]) : soakLabel(k.replace(/^eds_/, '')))); tr.appendChild(soakValueCell(soak[k])); ot.appendChild(tr); }); wrap.appendChild(ot); }
     }
     if (other.length) {
       wrap.appendChild(mk('div', 'rv-section-label', 'Other test fields'));
-      var xt = mk('table', ''); other.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k))); tr.appendChild(soakValueCell(soak[k])); xt.appendChild(tr); }); wrap.appendChild(xt);
+      var xt = mk('table', ''); other.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', soakLabel(k, labels))); tr.appendChild(soakValueCell(soak[k])); xt.appendChild(tr); }); wrap.appendChild(xt);
     }
     body.appendChild(wrap);
   }
@@ -1711,7 +1796,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var g = String(grade || '').trim();
     if (g === '1') return 'g1';
     if (g === '2') return 'g2';
-    if (g === '3' || g === '4' || g === '5') return 'g34';   // NOV's §7 guide is a five-level scale; 4 and 5 are 'Not acceptable' (rolling handoff entry 18.5)
+    if (g === '3') return 'g3';                 // 'Fair / Acceptable working condition', monitor: acceptable with findings (NOV §7; rolling handoff entry 21.4)
+    if (g === '4' || g === '5') return 'g45';   // 'Not acceptable' in NOV's own words; SSORT 148's conditional triggers fire at 4 or 5
     return '';   // '', 'N/A', or anything else -> neutral bucket
   }
 
@@ -1819,7 +1905,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     table.appendChild(tbody);
     wrap.appendChild(table);
 
-    [['g1', 'Grade 1'], ['g2', 'Grade 2'], ['g34', 'Grade 3 / 4 / 5'], ['', 'Ungraded / N/A']].forEach(function (p) {
+    [['g1', 'Grade 1'], ['g2', 'Grade 2'], ['g3', 'Grade 3 \u2014 acceptable with findings'], ['g45', 'Grade 4 / 5 \u2014 not acceptable'], ['', 'Ungraded / N/A']].forEach(function (p) {
       legend.appendChild(mk('span', 'cbm-grade' + (p[0] ? ' ' + p[0] : ''), p[1]));
     });
     legend.appendChild(mk('span', '', 'Blank cell = no item reported at that position for that equipment'));
@@ -3495,7 +3581,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         if (e.notes && e.notes.replace(/<[^>]*>/g, '').trim()) eq.appendChild(rvNotes(e.notes));
         var ph = rvPhotos(e.photos, e.captions);
         if (ph) eq.appendChild(ph);
-        if (e.soak && typeof e.soak === 'object') rvSoak(e.soak, eq);   // entry 11.2: EDS and function tests
+        if (e.soak && typeof e.soak === 'object') rvSoak(e.soak, eq, soakLabelsOf(e));   // entry 11.2: EDS and function tests; entry 22: acoustic, labels from soaklabels
         tb.appendChild(eq);
       });
 

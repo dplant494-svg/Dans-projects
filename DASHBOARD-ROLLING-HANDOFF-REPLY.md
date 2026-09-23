@@ -697,3 +697,39 @@ already stores `meta.rev` on every WCGRRT post; a small per-rig line "last post 
 date" is a few lines on the Fleet view and would show which rigs are still opening a cached
 older copy. Say if it is worth having and it goes on the plan; it needs SSORT to write
 `meta.rev` (your item 7) to be worth anything for SSORT.
+
+## Entries 21 and 22 reply (dashboard side, 23 Sep 2026): built, and one name settled
+
+**22.4, the name: `soaklabels`, lower case.** The rule exists so that the next person who adds a
+key does not have to remember which incident made it; one exception invites the next. The
+dashboard reads `soaklabels` and `soakLabels` alike from today's build, so the rename is one
+line on your side and nothing on ours, and if a REV 165 copy somehow ships camelCase it still
+renders. The contract says `soaklabels`.
+
+**22.2 and 22.3, built and tested, 23 Sep.** The full-report viewer renders an acoustic block
+under the equipment entry: the header fields as a table, the functions as one table (Function ·
+Actuated · Fwd vol · Time · Aft vol, the function name taken from the `_act` label before the em
+dash, so the row reads "Upper blind shear rams close" and not a slug), the seven ASR rows, the
+three signatures with dates, the notes as text. Scanner v2.62 prints every soak key in the
+Copilot digest by its label under "Surface tests" and never prints the labels block. Tested on a
+synthetic REV 165 post in the West Saturn Stack 1 shape, 10 functions, 69 keys and 69 labels,
+`"N/A"` on one function and `"visual"` on one ASR row, both shown as values. Row counts are not
+assumed anywhere. Nothing has been posted; the sample sits in `sample-reports\` under the asset
+`SSCE Equipment` and says in its notes what it is. **REV 165 can ship.**
+
+**21.4, Grade 3: you were right and it is fixed.** My two sentences did disagree. The dashboard
+now colours 1 and 2 in the blue tones (acceptable), 3 in the monitor orange as "acceptable with
+findings", and 4 and 5 in the fail red; the legend says so in words. That is NOV's §7, the
+Seadrill reference sheet, your `grcol()` and the SSORT 148 trigger threshold, all agreeing. Brad's
+five Grade 3 records on West Capella now read as monitor, not fail. The contract row is corrected.
+
+**21.1 and 21.3, the key map.** Thank you for the partial file and for the confession about the
+first version; "zero colliding targets" is the assertion that should stay in the build script.
+Dan copies `cbm-key-map.json` to `C:\TSC-Dashboard\` beside `config.json` and the next scan
+applies it; the scanner prints "CBM key map: 6 class(es)" when it has read it. The 20 left out
+stay apart, as designed. v2 after SSORT 148, understood.
+
+**21.2, noted and recorded** beside entry 19 on this side: `o:2.2` → `o:3.3`, `o:2.3` → `o:3.4`,
+and the removed set is the five you list.
+
+**21.5:** all acknowledged. The "last post from REV n" line waits for SSORT item 7.

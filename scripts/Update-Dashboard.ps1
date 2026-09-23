@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.61'
+$ScriptVersion = '2.62'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -459,7 +459,7 @@ function Write-DigestSection {
     if ($tmp.Length -eq 0) { return }
     [void]$Sb.Append("<$Tag>").Append((ConvertTo-HtmlText $Label)).Append("</$Tag>").Append($tmp.ToString())
 }
-$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; imgdata = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1 }
+$DigestSkipKeys = @{ photos = 1; photo = 1; images = 1; image = 1; img = 1; imgdata = 1; src = 1; dataurl = 1; thumb = 1; thumbnail = 1; sheethtml = 1; alarmphotos = 1; soaklabels = 1 }   # v2.62: soaklabels is read beside soak, never printed on its own
 function Test-DigestSkipKey {
     param([string]$Key)   # photo-carrying keys by name: cbm _ph, *photo*, *image*, imgData...
     $k = $Key.ToLower()
@@ -563,6 +563,13 @@ function Write-DigestValue {
         return
     }
     # object: scalars as a two-column table, then nested sections
+    # v2.62: equipEntries[].soaklabels (WCGRRT REV 165, rolling handoff entry 22.3) carries
+    # the printed label for every soak key; when present, the soak table prints the label
+    # instead of the key, so Copilot reads "Upper blind shear rams close - Fwd vol" rather
+    # than acst_West_Saturn_Stack_1_f2_fwd. Read case-insensitively (soakLabels too).
+    $soakLabelMap = $null
+    $slv = Get-Prop $Value 'soaklabels'
+    if ($null -ne $slv -and -not (Test-DigestScalar $slv) -and -not ($slv -is [System.Array])) { $soakLabelMap = $slv }
     $scalars = New-Object System.Collections.Generic.List[object]
     $sections = New-Object System.Collections.Generic.List[object]
     foreach ($k in (Get-KeyNames $Value)) {
@@ -584,6 +591,21 @@ function Write-DigestValue {
     }
     foreach ($sec in $sections) {
         $tag = if ($Depth -le 1) { 'h3' } else { 'h4' }
+        if ($soakLabelMap -and $sec.k -eq 'soak' -and -not (Test-DigestScalar $sec.v) -and -not ($sec.v -is [System.Array])) {
+            $rows = New-Object System.Text.StringBuilder
+            foreach ($sk in (Get-KeyNames $sec.v)) {
+                $sks = [string]$sk
+                $sv = Get-Prop $sec.v $sks
+                if ($null -eq $sv -or -not (Test-DigestScalar $sv)) { continue }
+                $st = ConvertTo-DigestScalar $sv
+                if ($st -eq '') { continue }
+                $lab = [string](Get-Prop $soakLabelMap $sks)
+                if (-not $lab) { $lab = $sks }
+                [void]$rows.Append('<tr><th>').Append((ConvertTo-HtmlText $lab)).Append('</th><td>').Append((ConvertTo-HtmlText $st)).Append('</td></tr>')
+            }
+            if ($rows.Length) { [void]$Sb.Append("<$tag>").Append((ConvertTo-HtmlText 'Surface tests')).Append("</$tag><table>").Append($rows.ToString()).Append('</table>') }
+            continue
+        }
         Write-DigestSection -Sb $Sb -Tag $tag -Label $sec.k -Value $sec.v -Depth ($Depth + 1)
     }
 }
