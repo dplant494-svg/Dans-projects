@@ -198,6 +198,17 @@ record is the audit trail.
 | 11 | **Route to go-live** | **Settled, Dan 23 Sep: always a pilot under a documented DIR-00-0011 deviation, with the MOC and the HAZID as its basis**, while the DIR-37-0161 revision (owner Arnaud Gabaut, approver VP Technical Services & ISIT) goes through. The deviation case is connected to the MOC case; its end date is the directive revision date |
 | 12 | **Synergi case type** | **open:** the Seadrill-change (system change) type name in Synergi; the CAR26 example is the Physical Changes type, which is not ours |
 
+## 5a. Rev 6 queue for the Bulletin Board (held until Eric's Rev 5 handoff is back; Dan, 23 Sep: do not overload him)
+
+| # | Item | Written up in |
+|---|---|---|
+| A | The password gate on the served copy: two builds, app-specific salt, fail closed, set-password page, config never a build artefact | `AAB-REV5-HANDOFF-FOR-ERIC.md` §4 step A, with `tools/received/PASSWORD-GATE-PATTERN-HANDOFF-2026-09-23.md` |
+| B | The board as a served, passworded requests dashboard under `sacred\aab\`: the register view reading `aab-data.js`, New AAB, Revise, per-rig state chips, `maximoParent` on the record | `AAB-REV5-HANDOFF-FOR-ERIC.md` §4 step B; the `aab-data.js` shape comes from the dashboard side with the acknowledgement page |
+
+Rev 5 stays at steps 1 to 15 (the estate integration, SFI, attachments, photographs, load and save,
+size guard, endpoint, escaped preview, print, Generate PDF, logo, test records, the directive's
+wording, and sourcing the SFI list).
+
 ## 6. Who builds what, in order
 
 | Step | Owner | Needs first | Deliverable |

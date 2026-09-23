@@ -1,7 +1,7 @@
 # Seadrill Bulletin Board Rev 5 — what to build next, for Eric's Claude session
 
 **From:** the dashboard session, via Dan · **Date:** 22 September 2026
-**Read with:** `AAB-LOOP-PLAN.md` (the whole loop, the decisions, who builds what) · **Supplied with it:** `aab-logo-600.jpg` (the logo), `sample-reports\aab\` (four test records and a README), the password gate pattern handoff (`PASSWORD-GATE-PATTERN-HANDOFF-2026-09-23.md`)
+**Read with:** `AAB-LOOP-PLAN.md` (the whole loop, the decisions, who builds what) · **Supplied with it:** `aab-logo-600.jpg` (the logo), `sample-reports\aab\` (four test records and a README). The password gate handoff is held for Rev 6 (§4)
 **Posting:** the same HTTP intake URL every tool on the estate uses (Dan gives it directly, never in a file); the post lands in SharePoint WellControl / PostedReports, where the scanner and the flow read it. Nothing about the envelope changes.
 **Rev 4 status:** read in full against Dan's 15 September brief. It meets the brief. Rev 5 is
 the estate integration plus four things Dan asked for on 22 September: SFI codes, photographs,
@@ -112,48 +112,12 @@ below. Bump the header tag to Rev 5 and toolVersion to "2.0".
     expectedAcknowledgerRole becomes the fixed string "Technical Section Leader (each crew)":
     the directive says both TSLs acknowledge a Priority 3.
 
-15. PASSWORD GATE. The Bulletin Board issues advisories to thirteen rigs, so the served copy
-    carries the estate's password gate. The pattern, its traps and its checklist are in the
-    handoff supplied with this pack, "HANDOFF - Password gate pattern, portable for a new
-    app" (Precharge Pro session, 23 Sep 2026). Read its §1 and §3 first. Build it the way it
-    says, not a shortcut: gate overlay first in <body>; gate-config.js beside the page
-    setting window.PCGATE = { hash, hint } with a SHA-256 of salt + password and never the
-    password; an app-specific salt 'seadrill-bulletin-board-gate|'; fail closed when the
-    config is missing (field disabled, no server path or script name on the login screen);
-    unlock token in localStorage keyed on the first 12 characters of the hash, value an
-    expiry (0 = never, default 12 h), every localStorage access in try/catch; a set-password
-    page that self-tests SHA-256 against the two NIST vectors and refuses to run if they
-    fail; hash function and salt in exactly one place (generate the set-password page from
-    the gate source, as the handoff shows). Produce TWO builds from one source: the ungated
-    file for offline use and email, and the gated file that alone goes to the share; assert
-    at build time that the two share bodies are byte-identical and that the gate is first in
-    <body>. The endpoint (step 8) reads from the same gate-config.js as window.PCGATE.postUrl.
-    Write in the file header that the gate is a curtain, not a lock, in the handoff's words.
-
-16. SFI CODE LIST. Dan does not have the 331 to 336 list to hand. Source it yourself from the
+15. SFI CODE LIST. Dan does not have the 331 to 336 list to hand. Source it yourself from the
     Seadrill SFI group structure available to you (SYS-00-0034 RAMP Equipment Structure and
     Coding, or the Maximo item master by SFI group) and put it back to the dashboard side in
     your handoff as a table: group, code, name, one row per code, marked verified or
     unverified against the source you used. The tool's SFI_CODES list and the dashboard's
     test records both wait on it.
-
-17. THE BOARD IS A SERVED, PASSWORDED DASHBOARD (Dan, 23 Sep). The gated build from step 15
-    is published on the sacred server under aab\ beside the precharge pages and is the
-    Seadrill Bulletin Board itself: Eric creates AABs there; every subsea superintendent and
-    the offices open it to read. So the page gains a REGISTER view above the create form:
-    it fetches aab-data.js from the same folder (written by the dashboard scanner every ten
-    minutes; the dashboard side supplies the file's shape with the acknowledgement page)
-    and lists every AAB: number, current revision, title, priority, issue and due dates,
-    applicable rigs as chips coloured by state (outstanding / partly acknowledged / fully
-    acknowledged / action open / closed / overdue), with the PDF and the bulletin to open.
-    "New AAB" opens the create form; "Revise" loads that AAB into the form as revision n+1
-    (step 7). The register is read-only; nothing on it edits a posted file. When
-    aab-data.js is absent (a copy opened from disk) the register says so and the create
-    form still works. Keep the file self-contained apart from gate-config.js and
-    aab-data.js, both loaded relatively from the same folder.
-    Record: add maximoParent: "<Maximo parent AAB case number>" (text, optional): Dan keeps
-    the Maximo parent case for the corporate evaluation trail; the board replaces the child
-    cases and the tick-box acknowledgement for Priority 3.
 
 After each step: node --check on the script block, open the file from disk, create one
 AAB on the rig "West Vela" only with a small PDF and one photograph, press "Create AAB
@@ -246,3 +210,51 @@ Priority 3, so a rig is fully acknowledged after two acknowledgements. Here `met
   while the browser reports success.
 - **Which role acknowledges:** settled by DIR-37-0161 §2.2.4, both crews' TSLs (step 14).
   Response period, withdrawal, notification matrix: Dan's decisions in `AAB-LOOP-PLAN.md` §5.
+
+## 4. Held for Rev 6, not in the Rev 5 prompt (Dan, 23 Sep: one round at a time)
+
+Two further steps are ready and wait for Eric's Rev 5 handoff to come back. They are recorded here
+so the next prompt is a paste, and in `AAB-LOOP-PLAN.md` item 27's Rev 6 queue.
+
+```
+A. PASSWORD GATE. The Bulletin Board issues advisories to thirteen rigs, so the served copy
+    carries the estate's password gate. The pattern, its traps and its checklist are in the
+    handoff supplied with this pack, "HANDOFF - Password gate pattern, portable for a new
+    app" (Precharge Pro session, 23 Sep 2026). Read its §1 and §3 first. Build it the way it
+    says, not a shortcut: gate overlay first in <body>; gate-config.js beside the page
+    setting window.PCGATE = { hash, hint } with a SHA-256 of salt + password and never the
+    password; an app-specific salt 'seadrill-bulletin-board-gate|'; fail closed when the
+    config is missing (field disabled, no server path or script name on the login screen);
+    unlock token in localStorage keyed on the first 12 characters of the hash, value an
+    expiry (0 = never, default 12 h), every localStorage access in try/catch; a set-password
+    page that self-tests SHA-256 against the two NIST vectors and refuses to run if they
+    fail; hash function and salt in exactly one place (generate the set-password page from
+    the gate source, as the handoff shows). Produce TWO builds from one source: the ungated
+    file for offline use and email, and the gated file that alone goes to the share; assert
+    at build time that the two share bodies are byte-identical and that the gate is first in
+    <body>. The endpoint (step 8) reads from the same gate-config.js as window.PCGATE.postUrl.
+    Write in the file header that the gate is a curtain, not a lock, in the handoff's words.
+
+B. THE BOARD IS A SERVED, PASSWORDED DASHBOARD (Dan, 23 Sep). The gated build from step 15
+    is published on the sacred server under aab\ beside the precharge pages and is the
+    Seadrill Bulletin Board itself: Eric creates AABs there; every subsea superintendent and
+    the offices open it to read. So the page gains a REGISTER view above the create form:
+    it fetches aab-data.js from the same folder (written by the dashboard scanner every ten
+    minutes; the dashboard side supplies the file's shape with the acknowledgement page)
+    and lists every AAB: number, current revision, title, priority, issue and due dates,
+    applicable rigs as chips coloured by state (outstanding / partly acknowledged / fully
+    acknowledged / action open / closed / overdue), with the PDF and the bulletin to open.
+    "New AAB" opens the create form; "Revise" loads that AAB into the form as revision n+1
+    (step 7). The register is read-only; nothing on it edits a posted file. When
+    aab-data.js is absent (a copy opened from disk) the register says so and the create
+    form still works. Keep the file self-contained apart from gate-config.js and
+    aab-data.js, both loaded relatively from the same folder.
+    Record: add maximoParent: "<Maximo parent AAB case number>" (text, optional): Dan keeps
+    the Maximo parent case for the corporate evaluation trail; the board replaces the child
+    cases and the tick-box acknowledgement for Priority 3.
+
+```
+
+The password gate pattern handoff (`PASSWORD-GATE-PATTERN-HANDOFF-2026-09-23.md`) goes with step A
+when it is sent. Until then the Rev 5 record's `maximoParent` field is the only trace of step B in
+the prompt; it is harmless if Eric adds it early.
