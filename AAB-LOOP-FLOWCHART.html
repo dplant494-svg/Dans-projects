@@ -34,7 +34,7 @@
     <h1>The AAB loop — issue, notify, acknowledge, report back</h1>
     <p>Seadrill Bulletin Board (Eric) → estate → rig acknowledgement page → dashboard. Companion to AAB-LOOP-PLAN.md.</p>
   </div>
-  <span class="rev">22 Sep 2026 · Rev 1</span>
+  <span class="rev">23 Sep 2026 · Rev 2</span>
 </header>
 <main>
 <div class="card">
@@ -52,7 +52,7 @@
     <rect x="830" y="10" width="360" height="760" rx="8" fill="#f7f8fb" stroke="#d0d8e8"/>
     <text x="190" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">OFFICE — Eric, gatekeeper</text>
     <text x="600" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">ESTATE — trigger, SharePoint, flow, scanner</text>
-    <text x="1010" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">RIG — Subsea Supervisor / OIM</text>
+    <text x="1010" y="34" text-anchor="middle" font-weight="700" fill="#002C77" font-size="14">RIG — TSL of each crew (DIR-37-0161 §2.2.4)</text>
 
     <!-- 1 Bulletin Board -->
     <rect x="40" y="60" width="300" height="118" rx="6" fill="#e8eefb" stroke="#002C77" stroke-width="1.5"/>
@@ -97,7 +97,7 @@
     <rect x="860" y="170" width="300" height="140" rx="6" fill="#e8eefb" stroke="#002C77" stroke-width="1.5"/>
     <text x="1010" y="192" text-anchor="middle" font-weight="700">5 · sacred/aab/acknowledge.html?rig=</text>
     <text x="875" y="214">open AABs for this rig · text · PDF · photos</text>
-    <text x="875" y="238" font-weight="600">[Acknowledge]  name, role, date</text>
+    <text x="875" y="238" font-weight="600">[Acknowledge]  TSL name, crew A/B, date</text>
     <text x="875" y="256" font-weight="600">[Close action]  name, date, comment,</text>
     <text x="875" y="272" font-weight="600">                        evidence photographs</text>
     <text x="875" y="296" fill="#5a6880" font-size="12">West Gemini: PDF by email, ack by reply (item 24)</text>
@@ -174,7 +174,7 @@
     <li><b>The post lands</b> in PostedReports as one file per revision. It is never edited afterwards.</li>
     <li><b>The flow emails each applicable rig</b> its contacts from the Rigs sheet, PDFs attached, link to the AAB on the dashboard, Eric and the office in copy.</li>
     <li><b>The scanner records the AAB</b>, groups revisions by number, and writes the data file the rig page reads and the dashboard tab shows.</li>
-    <li><b>The rig acknowledges</b> on the sacred page: name, role, date. Later it closes the action with a comment and evidence photographs.</li>
+    <li><b>The rig acknowledges</b> on the sacred page: the TSL of each crew, name and crew, date (DIR-37-0161 §2.2.4: both TSLs for a Priority 3). Where the advisory asks for an action, the rig closes it later with a comment and evidence photographs.</li>
     <li><b>The acknowledgement posts</b> as its own file through the same trigger.</li>
     <li><b>The flow tells Eric</b> and the office that the rig has acknowledged.</li>
     <li><b>The scanner joins</b> acknowledgements to AABs and computes each rig's status.</li>
