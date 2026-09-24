@@ -65,8 +65,8 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
    - **AabNo**: `coalesce(body('Parse_JSON')?['aabNumber'],'')`
    - **Rev**: `string(coalesce(body('Parse_JSON')?['revision'],0))`
    - **Title**: `coalesce(body('Parse_JSON')?['title'],'')`
-   - **DashLink**: `'http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html'` (type the
-     text without quotes into the Inputs box; no fx needed)
+   - **DashLink**: `http://sdrlazneuiis01d.corp.local:8080/sacred/aab/register.html` (type the
+     text into the Inputs box; no fx needed: the fleet compliance page, password)
    - **OfficeCc**: `concat(outputs('OfficeList'), ';', outputs('SupList'), if(empty(outputs('Gatekeeper')), '', concat(';', outputs('Gatekeeper'))))`
 10. **Condition** named **IsAck**: `outputs('Kind')` **is equal to** `aab-ack`.
 
@@ -84,7 +84,7 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
 @{if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('Gatekeeper'), '<br>CC: ', outputs('OfficeList'), '</b></p>'), '')}
 <p><b>@{outputs('AckRig')}</b> has @{outputs('AckWhat')} AAB <b>@{outputs('AabNo')}</b> rev @{outputs('Rev')}.</p>
 <p>By: @{body('Parse_JSON')?['by']} (@{body('Parse_JSON')?['role']}, crew @{body('Parse_JSON')?['crew']}) on @{body('Parse_JSON')?['at']}<br>Comment: @{body('Parse_JSON')?['comment']}</p>
-<p><a href="@{outputs('DashLink')}">Open the AABs tab on the dashboard</a> (the state updates within ten minutes; evidence photographs are on the record there).</p>
+<p><a href="@{outputs('DashLink')}">Open the fleet compliance page</a> (the state updates within ten minutes; evidence photographs are on the record there).</p>
 <p>Technical Services - Well Control Engineering</p>
 ```
 
@@ -105,7 +105,7 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
 join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],'')),';'),json('[]')),';')
 ```
 
-    - Compose **AckLink**: `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/acknowledge.html?rig=', string(items('EachRig')))`
+    - Compose **AckLink**: `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/index.html?rig=', string(items('EachRig')))`
     - **Condition** **HasRigContact**: fx `length(replace(outputs('RigTo'), ';', ''))` **is greater than** `0`.
     - True → **Send an email (V2)**, rename **AAB Issued Email**:
       - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('RigTo'))`
@@ -120,7 +120,7 @@ join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''
 <p><b>What happened</b><br>@{replace(coalesce(body('Parse_JSON')?['advisory']?['whatHappened'],''), decodeUriComponent('%0A'), '<br>')}</p>
 <p><b>Why it matters</b><br>@{replace(coalesce(body('Parse_JSON')?['advisory']?['whyItMatters'],''), decodeUriComponent('%0A'), '<br>')}</p>
 <p><b>Required action</b><br>@{replace(coalesce(body('Parse_JSON')?['advisory']?['requiredAction'],''), decodeUriComponent('%0A'), '<br>')}</p>
-<p><a href="@{outputs('AckLink')}">Acknowledge this AAB for @{outputs('RigName')}</a> (each crew's TSL; the page also holds the bulletin and the photographs). Seadrill readers: <a href="@{outputs('DashLink')}">the AABs tab on the dashboard</a>.</p>
+<p><a href="@{outputs('AckLink')}">Acknowledge this AAB for @{outputs('RigName')}</a> (each crew's TSL; the page also holds the bulletin and the photographs). Technical Services: <a href="@{outputs('DashLink')}">the fleet compliance page</a>.</p>
 <p>Technical Services - Well Control Engineering</p>
 ```
 
@@ -174,7 +174,7 @@ copies it into the **Digests** library, which is SharePoint.
    Superintendents six, **OfficeCc**: as in Part B steps 6 to 9.
 6. **Apply to each** over `body('Parse_JSON')`. Inside: **RigRow** by
    `concat('RigKey eq ''', trim(string(items('Apply_to_each')?['rigKey'])), '''')`, **RigTo** as in
-   Part B, **AckLink** `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/acknowledge.html?rig=', string(items('Apply_to_each')?['rigKey']))`,
+   Part B, **AckLink** `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/index.html?rig=', string(items('Apply_to_each')?['rigKey']))`,
    then **Send an email (V2)**, rename **Chase Email**:
    - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('RigTo'))`
    - CC: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('OfficeCc'))`

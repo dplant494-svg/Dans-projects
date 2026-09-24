@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seadrill Bulletin Board</title>
+<!--
+  Seadrill Bulletin Board, the rig page (dashboard side of the AAB loop; AAB-LOOP-PLAN.md
+  §0 and §4; Dan, 24 Sep: one board, rigs go in and see what applies to their rig and
+  work from there; the fleet compliance and Create AAB are behind the password on
+  register.html and Eric's create page). Served from sacred\aab\ as index.html beside
+  aab-data.js (scanner v2.65+). It lists the current advisories that apply to one rig,
+  with the text, attachments and photographs, and posts one small record per
+  acknowledgement or closure through the estate's HTTP trigger:
+    seadrill-aab-ack_<aabNumber>_<revision>_<rigKey>_<yyyyMMdd-HHmmss>.json
+  The endpoint comes from gate-config.js (window.PCGATE.postUrl), never from this file.
+  gate-config.js beside the page supplies the endpoint (window.PCGATE.postUrl) and is
+  read here without the gate; nothing in it is secret except the URL, which never
+  travels in a file that is committed or emailed.
+  Rev 2, 24 September 2026 (Rev 1 was acknowledge.html, gated).
+-->
+<style>
+  :root { --sd-blue:#002C77; --sd-light-blue:#0082C0; --sd-yellow:#EDB71E; --sd-orange:#E25303; --sd-fail:#c0392b; --sd-text:#0a1530; --sd-text-light:#5a6880; --sd-border:#d0d8e8; --sd-bg:#f4f6fa; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--sd-bg); color: var(--sd-text); font: 14px/1.45 "Segoe UI", Arial, Helvetica, sans-serif; }
+  header { background: var(--sd-blue); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 4px solid var(--sd-yellow); }
+  header img { height: 44px; width: auto; background: #fff; border-radius: 4px; padding: 2px; }
+  header h1 { font-size: 18px; margin: 0; }
+  header .sub { font-size: 12px; color: rgba(255,255,255,.8); }
+  header .rev { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.7); text-align: right; }
+  main { max-width: 1040px; margin: 0 auto; padding: 18px 16px 60px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #fff; border: 1px solid var(--sd-border); border-radius: 6px; padding: 12px 14px; margin-bottom: 14px; }
+  .bar label { font-size: 12px; font-weight: 700; color: var(--sd-text-light); }
+  select, input[type=text], input[type=date], textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--sd-border); border-radius: 5px; background: #fff; width: 100%; }
+  select { width: auto; min-width: 220px; }
+  .banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-size: 13px; }
+  .banner.warn { background: #fff4e0; color: #7a4a00; border: 1px solid #f4c98a; }
+  .banner.err { background: #fdecea; color: #8a1f14; border: 1px solid #f2b5ae; }
+  .banner.ok { background: #e6f4ea; color: #1b5e20; border: 1px solid #a5d6a7; }
+  .empty { color: var(--sd-text-light); text-align: center; padding: 30px 0; }
+  .aab { background: #fff; border: 1px solid var(--sd-border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+  .aab .head { padding: 12px 16px; border-bottom: 1px solid var(--sd-border); display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+  .aab .head .num { font-weight: 700; color: var(--sd-blue); font-size: 15px; }
+  .aab .head .ttl { font-weight: 600; flex: 1 1 320px; }
+  .aab .body { padding: 12px 16px; }
+  .meta { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 16px; font-size: 12.5px; margin-bottom: 10px; }
+  .meta .k { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--sd-text-light); font-weight: 700; }
+  .sec { font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--sd-blue); margin: 12px 0 4px; border-bottom: 1px solid #e4e9f2; padding-bottom: 3px; }
+  .txt { white-space: pre-wrap; margin: 0 0 6px; }
+  .chip { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 9px; border-radius: 9px; border: 1px solid transparent; white-space: nowrap; }
+  .st-outstanding { background: #eef0f4; color: #3d4a63; border-color: #d0d8e8; }
+  .st-partly { background: #e6f2fa; color: #005f8c; border-color: #9ccbe6; }
+  .st-acknowledged { background: var(--sd-blue); color: #fff; }
+  .st-action { background: #fff1e6; color: #b23f00; border-color: #f4b48a; }
+  .st-closed { background: #e6f4ea; color: #1b5e20; border-color: #a5d6a7; }
+  .st-overdue { background: var(--sd-fail); color: #fff; }
+  .st-withdrawn { background: #f4f4f4; color: #777; text-decoration: line-through; }
+  ul.files { margin: 0 0 8px; padding-left: 18px; font-size: 13px; }
+  .photos { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 10px; }
+  .photos figure { margin: 0; width: 160px; }
+  .photos img { width: 160px; height: 120px; object-fit: cover; border-radius: 4px; border: 1px solid var(--sd-border); }
+  .photos figcaption { font-size: 11px; color: var(--sd-text-light); }
+  details { margin: 6px 0; }
+  summary { cursor: pointer; font-weight: 600; color: var(--sd-light-blue); }
+  .forms { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+  @media (max-width: 760px) { .forms { grid-template-columns: 1fr; } }
+  form.act { border: 1px solid var(--sd-border); border-radius: 6px; padding: 12px 14px; background: #fafbfd; }
+  form.act h3 { margin: 0 0 8px; font-size: 14px; color: var(--sd-blue); }
+  form.act label { display: block; font-size: 11.5px; font-weight: 700; color: var(--sd-text-light); margin: 8px 0 3px; }
+  .crew { display: flex; gap: 14px; font-size: 13px; }
+  .crew label { display: inline; font-weight: 600; color: var(--sd-text); margin: 0; }
+  button.go { margin-top: 10px; background: var(--sd-blue); color: #fff; border: 0; border-radius: 5px; padding: 9px 18px; font: 600 14px inherit; cursor: pointer; }
+  button.go:hover { background: #00205a; }
+  button.go[disabled] { background: #9aa6bd; cursor: default; }
+  .msg { font-size: 12.5px; margin-top: 8px; min-height: 18px; }
+  .msg.ok { color: #1b5e20; } .msg.err { color: var(--sd-fail); }
+  .hint { font-size: 11.5px; color: var(--sd-text-light); }
+  .history { font-size: 12px; color: var(--sd-text-light); margin: 4px 0 0; padding-left: 18px; }
+  footer { text-align: center; font-size: 11px; color: var(--sd-text-light); padding: 20px; }
+</style>
+</head>
+<body>
+<!-- No password gate on this page (Dan, 24 Sep): a rig sees only what applies to it and works from here; the fleet compliance and Create AAB sit behind the password on register.html and the Bulletin Board. -->
+<header>
+  <img src="aab-logo-600.jpg" alt="Seadrill Bulletin Board" onerror="this.style.display='none'">
+  <div>
+    <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
+    <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; close a requested action with a comment and photographs.</div>
+  </div>
+  <div class="rev"><a href="register.html" style="color:#EDB71E;font-weight:700;text-decoration:none">Technical Services: fleet compliance and create AAB &rarr;</a><br>Bulletin Board rig page Rev 2 &middot; 24 Sep 2026</div>
+</header>
+<main>
+  <div id="stale" class="banner warn" hidden></div>
+  <div id="nodata" class="banner err" hidden>The advisory list (aab-data.js) is not beside this page. Nothing can be shown until the scanner has published it.</div>
+  <div class="bar">
+    <label for="rig">Rig</label>
+    <select id="rig"><option value="">— choose your rig —</option></select>
+    <span class="hint" id="count"></span>
+    <span class="hint" id="endpoint"></span>
+  </div>
+  <div id="list"></div>
+</main>
+<footer>Technical Services — Well Control Engineering. The record you post is the audit trail: name, role, crew and date, exactly as entered. The dashboard shows the new state within ten minutes.</footer>
+<script src="gate-config.js"></script>
+<script src="aab-data.js"></script>
+<script>
+(function () {
+  'use strict';
+  var PAGE_REV = 2;
+  var WARN_BYTES = 20 * 1024 * 1024, REFUSE_BYTES = 30 * 1024 * 1024;   // the Bulletin Board's own guard
+  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
+  var $ = function (id) { return document.getElementById(id); };
+  function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function stamp() { var d = new Date(); function p(n) { return String(n).padStart(2, '0'); } return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds()); }
+  function b64utf8(s) { return btoa(unescape(encodeURIComponent(s))); }
+  function blobUrl(base64, mime) { var bin = atob(base64); var arr = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i); return URL.createObjectURL(new Blob([arr], { type: mime || 'application/octet-stream' })); }
+  function sizeTxt(bytes) { bytes = Number(bytes || 0); return bytes ? (bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB') : ''; }
+
+  var data = window.AAB_DATA || null;
+  var posted = {};   // aabNumber|rev -> true after a successful post this session
+  var params = new URLSearchParams(location.search);
+
+  if (!data) { $('nodata').hidden = false; return; }
+  if (data.generatedAt) {
+    var age = (Date.now() - new Date(data.generatedAt).getTime()) / 3600000;
+    if (age > 2) { $('stale').hidden = false; $('stale').textContent = 'This list was published ' + Math.round(age) + ' hours ago. The scanner may have stopped; the advisories are still valid, but a recent acknowledgement may not show yet.'; }
+  }
+  var rigCodes = data.rigCodes || {};
+  Object.keys(rigCodes).forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = rigCodes[k]; $('rig').appendChild(o); });
+  var pre = (params.get('rig') || '').toLowerCase();
+  if (pre && rigCodes[pre]) $('rig').value = pre;
+  $('rig').addEventListener('change', render);
+  if (window.PCGATE && window.PCGATE.postUrl) { $('endpoint').textContent = 'Posting: configured'; }
+  else { $('endpoint').textContent = 'Posting: not configured on this copy — a record you save here is downloaded for Technical Services instead.'; }
+
+  function statusFor(num, rigKey) { return (data.status || []).filter(function (r) { return r.aabNumber === num && r.rigKey === rigKey; })[0] || null; }
+  function acksFor(num, rigKey) { return (data.acks || []).filter(function (a) { return a.aabNumber === num && a.rigKey === rigKey; }).sort(function (a, b) { return String(a.saved).localeCompare(String(b.saved)); }); }
+
+  function render() {
+    var rigKey = $('rig').value; var list = $('list'); list.innerHTML = '';
+    if (!rigKey) { $('count').textContent = ''; list.appendChild(mk('div', 'empty', 'Choose your rig to see the advisories that apply to it.')); return; }
+    var recs = (data.records || []).filter(function (r) { return r.current && (r.rigsApplicable || []).indexOf(rigKey) !== -1; });
+    recs.sort(function (a, b) {
+      var sa = statusFor(a.aabNumber, rigKey), sb = statusFor(b.aabNumber, rigKey);
+      var oa = sa && sa.overdue ? 0 : 1, ob = sb && sb.overdue ? 0 : 1; if (oa !== ob) return oa - ob;
+      var ca = sa && (sa.state === 'closed' || sa.state === 'acknowledged' || sa.state === 'withdrawn') ? 1 : 0, cb = sb && (sb.state === 'closed' || sb.state === 'acknowledged' || sb.state === 'withdrawn') ? 1 : 0; if (ca !== cb) return ca - cb;
+      return String(b.issueDate || '').localeCompare(String(a.issueDate || ''));
+    });
+    var open = recs.filter(function (r) { var s = statusFor(r.aabNumber, rigKey); return !s || (s.state !== 'closed' && s.state !== 'acknowledged' && s.state !== 'withdrawn'); }).length;
+    $('count').textContent = recs.length + ' advisory(ies) for ' + rigCodes[rigKey] + ', ' + open + ' open';
+    if (!recs.length) { list.appendChild(mk('div', 'empty', 'No advisory applies to ' + rigCodes[rigKey] + ' at the moment.')); return; }
+    recs.forEach(function (rec) { list.appendChild(card(rec, rigKey)); });
+  }
+
+  function card(rec, rigKey) {
+    var st = statusFor(rec.aabNumber, rigKey);
+    var stName = posted[rec.aabNumber + '|' + rec.revision] ? 'posted' : (st ? st.status : 'outstanding');
+    var box = mk('div', 'aab');
+    var head = mk('div', 'head');
+    head.appendChild(mk('span', 'num', 'AAB ' + rec.aabNumber + ' · rev ' + rec.revision));
+    head.appendChild(mk('span', 'ttl', rec.title || '(untitled)'));
+    var chip = mk('span', 'chip ' + (stName === 'posted' ? 'st-acknowledged' : (STATE_CLASS[stName] || 'st-outstanding')), stName === 'posted' ? 'posted — dashboard updates within 10 minutes' : stName + (st && st.overdue ? ' · ' + st.daysOverdue + ' days' : ''));
+    head.appendChild(chip);
+    box.appendChild(head);
+    var body = mk('div', 'body');
+    var meta = mk('div', 'meta');
+    function m(k, v) { var d = mk('div'); d.appendChild(mk('div', 'k', k)); d.appendChild(mk('div', '', v || '—')); meta.appendChild(d); }
+    m('Issued', rec.issueDate); m('Due', rec.dueDate);
+    m('Action requested', rec.actionRequested ? 'Yes — close it below with evidence' : 'No — acknowledgement is the whole lifecycle');
+    m('Acknowledged by', rec.expectedAcknowledgerRole || 'Technical Section Leader (each crew)');
+    m('Category', rec.category); m('SFI', (rec.sfi || []).map(function (s) { return (s.code || s.group) + (s.name && s.name !== 'to confirm' ? ' ' + s.name : ''); }).join(', '));
+    m('Originator', (rec.originatorName || '') + (rec.originatorEmail ? ' · ' + rec.originatorEmail : ''));
+    if (rec.requiresReacknowledgement) m('This revision', 'Re-acknowledgement required, even if an earlier revision was acknowledged');
+    body.appendChild(meta);
+    if (st && st.state !== 'outstanding') {
+      var hist = acksFor(rec.aabNumber, rigKey);
+      if (hist.length) { var hl = mk('ul', 'history'); hist.forEach(function (a) { hl.appendChild(mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : ''))); }); body.appendChild(hl); }
+    }
+    [['What happened', rec.whatHappened], ['Why it matters', rec.whyItMatters], ['Required action', rec.requiredAction]].forEach(function (p) { body.appendChild(mk('div', 'sec', p[0])); body.appendChild(mk('div', 'txt', p[1] || '—')); });
+    if ((rec.referenceDocuments || []).length) { body.appendChild(mk('div', 'sec', 'Reference documents')); var rl = mk('ul', 'files'); rec.referenceDocuments.forEach(function (d) { rl.appendChild(mk('li', '', d)); }); body.appendChild(rl); }
+    var files = mk('ul', 'files');
+    if (rec.pdf) { var li0 = mk('li'); var a0 = mk('a', '', (rec.pdfName || 'AAB ' + rec.aabNumber + '.pdf') + ' — the advisory as issued'); a0.href = blobUrl(rec.pdf, 'application/pdf'); a0.target = '_blank'; li0.appendChild(a0); files.appendChild(li0); }
+    (rec.attachments || []).forEach(function (a) { if (!a || !a.data) return; var li = mk('li'); var l = mk('a', '', (a.name || 'attachment') + (a.primary ? ' — the bulletin' : '') + (sizeTxt(a.bytes) ? ' (' + sizeTxt(a.bytes) + ')' : '')); l.href = blobUrl(a.data, a.type); l.target = '_blank'; l.download = a.name || 'attachment'; li.appendChild(l); files.appendChild(li); });
+    if (files.childNodes.length) { body.appendChild(mk('div', 'sec', 'Documents')); body.appendChild(files); }
+    if ((rec.photos || []).length) { body.appendChild(mk('div', 'sec', 'Photographs')); var ph = mk('div', 'photos'); rec.photos.forEach(function (p) { if (!p || !p.data) return; var f = mk('figure'); var im = mk('img'); im.src = p.data; im.alt = p.caption || p.name || 'photo'; im.loading = 'lazy'; f.appendChild(im); if (p.caption) f.appendChild(mk('figcaption', '', p.caption)); ph.appendChild(f); }); body.appendChild(ph); }
+
+    var terminal = st && (st.state === 'closed' || st.state === 'withdrawn' || (st.state === 'acknowledged'));
+    if (!terminal && stName !== 'posted') {
+      var forms = mk('div', 'forms');
+      var canAck = !st || st.state === 'outstanding' || st.state === 'partly acknowledged' || (st.overdue && st.state !== 'action open');
+      if (canAck) forms.appendChild(actForm(rec, rigKey, 'acknowledge', st));
+      if (rec.actionRequested) forms.appendChild(actForm(rec, rigKey, 'close', st));
+      body.appendChild(forms);
+    } else if (terminal) {
+      body.appendChild(mk('div', 'hint', st.state === 'closed' ? 'Closed by this rig' + (st.closedAt ? ' on ' + st.closedAt : '') + '. Nothing more is owed.' : st.state === 'withdrawn' ? 'Withdrawn by Technical Services. Nothing is owed.' : 'Acknowledged by both crews. Nothing more is owed.'));
+    }
+    box.appendChild(body);
+    return box;
+  }
+
+  function actForm(rec, rigKey, action, st) {
+    var f = mk('form', 'act');
+    f.appendChild(mk('h3', '', action === 'close' ? 'Close the requested action' : 'Acknowledge this advisory'));
+    if (action === 'acknowledge') f.appendChild(mk('div', 'hint', 'One acknowledgement per crew: the Technical Section Leader of crew A and of crew B each acknowledge once.' + (st && st.ackCrews && st.ackCrews.length ? ' Already acknowledged by crew ' + st.ackCrews.join(' and ') + '.' : '')));
+    else f.appendChild(mk('div', 'hint', 'Say what was done and attach up to six photographs as evidence. A closure counts as an acknowledgement as well.'));
+    var name = field(f, 'Your name', 'text', ''); name.required = true;
+    var role = field(f, 'Role', 'text', 'Technical Section Leader'); role.required = true;
+    f.appendChild(mk('label', '', 'Crew'));
+    var crewWrap = mk('div', 'crew'); var crewName = 'crew-' + action + '-' + rec.aabNumber + '-' + rec.revision;
+    ['A', 'B'].forEach(function (c) { var l = mk('label'); var r = mk('input'); r.type = 'radio'; r.name = crewName; r.value = c; r.required = true; l.appendChild(r); l.appendChild(document.createTextNode(' Crew ' + c)); crewWrap.appendChild(l); });
+    f.appendChild(crewWrap);
+    var at = field(f, 'Date', 'date', today()); at.required = true;
+    f.appendChild(mk('label', '', action === 'close' ? 'What was done (required)' : 'Comment (optional)'));
+    var comment = mk('textarea'); comment.rows = action === 'close' ? 4 : 2; if (action === 'close') comment.required = true; f.appendChild(comment);
+    var photoInput = null, photoList = [];
+    if (action === 'close') {
+      f.appendChild(mk('label', '', 'Evidence photographs (up to 6, resized to 1600 px)'));
+      photoInput = mk('input'); photoInput.type = 'file'; photoInput.accept = 'image/*'; photoInput.multiple = true; f.appendChild(photoInput);
+      var preview = mk('div', 'photos'); f.appendChild(preview);
+      photoInput.addEventListener('change', function () {
+        var fl = Array.prototype.slice.call(photoInput.files || []).slice(0, 6); photoList = []; preview.innerHTML = '';
+        fl.forEach(function (file) { shrink(file, function (dataUrl) { photoList.push({ name: file.name, caption: '', data: dataUrl }); var fg = mk('figure'); var im = mk('img'); im.src = dataUrl; fg.appendChild(im); fg.appendChild(mk('figcaption', '', file.name)); preview.appendChild(fg); }); });
+      });
+    }
+    var btn = mk('button', 'go', action === 'close' ? 'Post the closure' : 'Post the acknowledgement'); btn.type = 'submit'; f.appendChild(btn);
+    var msg = mk('div', 'msg'); f.appendChild(msg);
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var crew = (f.querySelector('input[name="' + crewName + '"]:checked') || {}).value || '';
+      if (!crew) { msg.className = 'msg err'; msg.textContent = 'Choose your crew.'; return; }
+      var record = {
+        meta: { kind: 'aab-ack', tool: 'AAB Acknowledgement', rev: PAGE_REV, asset: rigCodes[rigKey] || rigKey, rigkey: rigKey, saved: new Date().toISOString() },
+        aabNumber: rec.aabNumber, revision: Number(rec.revision), action: action,
+        by: name.value.trim(), role: role.value.trim(), crew: crew, at: at.value, comment: comment.value.trim(), photos: photoList
+      };
+      var json = JSON.stringify(record);
+      if (json.length > REFUSE_BYTES) { msg.className = 'msg err'; msg.textContent = 'Too large to post (' + sizeTxt(json.length) + '). Use fewer photographs.'; return; }
+      var fileName = 'seadrill-aab-ack_' + rec.aabNumber + '_' + rec.revision + '_' + rigKey + '_' + stamp() + '.json';
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Posting' + (json.length > WARN_BYTES ? ' (' + sizeTxt(json.length) + ', this may take a while)' : '') + '…';
+      post(fileName, json).then(function (res) {
+        if (res.ok) { posted[rec.aabNumber + '|' + rec.revision] = true; msg.className = 'msg ok'; msg.textContent = 'Posted as ' + fileName + '. The dashboard shows it within ten minutes.'; render(); }
+        else { download(fileName, json); btn.disabled = false; msg.className = 'msg err'; msg.textContent = (res.why || 'The post failed') + '. The record was downloaded instead: send ' + fileName + ' to Technical Services.'; }
+      });
+    });
+    return f;
+  }
+  function field(f, label, type, value) { f.appendChild(mk('label', '', label)); var i = mk('input'); i.type = type; i.value = value; f.appendChild(i); return i; }
+  function shrink(file, cb) {
+    var rd = new FileReader();
+    rd.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var max = 1600, w = img.width, h = img.height; var sc = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement('canvas'); c.width = Math.round(w * sc); c.height = Math.round(h * sc);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        cb(c.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = function () { cb(String(rd.result)); };
+      img.src = String(rd.result);
+    };
+    rd.readAsDataURL(file);
+  }
+  function post(fileName, json) {
+    var url = window.PCGATE && window.PCGATE.postUrl;
+    if (!url) return Promise.resolve({ ok: false, why: 'No intake endpoint on this copy (gate-config.js)' });
+    var envelope = { FileName: fileName, ContentType: 'application/json', FileContent: b64utf8(json) };
+    return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(envelope) })
+      .then(function (r) { return r.ok ? { ok: true } : { ok: false, why: 'HTTP ' + r.status + ' ' + r.statusText }; })
+      .catch(function (err) { return { ok: false, why: err.name + ': ' + err.message }; });
+  }
+  function download(fileName, json) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = fileName; document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 0);
+  }
+  render();
+})();
+</script>
+</body>
+</html>

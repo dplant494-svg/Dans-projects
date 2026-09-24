@@ -3,9 +3,12 @@
 **For:** Dan · **Date:** 24 September 2026 · **Plan:** `AAB-LOOP-PLAN.md` §6 step 2, done this
 side; step 3 (the flow) is `AAB-NOTIFICATIONS-FLOW-GUIDE.md`.
 **What this installs:** scanner v2.65 (reads AAB posts and acknowledgements, writes
-`aab-data.js` and the overdue chase file), the dashboard's new **AABs** tab, the
-acknowledgement page for the rigs, Eric's gated Bulletin Board (Rev 8) and his set-password
-page, all served from one passworded folder on the share: `sacred\aab\`.
+`aab-data.js` and the overdue chase file), one **Seadrill Bulletin Board** on the share at
+`sacred\aab\` (Dan, 24 Sep: one board, not three views): the open rig page (`index.html`:
+choose your rig, see what applies, acknowledge, close with evidence), the Technical Services
+fleet compliance page (`register.html`, password) with the **Create or revise an AAB** button
+into Eric's gated Rev 8 create page, and his set-password page. The main dashboard carries
+no AAB tab, only a line on the Compliance tab with the overdue count and the links.
 
 Nothing here posts anything. The first real post is yours, in test mode, in Part D.
 
@@ -22,16 +25,20 @@ Then a new folder:
 
 5. Open File Explorer. Go to `C:\TSC-Dashboard`.
 6. Right-click an empty space, **New**, **Folder**. Name it `aab`. Press Enter.
-7. Save these four files into `C:\TSC-Dashboard\aab\`:
-   - `seadrill-bulletin-board.html` (Eric's gated build, Rev 8)
-   - `acknowledge.html` (the rig acknowledgement page)
+7. Save these seven files into `C:\TSC-Dashboard\aab\`:
+   - `index.html` (the open rig page)
+   - `register.html` (fleet compliance, password)
+   - `aab-register.js` (the register the fleet page draws; Eric embeds it in Rev 9)
+   - `seadrill-bulletin-board.html` (Eric's gated build, Rev 8: the create page)
+   - `acknowledge.html` (a redirect to index.html, for older links)
    - `set-password.html` (Eric's)
    - `aab-logo-600.jpg`
 
 ## Part B — the password and the endpoint (5 minutes)
 
-The Bulletin Board and the acknowledgement page share one password and one small file,
-`gate-config.js`, that never leaves your PC and the share.
+The create page and the fleet compliance page share one password and one small file,
+`gate-config.js`, that never leaves your PC and the share. The rig page reads the same file
+for the endpoint only and shows no password box.
 
 1. In File Explorer, open `C:\TSC-Dashboard\aab`.
 2. Double-click `set-password.html`. It opens in the browser.
@@ -83,17 +90,19 @@ C:\TSC-Dashboard\scripts\Update-Dashboard.ps1
 C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
 ```
 
-   Look for six lines starting `Published aab\` (the board, the acknowledgement page,
-   set-password, gate-config.js, the logo, aab-data.js).
+   Look for nine lines starting `Published aab\`.
 
-3. In the browser open `http://sdrlazneuiis01d.corp.local:8080/sacred/aab/seadrill-bulletin-board.html`.
-   The password box appears. Type the password. The board opens and says
-   **Endpoint: configured (gate-config.js)** at the top.
-4. Open `http://sdrlazneuiis01d.corp.local:8080/sacred/aab/acknowledge.html`. No password
-   box this time (one unlock opens both for twelve hours). It says
-   "Choose your rig" and, at the top right of the grey bar, **Posting: configured**.
-5. Open the dashboard. There is a new tab, **AABs**, after Compliance. It says no AABs
-   posted yet.
+3. In the browser open `http://sdrlazneuiis01d.corp.local:8080/sacred/aab/` (or
+   `…/sacred/aab/index.html`). No password box. It says "Choose your rig" and, at the top
+   right of the grey bar, **Posting: configured**. Choose a rig: "No advisory applies" until
+   the first post. At the top right of the blue header is the link **Technical Services:
+   fleet compliance and create AAB**.
+4. Click that link. The password box appears. Type the password. The fleet compliance page
+   opens (empty until the first post) with **Create or revise an AAB** at the top right.
+5. Click **Create or revise an AAB**. Eric's create page opens with no second password box
+   (one unlock covers both for twelve hours) and says **Endpoint: configured (gate-config.js)**.
+6. Open the dashboard, **Compliance** tab. Once an AAB exists, a line at the top gives the
+   counts and the two links; until then nothing shows.
 
 ## Part D — the first post, in test mode (after the flow in `AAB-NOTIFICATIONS-FLOW-GUIDE.md` is built)
 
@@ -104,9 +113,9 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    says `Posted — seadrill-aab_… sent to the intake endpoint (HTTP 200)`.
 3. The AAB Notifications flow fires: the office gets `[TEST MODE] [AAB C…]` with the red
    line naming the rig addresses. Nothing reaches the rig.
-4. Within ten minutes the dashboard's AABs tab shows the advisory with the rig chip
-   **outstanding**.
-5. Open `…/sacred/aab/acknowledge.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
+4. Within ten minutes the fleet compliance page shows the advisory with the rig chip
+   **outstanding**, and the dashboard's Compliance tab shows the line.
+5. Open `…/sacred/aab/index.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
    `jupiter`, `tellus`, `carina`, `polaris`, `vela`, `gemini`, `capella`, `libongos`,
    `quenguela`, `cam`). Acknowledge as crew A. Then as crew B. Then close the action with a
    comment and a photograph.
@@ -135,7 +144,7 @@ script never moves an AAB file.
 - **The password box refuses the password:** the hash in `gate-config.js` is not the one
   set-password.html generated (a stale download). Generate and download again, keep the
   `postUrl` line, Deploy.
-- **The acknowledgement page says "aab-data.js is not beside this page":** the scan has not
+- **The rig page says "aab-data.js is not beside this page":** the scan has not
   run since Part A, or the deploy folder for AAB is not `sacred\aab`. Run the scan; the
   scan output says where it deployed the file.
 - **A post from the board says HTTP 4xx/5xx:** the intake URL is wrong or expired. The board

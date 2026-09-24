@@ -151,10 +151,12 @@ if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config
     }
 }
 
-# AAB loop (scanner v2.65, AAB-LOOP-PLAN.md): the Seadrill Bulletin Board (Eric's gated
-# build, published as-is), the acknowledgement page (dashboard session), Eric's
-# set-password.html, the logo, and the scanner's aab-data.js when it exists. All served
-# from one folder behind one password: gate-config.js is Dan's (made with
+# AAB loop (scanner v2.65, AAB-LOOP-PLAN.md): index.html (the open rig page: choose your
+# rig, acknowledge, close with evidence), register.html (fleet compliance, behind the
+# password) and aab-register.js (both ours), the Seadrill Bulletin Board create page
+# (Eric's gated build, published as-is), Eric's set-password.html, the logo, and the
+# scanner's aab-data.js when it exists. acknowledge.html is a redirect kept for older
+# links. One folder, one password for the two gated pages: gate-config.js is Dan's (made with
 # set-password.html, then postUrl added), never committed, never generated here.
 # 'aabDeployPath' names the folder (default: aab\ beside the dashboard folder).
 $aabSrcDir = Join-Path $repoRoot 'aab'
@@ -164,7 +166,7 @@ if (Test-Path -Path $aabSrcDir) {
         $aabDeployDir = [Environment]::ExpandEnvironmentVariables($config.aabDeployPath)
     }
     if (-not (Test-Path -Path $aabDeployDir)) { New-Item -ItemType Directory -Path $aabDeployDir -Force | Out-Null }
-    foreach ($name in @('seadrill-bulletin-board.html', 'acknowledge.html', 'set-password.html', 'gate-config.js', 'aab-logo-600.jpg', 'aab-data.js')) {
+    foreach ($name in @('index.html', 'register.html', 'aab-register.js', 'seadrill-bulletin-board.html', 'acknowledge.html', 'set-password.html', 'gate-config.js', 'aab-logo-600.jpg', 'aab-data.js')) {
         $src = Join-Path $aabSrcDir $name
         if (Test-Path -Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $aabDeployDir $name) -Force

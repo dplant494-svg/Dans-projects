@@ -50,10 +50,14 @@ is what was verified, the answers to every question you flagged, and what would 
    already: a withdrawn current revision sets every applicable rig to **withdrawn**, nothing
    is owed, and every earlier acknowledgement stays in the history. When you add it to the
    tool, nothing changes here.
-5. **Acknowledgement page: built, ours.** `acknowledge.html`, served beside the board at
-   `sacred\aab\`, behind **your** gate fragment inlined verbatim (same SALT, same
-   `sha256()`, same `gate-config.js`), so one password opens both and one unlock lasts for
-   both. It lists a rig's current advisories with the text, the bulletin, the photographs
+5. **Acknowledgement page: built, ours, and it is the board's front door.** Dan's decision
+   the same morning: **one Seadrill Bulletin Board, not three views.** `index.html` at
+   `sacred\aab\` is the open rig page (no password): a rig chooses itself, sees only what
+   applies to it and works from there. The fleet compliance sits behind the password on
+   `register.html`, which carries the **Create or revise an AAB** button into your gated
+   page; both gated pages use **your** gate fragment inlined verbatim (same SALT, same
+   `sha256()`, same `gate-config.js`), so one unlock opens the compliance page and your
+   create page. The rig page lists a rig's current advisories with the text, the bulletin, the photographs
    and the AAB PDF when there is one; the TSL acknowledges by name, role, crew and date;
    a requested action is closed with a comment and up to six photographs (resized to
    1600 px, JPEG 0.82, your own numbers). It posts the acknowledgement record through the
@@ -104,26 +108,32 @@ objects, and it is now the contract on this side (`INTEGRATION-CONTRACT.md`).
 Filename `seadrill-aab-ack_<aabNumber>_<revision>_<rigKey>_<yyyyMMdd-HHmmss>.json`.
 The dashboard joins on `aabNumber` + `revision` + `rigkey`, exactly as you described.
 
-## 4. What is on the share, and what the rigs will see
+## 4. What is on the share, and who sees what
 
-`sacred\aab\`: `seadrill-bulletin-board.html` (your GATED build), `acknowledge.html`,
-`set-password.html` (yours), `gate-config.js` (Dan's), `aab-logo-600.jpg`, and
-`aab-data.js`, which the scanner rewrites every ten minutes: every AAB revision in full
-(attachments, photographs, PDF), every acknowledgement, and one status row per current
-AAB per applicable rig. The main dashboard has a new **AABs** tab reading the same data:
-overdue count first, then open rig states, the percentage acknowledged or closed, the
-register with rig chips coloured by state, and a record view with the three sections,
-references, the rig table with each crew's acknowledgement, the revision history and the
-files. Rig emails carry the bulletin and a link straight to the acknowledgement page for
-that rig.
+`sacred\aab\`: `index.html` (the open rig page), `register.html` (fleet compliance,
+password) and `aab-register.js` (the register it draws), `seadrill-bulletin-board.html`
+(your GATED build, reached from the compliance page's **Create or revise an AAB** button),
+`set-password.html` (yours), `gate-config.js` (Dan's), the logo, and `aab-data.js`, which
+the scanner rewrites every ten minutes: every AAB revision in full (attachments,
+photographs, PDF), every acknowledgement, and one status row per current AAB per
+applicable rig. The register shows overdue first, open rig states, the percentage
+acknowledged or closed, every current AAB with rig chips coloured by state, and on a click
+the three sections, references, documents, photographs, each rig's crews, history and the
+evidence posted with a closure, and the revision history. The main dashboard has **no AAB
+tab**: one line on its Compliance tab with the counts and the two links. Rig emails carry
+the bulletin and a link straight to the rig page for that rig.
 
 ## 5. For Rev 9, when Dan says go (not before; one round at a time)
 
-1. **A register view on the board** reading `aab-data.js` from the same folder: the
-   current AABs with their per-rig state chips, so the gatekeeper sees the fleet without
-   opening the dashboard, and **Revise** opens an existing record as the next revision.
-   The data file's shape is documented in `INTEGRATION-CONTRACT.md` and a sample scanner
-   output can be sent with the test set on request.
+1. **The fleet register on your create page, built for you already.** Two lines in your
+   page, after `aab-data.js`: `<div id="aab-register"></div>` and
+   `<script src="aab-register.js"></script>`, then
+   `AAB_REGISTER.render(document.getElementById('aab-register'), {})`. It draws the
+   whole fleet compliance with evidence from `aab-data.js` beside the page (KPIs, register,
+   per-rig history, photographs, revision history); its styles are its own and prefixed
+   `.aabreg`. With that in, `register.html` is a doorway only and can go. A **Revise**
+   button that opens an existing record from the same data as the next revision is the
+   natural companion; `records[]` in `aab-data.js` carries every field you posted.
 2. **`maximoParent`** on the record (free text, the parent case number the directive wants
    for every AAB). The scanner already reads it and the dashboard shows it when present.
 3. **Withdrawal** as a new revision with `status: "withdrawn"`, as you proposed.
