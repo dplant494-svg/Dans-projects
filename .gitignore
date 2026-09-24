@@ -10,3 +10,8 @@ scan-state.json
 scan-lock.json
 # written by Update-Dashboard.ps1 v2.58: photo-stripped report copies for faster scans; per-installation
 scan-cache/
+# AAB loop (scanner v2.65): per-installation, never committed
+aab/gate-config.js
+aab/aab-data.js
+aab-overdue-pending.json
+aab-overdue-state.json

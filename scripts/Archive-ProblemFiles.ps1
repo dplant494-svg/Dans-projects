@@ -103,10 +103,14 @@ Write-Host "Errors list from the scan of $stamp ($($all.Count) entries)"
 # is also oversized); an oversized rig report never moves; everything else moves.
 $byPath = [ordered]@{}
 foreach ($e in $all) { $k = [string]$e.path; if (-not $byPath.Contains($k)) { $byPath[$k] = New-Object System.Collections.Generic.List[object] }; $byPath[$k].Add($e) | Out-Null }
-$toMove = New-Object System.Collections.Generic.List[object]; $leftLarge = 0; $leftUnattributed = 0; $leftShrunk = 0; $leftReplay = 0
+$toMove = New-Object System.Collections.Generic.List[object]; $leftLarge = 0; $leftUnattributed = 0; $leftShrunk = 0; $leftReplay = 0; $leftAab = 0
 foreach ($k in $byPath.Keys) {
     $kinds = @($byPath[$k] | ForEach-Object { [string]$_.kind })
     $entry = $byPath[$k][0]
+    # v2.65 (HAZID H8): an AAB or an acknowledgement file is never moved by this script,
+    # readable or not - the post is the record. Recognised by kind, or by name when the
+    # scanner could not read it at all.
+    if (($kinds -contains 'aab-invalid') -or ([string]$entry.file -like 'seadrill-aab_*') -or ([string]$entry.file -like 'seadrill-aab-ack_*')) { $leftAab++; continue }
     if ($kinds -contains 'unattributed') {
         if ($IncludeUnattributed) { $entry = ($byPath[$k] | Where-Object { [string]$_.kind -eq 'unattributed' })[0]; $toMove.Add($entry) | Out-Null } else { $leftUnattributed++ }
     }
@@ -118,6 +122,7 @@ foreach ($k in $byPath.Keys) {
 $toMove = @($toMove.ToArray())
 if ($leftLarge) { Write-Host "$leftLarge oversized report(s) stay where they are: they are real reports, on the dashboard. This script never moves them." -ForegroundColor Yellow }
 if ($leftShrunk) { Write-Host "$leftShrunk report(s) that replaced a bigger post stay where they are: they are on the dashboard. The earlier version is under reports\_replaced on the server." -ForegroundColor Yellow }
+if ($leftAab) { Write-Host "$leftAab AAB or acknowledgement file(s) stay where they are: the post is the record and this script never moves one (HAZID H8). Fix the file at source, or ask the dashboard session." -ForegroundColor Yellow }
 if ($leftReplay) { Write-Host "$leftReplay CBM post(s) that replay an older inspection under a newer tool stamp stay where they are: they are on the dashboard, flagged on the Errors button." -ForegroundColor Yellow }
 if ($leftUnattributed) { Write-Host "$leftUnattributed report(s) with no rig identity stay where they are. Run again with -IncludeUnattributed to move them." -ForegroundColor Yellow }
 if (-not $toMove.Count) {

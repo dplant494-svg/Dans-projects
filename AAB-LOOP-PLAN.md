@@ -213,12 +213,24 @@ wording, and sourcing the SFI list).
 
 | Step | Owner | Needs first | Deliverable |
 |---|---|---|---|
-| 1 | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack), the logo, `sample-reports/aab/` | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, `pdf`/`pdfName`, Load AAB file proven on the two test records, one saved test record on `West Vela` only, **not posted** |
-| 2 | dashboard session | `sample-reports/aab/` (four records, expected state in its README) | scanner `aabRecords[]` / `aabAcks[]` / `aabStatus[]`, `aab-data.js`, the AAB tab, the acknowledgement page; tested on the test set with a synthetic ack |
-| 3 | Dan, guide from us | steps 1 and 2 | **AAB Notifications** flow: issued branch, acknowledged/closed branch, overdue chase; test mode from the first minute; `Settings` obeyed |
+| 1 ✅ Rev 8 + schema 2.0 handoff received 24 Sep | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack), the logo, `sample-reports/aab/` | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, `pdf`/`pdfName`, Load AAB file proven on the two test records, one saved test record on `West Vela` only, **not posted** |
+| 2 ✅ built 24 Sep (scanner v2.65, AABs tab, `aab/acknowledge.html`, `AAB-INSTALL-GUIDE.md`) | dashboard session | `sample-reports/aab/` (four records, expected state in its README) | scanner `aabRecords[]` / `aabAcks[]` / `aabStatus[]`, `aab-data.js`, the AAB tab, the acknowledgement page; tested on the test set with a synthetic ack |
+| 3 guide written 24 Sep: `AAB-NOTIFICATIONS-FLOW-GUIDE.md` | Dan, guide from us | steps 1 and 2 | **AAB Notifications** flow: issued branch, acknowledged/closed branch, overdue chase; test mode from the first minute; `Settings` obeyed |
 | 4 | Dan + Eric | step 3 in test mode | end to end: Eric posts a real AAB on one rig with Dan's address on that rig's row; acknowledge from the page; the chase fires on a due date set to yesterday |
 | 5 | Eric | live | the directive advisory and the draft MOC his brief already asks for, now written against how the loop actually runs |
 | 6 | reporting-tools session, later | `aab-data.js` on `sacred` | WCGRRT tile "Open AABs for this rig", read-only |
+
+**State on 24 September 2026.** Steps 1 and 2 are done. Eric's Rev 8 is the gated build from
+his own build script (verified byte-identical to the ungated source plus the fragment; his
+`sha256()` checked against Node's; endpoint from `gate-config.js` only). The dashboard side is
+built and tested on the synthetic set: four sample records plus synthetic acknowledgements give
+outstanding, partly acknowledged, closed and overdue states, the chase file fires once per day,
+the acknowledgement page posts the ack record and downloads it when the endpoint is down. Not
+yet built by Eric, by his own account: the AAB PDF (jsPDF could not be fetched whole), the
+register view on the board (Rev 6 queue B), `maximoParent`, withdrawal. Reply and the Rev 9
+list: `AAB-REV8-REPLY-FOR-ERIC.md` (the Rev 5 prompt pack `AAB-REV5-HANDOFF-FOR-ERIC.md` is answered by it). Next: Dan
+installs (`AAB-INSTALL-GUIDE.md`), builds the two flows (`AAB-NOTIFICATIONS-FLOW-GUIDE.md`),
+and the first TEST advisory goes round the loop in test mode (step 4).
 
 ## 7. What is deliberately not in this plan
 

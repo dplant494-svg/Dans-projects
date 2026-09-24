@@ -15,4 +15,6 @@ Expected dashboard state after all four: C10250746 current revision 1; West Vela
 revision 1 (its revision 0 acknowledgement and closure kept as history); West Capella outstanding
 on revision 1 with no history; both overdue after 7 Oct 2026 until acknowledged.
 
+The acknowledgements here carry no `crew` (they predate the crew field); the scanner treats a crew-less acknowledgement as a full one, so with only these four files West Vela's revision 0 history reads acknowledged then closed. The dashboard session's test set adds acknowledgements with `crew` A and B and a second, overdue advisory to exercise partly acknowledged, action open, closed and overdue (scanner v2.65, 24 Sep 2026).
+
 Do not upload these to PostedReports. A post to the estate is Dan's, in test mode.

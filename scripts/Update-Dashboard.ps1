@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.64'
+$ScriptVersion = '2.65'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1200,6 +1200,173 @@ $prechargeRequestFiles = @{}   # source filenames, so the report-copy loop never
 # report PDF for the OEM notification flow. Not a report: recorded for the 'Sent to
 # OEM' badge only, never listed, copied to the server, digested or size-checked.
 $oemCopies = New-Object System.Collections.Generic.List[object]
+# v2.65: the AAB loop (Seadrill Bulletin Board -> dashboard -> acknowledgement page;
+# AAB-LOOP-PLAN.md §4, Eric's schema 2.0 handoff of 24 Sep 2026). An AAB is a fleet
+# record with no meta.asset; an acknowledgement belongs to one rig. Neither is ever a
+# report, a digest or a copy in the open share's reports folder; both are kept whole
+# (attachments, photographs) for aab-data.js, and slim for reports-data.js.
+$aabFiles = @{}
+$aabRaw = New-Object System.Collections.Generic.List[object]
+$aabAckRaw = New-Object System.Collections.Generic.List[object]
+$AabRigCodes = [ordered]@{ nov = 'West Neptune'; auriga = 'West Auriga'; saturn = 'West Saturn'; jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'; vela = 'West Vela'; gemini = 'West Gemini'; capella = 'West Capella'; libongos = 'Sonangol Libongos'; quenguela = 'Sonangol Quenguela'; cam = 'Sevan Louisiana' }
+function ConvertTo-AabBool { param($Value)
+    if ($Value -is [bool]) { return $Value }
+    if ($null -eq $Value) { return $false }
+    return (([string]$Value).Trim() -match '^(true|yes|y|1)$')
+}
+function ConvertTo-AabText { param($Value) if ($null -eq $Value) { return '' } return ([string]$Value) }
+# The JSON reader hands a one-element array back as the bare element (PowerShell
+# unrolls it), so every array field is read through this: null -> empty, a string or a
+# single object -> one element, an array -> itself. Returned with the comma so the
+# caller always receives an array.
+function ConvertTo-AabList { param($Value)
+    if ($null -eq $Value) { return ,@() }
+    if ($Value -is [string]) { return ,@($Value) }
+    return ,@($Value)
+}
+function Read-AabAttachments { param($Json)
+    $atts = New-Object System.Collections.Generic.List[object]
+    foreach ($a in (ConvertTo-AabList (Get-Prop $Json 'attachments'))) {
+        if ($true) {
+            if ($null -eq $a -or ($a -is [string])) { continue }
+            $data = ConvertTo-AabText (Get-Prop $a 'data')
+            $bytes = 0L; [void][long]::TryParse((ConvertTo-AabText (Get-Prop $a 'bytes')), [ref]$bytes)
+            if ($bytes -le 0 -and $data) { $bytes = [long][math]::Floor($data.Length * 0.75) }
+            $atts.Add([ordered]@{ name = ConvertTo-AabText (Get-Prop $a 'name'); type = ConvertTo-AabText (Get-Prop $a 'type'); bytes = $bytes; primary = (ConvertTo-AabBool (Get-Prop $a 'primary')); data = $data }) | Out-Null
+        }
+    }
+    # schema 1.0 (Rev 4): one 'bulletin' object -> a single primary attachment
+    $bul = Get-Prop $Json 'bulletin'
+    if ($atts.Count -eq 0 -and $null -ne $bul -and -not ($bul -is [string])) {
+        $data = ConvertTo-AabText (Get-Prop $bul 'data')
+        if (-not $data) { $data = ConvertTo-AabText (Get-Prop $bul 'base64') }
+        if ($data -match '^data:[^;]+;base64,') { $data = $data -replace '^data:[^;]+;base64,', '' }
+        if ($data) { $atts.Add([ordered]@{ name = (ConvertTo-AabText (Get-Prop $bul 'name')); type = 'application/pdf'; bytes = [long][math]::Floor($data.Length * 0.75); primary = $true; data = $data }) | Out-Null }
+    }
+    return ,$atts.ToArray()
+}
+function Read-AabPhotos { param($Arr)
+    $out = New-Object System.Collections.Generic.List[object]
+    if ($true) {
+        foreach ($p in (ConvertTo-AabList $Arr)) {
+            if ($null -eq $p) { continue }
+            if ($p -is [string]) { if ($p) { $out.Add([ordered]@{ name = ''; caption = ''; data = $p }) | Out-Null }; continue }
+            $out.Add([ordered]@{ name = ConvertTo-AabText (Get-Prop $p 'name'); caption = ConvertTo-AabText (Get-Prop $p 'caption'); data = ConvertTo-AabText (Get-Prop $p 'data') }) | Out-Null
+        }
+    }
+    return ,$out.ToArray()
+}
+function Read-AabRecord { param($Json, $Meta, $File)
+    $num = (ConvertTo-AabText (Get-Prop $Json 'aabNumber')).Trim()
+    if (-not $num) { return $null }
+    $rev = 0; [void][int]::TryParse((ConvertTo-AabText (Get-Prop $Json 'revision')), [ref]$rev)
+    $schema = (ConvertTo-AabText (Get-Prop $Json 'schemaVersion')).Trim(); if (-not $schema) { $schema = '1.0' }
+    $rigs = New-Object System.Collections.Generic.List[string]
+    if ($true) { foreach ($r in (ConvertTo-AabList (Get-Prop $Json 'rigsApplicable'))) { $k = (ConvertTo-AabText $r).Trim().ToLowerInvariant(); if ($k -and -not $rigs.Contains($k)) { $rigs.Add($k) } } }
+    if ($rigs.Count -eq 0) {   # schema 1.0 carried the rig codes as the keys of rigStatus
+        $rs = Get-Prop $Json 'rigStatus'
+        if ($null -ne $rs -and -not ($rs -is [string])) { foreach ($k in (Get-KeyNames $rs)) { $ks = ([string]$k).Trim().ToLowerInvariant(); if ($ks -and -not $rigs.Contains($ks)) { $rigs.Add($ks) } } }
+    }
+    $rn = Get-Prop $Json 'rigNames'
+    $rigNames = [ordered]@{}
+    foreach ($k in $rigs) {
+        $n = ''
+        if ($null -ne $rn -and -not ($rn -is [string])) { $n = (ConvertTo-AabText (Get-Prop $rn $k)).Trim() }
+        if (-not $n -and $AabRigCodes.Contains($k)) { $n = [string]$AabRigCodes[$k] }
+        if (-not $n) { $n = $k }
+        $rigNames[$k] = $n
+    }
+    $sfi = New-Object System.Collections.Generic.List[object]
+    if ($true) {
+        foreach ($x in (ConvertTo-AabList (Get-Prop $Json 'sfi'))) {
+            if ($null -eq $x) { continue }
+            if ($x -is [string]) { $sfi.Add([ordered]@{ group = $x; code = $x; name = '' }) | Out-Null; continue }
+            $sfi.Add([ordered]@{ group = ConvertTo-AabText (Get-Prop $x 'group'); code = ConvertTo-AabText (Get-Prop $x 'code'); name = ConvertTo-AabText (Get-Prop $x 'name') }) | Out-Null
+        }
+    }
+    $refs = New-Object System.Collections.Generic.List[string]
+    foreach ($x in (ConvertTo-AabList (Get-Prop $Json 'referenceDocuments'))) { $t = (ConvertTo-AabText $x).Trim(); if ($t) { $refs.Add($t) } }
+    $adv = Get-Prop $Json 'advisory'
+    $orig = Get-Prop $Json 'originator'
+    $status = (ConvertTo-AabText (Get-Prop $Json 'status')).Trim().ToLowerInvariant(); if (-not $status) { $status = 'active' }
+    $posted = ConvertTo-StableTimestamp (Get-Prop $Json 'postedAt')
+    if (-not $posted) { $posted = ConvertTo-StableTimestamp (Get-Prop $Meta 'saved') }
+    if (-not $posted) { $posted = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+    $priority = 0; [void][int]::TryParse((ConvertTo-AabText (Get-Prop $Json 'priority')), [ref]$priority)
+    if ($priority -le 0) { [void][int]::TryParse((ConvertTo-AabText (Get-Prop $Json 'level')), [ref]$priority) }
+    if ($priority -le 0) { $priority = 3 }
+    return [ordered]@{
+        file          = $File.Name
+        modified      = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+        aabNumber     = $num
+        revision      = $rev
+        recordId      = (ConvertTo-AabText (Get-Prop $Json 'recordId')).Trim()
+        schemaVersion = $schema
+        toolVersion   = ConvertTo-AabText (Get-Prop $Json 'toolVersion')
+        rev           = ConvertTo-AabText (Get-Prop $Meta 'rev')
+        title         = (ConvertTo-AabText (Get-Prop $Json 'title')).Trim()
+        priority      = $priority
+        corporateMandatory = (ConvertTo-AabBool (Get-Prop $Json 'corporateMandatory'))
+        edocsRef      = (ConvertTo-AabText (Get-Prop $Json 'edocsRef')).Trim()
+        maximoParent  = (ConvertTo-AabText (Get-Prop $Json 'maximoParent')).Trim()
+        actionRequested = (ConvertTo-AabBool (Get-Prop $Json 'actionRequested'))
+        category      = (ConvertTo-AabText (Get-Prop $Json 'category')).Trim()
+        sfi           = $sfi.ToArray()
+        issueDate     = (ConvertTo-AabText (Get-Prop $Json 'issueDate')).Trim()
+        dueDate       = (ConvertTo-AabText (Get-Prop $Json 'dueDate')).Trim()
+        requiresReacknowledgement = (ConvertTo-AabBool (Get-Prop $Json 'requiresReacknowledgement'))
+        originatorName  = $(if ($orig -and -not ($orig -is [string])) { (ConvertTo-AabText (Get-Prop $orig 'name')).Trim() } else { (ConvertTo-AabText $orig).Trim() })
+        originatorEmail = $(if ($orig -and -not ($orig -is [string])) { (ConvertTo-AabText (Get-Prop $orig 'email')).Trim() } else { '' })
+        whatHappened  = $(if ($adv) { ConvertTo-AabText (Get-Prop $adv 'whatHappened') } else { '' })
+        whyItMatters  = $(if ($adv) { ConvertTo-AabText (Get-Prop $adv 'whyItMatters') } else { '' })
+        requiredAction = $(if ($adv) { ConvertTo-AabText (Get-Prop $adv 'requiredAction') } else { '' })
+        referenceDocuments = $refs.ToArray()
+        attachments   = (Read-AabAttachments -Json $Json)
+        photos        = (Read-AabPhotos -Arr (Get-Prop $Json 'photos'))
+        rigsApplicable = $rigs.ToArray()
+        rigNames      = $rigNames
+        expectedAcknowledgerRole = (ConvertTo-AabText (Get-Prop $Json 'expectedAcknowledgerRole')).Trim()
+        status        = $status
+        postedAt      = [string]$posted
+        postedBy      = (ConvertTo-AabText (Get-Prop $Json 'postedBy')).Trim()
+        pdfName       = (ConvertTo-AabText (Get-Prop $Json 'pdfName')).Trim()
+        pdf           = ConvertTo-AabText (Get-Prop $Json 'pdf')
+    }
+}
+function Read-AabAck { param($Json, $Meta, $File)
+    $num = (ConvertTo-AabText (Get-Prop $Json 'aabNumber')).Trim()
+    if (-not $num) { return $null }
+    $rev = 0; [void][int]::TryParse((ConvertTo-AabText (Get-Prop $Json 'revision')), [ref]$rev)
+    $rigKey = (ConvertTo-AabText (Get-Prop $Meta 'rigkey')).Trim().ToLowerInvariant()
+    if (-not $rigKey) { $rigKey = (ConvertTo-AabText (Get-Prop $Json 'rigKey')).Trim().ToLowerInvariant() }
+    if (-not $rigKey) { $rigKey = (ConvertTo-AabText (Get-Prop $Json 'rigkey')).Trim().ToLowerInvariant() }
+    $rig = (ConvertTo-AabText (Get-Prop $Meta 'asset')).Trim()
+    if (-not $rig -and $rigKey -and $AabRigCodes.Contains($rigKey)) { $rig = [string]$AabRigCodes[$rigKey] }
+    if (-not $rigKey -and $rig) { foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $rig) { $rigKey = [string]$k } } }
+    $action = (ConvertTo-AabText (Get-Prop $Json 'action')).Trim().ToLowerInvariant()
+    if ($action -ne 'close') { $action = 'acknowledge' }
+    $crew = (ConvertTo-AabText (Get-Prop $Json 'crew')).Trim().ToUpperInvariant()
+    if ($crew -ne 'A' -and $crew -ne 'B') { $crew = '' }
+    $saved = ConvertTo-StableTimestamp (Get-Prop $Meta 'saved')
+    if (-not $saved) { $saved = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+    return [ordered]@{
+        file      = $File.Name
+        modified  = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+        aabNumber = $num
+        revision  = $rev
+        rigKey    = $rigKey
+        rig       = $rig
+        action    = $action
+        by        = (ConvertTo-AabText (Get-Prop $Json 'by')).Trim()
+        role      = (ConvertTo-AabText (Get-Prop $Json 'role')).Trim()
+        crew      = $crew
+        at        = (ConvertTo-AabText (Get-Prop $Json 'at')).Trim()
+        comment   = ConvertTo-AabText (Get-Prop $Json 'comment')
+        photos    = (Read-AabPhotos -Arr (Get-Prop $Json 'photos'))
+        saved     = [string]$saved
+        rev       = ConvertTo-AabText (Get-Prop $Meta 'rev')
+    }
+}
 $oemCopyFiles = @{}
 $prechargeSuperseded = New-Object System.Collections.Generic.List[object]  # older payloads for an id (F-23a) -> requests\archive\<id>_<saved>.json
 $prechargeIssued = @{}         # rigKey|well -> list of @{bop; saved} of ISSUED precharge sheets (calculator post) - the return leg
@@ -1489,7 +1656,25 @@ foreach ($f in $files) {
         continue
     }
 
+    # v2.65: AAB records and acknowledgements (see $aabRaw above). Recognised by
+    # meta.kind, by recordType, or by the seadrill-aab_ / seadrill-aab-ack_ prefix as a
+    # fallback for a post whose meta was mangled: neither may ever surface as a report.
+    $metaKind = [string](Get-Prop $meta 'kind')
+    if ($metaKind -eq 'aab-ack' -or $f.Name -like 'seadrill-aab-ack_*') {
+        $aabFiles[$f.Name] = $true
+        $ack = Read-AabAck -Json $json -Meta $meta -File $f
+        if ($ack) { $aabAckRaw.Add($ack) | Out-Null } else { Add-Problem $f 'aab-invalid' 'an AAB acknowledgement without an aabNumber - cannot be joined to an advisory, not filed' }
+        continue
+    }
+    if ($metaKind -eq 'aab' -or ([string](Get-Prop $json 'recordType')) -eq 'AAB' -or $f.Name -like 'seadrill-aab_*') {
+        $aabFiles[$f.Name] = $true
+        $aabRec = Read-AabRecord -Json $json -Meta $meta -File $f
+        if ($aabRec) { $aabRaw.Add($aabRec) | Out-Null } else { Add-Problem $f 'aab-invalid' 'an AAB post without an aabNumber - cannot be filed' }
+        continue
+    }
+
     # Size ceiling, applied once the report type is known: 10 MB for
+
     # everything, 40 MB for CBM Inspection (see $LargeCbmReportBytes). Over
     # the ceiling the file is still ingested - it is a warning, not a rejection.
     $sizeType = [string](Get-ReportType -Meta $meta -Tiles (Get-Prop $json 'tiles'))
@@ -2532,7 +2717,109 @@ if ($digestPath -and (Test-Path -Path $digestPath) -and $reports.Count -gt 0) {
     Write-Host "Digests for Copilot: $digestWritten new/updated, $($digestExpected.Count) total, $digestRemoved stale removed in $digestPath" -ForegroundColor Green
 }
 
+# v2.65: AAB status. One row per current AAB per applicable rig, from the newest
+# revision's due date and the rig's acknowledgements (joined on aabNumber + revision +
+# rigKey). States, in the words the dashboard prints: outstanding, partly acknowledged
+# (one crew's TSL), acknowledged (both crews; the whole lifecycle when no action is
+# requested), action open (acknowledged, action still to close: its own state, HAZID
+# H3), closed, withdrawn. 'overdue' overlays the open states past the due date.
+$aabToday = (Get-Date).Date
+$aabById = @{}
+foreach ($r in $aabRaw) {   # duplicate recordId: newest file wins
+    $rid = [string]$r.recordId
+    if (-not $rid) { $rid = 'file:' + [string]$r.file }
+    if (-not $aabById.ContainsKey($rid) -or ([string]$r.modified -gt [string]$aabById[$rid].modified)) { $aabById[$rid] = $r }
+}
+$aabByNumRev = @{}
+foreach ($r in $aabById.Values) {   # same number + revision posted twice: newest postedAt wins
+    $k = "$($r.aabNumber)|$($r.revision)"
+    if (-not $aabByNumRev.ContainsKey($k) -or ([string]$r.postedAt -gt [string]$aabByNumRev[$k].postedAt)) { $aabByNumRev[$k] = $r }
+}
+$aabByNumber = @{}
+foreach ($r in $aabByNumRev.Values) {
+    if (-not $aabByNumber.ContainsKey($r.aabNumber)) { $aabByNumber[$r.aabNumber] = New-Object System.Collections.Generic.List[object] }
+    $aabByNumber[$r.aabNumber].Add($r) | Out-Null
+}
+$aabCurrent = @{}
+foreach ($num in $aabByNumber.Keys) {
+    $revs = @($aabByNumber[$num] | Sort-Object -Property @{ Expression = { [int]$_.revision }; Descending = $true }, @{ Expression = { [string]$_.postedAt }; Descending = $true })
+    $aabCurrent[$num] = $revs[0]
+}
+$aabAcksSorted = @($aabAckRaw | Sort-Object -Property @{ Expression = { [string]$_.saved } })
+$aabStatus = New-Object System.Collections.Generic.List[object]
+$aabStateCounts = [ordered]@{ overdue = 0; outstanding = 0; 'partly acknowledged' = 0; 'action open' = 0; acknowledged = 0; closed = 0; withdrawn = 0 }
+foreach ($num in $aabCurrent.Keys) {
+    $cur = $aabCurrent[$num]
+    $due = [datetime]::MinValue
+    $hasDue = [datetime]::TryParseExact([string]$cur.dueDate, 'yyyy-MM-dd', [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::None, [ref]$due)
+    foreach ($rigKey in $cur.rigsApplicable) {
+        $rigAcks = @($aabAcksSorted | Where-Object { [string]$_.aabNumber -eq $num -and [string]$_.rigKey -eq $rigKey })
+        if ($cur.requiresReacknowledgement) { $eligible = @($rigAcks | Where-Object { [int]$_.revision -eq [int]$cur.revision }) }
+        else { $eligible = @($rigAcks | Where-Object { [int]$_.revision -le [int]$cur.revision }) }
+        $ackAcks = @($eligible | Where-Object { $_.action -eq 'acknowledge' })
+        $closeAcks = @($eligible | Where-Object { $_.action -eq 'close' })
+        $crews = @($ackAcks | ForEach-Object { [string]$_.crew } | Where-Object { $_ } | Sort-Object -Unique)
+        $noCrewAck = @($ackAcks | Where-Object { -not $_.crew }).Count -gt 0
+        $fullyAck = (($crews -contains 'A') -and ($crews -contains 'B')) -or $noCrewAck
+        $state = 'outstanding'
+        if ($cur.status -eq 'withdrawn') { $state = 'withdrawn' }
+        elseif ($closeAcks.Count -gt 0) { $state = 'closed' }
+        elseif ($fullyAck) { $state = $(if ($cur.actionRequested) { 'action open' } else { 'acknowledged' }) }
+        elseif ($ackAcks.Count -gt 0) { $state = 'partly acknowledged' }
+        $open = ($state -eq 'outstanding' -or $state -eq 'partly acknowledged' -or $state -eq 'action open')
+        $overdue = $open -and $hasDue -and ($aabToday -gt $due)
+        $daysOverdue = 0; if ($overdue) { $daysOverdue = [int]($aabToday - $due).TotalDays }
+        $lastAck = $null; if ($ackAcks.Count -gt 0) { $lastAck = $ackAcks[$ackAcks.Count - 1] }
+        $lastClose = $null; if ($closeAcks.Count -gt 0) { $lastClose = $closeAcks[$closeAcks.Count - 1] }
+        $statusName = $(if ($overdue) { 'overdue' } else { $state })
+        $aabStateCounts[$statusName] = [int]$aabStateCounts[$statusName] + 1
+        $aabStatus.Add([pscustomobject]@{
+            aabNumber   = $num
+            revision    = [int]$cur.revision
+            title       = [string]$cur.title
+            rigKey      = [string]$rigKey
+            rig         = [string]$cur.rigNames[$rigKey]
+            issueDate   = [string]$cur.issueDate
+            dueDate     = [string]$cur.dueDate
+            actionRequested = [bool]$cur.actionRequested
+            state       = $state
+            overdue     = [bool]$overdue
+            status      = $statusName
+            daysOverdue = $daysOverdue
+            ackCrews    = @($crews)
+            acknowledgedAt = $(if ($lastAck) { [string]$lastAck.at } else { '' })
+            acknowledgedBy = $(if ($lastAck) { [string]$lastAck.by } else { '' })
+            closedAt    = $(if ($lastClose) { [string]$lastClose.at } else { '' })
+            closedBy    = $(if ($lastClose) { [string]$lastClose.by } else { '' })
+            historyCount = $rigAcks.Count
+        }) | Out-Null
+    }
+}
+$aabStatusSorted = @($aabStatus | Sort-Object -Property @{ Expression = { if ($_.overdue) { 0 } else { 1 } } }, @{ Expression = { [string]$_.dueDate } }, @{ Expression = { [string]$_.aabNumber } }, @{ Expression = { [string]$_.rig } })
+# slim records for reports-data.js: everything but the binary payloads
+$aabRecordsSlim = New-Object System.Collections.Generic.List[object]
+foreach ($num in $aabByNumber.Keys) {
+    foreach ($r in $aabByNumber[$num]) {
+        $slim = [ordered]@{}
+        foreach ($k in @($r.Keys)) {
+            if ($k -eq 'pdf') { continue }
+            if ($k -eq 'attachments') { $slim[$k] = @($r[$k] | ForEach-Object { [ordered]@{ name = $_.name; type = $_.type; bytes = $_.bytes; primary = $_.primary } }); continue }
+            if ($k -eq 'photos') { $slim['photoCount'] = @($r[$k]).Count; $slim['photoCaptions'] = @($r[$k] | ForEach-Object { [string]$_.caption }); continue }
+            $slim[$k] = $r[$k]
+        }
+        $slim['hasPdf'] = [bool]([string]$r.pdf)
+        $slim['current'] = ([int]$r.revision -eq [int]$aabCurrent[$num].revision)
+        $aabRecordsSlim.Add([pscustomobject]$slim) | Out-Null
+    }
+}
+$aabRecordsSorted = @($aabRecordsSlim | Sort-Object -Property @{ Expression = { [string]$_.issueDate }; Descending = $true }, @{ Expression = { [string]$_.aabNumber } }, @{ Expression = { [int]$_.revision }; Descending = $true })
+$aabAcksSlim = @($aabAcksSorted | ForEach-Object { $a = [ordered]@{}; foreach ($k in @($_.Keys)) { if ($k -eq 'photos') { $a['photoCount'] = @($_[$k]).Count } else { $a[$k] = $_[$k] } }; [pscustomobject]$a } | Sort-Object -Property @{ Expression = { [string]$_.saved }; Descending = $true })
+if ($aabRaw.Count -gt 0 -or $aabAckRaw.Count -gt 0) {
+    Write-Host ("AABs: {0} advisory(ies) in {1} revision(s), {2} acknowledgement(s); rig states: {3}" -f $aabCurrent.Count, $aabByNumRev.Count, $aabAckRaw.Count, (@($aabStateCounts.Keys | Where-Object { [int]$aabStateCounts[$_] -gt 0 } | ForEach-Object { "$([int]$aabStateCounts[$_]) $_" }) -join ', ')) -ForegroundColor Cyan
+}
+
 $payload = [pscustomobject]@{
+
     generatedAt  = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     copilotUrl   = $copilotUrl
     reportFolder = ($existingFolders -join '  |  ')
@@ -2547,6 +2834,9 @@ $payload = [pscustomobject]@{
     topsetInvestigations = $topsetSorted.ToArray()
     complianceChecklists = $complianceSorted.ToArray()
     oemCopies    = @($oemCopies | Sort-Object -Property @{ Expression = { [string]$_.sent } } -Descending)
+    aabRecords   = $aabRecordsSorted      # v2.65: every AAB revision, slim (no attachment or photo bytes); aab-data.js carries them
+    aabAcks      = $aabAcksSlim           # v2.65
+    aabStatus    = $aabStatusSorted       # v2.65: one row per current AAB per applicable rig, overdue first
     problems     = $problems.ToArray()
 }
 # Marine Integrity was retired from WCGRRT at REV 155 (2026-09-09): the view
@@ -2893,7 +3183,73 @@ catch {
     Write-Warning "SSCE notification feed failed (scan unaffected): $($_.Exception.Message)"
 }
 
+# v2.65: aab-data.js (the whole AAB record set with attachments, photographs and the
+# AAB PDF, for the acknowledgement page and the dashboard's record view) and
+# aab-overdue-pending.json (one row per AAB per rig past due and still open, written
+# once per day per row, for the AAB Notifications flow's chase branch; the same idea
+# as ssce-notifications-pending.json). Config: aabOutputFile, aabDeployPath.
+$aabOutputFile = Join-Path $repoRoot 'aab\aab-data.js'
+if ($config.PSObject.Properties['aabOutputFile'] -and $config.aabOutputFile) {
+    $aabOutputFile = [Environment]::ExpandEnvironmentVariables($config.aabOutputFile)
+    if (-not [System.IO.Path]::IsPathRooted($aabOutputFile)) { $aabOutputFile = Join-Path $repoRoot $aabOutputFile }
+}
+$aabOverdueOutputFile = Join-Path $repoRoot 'aab-overdue-pending.json'
+try {
+    $aabFullRecords = New-Object System.Collections.Generic.List[object]
+    foreach ($num in $aabByNumber.Keys) { foreach ($r in $aabByNumber[$num]) { $c = [ordered]@{}; foreach ($k in @($r.Keys)) { $c[$k] = $r[$k] }; $c['current'] = ([int]$r.revision -eq [int]$aabCurrent[$num].revision); $aabFullRecords.Add($c) | Out-Null } }
+    $aabFullStatus = New-Object System.Collections.Generic.List[object]
+    foreach ($row in $aabStatusSorted) { $o = [ordered]@{}; foreach ($p in $row.PSObject.Properties) { $o[$p.Name] = $p.Value }; $aabFullStatus.Add($o) | Out-Null }
+    $aabFull = [ordered]@{
+        generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+        scanner     = $ScriptVersion
+        rigCodes    = $AabRigCodes
+        records     = $aabFullRecords.ToArray()
+        acks        = @($aabAcksSorted)
+        status      = $aabFullStatus.ToArray()
+    }
+    $aabDir = Split-Path -Parent $aabOutputFile
+    if (-not (Test-Path -Path $aabDir)) { New-Item -ItemType Directory -Path $aabDir -Force | Out-Null }
+    if ($PSVersionTable.PSEdition -eq 'Core') { $aabJson = $aabFull | ConvertTo-Json -Depth 24 -Compress }
+    else { $aabJson = ConvertTo-JsonArray @($aabFull); $aabJson = $aabJson.Substring(1, $aabJson.Length - 2) }   # 5.1: the big serialiser, unwrapped from its array
+    [System.IO.File]::WriteAllText($aabOutputFile, "window.AAB_DATA = $aabJson;`n", (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "Wrote $($aabFullRecords.Count) AAB record(s), $($aabAcksSorted.Count) acknowledgement(s), $($aabFullStatus.Count) rig state(s) to $aabOutputFile" -ForegroundColor Green
+
+    $aabOverdueStateFile = Join-Path $repoRoot 'aab-overdue-state.json'
+    $aabOverdueSeen = @{}
+    if (Test-Path -Path $aabOverdueStateFile) { foreach ($k in (Get-Content -Path $aabOverdueStateFile -Raw | ConvertFrom-Json)) { $aabOverdueSeen[[string]$k] = $true } }
+    $aabOverduePending = New-Object System.Collections.Generic.List[object]
+    $todayKey = (Get-Date).ToString('yyyy-MM-dd')
+    foreach ($row in $aabStatusSorted) {
+        if (-not $row.overdue) { continue }
+        $k = "$($row.aabNumber)|$($row.revision)|$($row.rigKey)|$todayKey"
+        if ($aabOverdueSeen.ContainsKey($k)) { continue }
+        $aabOverduePending.Add(@{ event = 'overdue'; aabNumber = $row.aabNumber; revision = $row.revision; title = $row.title; rigKey = $row.rigKey; rig = $row.rig; dueDate = $row.dueDate; daysOverdue = $row.daysOverdue; state = $row.state; day = $todayKey }) | Out-Null
+        $aabOverdueSeen[$k] = $true
+    }
+    $aabOverdueJson = if ($aabOverduePending.Count -eq 0) { '[]' } else { ConvertTo-JsonArray $aabOverduePending.ToArray() }
+    [System.IO.File]::WriteAllText($aabOverdueOutputFile, $aabOverdueJson, (New-Object System.Text.UTF8Encoding($false)))
+    $seenArr = @($aabOverdueSeen.Keys | Where-Object { $_ -like "*|$todayKey" })   # today's keys only: an open row fires again tomorrow by design
+    $seenJson = if ($seenArr.Count -eq 0) { '[]' } else { ConvertTo-JsonArray $seenArr }
+    [System.IO.File]::WriteAllText($aabOverdueStateFile, $seenJson, (New-Object System.Text.UTF8Encoding($false)))
+    if ($aabOverduePending.Count -gt 0) { Write-Host "AAB overdue chase: $($aabOverduePending.Count) new row(s) written to aab-overdue-pending.json" -ForegroundColor Green }
+    # aabChaseFile: a copy of the chase file inside a synced SharePoint library (the
+    # Digests library is the natural one), because a Power Automate flow can read
+    # SharePoint but not the server share. Optional; the AAB Overdue Chase flow reads it.
+    if ($config.PSObject.Properties['aabChaseFile'] -and $config.aabChaseFile) {
+        $aabChaseFile = [Environment]::ExpandEnvironmentVariables($config.aabChaseFile)
+        $chaseDir = Split-Path -Parent $aabChaseFile
+        if (Test-Path -Path $chaseDir) {
+            $prev = ''; if (Test-Path -Path $aabChaseFile) { $prev = [System.IO.File]::ReadAllText($aabChaseFile) }
+            if ($prev -ne $aabOverdueJson) { [System.IO.File]::WriteAllText($aabChaseFile, $aabOverdueJson, (New-Object System.Text.UTF8Encoding($false))); Write-Host "AAB chase file updated: $aabChaseFile" -ForegroundColor Green }
+        } else { Write-Warning "aabChaseFile folder not reachable ($chaseDir) - the chase flow has nothing new to read" }
+    }
+}
+catch {
+    Write-Warning "AAB data file failed (scan unaffected): $($_.Exception.Message)"
+}
+
 # SSCE -> COC dashboard write-back: for every APPROVED request, mark the
+
 # matching Central Spares item unavailable/assigned on a REVIEW COPY of the
 # COC dashboard - never the live file itself (Dan reviews and manually
 # replaces the live one, same manual-redistribution step that dashboard's
@@ -3199,6 +3555,23 @@ elseif ($deployPath) {
         if (Test-Path -Path $ssceNotifOutputFile) {
             Copy-Item -Path $ssceNotifOutputFile -Destination (Join-Path $deployPath 'ssce-notifications-pending.json') -Force
         }
+        # v2.65: aab-overdue-pending.json beside it, and aab-data.js to the AAB folder on
+        # the share (aabDeployPath; default <share>\aab, beside the Bulletin Board and the
+        # acknowledgement page that Deploy-Dashboard.ps1 publishes there).
+        if (Test-Path -Path $aabOverdueOutputFile) {
+            Copy-Item -Path $aabOverdueOutputFile -Destination (Join-Path $deployPath 'aab-overdue-pending.json') -Force
+        }
+        if (Test-Path -Path $aabOutputFile) {
+            $aabDeployPath = Join-Path (Split-Path -Parent $deployPath) 'aab'
+            if ($config.PSObject.Properties['aabDeployPath'] -and $config.aabDeployPath) { $aabDeployPath = [Environment]::ExpandEnvironmentVariables($config.aabDeployPath) }
+            if (-not (Test-Path -Path $aabDeployPath)) { New-Item -ItemType Directory -Path $aabDeployPath -Force | Out-Null }
+            $aabDeployTarget = Join-Path $aabDeployPath 'aab-data.js'
+            if ([System.IO.Path]::GetFullPath($aabDeployTarget) -ne [System.IO.Path]::GetFullPath($aabOutputFile)) {   # a test set may write and serve from one folder
+                Copy-Item -Path $aabOutputFile -Destination $aabDeployTarget -Force
+                Write-Host "Deployed aab-data.js to $aabDeployPath" -ForegroundColor Green
+            }
+        }
+
 
         # Full report files for the dashboard's 'View full report' feature:
         # copy each scanned .json into <deployPath>\reports (only new/changed
@@ -3219,7 +3592,7 @@ elseif ($deployPath) {
             # Restricted TOPSET bodies must never reach the open share; also
             # excluded from $expected below so a copy from before the file
             # became restricted gets cleaned up as stale.
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name)) { continue }
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder
             $destName = $f.Name + '.js'
             $have = $onServer[$destName]
             if (-not $have -or ($f.LastWriteTime -gt $have.LastWriteTime)) {
@@ -3238,7 +3611,7 @@ elseif ($deployPath) {
         }
         $expected = @{}
         foreach ($f in $files) {
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name)) { continue }
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder
             $expected[$f.Name + '.js'] = $true
         }
         foreach ($old in @($onServer.Values)) {
