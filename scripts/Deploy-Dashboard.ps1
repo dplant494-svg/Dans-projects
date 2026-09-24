@@ -166,7 +166,7 @@ if (Test-Path -Path $aabSrcDir) {
         $aabDeployDir = [Environment]::ExpandEnvironmentVariables($config.aabDeployPath)
     }
     if (-not (Test-Path -Path $aabDeployDir)) { New-Item -ItemType Directory -Path $aabDeployDir -Force | Out-Null }
-    foreach ($name in @('bulletin-board.html', 'register.html', 'aab-register.js', 'seadrill-bulletin-board.html', 'acknowledge.html', 'set-password.html', 'gate-config.js', 'aab-logo-600.jpg', 'aab-data.js')) {
+    foreach ($name in @('bulletin-board.html', 'register.html', 'create.html', 'aab-register.js', 'seadrill-bulletin-board.html', 'acknowledge.html', 'set-password.html', 'gate-config.js', 'aab-logo-600.jpg', 'aab-data.js')) {
         $src = Join-Path $aabSrcDir $name
         if (Test-Path -Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $aabDeployDir $name) -Force

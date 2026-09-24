@@ -27,7 +27,10 @@
   header img { height: 44px; width: auto; background: #fff; border-radius: 4px; padding: 2px; }
   header h1 { font-size: 18px; margin: 0; }
   header .sub { font-size: 12px; color: rgba(255,255,255,.8); }
-  header .rev { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.7); text-align: right; }
+  header .rev { margin-left: auto; font-size: 11px; color: rgba(255,255,255,.7); text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+  a.tsbtn { display: inline-block; background: var(--sd-yellow); color: #002C77; font-weight: 800; font-size: 15px; padding: 12px 22px; border-radius: 6px; text-decoration: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); border: 2px solid #fff; white-space: nowrap; }
+  a.tsbtn:hover { background: #ffd04a; }
+  .tsfoot { text-align: center; margin: 24px 0 0; }
   main { max-width: 1040px; margin: 0 auto; padding: 18px 16px 60px; }
   .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: #fff; border: 1px solid var(--sd-border); border-radius: 6px; padding: 12px 14px; margin-bottom: 14px; }
   .bar label { font-size: 12px; font-weight: 700; color: var(--sd-text-light); }
@@ -87,7 +90,7 @@
     <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
     <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; close a requested action with a comment and photographs.</div>
   </div>
-  <div class="rev"><a href="register.html" style="color:#EDB71E;font-weight:700;text-decoration:none">Technical Services: fleet compliance and create AAB &rarr;</a><br>Bulletin Board rig page Rev 2 &middot; 24 Sep 2026</div>
+  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 2 &middot; 24 Sep 2026</span></div>
 </header>
 <main>
   <div id="stale" class="banner warn" hidden></div>
@@ -100,6 +103,7 @@
   </div>
   <div id="list"></div>
 </main>
+<div class="tsfoot"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a></div>
 <footer>Technical Services — Well Control Engineering. The record you post is the audit trail: name, role, crew and date, exactly as entered. The dashboard shows the new state within ten minutes.</footer>
 <script src="gate-config.js"></script>
 <script src="aab-data.js"></script>

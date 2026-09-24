@@ -134,6 +134,9 @@ the bulletin and a link straight to the rig page for that rig.
    `.aabreg`. With that in, `register.html` is a doorway only and can go. A **Revise**
    button that opens an existing record from the same data as the next revision is the
    natural companion; `records[]` in `aab-data.js` carries every field you posted.
+   And two links in your header, **← Back to the rigs page** (`bulletin-board.html`) and
+   **Fleet compliance** (`register.html`): today your page is shown inside a thin frame
+   (`create.html`) that supplies them, and with the links in your page the frame goes.
 2. **`maximoParent`** on the record (free text, the parent case number the directive wants
    for every AAB). The scanner already reads it and the dashboard shows it when present.
 3. **Withdrawal** as a new revision with `status: "withdrawn"`, as you proposed.

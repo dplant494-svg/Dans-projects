@@ -28,6 +28,7 @@ Then a new folder:
 7. Save these seven files into `C:\TSC-Dashboard\aab\`:
    - `bulletin-board.html` (the open rig page)
    - `register.html` (fleet compliance, password)
+   - `create.html` (the frame around Eric's create page with the back buttons)
    - `aab-register.js` (the register the fleet page draws; Eric embeds it in Rev 9)
    - `seadrill-bulletin-board.html` (Eric's gated build, Rev 8: the create page)
    - `acknowledge.html` (a redirect to bulletin-board.html, for older links)
@@ -90,7 +91,7 @@ C:\TSC-Dashboard\scripts\Update-Dashboard.ps1
 C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
 ```
 
-   Look for nine lines starting `Published aab\`.
+   Look for ten lines starting `Published aab\`.
 
 3. In the browser open `http://sdrlazneuiis01d.corp.local:8080/sacred/aab/` (or
    `…/sacred/aab/bulletin-board.html`). No password box. It says "Choose your rig" and, at the top
@@ -99,8 +100,9 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    fleet compliance and create AAB**.
 4. Click that link. The password box appears. Type the password. The fleet compliance page
    opens (empty until the first post) with **Create or revise an AAB** at the top right.
-5. Click **Create or revise an AAB**. Eric's create page opens with no second password box
-   (one unlock covers both for twelve hours) and says **Endpoint: configured (gate-config.js)**.
+5. Click **Create or revise an AAB**. Eric's create page opens inside a frame with **Back to
+   the rigs page** and **Fleet compliance** at the top, no second password box (one unlock
+   covers both for twelve hours), and says **Endpoint: configured (gate-config.js)**.
 6. Open the dashboard, **AABs** tab. The top card is the Priority 3 loop: the two links now,
    the counts once an AAB exists. The second card is reserved for the corporate master AABs
    (Priority 1 and 2) and says "Not connected yet".
