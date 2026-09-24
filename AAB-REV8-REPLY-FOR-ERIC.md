@@ -51,7 +51,7 @@ is what was verified, the answers to every question you flagged, and what would 
    is owed, and every earlier acknowledgement stays in the history. When you add it to the
    tool, nothing changes here.
 5. **Acknowledgement page: built, ours, and it is the board's front door.** Dan's decision
-   the same morning: **one Seadrill Bulletin Board, not three views.** `index.html` at
+   the same morning: **one Seadrill Bulletin Board, not three views.** `bulletin-board.html` at
    `sacred\aab\` is the open rig page (no password): a rig chooses itself, sees only what
    applies to it and works from there. The fleet compliance sits behind the password on
    `register.html`, which carries the **Create or revise an AAB** button into your gated
@@ -110,7 +110,7 @@ The dashboard joins on `aabNumber` + `revision` + `rigkey`, exactly as you descr
 
 ## 4. What is on the share, and who sees what
 
-`sacred\aab\`: `index.html` (the open rig page), `register.html` (fleet compliance,
+`sacred\aab\`: `bulletin-board.html` (the open rig page), `register.html` (fleet compliance,
 password) and `aab-register.js` (the register it draws), `seadrill-bulletin-board.html`
 (your GATED build, reached from the compliance page's **Create or revise an AAB** button),
 `set-password.html` (yours), `gate-config.js` (Dan's), the logo, and `aab-data.js`, which

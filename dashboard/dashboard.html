@@ -776,7 +776,7 @@
         <section class="card">
           <h2>Advisory AABs — Priority 3 (Seadrill Bulletin Board)</h2>
           <div class="aab-line" id="aab-line" hidden></div>
-          <div class="source-line" id="aab-none">No Priority 3 advisory posted yet. Rigs work from the <a href="../aab/index.html" target="_blank">Seadrill Bulletin Board</a>; the fleet compliance with evidence is on the <a href="../aab/register.html" target="_blank">Technical Services page</a> (password).</div>
+          <div class="source-line" id="aab-none">No Priority 3 advisory posted yet. Rigs work from the <a href="../aab/bulletin-board.html" target="_blank">Seadrill Bulletin Board</a>; the fleet compliance with evidence is on the <a href="../aab/register.html" target="_blank">Technical Services page</a> (password).</div>
         </section>
         <section class="card">
           <h2>Corporate master AABs — Priority 1 and 2</h2>
@@ -4455,7 +4455,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var b = mk('b', '', 'Advisory AABs (Priority 3): ' + recs.length + ' current, ' + open + ' open rig state(s)' + (overdue ? ', ' + overdue + ' overdue' : ''));
     el.appendChild(b);
     el.appendChild(document.createTextNode(' \u00B7 rigs acknowledge on the '));
-    var a1 = mk('a', '', 'Seadrill Bulletin Board'); a1.href = '../aab/index.html'; a1.target = '_blank'; el.appendChild(a1);
+    var a1 = mk('a', '', 'Seadrill Bulletin Board'); a1.href = '../aab/bulletin-board.html'; a1.target = '_blank'; el.appendChild(a1);
     el.appendChild(document.createTextNode('; the fleet compliance with evidence is on the '));
     var a2 = mk('a', '', 'Technical Services page'); a2.href = '../aab/register.html'; a2.target = '_blank'; el.appendChild(a2);
     el.appendChild(document.createTextNode(' (password).'));

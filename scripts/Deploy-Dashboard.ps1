@@ -151,7 +151,7 @@ if ($config -and $config.PSObject.Properties['prechargeDeployPath'] -and $config
     }
 }
 
-# AAB loop (scanner v2.65, AAB-LOOP-PLAN.md): index.html (the open rig page: choose your
+# AAB loop (scanner v2.65, AAB-LOOP-PLAN.md): bulletin-board.html (the open rig page: choose your
 # rig, acknowledge, close with evidence), register.html (fleet compliance, behind the
 # password) and aab-register.js (both ours), the Seadrill Bulletin Board create page
 # (Eric's gated build, published as-is), Eric's set-password.html, the logo, and the
@@ -166,7 +166,7 @@ if (Test-Path -Path $aabSrcDir) {
         $aabDeployDir = [Environment]::ExpandEnvironmentVariables($config.aabDeployPath)
     }
     if (-not (Test-Path -Path $aabDeployDir)) { New-Item -ItemType Directory -Path $aabDeployDir -Force | Out-Null }
-    foreach ($name in @('index.html', 'register.html', 'aab-register.js', 'seadrill-bulletin-board.html', 'acknowledge.html', 'set-password.html', 'gate-config.js', 'aab-logo-600.jpg', 'aab-data.js')) {
+    foreach ($name in @('bulletin-board.html', 'register.html', 'aab-register.js', 'seadrill-bulletin-board.html', 'acknowledge.html', 'set-password.html', 'gate-config.js', 'aab-logo-600.jpg', 'aab-data.js')) {
         $src = Join-Path $aabSrcDir $name
         if (Test-Path -Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $aabDeployDir $name) -Force

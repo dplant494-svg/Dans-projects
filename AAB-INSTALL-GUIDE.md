@@ -4,7 +4,7 @@
 side; step 3 (the flow) is `AAB-NOTIFICATIONS-FLOW-GUIDE.md`.
 **What this installs:** scanner v2.65 (reads AAB posts and acknowledgements, writes
 `aab-data.js` and the overdue chase file), one **Seadrill Bulletin Board** on the share at
-`sacred\aab\` (Dan, 24 Sep: one board, not three views): the open rig page (`index.html`:
+`sacred\aab\` (Dan, 24 Sep: one board, not three views): the open rig page (`bulletin-board.html`:
 choose your rig, see what applies, acknowledge, close with evidence), the Technical Services
 fleet compliance page (`register.html`, password) with the **Create or revise an AAB** button
 into Eric's gated Rev 8 create page, and his set-password page. The main dashboard's AABs tab
@@ -26,11 +26,11 @@ Then a new folder:
 5. Open File Explorer. Go to `C:\TSC-Dashboard`.
 6. Right-click an empty space, **New**, **Folder**. Name it `aab`. Press Enter.
 7. Save these seven files into `C:\TSC-Dashboard\aab\`:
-   - `index.html` (the open rig page)
+   - `bulletin-board.html` (the open rig page)
    - `register.html` (fleet compliance, password)
    - `aab-register.js` (the register the fleet page draws; Eric embeds it in Rev 9)
    - `seadrill-bulletin-board.html` (Eric's gated build, Rev 8: the create page)
-   - `acknowledge.html` (a redirect to index.html, for older links)
+   - `acknowledge.html` (a redirect to bulletin-board.html, for older links)
    - `set-password.html` (Eric's)
    - `aab-logo-600.jpg`
 

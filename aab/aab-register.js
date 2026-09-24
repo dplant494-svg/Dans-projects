@@ -2,7 +2,7 @@
    Renders the fleet summary of every current AAB and each rig's state, with the
    acknowledgement history and the evidence photographs, from window.AAB_DATA
    (aab-data.js, written by the scanner every ten minutes). One implementation used by
-   the open Bulletin Board page (index.html) and by the gated create page (Eric's build,
+   the open Bulletin Board page (bulletin-board.html) and by the gated create page (Eric's build,
    Rev 9: <div id="aab-register"></div> and <script src="aab-register.js"></script>
    after aab-data.js). Nothing here posts anything or recomputes a state: the words are
    the scanner's (INTEGRATION-CONTRACT.md, aabStatus[]).
