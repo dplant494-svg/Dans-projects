@@ -12,7 +12,7 @@ tool still needs, how the return leg works, where it lives, and who builds which
 ## 0. The decision: a passworded Bulletin Board on sacred, like the precharge pages, not a WCGRRT tile
 
 **Shape settled 24 September (Dan): one Seadrill Bulletin Board, not three views.** Its open
-front page (`aab/index.html`) is the rig's: choose your rig, see only what applies, acknowledge,
+front page (`aab/bulletin-board.html`) is the rig's: choose your rig, see only what applies, acknowledge,
 close with evidence. Behind the password sit the Technical Services pages: the fleet compliance
 with evidence (`aab/register.html`, drawn by `aab-register.js`) and, from its **Create or revise
 an AAB** button, Eric's create page; one unlock covers both. The main dashboard's AABs

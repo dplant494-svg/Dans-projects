@@ -93,7 +93,7 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    Look for nine lines starting `Published aab\`.
 
 3. In the browser open `http://sdrlazneuiis01d.corp.local:8080/sacred/aab/` (or
-   `…/sacred/aab/index.html`). No password box. It says "Choose your rig" and, at the top
+   `…/sacred/aab/bulletin-board.html`). No password box. It says "Choose your rig" and, at the top
    right of the grey bar, **Posting: configured**. Choose a rig: "No advisory applies" until
    the first post. At the top right of the blue header is the link **Technical Services:
    fleet compliance and create AAB**.
@@ -116,7 +116,7 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    line naming the rig addresses. Nothing reaches the rig.
 4. Within ten minutes the fleet compliance page shows the advisory with the rig chip
    **outstanding**, and the dashboard's AABs tab shows the counts.
-5. Open `…/sacred/aab/index.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
+5. Open `…/sacred/aab/bulletin-board.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
    `jupiter`, `tellus`, `carina`, `polaris`, `vela`, `gemini`, `capella`, `libongos`,
    `quenguela`, `cam`). Acknowledge as crew A. Then as crew B. Then close the action with a
    comment and a photograph.

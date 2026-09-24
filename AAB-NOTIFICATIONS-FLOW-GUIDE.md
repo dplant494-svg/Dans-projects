@@ -105,7 +105,7 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
 join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''),';',coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],'')),';'),json('[]')),';')
 ```
 
-    - Compose **AckLink**: `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/index.html?rig=', string(items('EachRig')))`
+    - Compose **AckLink**: `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/bulletin-board.html?rig=', string(items('EachRig')))`
     - **Condition** **HasRigContact**: fx `length(replace(outputs('RigTo'), ';', ''))` **is greater than** `0`.
     - True → **Send an email (V2)**, rename **AAB Issued Email**:
       - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('RigTo'))`
@@ -174,7 +174,7 @@ copies it into the **Digests** library, which is SharePoint.
    Superintendents six, **OfficeCc**: as in Part B steps 6 to 9.
 6. **Apply to each** over `body('Parse_JSON')`. Inside: **RigRow** by
    `concat('RigKey eq ''', trim(string(items('Apply_to_each')?['rigKey'])), '''')`, **RigTo** as in
-   Part B, **AckLink** `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/index.html?rig=', string(items('Apply_to_each')?['rigKey']))`,
+   Part B, **AckLink** `concat('http://sdrlazneuiis01d.corp.local:8080/sacred/aab/bulletin-board.html?rig=', string(items('Apply_to_each')?['rigKey']))`,
    then **Send an email (V2)**, rename **Chase Email**:
    - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('RigTo'))`
    - CC: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), outputs('OfficeCc'))`
