@@ -670,6 +670,7 @@
         <button type="button" class="view-tab" id="tab-monitoring-btn">Rig Monitoring</button>
         <button type="button" class="view-tab" id="tab-invest-btn">Investigations</button>
         <button type="button" class="view-tab" id="tab-compliance-btn">Compliance</button>
+        <button type="button" class="view-tab" id="tab-aab-btn">AABs</button>
         <button type="button" class="errors-btn" id="errors-btn" hidden title="Posted files the scanner could not use, or that are over the size ceiling"></button>
       </div>
 
@@ -771,11 +772,23 @@
         </section>
       </div>
 
+      <div id="aab-view" hidden>
+        <section class="card">
+          <h2>Advisory AABs — Priority 3 (Seadrill Bulletin Board)</h2>
+          <div class="aab-line" id="aab-line" hidden></div>
+          <div class="source-line" id="aab-none">No Priority 3 advisory posted yet. Rigs work from the <a href="../aab/index.html" target="_blank">Seadrill Bulletin Board</a>; the fleet compliance with evidence is on the <a href="../aab/register.html" target="_blank">Technical Services page</a> (password).</div>
+        </section>
+        <section class="card">
+          <h2>Corporate master AABs — Priority 1 and 2</h2>
+          <div class="source-line">The corporate register (Safety Alerts, Priority 1; Bulletins and Product Obsolescence, Priority 2; DIR-37-0161) will list here once its source is connected. Dan, 24 Sep 2026: this tab is where the corporate master AABs are displayed; the source (eDocs, Maximo or the corporate SharePoint list) and the fields are still to be agreed with Corporate.</div>
+          <div class="rig-mon-empty">Not connected yet.</div>
+        </section>
+      </div>
+
       <div id="compliance-view" hidden>
         <section class="card">
           <h2>BWM Compliance Checklists</h2>
           <div class="source-line">Latest compliance checklist per rig with the P1–P8 tallies. Action counts and not-assessed counts are shown separately — an incomplete checklist is a different problem from a failed item. Click a rig for the full checklist.</div>
-          <div class="aab-line" id="aab-line" hidden></div>
           <div class="rig-mon-empty" id="compliance-empty" hidden></div>
           <div id="compliance-cards"></div>
           <div id="compliance-raised"></div>
@@ -4423,15 +4436,18 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   $('errors-btn').addEventListener('click', openErrorsModal);
 
 
-  // Advisory AABs (Priority 3) live on the Seadrill Bulletin Board, not here (Dan, 24 Sep
-  // 2026: one board; rigs work from its open page, the fleet compliance sits behind the
-  // password). This line carries the scanner's overdue count and the way there.
+  // AABs tab: the Priority 3 loop lives on the Seadrill Bulletin Board (Dan, 24 Sep 2026:
+  // one board; rigs work from its open page, the fleet compliance sits behind the
+  // password), so this line carries the scanner's counts and the way there; the tab itself
+  // is kept for the corporate master AABs (Priority 1 and 2), source still to be agreed.
   function renderAabLine() {
     var el = $('aab-line'); if (!el) return;
+    var none = $('aab-none');
     var status = (window.DASHBOARD_DATA || {}).aabStatus || [];
     var recs = ((window.DASHBOARD_DATA || {}).aabRecords || []).filter(function (r) { return r.current; });
     el.innerHTML = '';
-    if (!recs.length) { el.hidden = true; return; }
+    if (!recs.length) { el.hidden = true; if (none) none.hidden = false; return; }
+    if (none) none.hidden = true;
     var overdue = status.filter(function (r) { return r.overdue; }).length;
     var open = status.filter(function (r) { return r.state !== 'closed' && r.state !== 'acknowledged' && r.state !== 'withdrawn'; }).length;
     el.className = 'aab-line' + (overdue ? ' attention' : '');
@@ -4522,6 +4538,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var isMonitoring = name === 'monitoring';
     var isInvest = name === 'invest';
     var isCompliance = name === 'compliance';
+    var isAab = name === 'aab';
+    $('tab-aab-btn').classList.toggle('active', isAab);
+    $('aab-view').hidden = !isAab;
     $('tab-list-btn').classList.toggle('active', isList);
     $('tab-cbm-btn').classList.toggle('active', isCbm);
     $('tab-monitoring-btn').classList.toggle('active', isMonitoring);
@@ -4538,7 +4557,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // The monitoring, investigations and compliance tabs are deliberately
     // fleet-wide (one tile/card per rig or investigation), so the rig
     // filter has nothing to scope there.
-    $('rig-filter').hidden = isMonitoring || isInvest || isCompliance;
+    $('rig-filter').hidden = isMonitoring || isInvest || isCompliance || isAab;
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
@@ -4546,6 +4565,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   $('goto-monitoring').addEventListener('click', function () { showTab('monitoring'); });
   $('tab-invest-btn').addEventListener('click', function () { showTab('invest'); });
   $('tab-compliance-btn').addEventListener('click', function () { showTab('compliance'); });
+  $('tab-aab-btn').addEventListener('click', function () { showTab('aab'); });
 
   $('cbm-class-select').addEventListener('change', function () {
     state.cbmClass = this.value;

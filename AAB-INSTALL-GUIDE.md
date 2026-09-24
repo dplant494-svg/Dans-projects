@@ -7,8 +7,8 @@ side; step 3 (the flow) is `AAB-NOTIFICATIONS-FLOW-GUIDE.md`.
 `sacred\aab\` (Dan, 24 Sep: one board, not three views): the open rig page (`index.html`:
 choose your rig, see what applies, acknowledge, close with evidence), the Technical Services
 fleet compliance page (`register.html`, password) with the **Create or revise an AAB** button
-into Eric's gated Rev 8 create page, and his set-password page. The main dashboard carries
-no AAB tab, only a line on the Compliance tab with the overdue count and the links.
+into Eric's gated Rev 8 create page, and his set-password page. The main dashboard's AABs tab
+keeps the Priority 3 counts and links, and is where the corporate master AABs will list.
 
 Nothing here posts anything. The first real post is yours, in test mode, in Part D.
 
@@ -101,8 +101,9 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    opens (empty until the first post) with **Create or revise an AAB** at the top right.
 5. Click **Create or revise an AAB**. Eric's create page opens with no second password box
    (one unlock covers both for twelve hours) and says **Endpoint: configured (gate-config.js)**.
-6. Open the dashboard, **Compliance** tab. Once an AAB exists, a line at the top gives the
-   counts and the two links; until then nothing shows.
+6. Open the dashboard, **AABs** tab. The top card is the Priority 3 loop: the two links now,
+   the counts once an AAB exists. The second card is reserved for the corporate master AABs
+   (Priority 1 and 2) and says "Not connected yet".
 
 ## Part D — the first post, in test mode (after the flow in `AAB-NOTIFICATIONS-FLOW-GUIDE.md` is built)
 
@@ -114,7 +115,7 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
 3. The AAB Notifications flow fires: the office gets `[TEST MODE] [AAB C…]` with the red
    line naming the rig addresses. Nothing reaches the rig.
 4. Within ten minutes the fleet compliance page shows the advisory with the rig chip
-   **outstanding**, and the dashboard's Compliance tab shows the line.
+   **outstanding**, and the dashboard's AABs tab shows the counts.
 5. Open `…/sacred/aab/index.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
    `jupiter`, `tellus`, `carina`, `polaris`, `vela`, `gemini`, `capella`, `libongos`,
    `quenguela`, `cam`). Acknowledge as crew A. Then as crew B. Then close the action with a

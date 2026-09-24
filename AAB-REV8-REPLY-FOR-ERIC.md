@@ -119,8 +119,8 @@ photographs, PDF), every acknowledgement, and one status row per current AAB per
 applicable rig. The register shows overdue first, open rig states, the percentage
 acknowledged or closed, every current AAB with rig chips coloured by state, and on a click
 the three sections, references, documents, photographs, each rig's crews, history and the
-evidence posted with a closure, and the revision history. The main dashboard has **no AAB
-tab**: one line on its Compliance tab with the counts and the two links. Rig emails carry
+evidence posted with a closure, and the revision history. The main dashboard's AABs tab is kept for the corporate master AABs (Priority 1 and 2,
+source to be agreed) and carries a Priority 3 line with the counts and the two links. Rig emails carry
 the bulletin and a link straight to the rig page for that rig.
 
 ## 5. For Rev 9, when Dan says go (not before; one round at a time)

@@ -15,8 +15,9 @@ tool still needs, how the return leg works, where it lives, and who builds which
 front page (`aab/index.html`) is the rig's: choose your rig, see only what applies, acknowledge,
 close with evidence. Behind the password sit the Technical Services pages: the fleet compliance
 with evidence (`aab/register.html`, drawn by `aab-register.js`) and, from its **Create or revise
-an AAB** button, Eric's create page; one unlock covers both. The main dashboard carries no AAB
-tab, only a line on the Compliance tab with the overdue count and the two links. Eric's Rev 9
+an AAB** button, Eric's create page; one unlock covers both. The main dashboard's AABs
+tab is kept for the **corporate master AABs** (Priority 1 and 2, source to be agreed with
+Corporate; Dan, 24 Sep) and carries the Priority 3 line with the counts and the two links. Eric's Rev 9
 embeds `aab-register.js` in his page, after which `register.html` is a doorway only.
 
 **Dan, 23 Sep (evening), replacing the 22 Sep wording:** the Seadrill Bulletin Board is **a separate,
