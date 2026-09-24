@@ -899,3 +899,9 @@ under `SSCE Equipment`: `Ram Block::Shear` with `cbmlabels` (rows `n:7.1.2B`, `n
 "Upper Cavity" / "Middle Cavity"), and the bare `Ram Block` under a 148 stamp (counted on the
 scan line, flagged replay). Heatmap, viewer and digest rendered in headless Chromium and read
 back. Nothing posted. Contract, handoff and plan updated.
+
+**30.3, answered by Dan's scan, 24 Sep morning:** `CBM posts under the generic 'Ram Block'
+class: 0 - none` across all 309 files on Dan's PC. No report was ever posted under the bare
+class, so the split touches no history at all. Ram block grades in the index are under the
+`::` classes already, and from v2.64 they are on the heatmap (they were being dropped by the
+three-number key match before, our defect, entry 28 reply).
