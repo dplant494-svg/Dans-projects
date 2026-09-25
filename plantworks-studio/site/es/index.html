@@ -236,6 +236,7 @@
   }
   .contact button:hover{background:var(--sol-light);border-color:var(--sol-light)}
   .alt{margin-top:1.8rem;color:#B9C3CE;font-size:.95rem}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   .alt a{color:var(--sol-light)}
 
   footer{background:var(--steel-deep);color:#8C98A6;padding:2.4rem 1.4rem;font-size:.9rem;border-top:1px solid var(--steel-line)}
@@ -540,7 +541,9 @@
     <span class="mono tag">Contacto</span>
     <h2>Cuéntanos cómo es tu negocio. Te respondemos en un día laborable.</h2>
     <p class="lede">Con unas líneas basta. Si ya tienes web, mándanos la dirección y te devolvemos una lectura honesta de lo que funciona y lo que no. Sin coste.</p>
-    <form id="contactForm">
+    <form id="contactForm" name="contact-es" method="POST" action="/es/gracias/" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact-es">
+      <p class="hp"><label>Deja este campo vacío <input name="bot-field"></label></p>
       <div>
         <label for="c-name">Tu nombre</label>
         <input id="c-name" name="name" type="text" autocomplete="name" required>
@@ -576,14 +579,5 @@
   </div>
 </footer>
 
-<script>
-  document.getElementById('contactForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var f = e.target;
-    var body = f.message.value + '\n\nTipo de negocio: ' + f.type.value + '\nDe: ' + f.name.value + ' (' + f.contact.value + ')';
-    window.location.href = 'mailto:info@plantworksstudio.com?subject=' +
-      encodeURIComponent('Consulta web — ' + f.name.value) + '&body=' + encodeURIComponent(body);
-  });
-</script>
 </body>
 </html>

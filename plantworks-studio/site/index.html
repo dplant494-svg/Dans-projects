@@ -245,6 +245,7 @@
   }
   .contact button:hover{background:var(--sol-light);border-color:var(--sol-light)}
   .alt{margin-top:1.8rem;color:#B9C3CE;font-size:.95rem}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
   .alt a{color:var(--sol-light)}
 
   footer{background:var(--steel-deep);color:#8C98A6;padding:2.4rem 1.4rem;font-size:.9rem;border-top:1px solid var(--steel-line)}
@@ -556,7 +557,9 @@
     <span class="mono tag">Contact</span>
     <h2>Tell us about the business. We'll reply within a working day.</h2>
     <p class="lede">A few lines is plenty. If you have a current site, send the address and we'll come back with an honest read of what's working and what isn't &mdash; no charge.</p>
-    <form id="contactForm">
+    <form id="contactForm" name="contact-en" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact-en">
+      <p class="hp"><label>Leave this field empty <input name="bot-field"></label></p>
       <div>
         <label for="c-name">Your name</label>
         <input id="c-name" name="name" type="text" autocomplete="name" required>
@@ -592,14 +595,5 @@
   </div>
 </footer>
 
-<script>
-  document.getElementById('contactForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var f = e.target;
-    var body = f.message.value + '\n\nBusiness type: ' + f.type.value + '\nFrom: ' + f.name.value + ' (' + f.contact.value + ')';
-    window.location.href = 'mailto:info@plantworksstudio.com?subject=' +
-      encodeURIComponent('Website enquiry — ' + f.name.value) + '&body=' + encodeURIComponent(body);
-  });
-</script>
 </body>
 </html>

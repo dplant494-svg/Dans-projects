@@ -68,7 +68,7 @@ Design system:
 - Colours: `--steel:#1B2A38`, `--steel-deep:#111C27`, `--sol:#E0762E` (Andalusian sun / safety orange), `--sand:#F5EFE6`, `--ink:#1E2730`.
 - Type: Fraunces (display), IBM Plex Sans (body), IBM Plex Mono (labels, the "datasheet" voice).
 - Mark: hexagon (bolt head) with a sprouting stem. Used as the favicon too.
-- The only JavaScript is the contact form's mailto builder. Everything else is CSS.
+- No JavaScript at all. The contact form is a Netlify Form (`data-netlify="true"`, honeypot field, hidden `form-name`); submissions land in the Netlify dashboard and are emailed to info@ via a form notification. Thank-you pages at `/thanks/` and `/es/gracias/`, both noindex.
 - EN at `/`, ES at `/es/`. Each page carries `hreflang` for en, es and x-default. Sitemap repeats them.
 
 Placeholders that must be swapped before launch are listed in the checklist below.
@@ -101,7 +101,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 - [ ] **Name clash**. A web search for "Plantworks Studio" and "Plantworks" web design found no existing web studio, but this is a weak signal. Do a Spanish trademark search (OEPM, oepm.es) and an EUIPO search before printing anything.
 - [x] **Email**. `info@plantworksstudio.com`, Namecheap Private Email (Sept 2026). Used in the contact form, the mailto link and the structured data on both pages.
 - [x] **Founder name**. Removed from the site and the structured data; the site speaks as a company.
-- [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
+- [x] **Contact form**. Netlify Forms, no mail app needed. Requires a form notification set up once in Netlify (Project configuration, Forms, Form notifications, email to info@). Free tier is 100 submissions a month.
 - [x] **WhatsApp**. `wa.me/447464435081` (UK mobile) is on both pages and in the structured data as `telephone`. Swap to the Spanish number when it exists: search-and-replace `447464435081` and `+44 7464 435081` in `site/index.html` and `site/es/index.html`.
 - [ ] **Spanish**. Nobody on the team speaks it. Written Spanish (WhatsApp, email) is handled with translation tools; the site says calls are in English. A bilingual freelancer is needed for the proofread below and for any Spanish-language client call, budgeted per job.
 - [ ] **Spanish proofread**. The ES copy was written directly, not machine-translated, but per the studio's own promise it should go past a native speaker before launch. Uses tú, not usted.
