@@ -4,6 +4,19 @@ Web studio for small businesses in the UK and on the Costa del Sol, remote every
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
+## Rolling plan (kept current; last updated 25 Sept 2026)
+
+**Live**: plantworksstudio.com on Netlify, HTTPS, both languages, demos hidden from search. Mailbox info@ on Namecheap Private Email, working on the Samsung phone over IMAP. Contact form posts to Netlify Forms and emails info@. Search Console verified, sitemap accepted with two pages. Templates for invoices (EN, ES) and proposals in `templates/`.
+
+**Next, in order**
+1. Talk to business owners. Launch offer: first five multi-page sites at €1,200 for a review and portfolio permission. Record the conversation, paste the transcript here, get the proposal back.
+2. UK limited company via an online accountant (registered office, ID verification, corporation tax registration included). Then: business bank account (Tide or Wise), Stripe, company number and address into the site footer and the invoice templates.
+3. Spanish native read of the ES page. Wife has the file.
+4. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
+5. Google Business Profile once there is a verifiable address.
+
+**Parked**: Care Plus and local-search work until the first Care client; AI assistant add-on until a client asks; a 952 landline number.
+
 ## Folder layout
 
 ```
@@ -123,6 +136,19 @@ Done Sept 2026. Kept for the next site. Netlify drag-and-drop, DNS stays at Name
 5. Google Search Console: add the property, verify by DNS TXT record at Namecheap, submit `https://plantworksstudio.com/sitemap.xml`.
 
 To update the site: zip the contents of `site/` (index.html at the top of the archive, not inside a folder), open the Netlify project, Deploys, drag the zip onto the drop box. Domain, certificate and form settings persist. Netlify keeps the domain and certificate. Cloudflare Pages works the same way if preferred, but it wants the nameservers moved to Cloudflare, which is a bigger change.
+
+
+## Social media
+
+Minimum viable, about an hour a week. The leads are in Facebook groups and referrals, not in a content calendar.
+
+- **Claim the handles now** so nobody else does: `plantworksstudio` on Instagram, Facebook, LinkedIn (company page), X. Same avatar (the hex mark on navy), same one-line bio: "Websites for small businesses, engineered not to fail. UK & Costa del Sol. English & Spanish."
+- **LinkedIn company page**: the credibility check UK clients and property firms do. Page, logo, the positioning line, link to the site. Post each finished site.
+- **Instagram**: where Costa del Sol restaurants and wellness businesses live. Post each finished site (phone screenshot, three lines, in both languages), and occasional before/after of a client's old site versus new. No stock quotes, no daily posting.
+- **Facebook groups**: the actual channel on the coast. Join the Marbella, Estepona and San Pedro expat and business groups. Read the rules. Answer people's questions about websites, Google listings and bookings before ever mentioning the studio. One helpful reply a week beats any advert.
+- **WhatsApp Business** on the studio number: business name, hours, the site link, a greeting message, quick replies for "prices" and "how it works".
+- **Share image**: `site/og-image.png` (1200×630) is set as `og:image` on both pages, so the link shows a proper card on WhatsApp, Facebook, LinkedIn and iMessage. Regenerate from `templates/og-card.html` (screenshot at 1200×630) if the strapline changes.
+- **Not worth it now**: TikTok, X beyond claiming the handle, paid ads until there are reviews to point them at.
 
 ## Working conventions
 
