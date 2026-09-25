@@ -99,7 +99,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 
 - [x] **Domain**. `plantworksstudio.com`, registered at Namecheap (Sept 2026). Every canonical, hreflang, Open Graph URL, structured-data URL and the sitemap use it. `www` should redirect to the bare domain (Netlify and Cloudflare Pages both do this once the bare domain is set as primary).
 - [ ] **Name clash**. A web search for "Plantworks Studio" and "Plantworks" web design found no existing web studio, but this is a weak signal. Do a Spanish trademark search (OEPM, oepm.es) and an EUIPO search before printing anything.
-- [ ] **Email**. `hello@plantworksstudio.com` is used in the contact form, the mailto link and the structured data on both pages. It doesn't exist yet: set up mail on the domain (Namecheap Private Email, or free email forwarding in the Namecheap domain panel to an existing inbox) and confirm the address.
+- [x] **Email**. `info@plantworksstudio.com`, Namecheap Private Email (Sept 2026). Used in the contact form, the mailto link and the structured data on both pages.
 - [x] **Founder name**. Removed from the site and the structured data; the site speaks as a company.
 - [ ] **Contact form**. Currently mailto-based (needs the visitor to have a mail app). Swap to Formspree free tier: set the form `action`, remove the inline script.
 - [x] **WhatsApp**. `wa.me/447464435081` (UK mobile) is on both pages and in the structured data as `telephone`. Swap to the Spanish number when it exists: search-and-replace `447464435081` and `+44 7464 435081` in `site/index.html` and `site/es/index.html`.
