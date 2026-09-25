@@ -12,8 +12,9 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 1. Talk to business owners. Launch offer: first five multi-page sites at €1,200 for a review and portfolio permission. Record the conversation, paste the transcript here, get the proposal back.
 2. UK limited company via an online accountant (registered office, ID verification, corporation tax registration included). Then: business bank account (Tide or Wise), Stripe, company number and address into the site footer and the invoice templates.
 3. Spanish native read of the ES page. Wife has the file.
-4. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
-5. Google Business Profile once there is a verifiable address.
+4. Logo: done, title block + P mark, in `site/brand/`. Use `mark-512.png` as the avatar everywhere and `lockup.png` on documents.
+5. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
+6. Google Business Profile once there is a verifiable address.
 
 **Parked**: Care Plus and local-search work until the first Care client; AI assistant add-on until a client asks; a 952 landline number.
 
@@ -81,7 +82,7 @@ Design system:
 
 - Colours: `--steel:#1B2A38`, `--steel-deep:#111C27`, `--sol:#E0762E` (Andalusian sun / safety orange), `--sand:#F5EFE6`, `--ink:#1E2730`.
 - Type: Fraunces (display), IBM Plex Sans (body), IBM Plex Mono (labels, the "datasheet" voice).
-- Mark: hexagon (bolt head) with a sprouting stem. Used as the favicon too.
+- Identity (decided 25 Sept 2026): the drawing-sheet **title block**. Lockup = name in a bordered block over a three-cell strip (WEB · AI | UK · COSTA DEL SOL | REV 01). Mark = a bordered square with a bold P and an orange strip, used as favicon and social avatar. Files in `site/brand/` (SVG masters, PNG exports); share image `site/og-image.png` built from the dark lockup. Bump REV when the site is redesigned.
 - No JavaScript at all. The contact form is a Netlify Form (`data-netlify="true"`, honeypot field, hidden `form-name`); submissions land in the Netlify dashboard and are emailed to info@ via a form notification. Thank-you pages at `/thanks/` and `/es/gracias/`, both noindex.
 - EN at `/`, ES at `/es/`. Each page carries `hreflang` for en, es and x-default. Sitemap repeats them.
 

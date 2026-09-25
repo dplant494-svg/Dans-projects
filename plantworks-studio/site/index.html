@@ -22,7 +22,7 @@
 <meta property="og:image:alt" content="Plantworks Studio: websites for small businesses, engineered not to fail">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1B2A38">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 4 56 18v28L32 60 8 46V18z' fill='%231B2A38'/%3E%3Cpath d='M32 46V26M32 34c-6 0-10-4-11-10 6 0 10 4 11 10zm0-4c1-6 5-10 11-10-1 6-5 10-11 10z' fill='none' stroke='%23E0762E' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect x=%224%22 y=%224%22 width=%2256%22 height=%2256%22 fill=%22%23F5EFE6%22 stroke=%22%231B2A38%22 stroke-width=%226%22/%3E%3Cpath fill=%22%231B2A38%22 fill-rule=%22evenodd%22 d=%22M21 13h15a9.5 9.5 0 0 1 0 19h-7v11h-8zm8 7v5h7a2.5 2.5 0 0 0 0-5z%22/%3E%3Crect x=%227%22 y=%2247%22 width=%2250%22 height=%2210%22 fill=%22%23E0762E%22/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -253,6 +253,12 @@
   .alt a{color:var(--sol-light)}
 
   footer{background:var(--steel-deep);color:#8C98A6;padding:2.4rem 1.4rem;font-size:.9rem;border-top:1px solid var(--steel-line)}
+  .tblock{display:inline-grid;border:2px solid var(--sand);color:var(--sand);font-family:'Fraunces',Georgia,serif;font-weight:600;line-height:1}
+  .tblock .n{padding:.7rem 1.1rem .55rem;font-size:1.55rem;letter-spacing:-.01em;border-bottom:2px solid var(--sand);text-align:center}
+  .tblock .s{display:grid;grid-template-columns:auto auto auto}
+  .tblock .s span{padding:.45rem .8rem;font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:.6rem;letter-spacing:.2em;border-right:2px solid var(--sand);display:flex;align-items:center;justify-content:center;white-space:nowrap}
+  .tblock .s span:last-child{border-right:0;color:var(--sol)}
+  footer .tbwrap{flex-basis:100%;margin-bottom:.6rem}
   footer .container{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center}
   footer a{color:#B9C3CE}
 </style>
@@ -262,7 +268,7 @@
 <nav aria-label="Main">
   <div class="nav-inner">
     <a class="brand" href="#top" aria-label="Plantworks Studio — home">
-      <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 56 18v28L32 60 8 46V18z" fill="none" stroke="#E0762E" stroke-width="3"/><path d="M32 46V26M32 34c-6 0-10-4-11-10 6 0 10 4 11 10zm0-4c1-6 5-10 11-10-1 6-5 10-11 10z" fill="none" stroke="#F5EFE6" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" fill="#F5EFE6" stroke="#1B2A38" stroke-width="6"/><path fill="#1B2A38" fill-rule="evenodd" d="M21 13h15a9.5 9.5 0 0 1 0 19h-7v11h-8zm8 7v5h7a2.5 2.5 0 0 0 0-5z"/><rect x="7" y="47" width="50" height="10" fill="#E0762E"/></svg>
       <span>Plantworks<small>Studio · UK &amp; Costa del Sol</small></span>
     </a>
     <div class="nav-links">
@@ -594,6 +600,7 @@
 
 <footer>
   <div class="container">
+    <div class="tbwrap"><div class="tblock"><div class="n">Plantworks Studio</div><div class="s"><span>WEB · AI</span><span>UK · COSTA DEL SOL</span><span>REV 01</span></div></div></div>
     <span>&copy; 2026 Plantworks Studio &middot; UK &amp; Costa del Sol &middot; remote everywhere</span>
     <span><a href="es/" hreflang="es" lang="es">Español</a> &middot; <a href="#top">Back to top</a></span>
   </div>

@@ -2,8 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const {
   Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType,
-  BorderStyle, ShadingType, LevelFormat, TabStopType, PageBreak,
+  BorderStyle, ShadingType, LevelFormat, TabStopType, PageBreak, ImageRun,
 } = require('docx');
+const LOCKUP = fs.readFileSync('/home/user/Dans-projects/plantworks-studio/site/brand/lockup.png');
 
 const OUT = process.argv[2] || '.';
 const NAVY = '1B2A38', SOL = 'E0762E', SOFT = '5B6672', LINE = 'D9D3C5', SAND = 'F5EFE6';
@@ -26,8 +27,7 @@ const bullet = (children) => P(children, { numbering: { reference: 'b', level: 0
 function header(L) {
   return table([new TableRow({ children: [
     cell([
-      new Paragraph({ children: [t('Plantworks', { font: 'Georgia', size: 36, bold: true, color: NAVY })], spacing: { after: 0 } }),
-      new Paragraph({ children: [t(L.tagline, { size: 15, bold: true, color: SOL })], spacing: { after: 0 } }),
+      new Paragraph({ children: [new ImageRun({ type: 'png', data: LOCKUP, transformation: { width: 300, height: 89 } })], spacing: { after: 0 } }),
     ], 5200),
     cell([
       P(t('Plantworks Studio Ltd', { bold: true, size: 20 }), { align: AlignmentType.RIGHT, after: 0 }),
