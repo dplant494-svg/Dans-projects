@@ -7,7 +7,7 @@ Portfolio pieces for the studio site. Both businesses are invented; each footer 
 | `brasa-y-sal/` | Beachfront espeto grill, Playa de la Bajadilla, Marbella | Spanish at `/` | English at `/en/` | The bilingual restaurant piece. CSS-only menu tabs, Restaurant structured data with hours and geo, booking form. |
 | `pinar-property/` | Property management for owners abroad, Estepona | English at `/` | Spanish at `/es/` | The property-services piece. Sample visit report in the hero, seven-point inspection drawn on a villa, pricing, `details`-based FAQ, LocalBusiness data. |
 
-The two show both folder layouts a client might want: Spanish-root and English-root. Each page carries `hreflang` for both languages plus `x-default`, and the studio `sitemap.xml` lists all six URLs.
+Both carry `<meta name="robots" content="noindex">` and are left out of the studio sitemap, so they work as portfolio pages linked from Work but never appear in search as if they were real businesses. The two show both folder layouts a client might want: Spanish-root and English-root. Each page carries `hreflang` for both languages plus `x-default`, and the studio `sitemap.xml` lists all six URLs.
 
 ## Facts that are made up
 

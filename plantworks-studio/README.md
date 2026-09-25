@@ -13,7 +13,7 @@ plantworks-studio/
 ├── site/                     ← the studio's own site. Deploy this folder as-is.
 │   ├── index.html            ← English (default, x-default)
 │   ├── es/index.html         ← Spanish
-│   ├── sitemap.xml           ← all six URLs with hreflang alternates
+│   ├── sitemap.xml           ← the two studio URLs with hreflang alternates (demos are noindex)
 │   ├── robots.txt
 │   └── work/                 ← fictional demo sites, deployed with the studio at /work/<name>/
 │       ├── README.md         ← what's invented, how to reuse for a real client
