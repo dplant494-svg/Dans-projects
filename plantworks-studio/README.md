@@ -82,8 +82,8 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 2. **Own studio site**
    - [x] Built, bilingual, hreflang correct
    - [x] Domain bought and swapped in (plantworksstudio.com)
+   - [x] Live at https://plantworksstudio.com (Sept 2026). Netlify project `benevolent-gumption-18b8fd`, manual zip deploys, DNS at Namecheap (A @ 75.2.60.5, CNAME www), HTTPS issued, form detection on, form notifications to info@, Search Console verified by TXT record.
    - [ ] Remaining placeholders swapped (see checklist)
-   - [ ] Deployed (see Deploying below)
 3. **Legal** (decided Sept 2026: a **UK limited company**, for tax reasons. It is UK-resident by incorporation and gets UK-Spain treaty protection regardless of where the team happens to be working.)
    - [ ] Incorporate a UK Ltd (Plantworks Studio Ltd or similar), registered office at a UK address (an accountant's registered-office service is fine).
    - [ ] Appoint a small-business accountant to run it: annual accounts, corporation tax return, confirmation statement. Budget roughly one care-plan client a month.
@@ -111,7 +111,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 
 ## Deploying the studio site
 
-Netlify drag-and-drop, DNS stays at Namecheap. About fifteen minutes.
+Done Sept 2026. Kept for the next site. Netlify drag-and-drop, DNS stays at Namecheap. About fifteen minutes.
 
 1. Log in to Netlify, go to Sites, drag the whole `site/` folder onto the page. Netlify gives it a `something.netlify.app` address. Check the site, both languages and both demos work there.
 2. In that site's settings, Domain management, add custom domain `plantworksstudio.com`. Netlify will show which records it wants.
@@ -121,7 +121,7 @@ Netlify drag-and-drop, DNS stays at Namecheap. About fifteen minutes.
 4. Back in Netlify, once DNS has propagated (minutes to an hour), it issues the HTTPS certificate itself. Set `plantworksstudio.com` as the primary domain so `www` redirects to it.
 5. Google Search Console: add the property, verify by DNS TXT record at Namecheap, submit `https://plantworksstudio.com/sitemap.xml`.
 
-To update the site later, drag the folder again. Netlify keeps the domain and certificate. Cloudflare Pages works the same way if preferred, but it wants the nameservers moved to Cloudflare, which is a bigger change.
+To update the site: zip the contents of `site/` (index.html at the top of the archive, not inside a folder), open the Netlify project, Deploys, drag the zip onto the drop box. Domain, certificate and form settings persist. Netlify keeps the domain and certificate. Cloudflare Pages works the same way if preferred, but it wants the nameservers moved to Cloudflare, which is a bigger change.
 
 ## Working conventions
 
