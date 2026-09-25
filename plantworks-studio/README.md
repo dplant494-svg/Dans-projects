@@ -19,6 +19,7 @@ plantworks-studio/
 │       ├── README.md         ← what's invented, how to reuse for a real client
 │       ├── brasa-y-sal/      ← beach restaurant, Marbella. ES at /, EN at /en/
 │       └── pinar-property/   ← property management, Estepona. EN at /, ES at /es/
+├── templates/                ← invoice (EN, ES) and proposal Word templates, plus the script that builds them
 └── clients/
     └── the-fifth-quarter/    ← client site. Deploy this folder as-is.
         ├── index.html
