@@ -100,9 +100,9 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    fleet compliance and create AAB**.
 4. Click that link. The password box appears. Type the password. The fleet compliance page
    opens (empty until the first post) with **Create or revise an AAB** at the top right.
-5. Click **Create or revise an AAB**. Eric's create page opens inside a frame with **Back to
-   the rigs page** and **Fleet compliance** at the top, no second password box (one unlock
-   covers both for twelve hours), and says **Endpoint: configured (gate-config.js)**.
+5. Click **Create or revise an AAB**. The create page (Rev 9) opens with **Rigs page** and
+   **Fleet compliance** links in its own header, no second password box (one unlock covers
+   both for twelve hours), and says **Endpoint: configured (gate-config.js)**.
 6. Open the dashboard, **AABs** tab. The top card is the Priority 3 loop: the two links now,
    the counts once an AAB exists. The second card is reserved for the corporate master AABs
    (Priority 1 and 2) and says "Not connected yet".

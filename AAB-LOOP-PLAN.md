@@ -239,7 +239,9 @@ built and tested on the synthetic set: four sample records plus synthetic acknow
 outstanding, partly acknowledged, closed and overdue states, the chase file fires once per day,
 the acknowledgement page posts the ack record and downloads it when the endpoint is down. Not
 yet built by Eric, by his own account: the AAB PDF (jsPDF could not be fetched whole), the
-register view on the board (Rev 6 queue B), `maximoParent`, withdrawal. Reply and the Rev 9
+register view on the board (Rev 6 queue B), `maximoParent`, withdrawal. **26 Sep: `maximoParent`,
+withdrawal and the header back links were done on this side as Rev 9** (his source edited, his
+build script rebuilt the gated copy; Dan: nothing from Eric until Monday). PDF still his. Reply and the Rev 9
 list: `AAB-REV8-REPLY-FOR-ERIC.md` (the Rev 5 prompt pack `AAB-REV5-HANDOFF-FOR-ERIC.md` is answered by it). Next: Dan
 installs (`AAB-INSTALL-GUIDE.md`), builds the two flows (`AAB-NOTIFICATIONS-FLOW-GUIDE.md`),
 and the first TEST advisory goes round the loop in test mode (step 4).

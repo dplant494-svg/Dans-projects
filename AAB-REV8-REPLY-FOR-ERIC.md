@@ -152,3 +152,24 @@ the bulletin and a link straight to the rig page for that rig.
 
 Thank you for the build script's assertions and for saying plainly what was not built. That
 is exactly what lets this side build against it without guessing.
+
+## Addendum, 26 September: Rev 9 was done on this side (Dan: nothing from your side until Monday)
+
+Your Rev 8 ungated source was edited here and the gated copy rebuilt with **your** `build_gate.py`,
+fragment and template, all four assertions passing; `set-password.html` came out byte-identical.
+Both files are in `tools/received/` (`seadrill-bulletin-board-rev9.html`, `…-rev9-GATED.html`)
+and the gated one is on the share. Please take the Rev 9 source as your base from here, so we
+do not fork. What changed, all additive:
+
+1. **`maximoParent`** on the record: an optional text field beside eDocs ("Maximo parent case"),
+   carried through `buildRecord`, `applyLoaded`, the preview and the print.
+2. **Withdrawal:** a checkbox "This revision withdraws the AAB" sets `status: "withdrawn"`;
+   `validate()` refuses it on revision 0 ("a withdrawal is posted as a new revision"). The
+   scanner closes every rig's state on a withdrawn current revision and keeps the history.
+3. **Two links in the header**, Rigs page and Fleet compliance, so the thin frame page is gone.
+4. `toolVersion` `"2.1"`; `schemaVersion` stays `"2.0"` because nothing existing moved.
+5. Rev tag **Rev 9**.
+
+Not done, still yours when you have the jsPDF: the AAB PDF. Not done by decision: no priority
+selector, Priority 3 only (Dan). The register on your page is still on offer
+(`aab-register.js`, two lines), but `register.html` already serves it, so no hurry.
