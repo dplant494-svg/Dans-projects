@@ -4,7 +4,7 @@ Web studio for small businesses in the UK and on the Costa del Sol, remote every
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
-## Rolling plan (kept current; last updated 25 Sept 2026)
+## Rolling plan (kept current; last updated 26 Sept 2026)
 
 **Live**: plantworksstudio.com on Netlify, HTTPS, both languages, demos hidden from search. Mailbox info@ on Namecheap Private Email, working on the Samsung phone over IMAP. Contact form posts to Netlify Forms and emails info@. Search Console verified, sitemap accepted with two pages. Templates for invoices (EN, ES) and proposals in `templates/`.
 
@@ -13,8 +13,13 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 2. UK limited company via an online accountant (registered office, ID verification, corporation tax registration included). Then: business bank account (Tide or Wise), Stripe, company number and address into the site footer and the invoice templates.
 3. Spanish native read of the ES page. Wife has the file.
 4. Logo: done, title block + P mark, in `site/brand/`. Use `mark-512.png` as the avatar everywhere and `lockup.png` on documents.
-5. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
-6. Google Business Profile once there is a verifiable address.
+5. Phone, two numbers on the Galaxy S23 Ultra (unlocked, Vodafone UK in the physical slot):
+   - Now: install WhatsApp Business on the UK number (the one on the site), move personal chats into it, set greeting, hours, site link, quick replies for "prices" and "how it works".
+   - Next trip to Spain: prepaid eSIM on a passport (Digi, Lobster, Vodafone ES, Orange or Movistar all sell eSIMs). SIM manager: mobile data on the Spanish SIM while in Spain, calls and texts "ask every time".
+   - Then: Settings, Advanced features, Dual Messenger, second WhatsApp on the second number. Decide which number is the studio's and swap it on the site with one search-and-replace (`447464435081`).
+   - Password manager (Bitwarden, free) before the first client hands over a login.
+6. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
+7. Google Business Profile once there is a verifiable address.
 
 **Parked**: Care Plus and local-search work until the first Care client; AI assistant add-on until a client asks; a 952 landline number.
 
