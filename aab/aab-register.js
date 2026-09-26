@@ -62,7 +62,7 @@
     if (st === 'action open') return 'Waiting on the rig to do the action and report it done with a comment and evidence photographs (on the rig page).' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
     var left = ['A', 'B'].filter(function (c) { return crews.indexOf(c) === -1; });
     var who = left.map(function (c) { return 'Technical Section Leader, crew ' + c; }).join(' and ');
-    var s = 'Waiting on: ' + (who || 'the rig') + ' to acknowledge' + (rec && rec.actionRequested ? ', then the rig to close the action with evidence' : '') + '.';
+    var s = 'Waiting on: ' + (who || 'the rig') + ' to acknowledge' + (rec && rec.actionRequested ? ', then the rig to report the action done with evidence' : '') + '.';
     if (crews.length) s += ' Acknowledged so far by crew ' + crews.join(' and ') + (row.acknowledgedBy ? ' (' + row.acknowledgedBy + ')' : '') + '.';
     if (row.overdue) s += ' Overdue by ' + row.daysOverdue + ' days (due ' + row.dueDate + ').';
     return s;
