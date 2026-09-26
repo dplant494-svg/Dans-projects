@@ -18,7 +18,7 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
    - Now: install WhatsApp Business on the UK number (the one on the site), move personal chats into it, set greeting, hours, site link, quick replies for "prices" and "how it works".
    - Done: Spanish SIM in, WhatsApp Business on **+34 722 676 631** with the P mark as photo. Profile, greeting, away and quick-reply texts (EN/ES) in `templates/whatsapp.md`.
    - Now: Samsung Keyboard Chat assist (chat translation, Spanish pack) so Spanish chats can be answered in English.
-   - Decide which number the site shows. To switch to the Spanish one, replace `447464435081` with `34722676631` and `+44 7464 435081` with `+34 722 676 631` in both studio pages, then rezip and redeploy.
+   - Site shows both numbers (WhatsApp button → Spanish number; calls UK and Spain listed). JSON-LD carries both.
    - Password manager (Bitwarden, free) before the first client hands over a login.
 6. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
 7. Google Business Profile once there is a verifiable address.
