@@ -120,11 +120,15 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    **outstanding**, and the dashboard's AABs tab shows the counts.
 5. Open `…/sacred/aab/bulletin-board.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
    `jupiter`, `tellus`, `carina`, `polaris`, `vela`, `gemini`, `capella`, `libongos`,
-   `quenguela`, `cam`). Acknowledge as crew A. Then as crew B. Then close the action with a
-   comment and a photograph.
+   `quenguela`, `cam`). Acknowledge as crew A. Then as crew B. Then **Report the action done**
+   with a comment and a photograph.
 6. Each post lands in PostedReports as `seadrill-aab-ack_…json` and the flow mails the
-   gatekeeper and the office (test mode: office only). The next scan moves the rig chip
-   through **partly acknowledged**, **action open**, **closed**.
+   originator and the rig's four (test mode: office only). The next scan moves the rig chip
+   through **partly acknowledged**, **action open**, **actioned**.
+6a. On the fleet compliance page (password) the row shows **Awaiting your review: 1**. Open
+   the AAB, and in the rig's row review the evidence, type your name and a comment, click
+   **Close this rig's case**. After the next scan the chip is **closed**. The rig never
+   closes; Technical Services do.
 7. To see the chase: post one more TEST advisory with the due date set to yesterday. The
    next scan prints `AAB overdue chase: 1 new row(s)` and the chase flow (Part D of the
    flow guide) mails once a day until the rig closes it.

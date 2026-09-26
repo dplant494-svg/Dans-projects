@@ -9,13 +9,14 @@
    Usage: AAB_REGISTER.render(document.getElementById('aab-register'), { rigKey: '' })  */
 (function () {
   'use strict';
-  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
+  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'actioned': 'st-actioned', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
   var STATE_HELP = {
     'outstanding': 'No acknowledgement from this rig yet.',
     'partly acknowledged': 'One crew’s Technical Section Leader has acknowledged; the other crew has not.',
     'acknowledged': 'Both crews have acknowledged. No action was requested, so this is the whole lifecycle.',
-    'action open': 'Both crews have acknowledged; the requested action has not been closed with evidence.',
-    'closed': 'The rig has closed the requested action with a comment and evidence photographs.',
+    'action open': 'Both crews have acknowledged; the rig has not yet reported the requested action done.',
+    'actioned': 'The rig has reported the action done with a comment and evidence photographs; awaiting Technical Services review and closure.',
+    'closed': 'Technical Services reviewed the evidence and closed the case.',
     'overdue': 'Past the due date and still open: outstanding, partly acknowledged, or action open.',
     'withdrawn': 'The advisory was withdrawn in a later revision; nothing is owed.'
   };
@@ -32,7 +33,7 @@
     '.aabreg .chip{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:9px;margin:0 4px 4px 0;border:1px solid transparent;white-space:nowrap;cursor:pointer}' +
     '.aabreg .st-outstanding{background:#eef0f4;color:#3d4a63;border-color:#d0d8e8}.aabreg .st-partly{background:#e6f2fa;color:#005f8c;border-color:#9ccbe6}' +
     '.aabreg .st-acknowledged{background:#002C77;color:#fff}.aabreg .st-action{background:#fff1e6;color:#b23f00;border-color:#f4b48a}' +
-    '.aabreg .st-closed{background:#e6f4ea;color:#1b5e20;border-color:#a5d6a7}.aabreg .st-overdue{background:#c0392b;color:#fff}.aabreg .st-withdrawn{background:#f4f4f4;color:#777;text-decoration:line-through}' +
+    '.aabreg .st-actioned{background:#e8f0fe;color:#1a3d8f;border-color:#a7bff0}.aabreg .st-closed{background:#e6f4ea;color:#1b5e20;border-color:#a5d6a7}.aabreg .st-overdue{background:#c0392b;color:#fff}.aabreg .st-withdrawn{background:#f4f4f4;color:#777;text-decoration:line-through}' +
     '.aabreg .legend{font-size:11.5px;color:#5a6880;margin:10px 0 0;line-height:1.9}.aabreg .legend .chip{cursor:default}' +
     '.aabreg .detail{background:#fafbfd;border:1px solid #d0d8e8;border-radius:6px;padding:10px 12px;margin:6px 0 10px}' +
     '.aabreg .detail h4{margin:8px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#002C77}' +
@@ -41,6 +42,7 @@
     '.aabreg .photos img{width:150px;height:112px;object-fit:cover;border-radius:4px;border:1px solid #d0d8e8;cursor:zoom-in}.aabreg .photos figcaption{font-size:11px;color:#5a6880}' +
     '.aabreg .rigtab{width:100%;border-collapse:collapse;font-size:12px;background:#fff}.aabreg .rigtab th{text-align:left;font-size:10px;text-transform:uppercase;color:#5a6880;padding:4px 6px;border-bottom:1px solid #d0d8e8}.aabreg .rigtab td{padding:5px 6px;border-bottom:1px solid #e4e9f2;vertical-align:top}' +
     '.aabreg .empty{color:#5a6880;text-align:center;padding:24px 0}.aabreg button.lnk{background:none;border:0;color:#0082C0;cursor:pointer;font:inherit;padding:0;text-decoration:underline}' +
+    '.aabreg form.close{margin:6px 0 0;padding:8px 10px;border:1px solid #d0d8e8;border-radius:6px;background:#fff;font-size:12px}.aabreg form.close input,.aabreg form.close textarea{font:inherit;width:100%;padding:6px 8px;border:1px solid #d0d8e8;border-radius:4px;margin:3px 0 6px;box-sizing:border-box}.aabreg form.close button{background:#002C77;color:#fff;border:0;border-radius:4px;padding:7px 14px;font:600 12px inherit;cursor:pointer}.aabreg form.close .msg{margin-top:6px;min-height:14px}.aabreg form.close .msg.err{color:#c0392b}.aabreg form.close .msg.ok{color:#1b5e20}' +
     '.aabreg .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:99999;cursor:zoom-out}.aabreg .lightbox img{max-width:96vw;max-height:96vh}';
 
   function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -53,10 +55,11 @@
   // acknowledged; names come from the rig's own list, not from here.
   function waitingOn(row, rec) {
     var st = row.state, crews = row.ackCrews || [];
-    if (st === 'closed') return 'Nothing owed: closed' + (row.closedBy ? ' by ' + row.closedBy : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
+    if (st === 'closed') return 'Nothing owed: closed by Technical Services' + (row.closedBy ? ' (' + row.closedBy + ')' : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
     if (st === 'withdrawn') return 'Nothing owed: the advisory was withdrawn.';
     if (st === 'acknowledged') return 'Nothing owed: acknowledged by both crews' + (row.acknowledgedAt ? ', last on ' + row.acknowledgedAt : '') + '.';
-    if (st === 'action open') return 'Waiting on the rig to close the requested action with a comment and evidence photographs (Subsea Supervisor or either crew\u2019s Technical Section Leader on the rig page).' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
+    if (st === 'actioned') return 'Reported done' + (row.actionedBy ? ' by ' + row.actionedBy : '') + (row.actionedAt ? ' on ' + row.actionedAt : '') + '. Waiting on Technical Services to review the evidence and close the case.';
+    if (st === 'action open') return 'Waiting on the rig to do the action and report it done with a comment and evidence photographs (on the rig page).' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
     var left = ['A', 'B'].filter(function (c) { return crews.indexOf(c) === -1; });
     var who = left.map(function (c) { return 'Technical Section Leader, crew ' + c; }).join(' and ');
     var s = 'Waiting on: ' + (who || 'the rig') + ' to acknowledge' + (rec && rec.actionRequested ? ', then the rig to close the action with evidence' : '') + '.';
@@ -90,13 +93,15 @@
     if (!records.length) { root.appendChild(mk('div', 'empty', opts.rigKey ? 'No advisory applies to this rig.' : 'No advisories posted yet. Advisories created on the Bulletin Board appear here within ten minutes.')); return; }
 
     var counts = {}; status.forEach(function (r) { counts[r.status] = (counts[r.status] || 0) + 1; });
-    var open = status.filter(function (r) { return r.state !== 'closed' && r.state !== 'acknowledged' && r.state !== 'withdrawn'; }).length;
+    var open = status.filter(function (r) { return r.state !== 'closed' && r.state !== 'acknowledged' && r.state !== 'withdrawn' && r.state !== 'actioned'; }).length;
+    var review = status.filter(function (r) { return r.state === 'actioned'; }).length;
     var done = status.filter(function (r) { return r.state === 'closed' || r.state === 'acknowledged'; }).length;
     var scored = status.filter(function (r) { return r.state !== 'withdrawn'; }).length;
     var kpis = mk('div', 'kpis');
     function kpi(l, v, s, att) { var k = mk('div', 'kpi' + (att ? ' att' : '')); k.appendChild(mk('div', 'l', l)); k.appendChild(mk('div', 'v', String(v))); if (s) k.appendChild(mk('div', 's', s)); kpis.appendChild(k); }
     kpi('Overdue', counts.overdue || 0, 'rig states past the due date', (counts.overdue || 0) > 0);
     kpi('Open rig states', open, (counts.outstanding || 0) + ' outstanding · ' + (counts['partly acknowledged'] || 0) + ' partly · ' + (counts['action open'] || 0) + ' action open');
+    kpi('Awaiting your review', review, 'reported done by the rig; close from the rig table', review > 0);
     kpi('Acknowledged or closed', scored ? Math.round(done / scored * 100) + '%' : '—', done + ' of ' + scored + ' rig states');
     kpi('Current advisories', records.length, (data.records || []).length + ' revision(s) on file' + (data.generatedAt ? ' · updated ' + String(data.generatedAt).replace('T', ' ').slice(0, 16) : ''));
     root.appendChild(kpis);
@@ -123,16 +128,16 @@
       var td6 = mk('td'); (byNum[rec.aabNumber] || []).forEach(function (r) { var c = chip(r, function () { toggle(); }); c.title += '\n' + waitingOn(r, rec); td6.appendChild(c); }); tr.appendChild(td6);
       tbody.appendChild(tr);
       var dtr = mk('tr'); dtr.hidden = true; var dtd = mk('td'); dtd.colSpan = 6; dtr.appendChild(dtd); tbody.appendChild(dtr);
-      function toggle() { if (dtr.hidden) { dtd.innerHTML = ''; dtd.appendChild(detail(rec, byNum[rec.aabNumber] || [], data)); dtr.hidden = false; } else { dtr.hidden = true; } }
+      function toggle() { if (dtr.hidden) { dtd.innerHTML = ''; dtd.appendChild(detail(rec, byNum[rec.aabNumber] || [], data, opts)); dtr.hidden = false; } else { dtr.hidden = true; } }
       b.addEventListener('click', toggle);
     });
     table.appendChild(tbody); root.appendChild(table);
     var legend = mk('div', 'legend');
-    ['overdue', 'outstanding', 'partly acknowledged', 'action open', 'acknowledged', 'closed', 'withdrawn'].forEach(function (st) { legend.appendChild(mk('span', 'chip ' + STATE_CLASS[st], st)); legend.appendChild(document.createTextNode(' ' + STATE_HELP[st] + '  ')); });
+    ['overdue', 'outstanding', 'partly acknowledged', 'action open', 'actioned', 'acknowledged', 'closed', 'withdrawn'].forEach(function (st) { legend.appendChild(mk('span', 'chip ' + STATE_CLASS[st], st)); legend.appendChild(document.createTextNode(' ' + STATE_HELP[st] + '  ')); });
     root.appendChild(legend);
   }
 
-  function detail(rec, rows, data) {
+  function detail(rec, rows, data, opts) {
     var d = mk('div', 'detail');
     var acks = (data.acks || []).filter(function (a) { return a.aabNumber === rec.aabNumber; }).sort(function (a, b) { return String(a.saved).localeCompare(String(b.saved)); });
     var revs = (data.records || []).filter(function (r) { return r.aabNumber === rec.aabNumber; }).sort(function (a, b) { return b.revision - a.revision; });
@@ -154,19 +159,58 @@
       var tds = mk('td'); var stc = chip({ rig: r.status, status: r.status, state: r.state, daysOverdue: r.daysOverdue, dueDate: r.dueDate }); stc.title += '\nClick for who is left to act.';
       var wl = mk('div', 'sub'); wl.hidden = true; wl.textContent = waitingOn(r, rec);
       stc.addEventListener('click', function () { wl.hidden = !wl.hidden; });
-      tds.appendChild(stc); tds.appendChild(wl); tr.appendChild(tds);
+      tds.appendChild(stc); tds.appendChild(wl);
+      if (opts && opts.canClose && (r.state === 'actioned' || r.state === 'action open' || r.state === 'acknowledged')) tds.appendChild(closeForm(rec, r, data));
+      tr.appendChild(tds);
       tr.appendChild(mk('td', '', (r.ackCrews || []).length ? r.ackCrews.join(' and ') : '—'));
       tr.appendChild(mk('td', '', r.acknowledgedAt ? r.acknowledgedAt + (r.acknowledgedBy ? ' · ' + r.acknowledgedBy : '') : '—'));
       tr.appendChild(mk('td', '', r.closedAt ? r.closedAt + (r.closedBy ? ' · ' + r.closedBy : '') : '—'));
       var tdh = mk('td'); var hist = acks.filter(function (a) { return a.rigKey === r.rigKey; });
       if (!hist.length) tdh.textContent = '—';
-      else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); hul.appendChild(li); }); tdh.appendChild(hul); }
+      else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : a.action === 'actioned' ? 'reported done' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); hul.appendChild(li); }); tdh.appendChild(hul); }
       tr.appendChild(tdh); tb.appendChild(tr);
     });
     rt.appendChild(tb); d.appendChild(rt);
     if (revs.length > 1) { d.appendChild(mk('h4', '', 'Revision history')); var rl = mk('ul'); revs.forEach(function (v) { rl.appendChild(mk('li', '', 'rev ' + v.revision + ' · posted ' + String(v.postedAt || '').replace('T', ' ').slice(0, 16) + (v.requiresReacknowledgement ? ' · re-acknowledgement required' : '') + (v.status === 'withdrawn' ? ' · withdrawn' : '') + (v.current ? ' · current' : ''))); }); d.appendChild(rl); }
     d.appendChild(mk('div', 'sub', 'Source file: ' + rec.file));
     return d;
+  }
+
+  // Technical Services close (Dan, 26 Sep): after reviewing the rig's evidence the gatekeeper
+  // closes the rig's case from here. Posts the same acknowledgement record shape with
+  // action 'close' through the intake in gate-config.js; downloads it if the post fails.
+  var posted = {};
+  function closeForm(rec, row, data) {
+    var key = rec.aabNumber + '|' + rec.revision + '|' + row.rigKey;
+    if (posted[key]) return mk('div', 'sub', 'Closure posted; the state updates within ten minutes.');
+    var f = mk('form', 'close');
+    f.appendChild(mk('div', 'sub', row.state === 'actioned' ? 'Review the evidence, then close this rig\u2019s case.' : 'Close this rig\u2019s case without a report from the rig (say why).'));
+    var name = mk('input'); name.placeholder = 'Your name'; name.required = true; f.appendChild(name);
+    var comment = mk('textarea'); comment.rows = 2; comment.placeholder = 'Review comment (required)'; comment.required = true; f.appendChild(comment);
+    var btn = mk('button', '', 'Close this rig\u2019s case'); btn.type = 'submit'; f.appendChild(btn);
+    var msg = mk('div', 'msg'); f.appendChild(msg);
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var d = new Date(); function p(n) { return String(n).padStart(2, '0'); }
+      var today = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+      var stampTxt = d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes()) + p(d.getSeconds());
+      var record = { meta: { kind: 'aab-ack', tool: 'AAB Fleet Compliance', rev: 1, asset: row.rig, rigkey: row.rigKey, saved: d.toISOString() },
+        aabNumber: rec.aabNumber, revision: Number(rec.revision), action: 'close', by: name.value.trim(), role: 'Technical Services', crew: '', at: today, comment: comment.value.trim(), photos: [],
+        aabTitle: rec.title || '', originatorName: rec.originatorName || '', originatorEmail: rec.originatorEmail || '' };
+      var json = JSON.stringify(record);
+      var fileName = 'seadrill-aab-ack_' + rec.aabNumber + '_' + rec.revision + '_' + row.rigKey + '_' + stampTxt + '.json';
+      var url = window.PCGATE && window.PCGATE.postUrl;
+      btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Posting\u2026';
+      var done = function (ok, why) {
+        if (ok) { posted[key] = true; msg.className = 'msg ok'; msg.textContent = 'Closed. Posted as ' + fileName + '; the state updates within ten minutes.'; }
+        else { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = fileName; document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 0); btn.disabled = false; msg.className = 'msg err'; msg.textContent = (why || 'The post failed') + '. The record was downloaded instead: send ' + fileName + ' to the dashboard owner.'; }
+      };
+      if (!url) { done(false, 'No intake endpoint on this copy (gate-config.js)'); return; }
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ FileName: fileName, ContentType: 'application/json', FileContent: btoa(unescape(encodeURIComponent(json))) }) })
+        .then(function (r) { done(r.ok, r.ok ? '' : 'HTTP ' + r.status + ' ' + r.statusText); })
+        .catch(function (err) { done(false, err.name + ': ' + err.message); });
+    });
+    return f;
   }
 
   window.AAB_REGISTER = { render: render, waitingOn: waitingOn, STATE_CLASS: STATE_CLASS, STATE_HELP: STATE_HELP };

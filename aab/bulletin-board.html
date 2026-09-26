@@ -17,7 +17,9 @@
   gate-config.js beside the page supplies the endpoint (window.PCGATE.postUrl) and is
   read here without the gate; nothing in it is secret except the URL, which never
   travels in a file that is committed or emailed.
-  Rev 4, 26 September 2026: the role is a dropdown of the rig crafts with an Other box.
+  Rev 5, 26 September 2026: the rig reports an action done ('actioned') with evidence; closing
+  is Technical Services' from the compliance page (Dan). Rev 4, 26 September 2026: the role is a
+  dropdown of the rig crafts with an Other box.
   Rev 3, 26 September 2026: the acknowledgement record carries aabTitle, originatorName and
   originatorEmail. Rev 2, 24 September 2026 (Rev 1 was acknowledge.html, gated).
 -->
@@ -57,6 +59,7 @@
   .st-partly { background: #e6f2fa; color: #005f8c; border-color: #9ccbe6; }
   .st-acknowledged { background: var(--sd-blue); color: #fff; }
   .st-action { background: #fff1e6; color: #b23f00; border-color: #f4b48a; }
+  .st-actioned { background: #e8f0fe; color: #1a3d8f; border-color: #a7bff0; }
   .st-closed { background: #e6f4ea; color: #1b5e20; border-color: #a5d6a7; }
   .st-overdue { background: var(--sd-fail); color: #fff; }
   .st-withdrawn { background: #f4f4f4; color: #777; text-decoration: line-through; }
@@ -90,9 +93,9 @@
   <img src="aab-logo-600.jpg" alt="Seadrill Bulletin Board" onerror="this.style.display='none'">
   <div>
     <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
-    <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; close a requested action with a comment and photographs.</div>
+    <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; report a requested action done with a comment and photographs. Technical Services review and close.</div>
   </div>
-  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 4 &middot; 26 Sep 2026</span></div>
+  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 5 &middot; 26 Sep 2026</span></div>
 </header>
 <main>
   <div id="stale" class="banner warn" hidden></div>
@@ -112,10 +115,10 @@
 <script>
 (function () {
   'use strict';
-  var PAGE_REV = 4;
+  var PAGE_REV = 5;
   var WARN_BYTES = 20 * 1024 * 1024, REFUSE_BYTES = 30 * 1024 * 1024;   // the Bulletin Board's own guard
   var ROLES = ['Technical Section Leader', 'Subsea Supervisor', 'Subsea Engineer', 'Assistant Rig Manager', 'Rig Manager', 'OIM', 'Electrical Supervisor', 'Drilling Section Leader', 'MPD Supervisor', 'Maintenance Supervisor'];
-  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
+  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'actioned': 'st-actioned', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
   var $ = function (id) { return document.getElementById(id); };
   function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
@@ -143,10 +146,11 @@
 
   function waitingOn(row, rec) {
     var st = row.state, crews = row.ackCrews || [];
-    if (st === 'closed') return 'Nothing owed: closed' + (row.closedBy ? ' by ' + row.closedBy : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
+    if (st === 'closed') return 'Nothing owed: closed by Technical Services' + (row.closedBy ? ' (' + row.closedBy + ')' : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
     if (st === 'withdrawn') return 'Nothing owed: the advisory was withdrawn.';
     if (st === 'acknowledged') return 'Nothing owed: acknowledged by both crews.';
-    if (st === 'action open') return 'Waiting on this rig to close the requested action below with a comment and evidence photographs.' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
+    if (st === 'actioned') return 'Reported done' + (row.actionedBy ? ' by ' + row.actionedBy : '') + (row.actionedAt ? ' on ' + row.actionedAt : '') + '. Waiting on Technical Services to review the evidence and close.';
+    if (st === 'action open') return 'Waiting on this rig to do the action and report it done below, with a comment and evidence photographs.' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
     var left = ['A', 'B'].filter(function (c) { return crews.indexOf(c) === -1; });
     var s = 'Waiting on: ' + left.map(function (c) { return 'Technical Section Leader, crew ' + c; }).join(' and ') + ' to acknowledge' + (rec.actionRequested ? ', then the rig to close the action with evidence' : '') + '.';
     if (crews.length) s += ' Acknowledged so far by crew ' + crews.join(' and ') + (row.acknowledgedBy ? ' (' + row.acknowledgedBy + ')' : '') + '.';
@@ -200,7 +204,7 @@
     body.appendChild(meta);
     if (st && st.state !== 'outstanding') {
       var hist = acksFor(rec.aabNumber, rigKey);
-      if (hist.length) { var hl = mk('ul', 'history'); hist.forEach(function (a) { hl.appendChild(mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : ''))); }); body.appendChild(hl); }
+      if (hist.length) { var hl = mk('ul', 'history'); hist.forEach(function (a) { hl.appendChild(mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : a.action === 'actioned' ? 'reported done' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : ''))); }); body.appendChild(hl); }
     }
     [['What happened', rec.whatHappened], ['Why it matters', rec.whyItMatters], ['Required action', rec.requiredAction]].forEach(function (p) { body.appendChild(mk('div', 'sec', p[0])); body.appendChild(mk('div', 'txt', p[1] || '—')); });
     if ((rec.referenceDocuments || []).length) { body.appendChild(mk('div', 'sec', 'Reference documents')); var rl = mk('ul', 'files'); rec.referenceDocuments.forEach(function (d) { rl.appendChild(mk('li', '', d)); }); body.appendChild(rl); }
@@ -210,15 +214,16 @@
     if (files.childNodes.length) { body.appendChild(mk('div', 'sec', 'Documents')); body.appendChild(files); }
     if ((rec.photos || []).length) { body.appendChild(mk('div', 'sec', 'Photographs')); var ph = mk('div', 'photos'); rec.photos.forEach(function (p) { if (!p || !p.data) return; var f = mk('figure'); var im = mk('img'); im.src = p.data; im.alt = p.caption || p.name || 'photo'; im.loading = 'lazy'; f.appendChild(im); if (p.caption) f.appendChild(mk('figcaption', '', p.caption)); ph.appendChild(f); }); body.appendChild(ph); }
 
-    var terminal = st && (st.state === 'closed' || st.state === 'withdrawn' || (st.state === 'acknowledged'));
+    var terminal = st && (st.state === 'closed' || st.state === 'withdrawn' || st.state === 'acknowledged' || st.state === 'actioned');
     if (!terminal && stName !== 'posted') {
       var forms = mk('div', 'forms');
-      var canAck = !st || st.state === 'outstanding' || st.state === 'partly acknowledged' || (st.overdue && st.state !== 'action open');
+      var canAck = !st || st.state === 'outstanding' || st.state === 'partly acknowledged';
       if (canAck) forms.appendChild(actForm(rec, rigKey, 'acknowledge', st));
-      if (rec.actionRequested) forms.appendChild(actForm(rec, rigKey, 'close', st));
+      if (rec.actionRequested && st && st.state !== 'actioned') forms.appendChild(actForm(rec, rigKey, 'actioned', st));
+      if (st && st.state === 'actioned') body.appendChild(mk('div', 'hint', 'Reported done' + (st.actionedBy ? ' by ' + st.actionedBy : '') + (st.actionedAt ? ' on ' + st.actionedAt : '') + '. Awaiting review and closure by Technical Services.'));
       body.appendChild(forms);
     } else if (terminal) {
-      body.appendChild(mk('div', 'hint', st.state === 'closed' ? 'Closed by this rig' + (st.closedAt ? ' on ' + st.closedAt : '') + '. Nothing more is owed.' : st.state === 'withdrawn' ? 'Withdrawn by Technical Services. Nothing is owed.' : 'Acknowledged by both crews. Nothing more is owed.'));
+      if (st.state !== 'actioned') body.appendChild(mk('div', 'hint', st.state === 'closed' ? 'Closed by Technical Services' + (st.closedBy ? ' (' + st.closedBy + ')' : '') + (st.closedAt ? ' on ' + st.closedAt : '') + '. Nothing more is owed.' : st.state === 'withdrawn' ? 'Withdrawn by Technical Services. Nothing is owed.' : 'Acknowledged by both crews. Nothing more is owed.'));
     }
     box.appendChild(body);
     return box;
@@ -226,9 +231,9 @@
 
   function actForm(rec, rigKey, action, st) {
     var f = mk('form', 'act');
-    f.appendChild(mk('h3', '', action === 'close' ? 'Close the requested action' : 'Acknowledge this advisory'));
+    f.appendChild(mk('h3', '', action === 'actioned' ? 'Report the action done' : 'Acknowledge this advisory'));
     if (action === 'acknowledge') f.appendChild(mk('div', 'hint', 'One acknowledgement per crew: the Technical Section Leader of crew A and of crew B each acknowledge once.' + (st && st.ackCrews && st.ackCrews.length ? ' Already acknowledged by crew ' + st.ackCrews.join(' and ') + '.' : '')));
-    else f.appendChild(mk('div', 'hint', 'Say what was done and attach up to six photographs as evidence. A closure counts as an acknowledgement as well.'));
+    else f.appendChild(mk('div', 'hint', 'Say what was done and attach up to six photographs as evidence. Technical Services review it and close the case from the compliance page.'));
     var name = field(f, 'Your name', 'text', ''); name.required = true;
     // Rev 4 (Dan, 26 Sep): the role is a dropdown of the rig crafts, TSL first because the
     // directive names the TSL of each crew; 'Other' opens a box for anything not listed.
@@ -245,10 +250,10 @@
     ['A', 'B'].forEach(function (c) { var l = mk('label'); var r = mk('input'); r.type = 'radio'; r.name = crewName; r.value = c; r.required = true; l.appendChild(r); l.appendChild(document.createTextNode(' Crew ' + c)); crewWrap.appendChild(l); });
     f.appendChild(crewWrap);
     var at = field(f, 'Date', 'date', today()); at.required = true;
-    f.appendChild(mk('label', '', action === 'close' ? 'What was done (required)' : 'Comment (optional)'));
-    var comment = mk('textarea'); comment.rows = action === 'close' ? 4 : 2; if (action === 'close') comment.required = true; f.appendChild(comment);
+    f.appendChild(mk('label', '', action === 'actioned' ? 'What was done (required)' : 'Comment (optional)'));
+    var comment = mk('textarea'); comment.rows = action === 'actioned' ? 4 : 2; if (action === 'actioned') comment.required = true; f.appendChild(comment);
     var photoInput = null, photoList = [];
-    if (action === 'close') {
+    if (action === 'actioned') {
       f.appendChild(mk('label', '', 'Evidence photographs (up to 6, resized to 1600 px)'));
       photoInput = mk('input'); photoInput.type = 'file'; photoInput.accept = 'image/*'; photoInput.multiple = true; f.appendChild(photoInput);
       var preview = mk('div', 'photos'); f.appendChild(preview);
@@ -257,7 +262,7 @@
         fl.forEach(function (file) { shrink(file, function (dataUrl) { photoList.push({ name: file.name, caption: '', data: dataUrl }); var fg = mk('figure'); var im = mk('img'); im.src = dataUrl; fg.appendChild(im); fg.appendChild(mk('figcaption', '', file.name)); preview.appendChild(fg); }); });
       });
     }
-    var btn = mk('button', 'go', action === 'close' ? 'Post the closure' : 'Post the acknowledgement'); btn.type = 'submit'; f.appendChild(btn);
+    var btn = mk('button', 'go', action === 'actioned' ? 'Post: action done' : 'Post the acknowledgement'); btn.type = 'submit'; f.appendChild(btn);
     var msg = mk('div', 'msg'); f.appendChild(msg);
     f.addEventListener('submit', function (e) {
       e.preventDefault();

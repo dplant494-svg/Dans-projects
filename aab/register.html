@@ -197,7 +197,7 @@
   <div id="stale" class="banner" hidden></div>
   <section class="card">
     <h2>Fleet register</h2>
-    <p class="note">Overdue first. Click an AAB number or a rig chip for the advisory text, documents, photographs, each rig's history and the evidence posted with a closure. States are computed by the dashboard scanner from the posted records; nothing here is edited by hand.</p>
+    <p class="note">Overdue first. Click an AAB number or a rig chip for the advisory text, documents, photographs, each rig's history and the evidence the rig posted. A rig that has reported its action done shows <b>actioned</b>: review the evidence and close the case from its row. States are computed by the dashboard scanner from the posted records.</p>
     <div id="aab-register"></div>
   </section>
 </main>
@@ -208,7 +208,7 @@
 (function () {
   var d = window.AAB_DATA;
   if (d && d.generatedAt) { var age = (Date.now() - new Date(d.generatedAt).getTime()) / 3600000; if (age > 2) { var s = document.getElementById('stale'); s.hidden = false; s.textContent = 'This register was published ' + Math.round(age) + ' hours ago. The scanner may have stopped; a recent acknowledgement may not show yet.'; } }
-  window.AAB_REGISTER.render(document.getElementById('aab-register'), {});
+  window.AAB_REGISTER.render(document.getElementById('aab-register'), { canClose: true });
 })();
 </script>
 </body>
