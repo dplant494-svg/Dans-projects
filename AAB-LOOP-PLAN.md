@@ -16,8 +16,11 @@ front page (`aab/bulletin-board.html`) is the rig's: choose your rig, see only w
 close with evidence. Behind the password sit the Technical Services pages: the fleet compliance
 with evidence (`aab/register.html`, drawn by `aab-register.js`) and, from its **Create or revise
 an AAB** button, Eric's create page; one unlock covers both. The main dashboard's AABs
-tab is kept for the **corporate master AABs** (Priority 1 and 2, source to be agreed with
-Corporate; Dan, 24 Sep) and carries the Priority 3 line with the counts and the two links. Eric's Rev 9
+tab is the **master AAB register** (Dan, 26 Sep): one row per Priority 3 parent as created on
+the board, the rigs selected on it mirrored as state chips, read only, evidence behind the
+password. **Priority 3 only**: Priority 1 and 2 raise costs, work orders and approvals up the
+chain and stay in the corporate process (Dan, 26 Sep); the earlier idea of a corporate register
+on this tab is dropped. Eric's Rev 9
 embeds `aab-register.js` in his page, after which `register.html` is a doorway only.
 
 **Dan, 23 Sep (evening), replacing the 22 Sep wording:** the Seadrill Bulletin Board is **a separate,

@@ -791,7 +791,7 @@
       <div id="aab-view" hidden>
         <section class="card">
           <h2>Master AAB register</h2>
-          <div class="source-line">One row per AAB: the master case created once on the Seadrill Bulletin Board, with the rigs selected on it mirrored as their own cases. A chip's colour is that rig's state from the acknowledgements it has posted; click a chip for who is left to act. Rigs work from the <a href="../aab/bulletin-board.html" target="_blank">Bulletin Board</a>; the fleet compliance with the evidence is on the <a href="../aab/register.html" target="_blank">Technical Services page</a> (password). Priority 3 today; Priority 1 and 2 masters list here the same way once their source is agreed.</div>
+          <div class="source-line">One row per AAB: the master case created once on the Seadrill Bulletin Board, with the rigs selected on it mirrored as their own cases. A chip's colour is that rig's state from the acknowledgements it has posted; click a chip for who is left to act. Rigs work from the <a href="../aab/bulletin-board.html" target="_blank">Bulletin Board</a>; the fleet compliance with the evidence is on the <a href="../aab/register.html" target="_blank">Technical Services page</a> (password). Priority 3 advisories only: this app creates the Priority 3 parent; Priority 1 and 2 stay in the corporate process (Dan, 26 Sep 2026).</div>
           <div class="aab-line" id="aab-line" hidden></div>
           <div class="rig-mon-empty" id="aab-none" hidden>No AAB posted yet.</div>
           <div class="table-scroll"><table class="aab-table" id="aab-master"></table></div>
@@ -4526,7 +4526,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     return s;
   }
   // Master AAB register (Dan, 26 Sep: the master is the AAB created once; the rigs selected on
-  // it are mirrored as their own cases). One row per current AAB from aabRecords[], the rigs
+  // it are mirrored as their own cases; Priority 3 only, Priority 1 and 2 are out of scope). One row per current AAB from aabRecords[], the rigs
   // from aabStatus[]; read only, no evidence here (that is behind the password on the board).
   function renderAabMaster() {
     var table = $('aab-master'), legend = $('aab-legend'); if (!table) return;

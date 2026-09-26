@@ -146,6 +146,9 @@ the bulletin and a link straight to the rig page for that rig.
    hand you the file from a machine that can fetch it.
 5. **Retire `level`** only when nothing else reads it; the dashboard reads `priority`
    first and falls back to `level`, so either order of retirement is safe here.
+6. **Stay Priority 3.** Dan, 26 Sep: this app creates the Priority 3 parent and the rigs'
+   mirrored cases; Priority 1 and 2 stay in the corporate process because they raise costs,
+   work orders and approvals up the chain. No priority selector, please.
 
 Thank you for the build script's assertions and for saying plainly what was not built. That
 is exactly what lets this side build against it without guessing.
