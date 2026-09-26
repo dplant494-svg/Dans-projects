@@ -34,9 +34,9 @@ Gracias por su mensaje. Respondemos en un día laborable. Precios y ejemplos: pl
 
 **/prices**
 ```
-Our packages: one-page bilingual site from €650, multi-page from €1,500, full site with booking or shop from €3,000. All prices fixed and agreed before we start. Details: plantworksstudio.com/#packages
+Our packages: one-page site €600 in English or €800 bilingual, multi-page site (up to eight pages, bilingual) €1,500, care plan €40 a month. Online payments and extras quoted on request. All prices fixed and agreed before we start. Details: plantworksstudio.com/#packages
 
-Nuestros paquetes: web de una página bilingüe desde 650 €, varias páginas desde 1.500 €, web completa con reservas o tienda desde 3.000 €. Precios fijos, acordados antes de empezar. Detalles: plantworksstudio.com/es/#packages
+Nuestros paquetes: web de una página 600 € en inglés u 800 € bilingüe, web de varias páginas (hasta ocho, bilingüe) 1.500 €, plan de mantenimiento 40 € al mes. Pagos online y extras, con presupuesto aparte. Precios fijos, acordados antes de empezar. Detalles: plantworksstudio.com/es/#packages
 ```
 
 **/how**
