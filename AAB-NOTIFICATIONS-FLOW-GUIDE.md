@@ -12,7 +12,7 @@ Two flows. **AAB Notifications** fires on every AAB post and every acknowledgeme
 | Event | Posted file | To | CC |
 |---|---|---|---|
 | AAB issued (or revised) | `seadrill-aab_<no>_<rev>_<stamp>.json` | each applicable rig: TSL, Subsea Supervisor, ARM, Rig Manager (Rigs sheet) | Office, Superintendents, the gatekeeper |
-| Rig acknowledged / closed | `seadrill-aab-ack_<no>_<rev>_<rigKey>_<stamp>.json` | the gatekeeper | Office |
+| Rig acknowledged / closed | `seadrill-aab-ack_<no>_<rev>_<rigKey>_<stamp>.json` | the person who posted the AAB (originator on the record; the gatekeeper when absent) and that rig's Subsea Supervisor | Office, the gatekeeper |
 | Overdue chase (daily) | `aab-overdue-pending.json` in the Digests library | the rig's four | Office, the gatekeeper |
 
 Rig people always on To, never CC (your rule, 23 Sep). The gatekeeper is Eric.
@@ -70,19 +70,28 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
    - **OfficeCc**: `concat(outputs('OfficeList'), ';', outputs('SupList'), if(empty(outputs('Gatekeeper')), '', concat(';', outputs('Gatekeeper'))))`
 10. **Condition** named **IsAck**: `outputs('Kind')` **is equal to** `aab-ack`.
 
-### IsAck → True: the acknowledgement email
+### IsAck → True: the acknowledgement email (to the originator and the rig's Subsea Supervisor; Dan, 26 Sep)
 
 11. Compose **AckRig**: `coalesce(body('Parse_JSON')?['meta']?['asset'],body('Parse_JSON')?['meta']?['rigkey'],'')`
     and **AckWhat**: `if(equals(toLower(coalesce(body('Parse_JSON')?['action'],'')), 'close'), 'action closed', 'acknowledged')`.
+11a. **AckRigRow**: List rows present in a table, table **Rigs**, Filter Query fx
+    `concat('RigKey eq ''', trim(coalesce(body('Parse_JSON')?['meta']?['rigkey'],'')), '''')`, Top Count `1`.
+11b. Compose **AckTo** (the originator from the record, else the gatekeeper; plus the rig's
+    Subsea Supervisor; blanks skipped):
+
+```
+join(union(split(concat(coalesce(body('Parse_JSON')?['originatorEmail'], outputs('Gatekeeper'), ''), ';', coalesce(first(body('AckRigRow')?['value'])?['SubseaSupervisorEmail'],'')), ';'), json('[]')), ';')
+```
+
 12. **Send an email (V2)**, rename **Ack Email**:
-    - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), if(empty(outputs('Gatekeeper')), outputs('OfficeList'), outputs('Gatekeeper')))`
-    - CC: fx `outputs('OfficeList')`
+    - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), if(empty(replace(outputs('AckTo'), ';', '')), outputs('OfficeList'), outputs('AckTo')))`
+    - CC: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), concat(outputs('OfficeList'), if(empty(outputs('Gatekeeper')), '', concat(';', outputs('Gatekeeper')))))`
     - Subject: fx `concat(if(equals(outputs('TestMode'), true), '[TEST MODE] ', ''), '[AAB ', outputs('AckWhat'), '] ', outputs('AabNo'), ' rev ', outputs('Rev'), ' - ', outputs('AckRig'), ' crew ', coalesce(body('Parse_JSON')?['crew'],'?'))`
     - Body (code view):
 
 ```
-@{if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('Gatekeeper'), '<br>CC: ', outputs('OfficeList'), '</b></p>'), '')}
-<p><b>@{outputs('AckRig')}</b> has @{outputs('AckWhat')} AAB <b>@{outputs('AabNo')}</b> rev @{outputs('Rev')}.</p>
+@{if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('AckTo'), '<br>CC: ', outputs('OfficeList'), ';', outputs('Gatekeeper'), '</b></p>'), '')}
+<p><b>@{outputs('AckRig')}</b> has @{outputs('AckWhat')} AAB <b>@{outputs('AabNo')}</b> rev @{outputs('Rev')}@{if(empty(coalesce(body('Parse_JSON')?['aabTitle'],'')), '', concat(' - ', body('Parse_JSON')?['aabTitle']))}.</p>
 <p>By: @{body('Parse_JSON')?['by']} (@{body('Parse_JSON')?['role']}, crew @{body('Parse_JSON')?['crew']}) on @{body('Parse_JSON')?['at']}<br>Comment: @{body('Parse_JSON')?['comment']}</p>
 <p><a href="@{outputs('DashLink')}">Open the fleet compliance page</a> (the state updates within ten minutes; evidence photographs are on the record there).</p>
 <p>Technical Services - Well Control Engineering</p>

@@ -17,7 +17,8 @@
   gate-config.js beside the page supplies the endpoint (window.PCGATE.postUrl) and is
   read here without the gate; nothing in it is secret except the URL, which never
   travels in a file that is committed or emailed.
-  Rev 2, 24 September 2026 (Rev 1 was acknowledge.html, gated).
+  Rev 3, 26 September 2026: the acknowledgement record carries aabTitle, originatorName and
+  originatorEmail. Rev 2, 24 September 2026 (Rev 1 was acknowledge.html, gated).
 -->
 <style>
   :root { --sd-blue:#002C77; --sd-light-blue:#0082C0; --sd-yellow:#EDB71E; --sd-orange:#E25303; --sd-fail:#c0392b; --sd-text:#0a1530; --sd-text-light:#5a6880; --sd-border:#d0d8e8; --sd-bg:#f4f6fa; }
@@ -90,7 +91,7 @@
     <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
     <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; close a requested action with a comment and photographs.</div>
   </div>
-  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 2 &middot; 24 Sep 2026</span></div>
+  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 3 &middot; 26 Sep 2026</span></div>
 </header>
 <main>
   <div id="stale" class="banner warn" hidden></div>
@@ -110,7 +111,7 @@
 <script>
 (function () {
   'use strict';
-  var PAGE_REV = 2;
+  var PAGE_REV = 3;
   var WARN_BYTES = 20 * 1024 * 1024, REFUSE_BYTES = 30 * 1024 * 1024;   // the Bulletin Board's own guard
   var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
   var $ = function (id) { return document.getElementById(id); };
@@ -236,6 +237,10 @@
       var record = {
         meta: { kind: 'aab-ack', tool: 'AAB Acknowledgement', rev: PAGE_REV, asset: rigCodes[rigKey] || rigKey, rigkey: rigKey, saved: new Date().toISOString() },
         aabNumber: rec.aabNumber, revision: Number(rec.revision), action: action,
+        // Rev 3: the flow mails the person who posted the advisory and the rig's Subsea
+        // Supervisor (Dan, 26 Sep); the originator travels on the record so the flow
+        // needs no second lookup. Display copies of title and originator name too.
+        aabTitle: rec.title || '', originatorName: rec.originatorName || '', originatorEmail: rec.originatorEmail || '',
         by: name.value.trim(), role: role.value.trim(), crew: crew, at: at.value, comment: comment.value.trim(), photos: photoList
       };
       var json = JSON.stringify(record);
