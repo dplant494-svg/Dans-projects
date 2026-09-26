@@ -12,7 +12,7 @@ Two flows. **AAB Notifications** fires on every AAB post and every acknowledgeme
 | Event | Posted file | To | CC |
 |---|---|---|---|
 | AAB issued (or revised) | `seadrill-aab_<no>_<rev>_<stamp>.json` | each applicable rig: TSL, Subsea Supervisor, ARM, Rig Manager (Rigs sheet) | Office, Superintendents, the gatekeeper |
-| Rig acknowledged / action done / closed by Technical Services | `seadrill-aab-ack_<no>_<rev>_<rigKey>_<stamp>.json` | the person who posted the AAB (originator on the record; the gatekeeper when absent) and the rig's four: TSL, Subsea Supervisor, ARM, Rig Manager | Office, the gatekeeper |
+| Rig acknowledged / closed by Technical Services | `seadrill-aab-ack_<no>_<rev>_<rigKey>_<stamp>.json` | the person who posted the AAB (originator on the record; the gatekeeper when absent) and the rig's four: TSL, Subsea Supervisor, ARM, Rig Manager | Office, the gatekeeper |
 | Overdue chase (daily) | `aab-overdue-pending.json` in the Digests library | the rig's four | Office, the gatekeeper |
 
 Rig people always on To, never CC (your rule, 23 Sep). The gatekeeper is Eric.
@@ -73,7 +73,7 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
 ### IsAck → True: the acknowledgement email (to the originator and the rig's Subsea Supervisor; Dan, 26 Sep)
 
 11. Compose **AckRig**: `coalesce(body('Parse_JSON')?['meta']?['asset'],body('Parse_JSON')?['meta']?['rigkey'],'')`
-    and **AckWhat**: `if(equals(toLower(coalesce(body('Parse_JSON')?['action'],'')), 'close'), 'closed by Technical Services', if(equals(toLower(coalesce(body('Parse_JSON')?['action'],'')), 'actioned'), 'action reported done', 'acknowledged'))`.
+    and **AckWhat**: `if(equals(toLower(coalesce(body('Parse_JSON')?['action'],'')), 'close'), 'closed by Technical Services', 'acknowledged')` (the three-way version with 'actioned' from earlier on 26 Sep still works; 'actioned' is no longer posted).
 11a. **AckRigRow**: List rows present in a table, table **Rigs**, Filter Query fx
     `concat('RigKey eq ''', trim(coalesce(body('Parse_JSON')?['meta']?['rigkey'],'')), '''')`, Top Count `1`.
 11b. Compose **AckTo** (the originator from the record, else the gatekeeper; plus the rig's

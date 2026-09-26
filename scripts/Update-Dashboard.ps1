@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.66'
+$ScriptVersion = '2.67'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1215,6 +1215,31 @@ function ConvertTo-AabBool { param($Value)
     return (([string]$Value).Trim() -match '^(true|yes|y|1)$')
 }
 function ConvertTo-AabText { param($Value) if ($null -eq $Value) { return '' } return ([string]$Value) }
+# v2.67: Windows PowerShell 5.1's JavaScriptSerializer walks a PSObject's members and
+# meets a circular reference (PSParameterizedProperty). Sort-Object and pipelines wrap
+# dictionaries in PSObjects, so everything is unwrapped to plain hashtables, arrays and
+# scalars before serialising aab-data.js.
+function ConvertTo-AabPlain { param($Value)
+    if ($null -eq $Value) { return $null }
+    if ($Value -is [System.Management.Automation.PSObject] -and -not ($Value.BaseObject -is [System.Management.Automation.PSCustomObject])) { $Value = $Value.BaseObject }
+    if ($Value -is [string] -or $Value -is [bool] -or $Value -is [ValueType]) { return $Value }
+    if ($Value -is [System.Collections.IDictionary]) {
+        $h = [ordered]@{}
+        foreach ($k in @($Value.Keys)) { $h[[string]$k] = ConvertTo-AabPlain $Value[$k] }
+        return $h
+    }
+    if ($Value -is [System.Collections.IEnumerable]) {
+        $list = New-Object System.Collections.Generic.List[object]
+        foreach ($x in $Value) { $list.Add((ConvertTo-AabPlain $x)) | Out-Null }
+        return ,$list.ToArray()
+    }
+    if ($Value -is [System.Management.Automation.PSCustomObject] -or $Value.PSObject.Properties.Count -gt 0) {
+        $h = [ordered]@{}
+        foreach ($p in $Value.PSObject.Properties) { if ($p.MemberType -eq 'NoteProperty' -or $p.MemberType -eq 'Property') { $h[$p.Name] = ConvertTo-AabPlain $p.Value } }
+        return $h
+    }
+    return [string]$Value
+}
 # The JSON reader hands a one-element array back as the bare element (PowerShell
 # unrolls it), so every array field is read through this: null -> empty, a string or a
 # single object -> one element, an array -> itself. Returned with the comma so the
@@ -1344,10 +1369,10 @@ function Read-AabAck { param($Json, $Meta, $File)
     if (-not $rig -and $rigKey -and $AabRigCodes.Contains($rigKey)) { $rig = [string]$AabRigCodes[$rigKey] }
     if (-not $rigKey -and $rig) { foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $rig) { $rigKey = [string]$k } } }
     $action = (ConvertTo-AabText (Get-Prop $Json 'action')).Trim().ToLowerInvariant()
-    # v2.66: three actions. 'acknowledge' (a crew's TSL), 'actioned' (the rig reports the
-    # work done, with evidence), 'close' (Technical Services, after review; Dan, 26 Sep:
-    # closing is Eric's from the compliance side, never the rig's).
-    if ($action -ne 'close' -and $action -ne 'actioned') { $action = 'acknowledge' }
+    # v2.67 (Dan, 26 Sep): a Priority 3 is advisory only. Two actions: 'acknowledge' (a crew's
+    # TSL, with evidence photographs when the advisory asks for them) and 'close' (Technical
+    # Services, after review). A legacy 'actioned' record reads as an acknowledgement.
+    if ($action -ne 'close') { $action = 'acknowledge' }
     $crew = (ConvertTo-AabText (Get-Prop $Json 'crew')).Trim().ToUpperInvariant()
     if ($crew -ne 'A' -and $crew -ne 'B') { $crew = '' }
     $saved = ConvertTo-StableTimestamp (Get-Prop $Meta 'saved')
@@ -2722,12 +2747,12 @@ if ($digestPath -and (Test-Path -Path $digestPath) -and $reports.Count -gt 0) {
 
 # v2.65: AAB status. One row per current AAB per applicable rig, from the newest
 # revision's due date and the rig's acknowledgements (joined on aabNumber + revision +
-# rigKey). States, in the words the dashboard prints: outstanding, partly acknowledged
-# (one crew's TSL), acknowledged (both crews; the whole lifecycle when no action is
-# requested), action open (acknowledged, action still to do: its own state, HAZID H3),
-# actioned (the rig has reported the work done with evidence; awaiting Technical
-# Services review), closed (Technical Services, after review), withdrawn. 'overdue'
-# overlays the states where the rig still owes something, past the due date.
+# rigKey). States, in the words the dashboard prints (v2.67, advisory only): outstanding,
+# partly acknowledged (one crew's TSL), acknowledged (both crews, evidence attached when
+# asked; the rig's whole job), closed (Technical Services after review), withdrawn.
+# 'overdue' overlays outstanding and partly acknowledged past the due date. evidenceCount
+# counts the photographs on the rig's acknowledgements; when actionRequested (the advisory
+# asks for evidence) and none is attached, evidenceMissing is true for the reviewer.
 $aabToday = (Get-Date).Date
 $aabById = @{}
 foreach ($r in $aabRaw) {   # duplicate recordId: newest file wins
@@ -2752,7 +2777,7 @@ foreach ($num in $aabByNumber.Keys) {
 }
 $aabAcksSorted = @($aabAckRaw | Sort-Object -Property @{ Expression = { [string]$_.saved } })
 $aabStatus = New-Object System.Collections.Generic.List[object]
-$aabStateCounts = [ordered]@{ overdue = 0; outstanding = 0; 'partly acknowledged' = 0; 'action open' = 0; actioned = 0; acknowledged = 0; closed = 0; withdrawn = 0 }
+$aabStateCounts = [ordered]@{ overdue = 0; outstanding = 0; 'partly acknowledged' = 0; acknowledged = 0; closed = 0; withdrawn = 0 }
 foreach ($num in $aabCurrent.Keys) {
     $cur = $aabCurrent[$num]
     $due = [datetime]::MinValue
@@ -2762,23 +2787,21 @@ foreach ($num in $aabCurrent.Keys) {
         if ($cur.requiresReacknowledgement) { $eligible = @($rigAcks | Where-Object { [int]$_.revision -eq [int]$cur.revision }) }
         else { $eligible = @($rigAcks | Where-Object { [int]$_.revision -le [int]$cur.revision }) }
         $ackAcks = @($eligible | Where-Object { $_.action -eq 'acknowledge' })
-        $doneAcks = @($eligible | Where-Object { $_.action -eq 'actioned' })
         $closeAcks = @($eligible | Where-Object { $_.action -eq 'close' })
+        $evidenceCount = 0; foreach ($a in $ackAcks) { $evidenceCount += @($a.photos).Count }
         $crews = @($ackAcks | ForEach-Object { [string]$_.crew } | Where-Object { $_ } | Sort-Object -Unique)
         $noCrewAck = @($ackAcks | Where-Object { -not $_.crew }).Count -gt 0
         $fullyAck = (($crews -contains 'A') -and ($crews -contains 'B')) -or $noCrewAck
         $state = 'outstanding'
         if ($cur.status -eq 'withdrawn') { $state = 'withdrawn' }
         elseif ($closeAcks.Count -gt 0) { $state = 'closed' }
-        elseif ($doneAcks.Count -gt 0) { $state = 'actioned' }
-        elseif ($fullyAck) { $state = $(if ($cur.actionRequested) { 'action open' } else { 'acknowledged' }) }
+        elseif ($fullyAck) { $state = 'acknowledged' }
         elseif ($ackAcks.Count -gt 0) { $state = 'partly acknowledged' }
-        $open = ($state -eq 'outstanding' -or $state -eq 'partly acknowledged' -or $state -eq 'action open')
+        $open = ($state -eq 'outstanding' -or $state -eq 'partly acknowledged')
         $overdue = $open -and $hasDue -and ($aabToday -gt $due)
         $daysOverdue = 0; if ($overdue) { $daysOverdue = [int]($aabToday - $due).TotalDays }
         $lastAck = $null; if ($ackAcks.Count -gt 0) { $lastAck = $ackAcks[$ackAcks.Count - 1] }
         $lastClose = $null; if ($closeAcks.Count -gt 0) { $lastClose = $closeAcks[$closeAcks.Count - 1] }
-        $lastDone = $null; if ($doneAcks.Count -gt 0) { $lastDone = $doneAcks[$doneAcks.Count - 1] }
         $statusName = $(if ($overdue) { 'overdue' } else { $state })
         $aabStateCounts[$statusName] = [int]$aabStateCounts[$statusName] + 1
         $aabStatus.Add([pscustomobject]@{
@@ -2797,8 +2820,8 @@ foreach ($num in $aabCurrent.Keys) {
             ackCrews    = @($crews)
             acknowledgedAt = $(if ($lastAck) { [string]$lastAck.at } else { '' })
             acknowledgedBy = $(if ($lastAck) { [string]$lastAck.by } else { '' })
-            actionedAt  = $(if ($lastDone) { [string]$lastDone.at } else { '' })     # v2.66
-            actionedBy  = $(if ($lastDone) { [string]$lastDone.by } else { '' })
+            evidenceCount = $evidenceCount                                   # v2.67
+            evidenceMissing = [bool]($cur.actionRequested -and $fullyAck -and $evidenceCount -eq 0)
             closedAt    = $(if ($lastClose) { [string]$lastClose.at } else { '' })
             closedBy    = $(if ($lastClose) { [string]$lastClose.by } else { '' })
             historyCount = $rigAcks.Count
@@ -3220,7 +3243,7 @@ try {
     $aabDir = Split-Path -Parent $aabOutputFile
     if (-not (Test-Path -Path $aabDir)) { New-Item -ItemType Directory -Path $aabDir -Force | Out-Null }
     if ($PSVersionTable.PSEdition -eq 'Core') { $aabJson = $aabFull | ConvertTo-Json -Depth 24 -Compress }
-    else { $aabJson = ConvertTo-JsonArray @($aabFull); $aabJson = $aabJson.Substring(1, $aabJson.Length - 2) }   # 5.1: the big serialiser, unwrapped from its array
+    else { $aabJson = ConvertTo-JsonArray @((ConvertTo-AabPlain $aabFull)); $aabJson = $aabJson.Substring(1, $aabJson.Length - 2) }   # 5.1: plain objects into the big serialiser, unwrapped from its array (v2.67)
     [System.IO.File]::WriteAllText($aabOutputFile, "window.AAB_DATA = $aabJson;`n", (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "Wrote $($aabFullRecords.Count) AAB record(s), $($aabAcksSorted.Count) acknowledgement(s), $($aabFullStatus.Count) rig state(s) to $aabOutputFile" -ForegroundColor Green
 

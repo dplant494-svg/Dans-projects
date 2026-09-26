@@ -9,15 +9,13 @@
    Usage: AAB_REGISTER.render(document.getElementById('aab-register'), { rigKey: '' })  */
 (function () {
   'use strict';
-  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'actioned': 'st-actioned', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
+  var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
   var STATE_HELP = {
     'outstanding': 'No acknowledgement from this rig yet.',
     'partly acknowledged': 'One crew’s Technical Section Leader has acknowledged; the other crew has not.',
-    'acknowledged': 'Both crews have acknowledged. No action was requested, so this is the whole lifecycle.',
-    'action open': 'Both crews have acknowledged; the rig has not yet reported the requested action done.',
-    'actioned': 'The rig has reported the action done with a comment and evidence photographs; awaiting Technical Services review and closure.',
-    'closed': 'Technical Services reviewed the evidence and closed the case.',
-    'overdue': 'Past the due date and still open: outstanding, partly acknowledged, or action open.',
+    'acknowledged': 'Both crews have acknowledged, with evidence when the advisory asked for it. The rig\u2019s job is done; awaiting Technical Services review and closure.',
+    'closed': 'Technical Services reviewed the acknowledgements and evidence and closed the case.',
+    'overdue': 'Past the due date and not yet acknowledged by both crews.',
     'withdrawn': 'The advisory was withdrawn in a later revision; nothing is owed.'
   };
   var CSS = '.aabreg{font:13px/1.45 "Segoe UI",Arial,Helvetica,sans-serif;color:#0a1530}' +
@@ -57,12 +55,10 @@
     var st = row.state, crews = row.ackCrews || [];
     if (st === 'closed') return 'Nothing owed: closed by Technical Services' + (row.closedBy ? ' (' + row.closedBy + ')' : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
     if (st === 'withdrawn') return 'Nothing owed: the advisory was withdrawn.';
-    if (st === 'acknowledged') return 'Nothing owed: acknowledged by both crews' + (row.acknowledgedAt ? ', last on ' + row.acknowledgedAt : '') + '.';
-    if (st === 'actioned') return 'Reported done' + (row.actionedBy ? ' by ' + row.actionedBy : '') + (row.actionedAt ? ' on ' + row.actionedAt : '') + '. Waiting on Technical Services to review the evidence and close the case.';
-    if (st === 'action open') return 'Waiting on the rig to do the action and report it done with a comment and evidence photographs (on the rig page).' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
+    if (st === 'acknowledged') return 'Acknowledged by both crews' + (row.acknowledgedAt ? ', last on ' + row.acknowledgedAt : '') + (row.evidenceCount ? ', ' + row.evidenceCount + ' photograph(s) attached' : '') + (row.evidenceMissing ? '. NO EVIDENCE ATTACHED although this advisory asks for it' : '') + '. Waiting on Technical Services to review and close the case.';
     var left = ['A', 'B'].filter(function (c) { return crews.indexOf(c) === -1; });
     var who = left.map(function (c) { return 'Technical Section Leader, crew ' + c; }).join(' and ');
-    var s = 'Waiting on: ' + (who || 'the rig') + ' to acknowledge' + (rec && rec.actionRequested ? ', then the rig to report the action done with evidence' : '') + '.';
+    var s = 'Waiting on: ' + (who || 'the rig') + ' to acknowledge' + (rec && rec.actionRequested ? ' with evidence photographs' : '') + '.';
     if (crews.length) s += ' Acknowledged so far by crew ' + crews.join(' and ') + (row.acknowledgedBy ? ' (' + row.acknowledgedBy + ')' : '') + '.';
     if (row.overdue) s += ' Overdue by ' + row.daysOverdue + ' days (due ' + row.dueDate + ').';
     return s;
@@ -93,15 +89,15 @@
     if (!records.length) { root.appendChild(mk('div', 'empty', opts.rigKey ? 'No advisory applies to this rig.' : 'No advisories posted yet. Advisories created on the Bulletin Board appear here within ten minutes.')); return; }
 
     var counts = {}; status.forEach(function (r) { counts[r.status] = (counts[r.status] || 0) + 1; });
-    var open = status.filter(function (r) { return r.state !== 'closed' && r.state !== 'acknowledged' && r.state !== 'withdrawn' && r.state !== 'actioned'; }).length;
-    var review = status.filter(function (r) { return r.state === 'actioned'; }).length;
+    var open = status.filter(function (r) { return r.state === 'outstanding' || r.state === 'partly acknowledged'; }).length;
+    var review = status.filter(function (r) { return r.state === 'acknowledged'; }).length;
     var done = status.filter(function (r) { return r.state === 'closed' || r.state === 'acknowledged'; }).length;
     var scored = status.filter(function (r) { return r.state !== 'withdrawn'; }).length;
     var kpis = mk('div', 'kpis');
     function kpi(l, v, s, att) { var k = mk('div', 'kpi' + (att ? ' att' : '')); k.appendChild(mk('div', 'l', l)); k.appendChild(mk('div', 'v', String(v))); if (s) k.appendChild(mk('div', 's', s)); kpis.appendChild(k); }
     kpi('Overdue', counts.overdue || 0, 'rig states past the due date', (counts.overdue || 0) > 0);
-    kpi('Open rig states', open, (counts.outstanding || 0) + ' outstanding · ' + (counts['partly acknowledged'] || 0) + ' partly · ' + (counts['action open'] || 0) + ' action open');
-    kpi('Awaiting your review', review, 'reported done by the rig; close from the rig table', review > 0);
+    kpi('Open rig states', open, (counts.outstanding || 0) + ' outstanding · ' + (counts['partly acknowledged'] || 0) + ' partly acknowledged');
+    kpi('Awaiting your review', review, 'acknowledged by both crews; close from the rig table', review > 0);
     kpi('Acknowledged or closed', scored ? Math.round(done / scored * 100) + '%' : '—', done + ' of ' + scored + ' rig states');
     kpi('Current advisories', records.length, (data.records || []).length + ' revision(s) on file' + (data.generatedAt ? ' · updated ' + String(data.generatedAt).replace('T', ' ').slice(0, 16) : ''));
     root.appendChild(kpis);
@@ -133,7 +129,7 @@
     });
     table.appendChild(tbody); root.appendChild(table);
     var legend = mk('div', 'legend');
-    ['overdue', 'outstanding', 'partly acknowledged', 'action open', 'actioned', 'acknowledged', 'closed', 'withdrawn'].forEach(function (st) { legend.appendChild(mk('span', 'chip ' + STATE_CLASS[st], st)); legend.appendChild(document.createTextNode(' ' + STATE_HELP[st] + '  ')); });
+    ['overdue', 'outstanding', 'partly acknowledged', 'acknowledged', 'closed', 'withdrawn'].forEach(function (st) { legend.appendChild(mk('span', 'chip ' + STATE_CLASS[st], st)); legend.appendChild(document.createTextNode(' ' + STATE_HELP[st] + '  ')); });
     root.appendChild(legend);
   }
 
@@ -152,7 +148,7 @@
 
     d.appendChild(mk('h4', '', 'Rigs (' + rows.length + ')'));
     var rt = mk('table', 'rigtab'); var th = mk('thead'); var tr0 = mk('tr');
-    ['Rig', 'State', 'Crews', 'Last acknowledgement', 'Closed', 'History and evidence'].forEach(function (h) { tr0.appendChild(mk('th', '', h)); }); th.appendChild(tr0); rt.appendChild(th);
+    ['Rig', 'State', 'Crews', 'Last acknowledgement', 'Evidence', 'Closed', 'History and evidence'].forEach(function (h) { tr0.appendChild(mk('th', '', h)); }); th.appendChild(tr0); rt.appendChild(th);
     var tb = mk('tbody');
     rows.forEach(function (r) {
       var tr = mk('tr'); tr.appendChild(mk('td', '', r.rig));
@@ -160,14 +156,15 @@
       var wl = mk('div', 'sub'); wl.hidden = true; wl.textContent = waitingOn(r, rec);
       stc.addEventListener('click', function () { wl.hidden = !wl.hidden; });
       tds.appendChild(stc); tds.appendChild(wl);
-      if (opts && opts.canClose && (r.state === 'actioned' || r.state === 'action open' || r.state === 'acknowledged')) tds.appendChild(closeForm(rec, r, data));
+      if (opts && opts.canClose && r.state === 'acknowledged') tds.appendChild(closeForm(rec, r, data));
       tr.appendChild(tds);
       tr.appendChild(mk('td', '', (r.ackCrews || []).length ? r.ackCrews.join(' and ') : '—'));
       tr.appendChild(mk('td', '', r.acknowledgedAt ? r.acknowledgedAt + (r.acknowledgedBy ? ' · ' + r.acknowledgedBy : '') : '—'));
+      var tde = mk('td', '', r.evidenceCount ? r.evidenceCount + ' photo(s)' : (rec.actionRequested ? (r.state === 'acknowledged' ? 'MISSING' : 'asked for') : 'not asked for')); if (r.evidenceMissing) tde.style.color = '#c0392b'; tr.appendChild(tde);
       tr.appendChild(mk('td', '', r.closedAt ? r.closedAt + (r.closedBy ? ' · ' + r.closedBy : '') : '—'));
       var tdh = mk('td'); var hist = acks.filter(function (a) { return a.rigKey === r.rigKey; });
       if (!hist.length) tdh.textContent = '—';
-      else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : a.action === 'actioned' ? 'reported done' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); hul.appendChild(li); }); tdh.appendChild(hul); }
+      else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); hul.appendChild(li); }); tdh.appendChild(hul); }
       tr.appendChild(tdh); tb.appendChild(tr);
     });
     rt.appendChild(tb); d.appendChild(rt);
@@ -184,7 +181,7 @@
     var key = rec.aabNumber + '|' + rec.revision + '|' + row.rigKey;
     if (posted[key]) return mk('div', 'sub', 'Closure posted; the state updates within ten minutes.');
     var f = mk('form', 'close');
-    f.appendChild(mk('div', 'sub', row.state === 'actioned' ? 'Review the evidence, then close this rig\u2019s case.' : 'Close this rig\u2019s case without a report from the rig (say why).'));
+    f.appendChild(mk('div', 'sub', row.evidenceMissing ? 'This advisory asks for evidence and none is attached: ask the rig, or close with a reason.' : 'Review the acknowledgements' + (row.evidenceCount ? ' and the ' + row.evidenceCount + ' photograph(s)' : '') + ', then close this rig\u2019s case.'));
     var name = mk('input'); name.placeholder = 'Your name'; name.required = true; f.appendChild(name);
     var comment = mk('textarea'); comment.rows = 2; comment.placeholder = 'Review comment (required)'; comment.required = true; f.appendChild(comment);
     var btn = mk('button', '', 'Close this rig\u2019s case'); btn.type = 'submit'; f.appendChild(btn);
