@@ -9,6 +9,7 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 **Live**: plantworksstudio.com on Netlify, HTTPS, both languages, demos hidden from search. Mailbox info@ on Namecheap Private Email, working on the Samsung phone over IMAP. Contact form posts to Netlify Forms and emails info@. Search Console verified, sitemap accepted with two pages. Templates for invoices (EN, ES) and proposals in `templates/`.
 
 **Next, in order**
+0. Praetorian Fitness (friend's apparel brand): draft site built in `clients/praetorian-fitness/`. Send the preview, then ask for: logo as a vector, full-resolution photos, confirmed prices, domain, mailbox, Instagram handle. Deploy as a separate Netlify project (form detection on first, then notifications). Remove `noindex` at launch. Shop later: Stripe Payment Links on the static site, or Shopify if the range grows.
 1. Talk to business owners. Launch offer: first five multi-page sites at €1,200 for a review and portfolio permission. Record the conversation, paste the transcript here, get the proposal back.
 2. UK limited company via an online accountant (registered office, ID verification, corporation tax registration included). Then: business bank account (Tide or Wise), Stripe, company number and address into the site footer and the invoice templates.
 3. Spanish native read of the ES page. Wife has the file.
@@ -40,11 +41,16 @@ plantworks-studio/
 │       └── pinar-property/   ← property management, Estepona. EN at /, ES at /es/
 ├── templates/                ← invoice (EN, ES) and proposal Word templates, plus the script that builds them
 └── clients/
-    └── the-fifth-quarter/    ← client site. Deploy this folder as-is.
+    ├── the-fifth-quarter/    ← client site. Deploy this folder as-is.
+    │   ├── index.html
+    │   ├── sitemap.xml
+    │   ├── robots.txt
+    │   └── NOTES.md          ← open items and what's deliberately left out
+    └── praetorian-fitness/   ← client site (pre-launch, noindex). Deploy this folder as its own Netlify project.
         ├── index.html
-        ├── sitemap.xml
-        ├── robots.txt
-        └── NOTES.md          ← open items and what's deliberately left out
+        ├── thanks/index.html ← launch-list form landing page
+        ├── img/              ← crops from the supplied phone images; replace with originals
+        └── NOTES.md
 ```
 
 Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect the domain, HTTPS issues itself. No build step, no dependencies beyond Google Fonts.
@@ -97,6 +103,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 
 1. **Portfolio of three**
    - [x] The Fifth Quarter (in flight; open items in `clients/the-fifth-quarter/NOTES.md`)
+   - [x] Praetorian Fitness, premium gym apparel (draft built; placeholders and asks in `clients/praetorian-fitness/NOTES.md`)
    - [x] Fictional bilingual Marbella restaurant: Brasa y Sal (`site/work/brasa-y-sal/`)
    - [x] Fictional property-services site: Pinar Property Care (`site/work/pinar-property/`)
 2. **Own studio site**
