@@ -16,8 +16,9 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 4. Logo: done, title block + P mark, in `site/brand/`. Use `mark-512.png` as the avatar everywhere and `lockup.png` on documents.
 5. Phone, two numbers on the Galaxy S23 Ultra (unlocked, Vodafone UK in the physical slot):
    - Now: install WhatsApp Business on the UK number (the one on the site), move personal chats into it, set greeting, hours, site link, quick replies for "prices" and "how it works".
-   - Next trip to Spain: prepaid eSIM on a passport (Digi, Lobster, Vodafone ES, Orange or Movistar all sell eSIMs). SIM manager: mobile data on the Spanish SIM while in Spain, calls and texts "ask every time".
-   - Then: Settings, Advanced features, Dual Messenger, second WhatsApp on the second number. Decide which number is the studio's and swap it on the site with one search-and-replace (`447464435081`).
+   - Done: Spanish SIM in, WhatsApp Business on **+34 722 676 631** with the P mark as photo. Profile, greeting, away and quick-reply texts (EN/ES) in `templates/whatsapp.md`.
+   - Now: Samsung Keyboard Chat assist (chat translation, Spanish pack) so Spanish chats can be answered in English.
+   - Decide which number the site shows. To switch to the Spanish one, replace `447464435081` with `34722676631` and `+44 7464 435081` with `+34 722 676 631` in both studio pages, then rezip and redeploy.
    - Password manager (Bitwarden, free) before the first client hands over a login.
 6. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
 7. Google Business Profile once there is a verifiable address.
@@ -39,7 +40,7 @@ plantworks-studio/
 │       ├── README.md         ← what's invented, how to reuse for a real client
 │       ├── brasa-y-sal/      ← beach restaurant, Marbella. ES at /, EN at /en/
 │       └── pinar-property/   ← property management, Estepona. EN at /, ES at /es/
-├── templates/                ← invoice (EN, ES) and proposal Word templates, plus the script that builds them
+├── templates/                ← invoice (EN, ES) and proposal Word templates, WhatsApp texts (EN/ES), and the script that builds the docx files
 └── clients/
     ├── the-fifth-quarter/    ← client site. Deploy this folder as-is.
     │   ├── index.html
