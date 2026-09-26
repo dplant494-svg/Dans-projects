@@ -18,11 +18,15 @@ are never load-bearing · `meta.asset` is the rig identity contract.
 
 | # | Change | Rev | Status |
 |---|---|---|---|
+| 36 | **The Ram Cavity checker was never a calculator — it is a dimensional inspection record, and nothing it produced has ever been posted** | SSORT 148 | **NEEDS ACTION** — one new tile key, `calcData`. No history to re-read: it has never arrived before |
+| 35 | **Dan reviewed all 52 open tasks — criteria now on 93 of 104, and nine `_gr` keys stop being posted** | SSORT 148 | **NEEDS ACTION** — nine keys named in full. Cleaning tasks keep photos and notes, lose the 1–5 grade |
+| 34 | **Every NOV document reference audited against its own title block — 13 of 16 exact, one fixed, and the Ram Block entry was an outlier** | SSORT 148 | **FYI** — no keys change. Display and print only |
+| 33 | **A seventh ram block class (`Ram Block::Fixed`), a wrong NOV document number on every ram block report, and the OEM button is held** | SSORT 148 | **NEEDS ACTION** — one new key family. Button does not ship until flow Part D is proven |
 | 32 | **Criteria coverage 41 of 101 — and a method we proposed in the review sheet was wrong, withdrawn here** | SSORT 148 | **FYI** — no keys change. More NOV wording reaches you through `cbmlabels`; the rest keeps the universal scale |
-| 31 | **Post to OEM is built — but SSORT sends `html` and your flow test read `pdf`. SSORT has no PDF renderer** | SSORT 148 | **NEEDS DECISION** — does the flow convert HTML? If not, a crew pressing the button sends NOV an email with no attachment |
-| 30 | **Ram Block split into its six types — and the `n:` key map you asked for is EMPTY, by evidence: no id moved** | SSORT 148 | **NEEDS ACTION** — one check: has any report ever posted under the bare generic `Ram Block` class? |
-| 29 | **SSORT goes native too — the last iframe in either tool is gone, and its acoustic / EHBS / drawdown keys hash IDENTICAL to WCGRRT’s** | SSORT 148 | **FYI** — no new keys, nothing to build. Your entry 22/23 renderers read SSORT unchanged. −22.9% file size |
-| 28 | **`cbmlabels` — NOV’s task wording beside every posted CBM key. Your 24.2 ask, built** | SSORT 148 | **NEEDS ACTION** — one new key, additive, lower case; 2.9–8 KB per report; `itemLabel` unchanged |
+| 31 | **Post to OEM is built — but SSORT sends `html` and your flow test read `pdf`. SSORT has no PDF renderer** | SSORT 148 | **CLOSED 24 Sep** — answered: the flow reads `pdf` only and falls back to a 1-byte file. Button held; wording changed per 31.5 |
+| 30 | **Ram Block split into its six types — and the `n:` key map you asked for is EMPTY, by evidence: no id moved** | SSORT 148 | **CLOSED 24 Sep** — empty `n:` accepted, not needed. Scanner now counts generic `Ram Block` posts on every run |
+| 29 | **SSORT goes native too — the last iframe in either tool is gone, and its acoustic / EHBS / drawdown keys hash IDENTICAL to WCGRRT’s** | SSORT 148 | **CLOSED 24 Sep** — SSORT posts reach the same three renderers unchanged |
+| 28 | **`cbmlabels` — NOV’s task wording beside every posted CBM key. Your 24.2 ask, built** | SSORT 148 | **CLOSED 24 Sep** — `cbmlabels` built (v2.64), and it exposed two live defects on their side, both fixed |
 | 27 | **Conditional triggers now surface on a grade of 4 or 5 — as a prompt, not a ruling** | SSORT 148 | **CLOSED 23 Sep** — they agree: a computed judgement is not displayed as a recorded fact either. Nothing built, nothing owed |
 | 26 | **NOV’s grade criteria are now on the LIVE path — 9 of 65 migrated, with per-item document/page provenance** | SSORT 148 | **CLOSED 23 Sep** — acknowledged. Ram Block split needs an `n:` section in `cbm-key-map.json` **before** that build ships |
 | 25 | **`CBM_GRADED` is dead code in the deployed build — and there are TWO CBM key namespaces, positional and id-based** | SSORT 147 · 148 | **CLOSED 23 Sep** — decision (a), with us. Replay check built (v2.63): a `SSORT`-stamped post with positional keys is listed as a replay |
@@ -53,6 +57,444 @@ our side of that exchange: the one piece of work the reply said was still owed b
 Entry 6 answers the v2.40 addendum — the nine files the first scan found over 10 MB.
 Entries 8 and 9 are ours: both were found by reading our own code to answer the single
 assumption your 14 September reply asked us to confirm.*
+
+---
+
+## Entry 36 — The Ram Cavity checker was never a calculator. It is a dimensional inspection record, and nothing it produced has ever been posted. One new key: `calcData`
+
+**Rev: SSORT 148.** Status: **NEEDS ACTION** — one new tile-level key, shape given in full below.
+
+### 36.1 What it is, and why it was invisible to you
+
+The Calculators tile carries two entries. One really is a calculator (Conduit Flush — a
+volume and a time, worked out on the spot and used). The other, labelled *Cavity
+Dimensions*, is the **NOV BOP Ram Cavity Dimensions Checker**, and it is not a calculator
+at all. It records:
+
+- a rig, a test date, a **supervisor** and a **witness**
+- for each of 5, 6 or 7 cavities: the ram type, the block style, four vertical readings
+  (skid plate to seal seat, 90° apart), three horizontal readings (side pad to side pad),
+  and where the block style requires it, six ram-block points and two widths
+- a **PASS / FAIL** judgement on every one of those against **TR-WCE-331-038 Rev 3,
+  Figure 7 — BOP Cavity Nominal Limits**
+
+That is a record of whether a BOP ram cavity is within the manufacturer's limits. It sat
+inside a `srcdoc` iframe, and the tile payload has slots for `vsrData`, `caData`,
+`inspData`, `cbmData`, `r53Data`, `sbopData` and `pdcData` — **and none for the
+calculators**. So nothing a crew typed into it has ever reached you, or survived a page
+reload. Same defect class as the acoustic and EDS iframes in entries 17 and 29, on a
+record that matters as much.
+
+**You will not find it in your index, because it has never been there.** There is no
+historical data to re-read and nothing to replay. From REV 148 it starts arriving.
+
+### 36.2 The new key, in full
+
+One new key on the tile object, alongside the seven that already exist. Absent (or
+`null`) on any tile that is not a Calculators tile, and **`null` on a Calculators tile
+where nothing has been entered** — an untouched tile adds nothing to the payload.
+
+```
+calcData : {
+  unit      : "in" | "mm",          // the display unit the readings are IN
+  hdr       : { cfg: "5"|"6"|"7", date: "YYYY-MM-DD", sup: "", wit: "" },
+  summary   : { pass: n, fail: n, est: n, nospec: n, na: n },
+  cavities  : [ {
+      id             : 0,
+      position       : "UBSR"|"CSR"|"LBSR"|"UPR"|"MPR"|"LPR"|"TPR",
+      label          : "UBSR — Upper Blind Shear Ram",
+      ramType        : "pipe"|"multiram"|"shear"|"casingshear"|"reversible"|"empty",
+      blockStyle     : "CVX"|"CVX-W"|"LFS-5"|"LFS-3"          // shear
+                     | "Standard"|"Unsealed LFS-5"|"LFCS"|"LFCS-5"   // casing shear
+                     | "",
+      plateMode      : "with" | "without",
+      plateChoice    : "<NOV part no>" | "custom" | "",
+      plateMin       : 0.560, plateMax : 0.562,               // when a plate is chosen
+      customThickness: "",
+      forceBlock     : false,
+      expanded       : true,
+      vertical       : { fwd:"", stbd:"", aft:"", port:"" },
+      horizontal     : { fwd:"", mid:"", aft:"" },
+      block          : { fwd:["","","",""], aft:["","","",""] }   // pts 1-3 then width
+  } , ... ]
+}
+```
+
+**Three things to hold on to when you read it.**
+
+1. **`unit` governs every reading in the object.** The readings are stored as the crew
+   typed them, in whichever unit was selected. The nominal limits are always inches.
+   Convert with 25.4 before comparing anything to a published limit. A 7-cavity stack in
+   mm reads around 184.2, not 7.252 — do not treat that as an outlier.
+2. **`summary` is a convenience, not the record.** It is the count of cavities at each
+   overall status at the moment of collection. The rows are the evidence.
+3. **Empty strings mean not measured.** A cavity with partial readings is `na`
+   (INCOMPLETE), not a fail. Please do not roll INCOMPLETE into a fail bucket — that is
+   the same argument as entry 21 about Grade 3, and the same answer.
+
+### 36.3 The status values, and what each one means
+
+`evalCavity` returns a row per check; the cavity's overall status is the worst of them.
+Five values, and the two in the middle are the ones worth building for:
+
+| status | meaning |
+|---|---|
+| `pass` | every measured check within the TR-WCE-331-038 nominal |
+| `fail` | at least one check outside it. **This is the one to surface** |
+| `est` | measured as a bare casting, with a skid plate thickness added to estimate the assembled height. **Not a measured result** — it must be confirmed with plates installed before anyone signs it off. Do not present an `est` as a pass |
+| `nospec` | the block style has **no published limit**. Unsealed LFS-5, LFCS and LFCS-5 are unsealed casing shear variants and NOV has not published cavity limits for them. The readings are recorded for reference; there is nothing to judge them against, and **we have not invented a limit** |
+| `na` | not enough readings entered yet |
+
+### 36.4 Two things we removed rather than carried across
+
+**The Demo Data button is gone.** The standalone tool had one. `fillDemoData()` wrote
+randomised readings into the same `vertical` / `horizontal` / `block` fields an inspector
+types into — deliberately close to the nominal limits, alternating pass and fail down the
+stack, so a printout could be demonstrated without going offshore. Inside the iframe that
+was harmless, because nothing it produced was collected. Native and collected, one click
+would have put fabricated cavity measurements into a posted well-control record, and
+nothing in the payload would distinguish them from real ones. **It is not ported.** If
+you ever see a cavity stack that looks too neatly half-passing, it did not come from
+SSORT 148 or later.
+
+**Its own Print path is gone.** The tool ran its own `window.print()` from inside the
+iframe. It now renders through SSORT's report output like every other tile, behind a
+Print / PDF button on the Calculators tile header.
+
+### 36.5 A restore defect we found on the way, which would have destroyed records
+
+`loadState()` and the file-import path both rebuild the tiles **before** they put
+`meta-asset` back. The cavity block takes its rig from `meta-asset`, so on the first
+build a crash-recovered stack came back as an empty form — and then the next autosave
+**wrote that empty form over the good one**. A crew who reloaded would have lost the
+measurements and had no way to know.
+
+Fixed two ways: the rig gate now only applies to a *fresh* mount, since restored data
+carries its own configuration; and both restore paths now call `onAssetChange()` after
+restoring the meta fields, which is what every other programmatic setter of `meta-asset`
+in the file already did (`dlSetRig` and the daily-log restore). **Nothing else in SSORT
+read `meta-asset` at restore time, so nothing else was affected** — but it is worth your
+knowing the shape of it, because the same ordering exists on your side wherever a
+restored record depends on a field restored later.
+
+### 36.6 The iframe is gone, and that is now true of both tools
+
+`RAM_CAVITY_HTML_B64` — 237,036 chars of base64 carrying the whole standalone tool — is
+stripped. It was the **last embedded tool in either app**. WCGRRT reached that state at
+REV 166 (entry 23); SSORT reaches it now.
+
+| | |
+|---|---|
+| SSORT 148 before | 6,943,369 bytes |
+| SSORT 148 after | 6,766,746 bytes |
+| saved | **176,623 bytes** |
+
+The arithmetic was carried across unchanged and proved, not assumed: both versions were
+run over **8,000 randomly generated cavities**, in both units, across every ram type,
+block style and plate mode, and every row of every evaluation — item, measured, nominal,
+status and note — plus the overall status matched **exactly**. The six reference tables
+(`RAM_TYPES`, `SHEAR_BLOCK_SPECS`, `CASING_SHEAR_SPECS`, `STD_PLATES`, `SLOT_PLATES`,
+`CAVITY_TEMPLATES`) are byte-identical to the source.
+
+### 36.7 Nothing else moved
+
+Posting path byte-identical to REV 147. Zero `no-cors`. Photo compression still 0.82.
+Every existing `data-soak`, `data-cbm`, `data-vsr` and `data-cf` key present and
+unchanged; no tile-payload key removed; exactly one added, and it is additive. Both
+script blocks `node --check` clean, extraction reconciles, no duplicate top-level
+declarations. The module is a single closure — the source's 45 top-level names are all
+private, which is what disposes of the four that collided with SSORT (`POSITION_LABELS`,
+`CAVITY_TEMPLATES`, `num` and `SEADRILL_LOGO_WHITE`); three of those four differed in
+value, and §7.9 means the last declaration would have won silently and broken the BOP
+Config stack builder with no error anywhere.
+
+---
+
+## Entry 35 — Dan reviewed all 52 open tasks. Criteria now on 93 of 104, and nine `_gr` keys stop being posted
+
+**Rev: SSORT 148.** Status: **NEEDS ACTION** — nine keys stop arriving. Named in full below.
+
+### 35.1 The key change, named
+
+Dan's decision, 24 Sep: a cleaning task should not carry a 1–5 grade. *"If it says clean, you
+clean and add a check box then take pictures. I'm assuming the inspection task comes after
+the cleaning."* He has put it to NOV; this is the tool side of it.
+
+Task `7.1.1B`, **"Clean ram blocks and seals with fresh water"**, on all nine ram block
+classes, no longer shows grade buttons. **These nine keys stop being posted:**
+
+```
+cbm_Ram_Block_7_1_1B_gr
+cbm_Ram_Block__MultiRam_7_1_1B_gr
+cbm_Ram_Block__LFS_7_1_1B_gr
+cbm_Ram_Block__Shear_7_1_1B_gr
+cbm_Ram_Block__CasingShear_7_1_1B_gr
+cbm_Ram_Block__LFSCSG_7_1_1B_gr
+cbm_Ram_Block__Blind_7_1_1B_gr
+cbm_Ram_Block__PipeBlindFixed_7_1_1B_gr
+cbm_Ram_Block__BiDirectional_7_1_1B_gr
+```
+
+**Only the `_gr` goes.** `_cm` and `_ph` continue, and the task now explicitly asks for
+photographs — NOV requires photographic evidence on every inspection item, and a cleaning
+task keeps its evidence, it just stops carrying a judgement.
+
+**This is not hypothetical, and the history proves the point.** Three posted West Capella
+files already carry `cbm_Ram_Block__MultiRam_7_1_1B_gr = "1"` — a crew graded *"clean with
+fresh water"* as a 1, three times. Those three rows stay in your index and should stay
+visible; nothing is being rewritten. From SSORT 148 onwards the key simply will not arrive.
+Absence means "not graded because there is nothing to grade", not "missing".
+
+The Flexloops cleaning task `23.1.1` **keeps** its grade — Dan's call, and it is a different
+task: it combines cleaning with a check for damage and corrosion.
+
+### 35.2 Coverage
+
+| | before | now |
+|---|---|---|
+| gradeable tasks | 113 | **104** (nine cleaning tasks left the pool) |
+| carrying NOV criteria | 61 | **93** |
+| without item criteria | 52 | **11** |
+
+The remaining 11 are the ones Dan judged genuinely have no NOV counterpart: six C&K Stabs
+items with no mapped document, three BOP Mandrel items (latch profile, ring groove area and
+weld seams — there is no latch item in any of the 14 documents, and weld seams are, in his
+words, "absolutely nothing to do with fasteners"), and two others. They keep the universal
+GRADE LEVEL EVALUATION GUIDE on the `ⓘ scale` button.
+
+### 35.3 One correction we made to his decision, same document, better line
+
+Three rows — `7.1.5B` on Blind, PipeBlindFixed and BiDirectional — are *"Visually inspect
+cross strap seal retaining groove"*. The matcher had paired them with NOV's **RRA** item at
+0.10 overlap. Their own documents carry *"Visually inspect Ram Block **grooves** for damage,
+pitting and corrosion"*, which is obviously the right line.
+
+**Why the matcher missed it:** its tokeniser treats `groove` and `grooves` as different
+words, so the correct candidate scored **zero** overlap while the wrong one scored 0.10. Dan
+ticked "apply" meaning grade this task; it is now graded against the right line of the same
+document. Worth recording as a weakness in the method, not just a fixed row.
+
+### 35.4 Nothing else moved
+
+All 418 posted keys byte-identical apart from the nine `_gr` above — asserted mechanically,
+and the run writes nothing if a task id, a description or an existing criteria string moves.
+Posting path byte-identical to REV 147, zero `no-cors`, extraction reconciles, both script
+blocks clean, no duplicate declarations. File 6,959,523 bytes.
+
+---
+
+## Entry 34 — every NOV document reference audited against its own title block. The Ram Block entry was an outlier, not a pattern
+
+**Rev: SSORT 148.** Status: **FYI** — no keys change, nothing to build. Recorded because
+these strings are what a crew signs and an OEM auditor checks a document number against.
+
+### 34.1 Why
+
+Entry 33 found **three** errors in the single `CBM_REF["Ram Block"]` entry: the document
+number two digits out, the revision a version behind, and a title matching neither the
+document's title block nor its body. One entry being that wrong is a reason to look at the
+other fifteen rather than assume they are fine.
+
+### 34.2 Method
+
+Ground truth is each PDF's own front matter, never a filename: the component name printed
+under "CBM INSPECTION DOCUMENT", the "TEMPLATE DOCUMENT NUMBER" and the "REVISION" beside
+it. **14 distinct documents** across the 44 files on disk. Every `CBM_REF` entry was then
+compared on all three: template number, revision, title.
+
+### 34.3 Result
+
+| | |
+|---|---|
+| `CBM_REF` entries (distinct objects, aliases counted once) | 16 |
+| **match the document exactly** | **13** |
+| genuinely wrong | **1**, now fixed |
+| intentional difference | 2 |
+
+**The one real finding:** `Ram Block::LFS` carried *"NXT Low Force Shear Ram Blocks"*. The
+document's title block reads *"Blind Shear Rams NXT Low Force Shear Ram Blocks"*. A
+shortening rather than an error, but exact is cheaper to defend to an auditor than nearly.
+Corrected.
+
+**The two intentional ones** are `Ram Block::PipeBlindFixed` and `Ram Block::BiDirectional`.
+Their document's title block names both types together, so neither sub-class can carry it
+verbatim; they carry NOV's own wording for the **component**, taken from the body of the same
+document. Flagged by the audit, correct as they stand.
+
+So the Ram Block entry was an outlier. The rest of the references are sound, and that is
+worth knowing as plainly as the errors were.
+
+### 34.4 A false positive from our own tooling, said out loud
+
+The audit first reported `Ram Block::CasingShear` as citing a document that does not exist.
+It does exist and the reference is right. The PDF's text layer renders its number as
+`D9D100 8038-PRO-001 | REV01` — a space inside the document number and none before the
+revision — and our pattern did not tolerate either.
+
+That is the **second** false negative our extraction has produced today; the first told us
+"pipe" appeared nowhere in any document when in fact it is all through `D9D1008025`. Both
+were caught by reading the document. The lesson we are taking: a regex result over this PDF
+text layer is a lead, not a finding, and anything that says "none" gets read by eye before it
+is repeated to anyone.
+
+### 34.5 Unchanged
+
+Display and print only — no payload carries a document reference, so no key, no value and no
+historical record moves. Posting path byte-identical to REV 147, zero `no-cors`, extraction
+reconciles, both script blocks clean. File 6,948,284 bytes.
+
+---
+
+## Entry 33 — a seventh ram block class, a wrong document number on every ram block report, and the OEM button is held
+
+**Rev: SSORT 148.** Status: **NEEDS ACTION** — one new equipment class, so one new key family.
+
+### 33.1 Post to OEM does NOT ship. Your answer settles it
+
+Thank you for checking the flow rather than assuming. "The flow reads `pdf` only... the
+attachment expression falls back to a one-byte placeholder when `pdf` is absent, so a real
+press of the button today would email NOV a one-byte file called `.pdf`." That is worse than
+the no-attachment case we guessed at, and it is exactly why the question was asked before a
+rig ever pressed it.
+
+Done on our side: **31.5, the wording is changed** to *"Sent for OEM delivery"*, on both the
+button and the toast, with the reasoning recorded beside it — all the tool can see is that
+the POST returned `res.ok`. Whether the flow could build the attachment, and whether NOV's
+gateway accepted it, happen later and out of sight.
+
+Not done, and not ours: Part D of the flow guide. **The button stays unshipped until Dan has
+built and proven it in test mode.** Nothing else in SSORT 148 depends on it.
+
+### 33.2 New class: `Ram Block::Fixed` — a new key family
+
+Dan, 24 Sep: *"Ram blocks, there should be casing CSR, LFSCSG, BLIND, LFS, MULTI and FIXED
+to name a few."* Fixed was missing from the six in entry 30. Added, on the same terms:
+
+- posted class `Ram Block::Fixed`, keys `cbm_Ram_Block__Fixed_<id>` — **the only new key
+  family in this entry**
+- the same 13 task ids as every other ram block class, byte-identical; the build refuses to
+  write if any copy's structure diverges from the generic
+- its NOV document is `D9D1008025-PRO-001`, whose title is "NXT Ram Blocks — Pipe / Blind /
+  Fixed"; 3 of its 6 gradeable tasks took criteria from it
+
+"To name a few" means this list may still not be complete. **Pipe** is named in that
+document's own title and has no class yet; we have not invented one, and it is on Dan's list.
+
+### 33.3 A wrong NOV document number, on every ram block report ever printed
+
+Found while checking which document covers Fixed. `CBM_REF["Ram Block"].docNo` read
+**`D9D1998025-PRO-001`**. There is no such document. The real one is **`D9D1008025-PRO-001`**
+— two digits, `99` where `00` should be — and it is what the PDF's own title block says.
+
+That number is printed on the report a crew signs and an OEM auditor reads. Corrected to
+`D9D1008025-PRO-001 (Rev 02)`. Worth a look on your side at whether any archived ram block
+report shows the wrong number; nothing in the payload carries it, so this is a display and
+print fix only, with no key or data effect.
+
+### 33.4 Dan's domain corrections, and what each one turned out to allow
+
+He went through the 32 held items from entry 32 and gave the engineering rather than the text
+matching. Three outcomes, and only one of them was "apply":
+
+**Side outlets carry BX ring grooves, so a side outlet inspection is a ring groove
+inspection.** NOV agrees: items `8.2`, `9.2` and `10.2` of `D9D1008289` are all "Visually
+inspect side outlet ring groove for any defects" and **all three state the same scale**.
+Applied to `6.1.8` on all three NXT body classes. His reasoning and NOV's document reached
+the same place independently.
+
+**Side plates are not side outlets.** `6.1.3` stays without criteria. The text matcher had
+paired them at 0.43 and was wrong.
+
+**"Latch profile or ring groove will get any ring groove inspection or similar."** This one
+we could not do, and the reason is worth recording. There are **12 ring-groove items across
+the 14 documents and they use 4 different scales**: the SBOP's has no G4, the NXT body's
+ends "Repair required", the Flexloops one is worded differently again. There is no single
+ring-groove measuring stick to borrow. Separately, **no item in any of the 14 documents
+mentions a latch at all**, and "mandrel" appears exactly twice, both in the U2B *door*
+document meaning a door mandrel. So `BOP Mandrel 21.1.2` and `21.1.3` stay without criteria
+until someone points us at the document that grades them.
+
+**"Weld seams are absolutely nothing to do with fasteners."** Agreed, and that was already
+held. `21.1.5` stays.
+
+### 33.5 Dan's position on cleaning tasks, going to NOV — not built
+
+*"A task clean with fresh water doesn't need any scale at all... we only need to scale where
+there is an inspection. If it says clean, you clean and add a check box then take pictures.
+I'm assuming the inspection task comes after the cleaning."*
+
+**Nine gradeable tasks** currently start with clean/lubricate/flush: `Flexloops 23.1.1` and
+`7.1.1B` on all eight ram block classes. Nothing has been changed. Recorded here because Dan
+is putting it to NOV and the answer is theirs, and because if it goes ahead it **removes a
+`_gr` key** from nine tasks, which is a posted-key change and would come through this file
+first with a full list before it ships.
+
+### 33.6 Coverage, and your two defects
+
+| | entry 32 | now |
+|---|---|---|
+| gradeable tasks | 101 | **107** (Fixed adds six) |
+| carrying NOV criteria | 41 | **58** |
+
+On the two defects `cbmlabels` exposed on your side — id keys with a letter (`7_1_2B`) and
+cavity keys (`6_1_2_c0`) matching nothing, and `Ram Block::Shear` building a prefix with the
+colons intact: those are the better result of the day. Every ram block task in Brad's
+MultiRam, Shear and CasingShear posts and every cavity item on an NXT body had been silently
+absent from the heatmap since those shapes first arrived. Neither side would have found it
+from its own code. Good catch, and thank you for saying it plainly.
+
+### 33.7 Unchanged
+
+Posting path byte-identical to REV 147 — 17 transport lines, zero differences. Zero
+`no-cors`. Extraction reconciles, both script blocks clean, no duplicate declarations.
+File 6,941,956 bytes.
+
+One correction to our own method, for the record: the posting-path check briefly reported 18
+lines against 147's 17. That was the checker, not the code — it was matching comment lines,
+and a new comment in the OEM button mentions `res.ok`. The checker now excludes comments,
+which cannot affect the transport. The seventeen real lines are identical.
+
+### 33.8 Addendum, later the same day: the class is renamed, Bi-Directional added, and a correction to 33.2
+
+Dan asked whether NOV references *pipe* anywhere. It does, heavily, and the first search we
+ran said it did not — a false negative from a pattern written the wrong way round
+(`ram.{0,12}pipe`, which cannot match "Pipe / Blind Ram"). Taken at face value it would have
+told Dan the opposite of the truth. Redone properly:
+
+`D9D1008025` Rev 02 calls the component **"NXT Pipe / Blind Ram Blocks Fixed Rams"** right
+through its body — section headings, cleaning instructions, reference photos, the NDE
+component name — while its *title block* reads "NXT Ram Blocks - Bi-Directional and Fixed".
+Page 31 names **both** types side by side, which is why the document carries two identical
+graded sections at p14 and p17. Only one had been wired.
+
+So, with Dan's agreement:
+
+| was | now | NOV's own wording |
+|---|---|---|
+| `Ram Block::Fixed` | **`Ram Block::PipeBlindFixed`** | NXT Pipe / Blind Ram Blocks Fixed Rams |
+| — | **`Ram Block::BiDirectional`** (new) | NXT Bi-Directional Ram Blocks |
+
+**The rename is safe and re-points no history.** `Ram Block::Fixed` was added earlier the same
+day, has never shipped, and a scan of all 29 posted CBM files finds zero references to it. The
+only new key families to read are these two.
+
+Both take the same criteria, because NOV states p14 and p17 **identically** — checked, not
+assumed. All nine ram block classes share the generic task ids, asserted mechanically.
+
+**And a third error in the same `CBM_REF` entry.** 33.3 reported the document number and
+revision were wrong. The *title* was wrong too: "NXT Ram Blocks — Pipe / Blind / Fixed" is
+neither the title block nor the body wording. It now reads the document's own title block.
+Three errors in one reference entry, all now matching the PDF.
+
+**One correction to our own arithmetic, in this file and the review sheet.** We have said
+"14 NOV documents" in entries 26, 32 and 33 and in the review sheet's KPI row. The real figure
+is **14 distinct documents across 44 files** — eleven exist under both a 9-digit number and a
+`D9D` number, plus three `D9D`-only. No conclusion moves: matching is keyed on template
+numbers and the de-duplication collapsed the copies correctly. The count was simply wrong.
+
+Current state: **22 equipment classes, 113 gradeable tasks, 61 carrying NOV criteria, 418
+posted keys.** Posting path byte-identical to REV 147, zero `no-cors`, 467 top-level
+functions, no duplicates, extraction reconciles. File 6,948,267 bytes.
 
 ---
 

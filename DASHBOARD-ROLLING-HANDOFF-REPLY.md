@@ -905,3 +905,58 @@ class: 0 - none` across all 309 files on Dan's PC. No report was ever posted und
 class, so the split touches no history at all. Ram block grades in the index are under the
 `::` classes already, and from v2.64 they are on the heatmap (they were being dropped by the
 three-number key match before, our defect, entry 28 reply).
+
+## Entries 33 to 36 reply (dashboard side, 26 Sep 2026): cavity record renders, one ask on it, nothing else to build
+
+**36, `calcData`, built in the viewer.** A Calculators tile with `calcData` now renders a
+"Ram cavity dimensional inspection" section: stack size, test date, supervisor, witness, the
+unit the readings are in (with the note that the limits are published in inches and the
+tool converts), the summary as chips, then one block per cavity with position, ram type,
+block style, plate mode, the four vertical and three horizontal readings, the ram block
+points and widths when any are entered, and the skid plate choice and thickness band.
+Empty readings print as a dash; nothing is judged here, and the footnote says so in your
+36.3 words: an estimate must be confirmed with plates installed, a block style with no
+published limit is reference only, incomplete is not a fail. `null` on a tile adds nothing.
+Tested on a synthetic SSORT 148 post under `SSCE Equipment` (`sample-reports/…cavity-sample.json`),
+three cavities in the three shapes that matter. The Copilot digest prints it through the
+generic renderer with no change.
+
+**36, the ask.** The payload carries the readings and the summary counts, but **not the
+per-cavity status and not the per-check rows** that `evalCavity` produces, so the viewer
+can show "2 pass, 1 fail" from the summary and cannot say which cavity failed or on which
+check. The same rule as the drawdown verdicts (entry 23): the dashboard shows the tool's
+judgement and never recomputes it, and it has no TR-WCE-331-038 table to recompute from.
+Please add, on each cavity, `status` (`pass|fail|est|nospec|na`) and `checks[]` of
+`{ item, measured, nominal, status, note }`, the rows `evalCavity` already returns. The
+renderer reads both today and shows them the moment they arrive; until then the summary
+is what the reader gets.
+
+**36.5, noted with thanks.** The restore-before-asset ordering: on this side a record is
+never rebuilt from a partially restored state (the scanner reads whole files, the viewer
+reads the served copy), so nothing is affected, but the shape is recorded in the handoff.
+
+**35, the nine `_gr` keys: nothing to build.** Items are discovered from any of `_gr`,
+`_cm` or `_ph`, so a cleaning task with a note and photographs stays on the heatmap and in
+the viewer with no grade, which is the right reading of "nothing to grade". The three
+West Capella `7.1.1B = "1"` rows stay as posted. Absence of a key has never been a fault
+here. Dan's rule that a cleaning task carries a check and photographs, not a grade, goes on
+our side into the contract row.
+
+**33.2, `Ram Block::Fixed`, and 35's two more (`::PipeBlindFixed`, `::BiDirectional`):
+nothing to build.** Class names are read from `cbmData.equip` and the key prefix is built
+from it by the same rule as yours, so a new class appears on the heatmap the day it is
+posted. `Pipe` stays open with Dan, as you say. 33.3's document number: nothing in the
+payload carries it, so no archived record on this side shows it; it was print only.
+
+**33.1, the OEM button: agreed, held until Part D is proven.** Part D is in Dan's queue
+behind the AAB flows. The wording change to "Sent for OEM delivery" is the right one.
+
+**34, noted.** "A regex result over this PDF text layer is a lead, not a finding" is going
+in our own notes too; the CBM key parser had the same class of miss last week (the lettered
+and cavity-suffixed ids, entry 28 reply).
+
+**Two things from Dan this week that touch you, for the record:** the BOP Equipment
+Failure / Downtime Notification (your `FAILURE-NOTIFICATION-BUILD-SPEC.md`, queued last,
+the email flow is ours and the handoff entry with the keys is yours before it ships), and
+the Riser Tally (Dan, 26 Sep: per rig, embedded in SSORT with the other tools, after the
+failure reporting). Both are on the dashboard plan as items 31 and 32; neither is started.

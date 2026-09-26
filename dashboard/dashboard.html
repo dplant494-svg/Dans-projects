@@ -1866,6 +1866,62 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     body.appendChild(wrap);
   }
 
+
+  // ---------- Ram cavity dimensional inspection (SSORT calcData, rolling handoff entry 36) ----------
+  // The NOV BOP Ram Cavity Dimensions Checker, native in SSORT 148: readings as the crew
+  // typed them, in calcData.unit ('in' or 'mm'), judged in the tool against
+  // TR-WCE-331-038 Rev 3 Figure 7. The payload carries the readings and a summary count;
+  // a per-cavity status and the per-check rows are asked for (entry 36 reply) and are
+  // shown when present. Nothing is judged here: an empty reading is 'not measured', an
+  // 'est' is an estimate, a 'nospec' has no published limit, and none of them is a fail.
+  var CALC_STATUS = { pass: ['Pass', 'g1'], fail: ['FAIL', 'g45'], est: ['Estimated (bare casting + plate)', 'g3'], nospec: ['No published limit', ''], na: ['Incomplete', ''] };
+  function calcStatusChip(st) {
+    var d = CALC_STATUS[String(st || '').toLowerCase()];
+    var c = mk('span', 'cbm-grade-chip' + (d && d[1] ? ' ' + d[1] : ''), d ? d[0] : String(st || '—'));
+    return c;
+  }
+  function rvCalc(calc, body) {
+    if (!calc || typeof calc !== 'object') return;
+    var hdr = calc.hdr || {}, sum = calc.summary || {}, unit = calc.unit || 'in';
+    body.appendChild(mk('div', 'rv-section-label', 'Ram cavity dimensional inspection (NOV cavity nominal limits, TR-WCE-331-038)'));
+    var info = mk('div', 'rv-grid');
+    info.appendChild(rvField('Stack', (hdr.cfg ? hdr.cfg + ' cavities' : '—')));
+    info.appendChild(rvField('Test date', hdr.date || '—'));
+    info.appendChild(rvField('Supervisor', hdr.sup || '—'));
+    info.appendChild(rvField('Witness', hdr.wit || '—'));
+    info.appendChild(rvField('Readings in', unit === 'mm' ? 'millimetres (limits are published in inches; the tool converts)' : 'inches'));
+    body.appendChild(info);
+    var tally = mk('div', 'cbm-tally'); tally.appendChild(mk('span', 'lbl', 'Cavities: '));
+    ['pass', 'fail', 'est', 'nospec', 'na'].forEach(function (k) { if (sum[k]) { var ch = calcStatusChip(k); ch.textContent = CALC_STATUS[k][0] + ' × ' + sum[k]; tally.appendChild(ch); } });
+    if (tally.childNodes.length > 1) body.appendChild(tally);
+    var cavs = Array.isArray(calc.cavities) ? calc.cavities : [];
+    if (!cavs.length) { body.appendChild(mk('div', 'rv-notes', 'No cavity readings entered.')); return; }
+    var wrap = mk('div', 'rv-soak');
+    var v = function (x) { return (x === '' || x == null) ? '—' : String(x); };
+    cavs.forEach(function (c) {
+      var head = (c.label || c.position || ('Cavity ' + (Number(c.id) + 1))) + ' · ' + (c.ramType || 'ram type not set') + (c.blockStyle ? ' · ' + c.blockStyle : '') + (c.plateMode ? ' · ' + (c.plateMode === 'with' ? 'with skid plates' : 'without skid plates') : '');
+      var h = mk('div', 'rv-section-label', head);
+      if (c.status) { h.appendChild(document.createTextNode(' ')); h.appendChild(calcStatusChip(c.status)); }
+      wrap.appendChild(h);
+      var t = mk('table', '');
+      function row(label, cells) { var tr = mk('tr', ''); tr.appendChild(mk('th', '', label)); cells.forEach(function (x) { tr.appendChild(mk('td', '', x)); }); t.appendChild(tr); }
+      var vert = c.vertical || {}, hor = c.horizontal || {}, blk = c.block || {};
+      row('Vertical, skid plate to seal seat (' + unit + ')', ['fwd ' + v(vert.fwd), 'stbd ' + v(vert.stbd), 'aft ' + v(vert.aft), 'port ' + v(vert.port)]);
+      row('Horizontal, side pad to side pad (' + unit + ')', ['fwd ' + v(hor.fwd), 'mid ' + v(hor.mid), 'aft ' + v(hor.aft)]);
+      if (Array.isArray(blk.fwd) && blk.fwd.some(function (x) { return x !== '' && x != null; })) row('Ram block fwd, points 1 to 3 and width (' + unit + ')', blk.fwd.map(v));
+      if (Array.isArray(blk.aft) && blk.aft.some(function (x) { return x !== '' && x != null; })) row('Ram block aft, points 1 to 3 and width (' + unit + ')', blk.aft.map(v));
+      if (c.plateMode === 'without' || c.plateChoice) row('Skid plate', [c.plateChoice === 'custom' ? 'custom ' + v(c.customThickness) : v(c.plateChoice), (c.plateMin != null && c.plateMax != null) ? 'thickness ' + c.plateMin + ' to ' + c.plateMax + ' in' : '']);
+      wrap.appendChild(t);
+      if (Array.isArray(c.checks) && c.checks.length) {
+        var ct = mk('table', ''); var th = mk('tr', ''); ['Check', 'Measured', 'Nominal', 'Status', 'Note'].forEach(function (x) { th.appendChild(mk('th', '', x)); }); ct.appendChild(th);
+        c.checks.forEach(function (k) { var tr = mk('tr', ''); tr.appendChild(mk('td', '', v(k.item))); tr.appendChild(mk('td', '', v(k.measured))); tr.appendChild(mk('td', '', v(k.nominal))); var td = mk('td', ''); td.appendChild(calcStatusChip(k.status)); tr.appendChild(td); tr.appendChild(mk('td', '', v(k.note))); ct.appendChild(tr); });
+        wrap.appendChild(ct);
+      }
+    });
+    body.appendChild(wrap);
+    body.appendChild(mk('div', 'rv-notes', 'Readings are shown as posted. Pass and fail are the tool’s judgement against the NOV nominal limits; an estimate must be confirmed with skid plates installed before sign-off; a block style with no published limit is recorded for reference only.'));
+  }
+
   function rvVsr(vsr, body) {
     body.appendChild(mk('div', 'rv-section-label', 'Vendor surveillance details'));
     var grid = mk('div', 'rv-grid');
@@ -3715,6 +3771,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
       if (tile.vsrData) rvVsr(tile.vsrData, tb);
       if (tile.pdcData) rvPdc(tile.pdcData, tb);   // entry 10: pre-deployment checklist
+      if (tile.calcData) rvCalc(tile.calcData, tb);   // entry 36: ram cavity dimensional inspection
       if (tile.cbmData) rvCbm(tile.cbmData, tb);
       if (tile.marineData) rvMarine(tile.marineData, tb);
       if (tile.topsetData) rvTopset(tile.topsetData, tb);
