@@ -17,6 +17,7 @@
   gate-config.js beside the page supplies the endpoint (window.PCGATE.postUrl) and is
   read here without the gate; nothing in it is secret except the URL, which never
   travels in a file that is committed or emailed.
+  Rev 4, 26 September 2026: the role is a dropdown of the rig crafts with an Other box.
   Rev 3, 26 September 2026: the acknowledgement record carries aabTitle, originatorName and
   originatorEmail. Rev 2, 24 September 2026 (Rev 1 was acknowledge.html, gated).
 -->
@@ -91,7 +92,7 @@
     <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
     <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; close a requested action with a comment and photographs.</div>
   </div>
-  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 3 &middot; 26 Sep 2026</span></div>
+  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 4 &middot; 26 Sep 2026</span></div>
 </header>
 <main>
   <div id="stale" class="banner warn" hidden></div>
@@ -111,8 +112,9 @@
 <script>
 (function () {
   'use strict';
-  var PAGE_REV = 3;
+  var PAGE_REV = 4;
   var WARN_BYTES = 20 * 1024 * 1024, REFUSE_BYTES = 30 * 1024 * 1024;   // the Bulletin Board's own guard
+  var ROLES = ['Technical Section Leader', 'Subsea Supervisor', 'Subsea Engineer', 'Assistant Rig Manager', 'Rig Manager', 'OIM', 'Electrical Supervisor', 'Drilling Section Leader', 'MPD Supervisor', 'Maintenance Supervisor'];
   var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
   var $ = function (id) { return document.getElementById(id); };
   function mk(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
@@ -228,7 +230,16 @@
     if (action === 'acknowledge') f.appendChild(mk('div', 'hint', 'One acknowledgement per crew: the Technical Section Leader of crew A and of crew B each acknowledge once.' + (st && st.ackCrews && st.ackCrews.length ? ' Already acknowledged by crew ' + st.ackCrews.join(' and ') + '.' : '')));
     else f.appendChild(mk('div', 'hint', 'Say what was done and attach up to six photographs as evidence. A closure counts as an acknowledgement as well.'));
     var name = field(f, 'Your name', 'text', ''); name.required = true;
-    var role = field(f, 'Role', 'text', 'Technical Section Leader'); role.required = true;
+    // Rev 4 (Dan, 26 Sep): the role is a dropdown of the rig crafts, TSL first because the
+    // directive names the TSL of each crew; 'Other' opens a box for anything not listed.
+    f.appendChild(mk('label', '', 'Role'));
+    var roleSel = mk('select'); roleSel.style.width = '100%';
+    ROLES.forEach(function (r) { var o = mk('option', '', r); o.value = r; roleSel.appendChild(o); });
+    var oOther = mk('option', '', 'Other\u2026'); oOther.value = '__other'; roleSel.appendChild(oOther);
+    f.appendChild(roleSel);
+    var roleOther = mk('input'); roleOther.type = 'text'; roleOther.placeholder = 'Your role'; roleOther.hidden = true; roleOther.style.marginTop = '4px'; f.appendChild(roleOther);
+    roleSel.addEventListener('change', function () { roleOther.hidden = roleSel.value !== '__other'; if (!roleOther.hidden) roleOther.focus(); });
+    var role = { get value() { return roleSel.value === '__other' ? roleOther.value : roleSel.value; } };
     f.appendChild(mk('label', '', 'Crew'));
     var crewWrap = mk('div', 'crew'); var crewName = 'crew-' + action + '-' + rec.aabNumber + '-' + rec.revision;
     ['A', 'B'].forEach(function (c) { var l = mk('label'); var r = mk('input'); r.type = 'radio'; r.name = crewName; r.value = c; r.required = true; l.appendChild(r); l.appendChild(document.createTextNode(' Crew ' + c)); crewWrap.appendChild(l); });
@@ -252,6 +263,7 @@
       e.preventDefault();
       var crew = (f.querySelector('input[name="' + crewName + '"]:checked') || {}).value || '';
       if (!crew) { msg.className = 'msg err'; msg.textContent = 'Choose your crew.'; return; }
+      if (!String(role.value || '').trim()) { msg.className = 'msg err'; msg.textContent = 'Enter your role.'; return; }
       var record = {
         meta: { kind: 'aab-ack', tool: 'AAB Acknowledgement', rev: PAGE_REV, asset: rigCodes[rigKey] || rigKey, rigkey: rigKey, saved: new Date().toISOString() },
         aabNumber: rec.aabNumber, revision: Number(rec.revision), action: action,
