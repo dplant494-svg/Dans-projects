@@ -139,6 +139,18 @@
   if (window.PCGATE && window.PCGATE.postUrl) { $('endpoint').textContent = 'Posting: configured'; }
   else { $('endpoint').textContent = 'Posting: not configured on this copy — a record you save here is downloaded for Technical Services instead.'; }
 
+  function waitingOn(row, rec) {
+    var st = row.state, crews = row.ackCrews || [];
+    if (st === 'closed') return 'Nothing owed: closed' + (row.closedBy ? ' by ' + row.closedBy : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
+    if (st === 'withdrawn') return 'Nothing owed: the advisory was withdrawn.';
+    if (st === 'acknowledged') return 'Nothing owed: acknowledged by both crews.';
+    if (st === 'action open') return 'Waiting on this rig to close the requested action below with a comment and evidence photographs.' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
+    var left = ['A', 'B'].filter(function (c) { return crews.indexOf(c) === -1; });
+    var s = 'Waiting on: ' + left.map(function (c) { return 'Technical Section Leader, crew ' + c; }).join(' and ') + ' to acknowledge' + (rec.actionRequested ? ', then the rig to close the action with evidence' : '') + '.';
+    if (crews.length) s += ' Acknowledged so far by crew ' + crews.join(' and ') + (row.acknowledgedBy ? ' (' + row.acknowledgedBy + ')' : '') + '.';
+    if (row.overdue) s += ' Overdue by ' + row.daysOverdue + ' days (due ' + row.dueDate + ').';
+    return s;
+  }
   function statusFor(num, rigKey) { return (data.status || []).filter(function (r) { return r.aabNumber === num && r.rigKey === rigKey; })[0] || null; }
   function acksFor(num, rigKey) { return (data.acks || []).filter(function (a) { return a.aabNumber === num && a.rigKey === rigKey; }).sort(function (a, b) { return String(a.saved).localeCompare(String(b.saved)); }); }
 
@@ -168,6 +180,12 @@
     var chip = mk('span', 'chip ' + (stName === 'posted' ? 'st-acknowledged' : (STATE_CLASS[stName] || 'st-outstanding')), stName === 'posted' ? 'posted — dashboard updates within 10 minutes' : stName + (st && st.overdue ? ' · ' + st.daysOverdue + ' days' : ''));
     head.appendChild(chip);
     box.appendChild(head);
+    if (st && stName !== 'posted') {
+      var waitLine = mk('div', 'hint'); waitLine.style.padding = '6px 16px 0'; waitLine.textContent = waitingOn(st, rec);
+      chip.style.cursor = 'pointer'; chip.title = 'Click for who is left to act';
+      chip.addEventListener('click', function () { waitLine.hidden = !waitLine.hidden; });
+      box.appendChild(waitLine);
+    }
     var body = mk('div', 'body');
     var meta = mk('div', 'meta');
     function m(k, v) { var d = mk('div'); d.appendChild(mk('div', 'k', k)); d.appendChild(mk('div', '', v || '—')); meta.appendChild(d); }

@@ -48,6 +48,22 @@
   function sizeTxt(bytes) { bytes = Number(bytes || 0); return bytes ? (bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB') : ''; }
   function ensureCss(root) { if (document.getElementById('aabreg-css')) return; var st = mk('style'); st.id = 'aabreg-css'; st.textContent = CSS; document.head.appendChild(st); }
   function lightbox(src) { var lb = mk('div', 'lightbox'); var im = mk('img'); im.src = src; lb.appendChild(im); lb.addEventListener('click', function () { lb.remove(); }); document.querySelector('.aabreg').appendChild(lb); }
+  // Who is still to act, from the state and the crews recorded (Dan, 26 Sep: click the
+  // state and see who is left). Roles only: the record carries the crews that have
+  // acknowledged; names come from the rig's own list, not from here.
+  function waitingOn(row, rec) {
+    var st = row.state, crews = row.ackCrews || [];
+    if (st === 'closed') return 'Nothing owed: closed' + (row.closedBy ? ' by ' + row.closedBy : '') + (row.closedAt ? ' on ' + row.closedAt : '') + '.';
+    if (st === 'withdrawn') return 'Nothing owed: the advisory was withdrawn.';
+    if (st === 'acknowledged') return 'Nothing owed: acknowledged by both crews' + (row.acknowledgedAt ? ', last on ' + row.acknowledgedAt : '') + '.';
+    if (st === 'action open') return 'Waiting on the rig to close the requested action with a comment and evidence photographs (Subsea Supervisor or either crew\u2019s Technical Section Leader on the rig page).' + (row.overdue ? ' Overdue by ' + row.daysOverdue + ' days.' : '');
+    var left = ['A', 'B'].filter(function (c) { return crews.indexOf(c) === -1; });
+    var who = left.map(function (c) { return 'Technical Section Leader, crew ' + c; }).join(' and ');
+    var s = 'Waiting on: ' + (who || 'the rig') + ' to acknowledge' + (rec && rec.actionRequested ? ', then the rig to close the action with evidence' : '') + '.';
+    if (crews.length) s += ' Acknowledged so far by crew ' + crews.join(' and ') + (row.acknowledgedBy ? ' (' + row.acknowledgedBy + ')' : '') + '.';
+    if (row.overdue) s += ' Overdue by ' + row.daysOverdue + ' days (due ' + row.dueDate + ').';
+    return s;
+  }
   function chip(row, onClick) {
     var st = row.status || row.state || 'outstanding';
     var c = mk('span', 'chip ' + (STATE_CLASS[st] || 'st-outstanding'), (row.rig || row.rigKey || '') + (st === 'overdue' ? ' · ' + (row.daysOverdue || 0) + 'd' : ''));
@@ -104,7 +120,7 @@
       tr.appendChild(mk('td', '', (rec.sfi || []).map(function (s) { return s.code || s.group; }).filter(Boolean).join(', ') || '—'));
       tr.appendChild(mk('td', '', rec.issueDate || '—'));
       tr.appendChild(mk('td', '', rec.dueDate || '—'));
-      var td6 = mk('td'); (byNum[rec.aabNumber] || []).forEach(function (r) { td6.appendChild(chip(r, function () { toggle(); })); }); tr.appendChild(td6);
+      var td6 = mk('td'); (byNum[rec.aabNumber] || []).forEach(function (r) { var c = chip(r, function () { toggle(); }); c.title += '\n' + waitingOn(r, rec); td6.appendChild(c); }); tr.appendChild(td6);
       tbody.appendChild(tr);
       var dtr = mk('tr'); dtr.hidden = true; var dtd = mk('td'); dtd.colSpan = 6; dtr.appendChild(dtd); tbody.appendChild(dtr);
       function toggle() { if (dtr.hidden) { dtd.innerHTML = ''; dtd.appendChild(detail(rec, byNum[rec.aabNumber] || [], data)); dtr.hidden = false; } else { dtr.hidden = true; } }
@@ -135,7 +151,10 @@
     var tb = mk('tbody');
     rows.forEach(function (r) {
       var tr = mk('tr'); tr.appendChild(mk('td', '', r.rig));
-      var tds = mk('td'); tds.appendChild(chip({ rig: r.status, status: r.status, state: r.state, daysOverdue: r.daysOverdue, dueDate: r.dueDate })); tr.appendChild(tds);
+      var tds = mk('td'); var stc = chip({ rig: r.status, status: r.status, state: r.state, daysOverdue: r.daysOverdue, dueDate: r.dueDate }); stc.title += '\nClick for who is left to act.';
+      var wl = mk('div', 'sub'); wl.hidden = true; wl.textContent = waitingOn(r, rec);
+      stc.addEventListener('click', function () { wl.hidden = !wl.hidden; });
+      tds.appendChild(stc); tds.appendChild(wl); tr.appendChild(tds);
       tr.appendChild(mk('td', '', (r.ackCrews || []).length ? r.ackCrews.join(' and ') : '—'));
       tr.appendChild(mk('td', '', r.acknowledgedAt ? r.acknowledgedAt + (r.acknowledgedBy ? ' · ' + r.acknowledgedBy : '') : '—'));
       tr.appendChild(mk('td', '', r.closedAt ? r.closedAt + (r.closedBy ? ' · ' + r.closedBy : '') : '—'));
@@ -150,5 +169,5 @@
     return d;
   }
 
-  window.AAB_REGISTER = { render: render, STATE_CLASS: STATE_CLASS, STATE_HELP: STATE_HELP };
+  window.AAB_REGISTER = { render: render, waitingOn: waitingOn, STATE_CLASS: STATE_CLASS, STATE_HELP: STATE_HELP };
 })();
