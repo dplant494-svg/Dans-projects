@@ -17,7 +17,8 @@
   gate-config.js beside the page supplies the endpoint (window.PCGATE.postUrl) and is
   read here without the gate; nothing in it is secret except the URL, which never
   travels in a file that is committed or emailed.
-  Rev 5, 26 September 2026: the rig reports an action done ('actioned') with evidence; closing
+  Rev 6, 26 September 2026: the action can be reported done only after both crews have
+  acknowledged. Rev 5, 26 September 2026: the rig reports an action done ('actioned') with evidence; closing
   is Technical Services' from the compliance page (Dan). Rev 4, 26 September 2026: the role is a
   dropdown of the rig crafts with an Other box.
   Rev 3, 26 September 2026: the acknowledgement record carries aabTitle, originatorName and
@@ -95,7 +96,7 @@
     <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
     <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew; report a requested action done with a comment and photographs. Technical Services review and close.</div>
   </div>
-  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 5 &middot; 26 Sep 2026</span></div>
+  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 6 &middot; 26 Sep 2026</span></div>
 </header>
 <main>
   <div id="stale" class="banner warn" hidden></div>
@@ -115,7 +116,7 @@
 <script>
 (function () {
   'use strict';
-  var PAGE_REV = 5;
+  var PAGE_REV = 6;
   var WARN_BYTES = 20 * 1024 * 1024, REFUSE_BYTES = 30 * 1024 * 1024;   // the Bulletin Board's own guard
   var ROLES = ['Technical Section Leader', 'Subsea Supervisor', 'Subsea Engineer', 'Assistant Rig Manager', 'Rig Manager', 'OIM', 'Electrical Supervisor', 'Drilling Section Leader', 'MPD Supervisor', 'Maintenance Supervisor'];
   var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'action open': 'st-action', 'actioned': 'st-actioned', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
@@ -219,7 +220,10 @@
       var forms = mk('div', 'forms');
       var canAck = !st || st.state === 'outstanding' || st.state === 'partly acknowledged';
       if (canAck) forms.appendChild(actForm(rec, rigKey, 'acknowledge', st));
-      if (rec.actionRequested && st && st.state !== 'actioned') forms.appendChild(actForm(rec, rigKey, 'actioned', st));
+      // Rev 6 (Dan, 26 Sep): the action can only be reported done once both crews have
+      // acknowledged, i.e. the state is 'action open'. Before that the card says so.
+      if (rec.actionRequested && st && st.state === 'action open') forms.appendChild(actForm(rec, rigKey, 'actioned', st));
+      else if (rec.actionRequested && (!st || st.state === 'outstanding' || st.state === 'partly acknowledged')) { var gateNote = mk('div', 'hint'); gateNote.style.alignSelf = 'start'; gateNote.textContent = 'Report the action done opens here once both crews\u2019 Technical Section Leaders have acknowledged.'; forms.appendChild(gateNote); }
       if (st && st.state === 'actioned') body.appendChild(mk('div', 'hint', 'Reported done' + (st.actionedBy ? ' by ' + st.actionedBy : '') + (st.actionedAt ? ' on ' + st.actionedAt : '') + '. Awaiting review and closure by Technical Services.'));
       body.appendChild(forms);
     } else if (terminal) {
