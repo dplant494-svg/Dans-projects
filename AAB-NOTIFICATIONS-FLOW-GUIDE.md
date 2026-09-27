@@ -100,7 +100,10 @@ join(union(split(concat(coalesce(body('Parse_JSON')?['originatorEmail'], outputs
 ### IsAck → False: the issued email, one per applicable rig
 
 13. **Filter array**, rename **PrimaryAtt**: From fx `coalesce(body('Parse_JSON')?['attachments'], json('[]'))`,
-    condition: left box fx `string(item()?['primary'])`, **is equal to** `true`.
+    condition: left box fx `toLower(string(item()?['primary']))`, **is equal to** `true`.
+    (27 Sep, found on Dan's first real post: `string(true)` gives `True` with a capital T and the
+    comparison is case-sensitive, so without `toLower` the filter finds nothing and every issued
+    email carries `no-bulletin.txt`. `toLower` also covers a record where `primary` arrives as text.)
 14. Compose **HasAtt**: `greater(length(body('PrimaryAtt')), 0)`.
 15. Compose **HasPdf**: `not(empty(coalesce(body('Parse_JSON')?['pdf'],'')))`.
 16. **Apply to each**, rename **EachRig**. Select an output: fx
@@ -207,6 +210,9 @@ copies it into the **Digests** library, which is SharePoint.
 - **Issued email goes to nobody / NO RIG CONTACT:** the rig's `RigKey` on the Rigs sheet
   does not match the code the board used (`nov`, `cam` are the odd ones), or the four
   address cells are empty.
+- **The attachment is `no-bulletin.txt` although the board showed a BULLETIN file:** the
+  PrimaryAtt filter (step 13) is comparing `True` with `true`. Its left box must be
+  `toLower(string(item()?['primary']))`.
 - **The attachment is `no-bulletin.txt`:** the AAB was posted without a PDF. The board
   allows it; the dashboard shows the record; Eric decides whether to revise.
 - **Chase mails the same row twice in a day:** two scans on one day cannot, the state file
