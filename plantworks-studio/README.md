@@ -152,6 +152,12 @@ To link a project that was created by drag-and-drop: Project configuration → B
 
 **Deploy previews**: every branch pushed to GitHub gets its own URL (`<branch>--benevolent-gumption-18b8fd.netlify.app`) if branch deploys are set to "All" under Continuous deployment → Branches. That is the private preview link in the proposal.
 
+**Headers**: set in `site/netlify.toml` (security headers on every page, one-week cache on images). Verify after a deploy at securityheaders.com; expect an A.
+
+**Redirects**, also in `site/netlify.toml`: `/whatsapp` and `/wa` open the studio WhatsApp; `/prices` and `/precios` jump to the packages; `/en/...` folds into the root. Use `plantworksstudio.com/whatsapp` on print and in Instagram captions. No language-sniffing redirect (root → /es/ by browser language) on purpose: it confuses Google's indexing of the two versions and the header switch does the job.
+
+**Analytics**: Netlify Analytics is server-side (no cookie banner, counts real visits not bot hits). Project → Analytics → Enable, $9/month per project. Turn it on for the studio site once there is traffic worth reading, not before; Search Console already shows what people searched to find the site. Free alternative if wanted: GoatCounter (one script tag, no cookies).
+
 **Forms** still need detection enabled once per project (Forms → Enable form detection) and a notification (Forms → Notifications → email to info@).
 
 **Fallback, manual**: zip the folder (`cd site && zip -r ../site.zip .`) and drop it on the project's Deploys tab. Works, but the next Git push overwrites it.

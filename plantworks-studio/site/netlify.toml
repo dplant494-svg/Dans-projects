@@ -22,3 +22,40 @@
   for = "/brand/*"
   [headers.values]
     Cache-Control = "public, max-age=604800"
+
+# Short links for print, WhatsApp and Instagram. Order matters: first match wins.
+[[redirects]]
+  from = "/whatsapp"
+  to = "https://wa.me/34722676631"
+  status = 302
+
+[[redirects]]
+  from = "/wa"
+  to = "https://wa.me/34722676631"
+  status = 302
+
+[[redirects]]
+  from = "/precios"
+  to = "/es/#packages"
+  status = 302
+
+[[redirects]]
+  from = "/prices"
+  to = "/#packages"
+  status = 302
+
+[[redirects]]
+  from = "/en"
+  to = "/"
+  status = 301
+
+[[redirects]]
+  from = "/en/*"
+  to = "/:splat"
+  status = 301
+
+# Old demo path, in case it was ever shared
+[[redirects]]
+  from = "/demo/*"
+  to = "/work/:splat"
+  status = 301
