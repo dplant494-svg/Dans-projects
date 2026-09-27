@@ -1,6 +1,6 @@
 # WhatsApp Business texts (EN/ES)
 
-Studio number on WhatsApp Business: **+34 722 676 631** (Spanish SIM). UK number +44 7464 435081 stays on personal WhatsApp for now.
+Studio number on WhatsApp Business: **+34 722 676 631** (Spanish SIM). This is the only number shown anywhere; the UK number is personal.
 Paste each block as one message. English first, Spanish second, so both readers are served by one text.
 Spanish lines need a native read (wife) before going live, like the site.
 

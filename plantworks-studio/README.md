@@ -15,10 +15,9 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 3. Spanish native read of the ES page. Wife has the file.
 4. Logo: done, title block + P mark, in `site/brand/`. Use `mark-512.png` as the avatar everywhere and `lockup.png` on documents.
 5. Phone, two numbers on the Galaxy S23 Ultra (unlocked, Vodafone UK in the physical slot):
-   - Now: install WhatsApp Business on the UK number (the one on the site), move personal chats into it, set greeting, hours, site link, quick replies for "prices" and "how it works".
    - Done: Spanish SIM in, WhatsApp Business on **+34 722 676 631** with the P mark as photo. Profile, greeting, away and quick-reply texts (EN/ES) in `templates/whatsapp.md`.
    - Now: Samsung Keyboard Chat assist (chat translation, Spanish pack) so Spanish chats can be answered in English.
-   - Site shows both numbers (WhatsApp button → Spanish number; calls UK and Spain listed). JSON-LD carries both.
+   - Site shows only the Spanish number, +34 722 676 631 (WhatsApp Business). The UK number is personal and stays off the site, templates and profiles.
    - Password manager (Bitwarden, free) before the first client hands over a login.
 6. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
 7. Google Business Profile once there is a verifiable address.
