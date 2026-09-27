@@ -139,18 +139,22 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 
 ## Deploying the studio site
 
-Done Sept 2026. Kept for the next site. Netlify drag-and-drop, DNS stays at Namecheap. About fifteen minutes.
+**Now: Git-connected.** Netlify watches the repository and publishes on every push, so a change here is live within a minute. No zips.
 
-1. Log in to Netlify, go to Sites, drag the whole `site/` folder onto the page. Netlify gives it a `something.netlify.app` address. Check the site, both languages and both demos work there.
-2. In that site's settings, Domain management, add custom domain `plantworksstudio.com`. Netlify will show which records it wants.
-3. In Namecheap, Domain List, Manage, Advanced DNS. Delete the parking records Namecheap put there. Add:
-   - `A` record, host `@`, value `75.2.60.5` (Netlify's load balancer; use whatever address Netlify showed in step 2 if different).
-   - `CNAME` record, host `www`, value `<your-site>.netlify.app`.
-4. Back in Netlify, once DNS has propagated (minutes to an hour), it issues the HTTPS certificate itself. Set `plantworksstudio.com` as the primary domain so `www` redirects to it.
-5. Google Search Console: add the property, verify by DNS TXT record at Namecheap, submit `https://plantworksstudio.com/sitemap.xml`.
+| Netlify project | Base directory | Branch |
+|---|---|---|
+| plantworksstudio.com | `plantworks-studio/site` | `claude/new-business-venture-7pxnxz` |
+| Praetorian Fitness (own project) | `plantworks-studio/clients/praetorian-fitness` | same |
 
-To update the site: zip the contents of `site/` (index.html at the top of the archive, not inside a folder), open the Netlify project, Deploys, drag the zip onto the drop box. Domain, certificate and form settings persist. Netlify keeps the domain and certificate. Cloudflare Pages works the same way if preferred, but it wants the nameservers moved to Cloudflare, which is a bigger change.
+Each deploy folder has a `netlify.toml` (publish `.`, no build command, security headers, cache headers for images). Netlify skips the build when a push doesn't touch the base directory, so pushes to one site don't redeploy the other.
 
+To link a project that was created by drag-and-drop: Project configuration → Build & deploy → Continuous deployment → **Link repository** → GitHub → `dplant494-svg/Dans-projects` → set branch and base directory as above, leave build command empty, publish directory `plantworks-studio/site` (Netlify shows it relative to the repo root in the UI; the toml takes over after the first deploy).
+
+**Deploy previews**: every branch pushed to GitHub gets its own URL (`<branch>--benevolent-gumption-18b8fd.netlify.app`) if branch deploys are set to "All" under Continuous deployment → Branches. That is the private preview link in the proposal.
+
+**Forms** still need detection enabled once per project (Forms → Enable form detection) and a notification (Forms → Notifications → email to info@).
+
+**Fallback, manual**: zip the folder (`cd site && zip -r ../site.zip .`) and drop it on the project's Deploys tab. Works, but the next Git push overwrites it.
 
 ## Social media
 
