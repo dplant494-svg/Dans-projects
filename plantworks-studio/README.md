@@ -4,7 +4,7 @@ Web studio for small businesses in the UK and on the Costa del Sol, remote every
 
 The original brief that started this is `HANDOFF.md`. This file is the live version of it: update this one.
 
-## Rolling plan (kept current; last updated 26 Sept 2026)
+## Rolling plan (kept current; last updated 27 Sept 2026)
 
 **Live**: plantworksstudio.com on Netlify, HTTPS, both languages, demos hidden from search. Mailbox info@ on Namecheap Private Email, working on the Samsung phone over IMAP. Contact form posts to Netlify Forms and emails info@. Search Console verified, sitemap accepted with two pages. Templates for invoices (EN, ES) and proposals in `templates/`.
 
@@ -19,7 +19,7 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
    - Now: Samsung Keyboard Chat assist (chat translation, Spanish pack) so Spanish chats can be answered in English.
    - Site shows only the Spanish number, +34 722 676 631 (WhatsApp Business). The UK number is personal and stays off the site, templates and profiles.
    - Password manager (Bitwarden, free) before the first client hands over a login.
-6. Social: claim the handles, set up the LinkedIn page and WhatsApp Business profile, join the Costa del Sol expat groups (see Social below). One post per finished site.
+6. Social: Instagram first. Set up the account per `social/instagram/README.md`, post the nine-image launch pack over three days, pin offer/packages/contact. Then LinkedIn page, Facebook page (linked to Instagram), Costa del Sol expat groups. One post per finished site.
 7. Google Business Profile once there is a verifiable address.
 
 **Parked**: Care Plus and local-search work until the first Care client; AI assistant add-on until a client asks; a 952 landline number.
@@ -40,6 +40,7 @@ plantworks-studio/
 │       ├── brasa-y-sal/      ← beach restaurant, Marbella. ES at /, EN at /en/
 │       └── pinar-property/   ← property management, Estepona. EN at /, ES at /es/
 ├── templates/                ← invoice (EN, ES) and proposal Word templates, WhatsApp texts (EN/ES), and the script that builds the docx files
+├── social/instagram/         ← launch pack: nine post images, bio, captions EN/ES, hashtags, set-up steps
 └── clients/
     ├── the-fifth-quarter/    ← client site. Deploy this folder as-is.
     │   ├── index.html
@@ -155,9 +156,9 @@ To update the site: zip the contents of `site/` (index.html at the top of the ar
 
 Minimum viable, about an hour a week. The leads are in Facebook groups and referrals, not in a content calendar.
 
-- **Claim the handles now** so nobody else does: `plantworksstudio` on Instagram, Facebook, LinkedIn (company page), X. Same avatar (the hex mark on navy), same one-line bio: "Websites for small businesses, engineered not to fail. UK & Costa del Sol. English & Spanish."
+- **Claim the handles now** so nobody else does: `plantworksstudio` on Instagram, Facebook, LinkedIn (company page), X. Same avatar (`site/brand/mark-512.png`, the P mark), same one-line bio: "Websites for small businesses, engineered not to fail. UK & Costa del Sol. English & Spanish."
 - **LinkedIn company page**: the credibility check UK clients and property firms do. Page, logo, the positioning line, link to the site. Post each finished site.
-- **Instagram**: where Costa del Sol restaurants and wellness businesses live. Post each finished site (phone screenshot, three lines, in both languages), and occasional before/after of a client's old site versus new. No stock quotes, no daily posting.
+- **Instagram**: where Costa del Sol restaurants and wellness businesses live. Launch pack ready in `social/instagram/` (nine posts, bio, captions EN/ES, hashtags, set-up steps). Then one post per finished site (phone screenshot, three lines, both languages) and occasional before/after. No stock quotes, no daily posting.
 - **Facebook groups**: the actual channel on the coast. Join the Marbella, Estepona and San Pedro expat and business groups. Read the rules. Answer people's questions about websites, Google listings and bookings before ever mentioning the studio. One helpful reply a week beats any advert.
 - **WhatsApp Business** on the studio number: business name, hours, the site link, a greeting message, quick replies for "prices" and "how it works".
 - **Share image**: `site/og-image.png` (1200×630) is set as `og:image` on both pages, so the link shows a proper card on WhatsApp, Facebook, LinkedIn and iMessage. Regenerate from `templates/og-card.html` (screenshot at 1200×630) if the strapline changes.
