@@ -192,7 +192,7 @@ function proposal() {
       bullet(t('One person who can say yes')),
 
       sec('Next step'),
-      P([t('Reply to this email or WhatsApp with “yes” and we’ll send the deposit invoice and a date for the brief. Questions welcome. ', {}), t('info@plantworksstudio.com · +44 7464 435081', { bold: true })]),
+      P([t('Reply to this email or WhatsApp with “yes” and we’ll send the deposit invoice and a date for the brief. Questions welcome. ', {}), t('info@plantworksstudio.com · +34 722 676 631', { bold: true })]),
       P([], { after: 200 }),
       P(t('Plantworks Studio Ltd · plantworksstudio.com', { size: 16, color: SOFT }), { align: AlignmentType.CENTER }),
     ].filter(Boolean) }],
