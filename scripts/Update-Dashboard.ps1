@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.67'
+$ScriptVersion = '2.68'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1391,6 +1391,7 @@ function Read-AabAck { param($Json, $Meta, $File)
         at        = (ConvertTo-AabText (Get-Prop $Json 'at')).Trim()
         comment   = ConvertTo-AabText (Get-Prop $Json 'comment')
         photos    = (Read-AabPhotos -Arr (Get-Prop $Json 'photos'))
+        attachments = (Read-AabAttachments -Json $Json)   # v2.68: documents as evidence (PDF, Word, Excel, images), bare base64 like the AAB's own
         saved     = [string]$saved
         rev       = ConvertTo-AabText (Get-Prop $Meta 'rev')
     }
@@ -2788,7 +2789,7 @@ foreach ($num in $aabCurrent.Keys) {
         else { $eligible = @($rigAcks | Where-Object { [int]$_.revision -le [int]$cur.revision }) }
         $ackAcks = @($eligible | Where-Object { $_.action -eq 'acknowledge' })
         $closeAcks = @($eligible | Where-Object { $_.action -eq 'close' })
-        $evidenceCount = 0; foreach ($a in $ackAcks) { $evidenceCount += @($a.photos).Count }
+        $evidenceCount = 0; foreach ($a in $ackAcks) { $evidenceCount += @($a.photos).Count + @($a.attachments).Count }   # v2.68: photographs and documents
         $crews = @($ackAcks | ForEach-Object { [string]$_.crew } | Where-Object { $_ } | Sort-Object -Unique)
         $noCrewAck = @($ackAcks | Where-Object { -not $_.crew }).Count -gt 0
         $fullyAck = (($crews -contains 'A') -and ($crews -contains 'B')) -or $noCrewAck
@@ -2846,7 +2847,7 @@ foreach ($num in $aabByNumber.Keys) {
     }
 }
 $aabRecordsSorted = @($aabRecordsSlim | Sort-Object -Property @{ Expression = { [string]$_.issueDate }; Descending = $true }, @{ Expression = { [string]$_.aabNumber } }, @{ Expression = { [int]$_.revision }; Descending = $true })
-$aabAcksSlim = @($aabAcksSorted | ForEach-Object { $a = [ordered]@{}; foreach ($k in @($_.Keys)) { if ($k -eq 'photos') { $a['photoCount'] = @($_[$k]).Count } else { $a[$k] = $_[$k] } }; [pscustomobject]$a } | Sort-Object -Property @{ Expression = { [string]$_.saved }; Descending = $true })
+$aabAcksSlim = @($aabAcksSorted | ForEach-Object { $a = [ordered]@{}; foreach ($k in @($_.Keys)) { if ($k -eq 'photos') { $a['photoCount'] = @($_[$k]).Count } elseif ($k -eq 'attachments') { $a['attachmentCount'] = @($_[$k]).Count; $a['attachmentNames'] = @($_[$k] | ForEach-Object { [string]$_.name }) } else { $a[$k] = $_[$k] } }; [pscustomobject]$a } | Sort-Object -Property @{ Expression = { [string]$_.saved }; Descending = $true })
 if ($aabRaw.Count -gt 0 -or $aabAckRaw.Count -gt 0) {
     Write-Host ("AABs: {0} advisory(ies) in {1} revision(s), {2} acknowledgement(s); rig states: {3}" -f $aabCurrent.Count, $aabByNumRev.Count, $aabAckRaw.Count, (@($aabStateCounts.Keys | Where-Object { [int]$aabStateCounts[$_] -gt 0 } | ForEach-Object { "$([int]$aabStateCounts[$_]) $_" }) -join ', ')) -ForegroundColor Cyan
 }

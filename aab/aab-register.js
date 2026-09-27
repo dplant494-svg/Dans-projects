@@ -160,11 +160,11 @@
       tr.appendChild(tds);
       tr.appendChild(mk('td', '', (r.ackCrews || []).length ? r.ackCrews.join(' and ') : '—'));
       tr.appendChild(mk('td', '', r.acknowledgedAt ? r.acknowledgedAt + (r.acknowledgedBy ? ' · ' + r.acknowledgedBy : '') : '—'));
-      var tde = mk('td', '', r.evidenceCount ? r.evidenceCount + ' photo(s)' : (rec.actionRequested ? (r.state === 'acknowledged' ? 'MISSING' : 'asked for') : 'not asked for')); if (r.evidenceMissing) tde.style.color = '#c0392b'; tr.appendChild(tde);
+      var tde = mk('td', '', r.evidenceCount ? r.evidenceCount + ' item(s)' : (rec.actionRequested ? (r.state === 'acknowledged' ? 'MISSING' : 'asked for') : 'not asked for')); if (r.evidenceMissing) tde.style.color = '#c0392b'; tr.appendChild(tde);
       tr.appendChild(mk('td', '', r.closedAt ? r.closedAt + (r.closedBy ? ' · ' + r.closedBy : '') : '—'));
       var tdh = mk('td'); var hist = acks.filter(function (a) { return a.rigKey === r.rigKey; });
       if (!hist.length) tdh.textContent = '—';
-      else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); hul.appendChild(li); }); tdh.appendChild(hul); }
+      else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); if ((a.attachments || []).length) { var dl = mk('ul'); a.attachments.forEach(function (x) { if (!x || !x.data) return; var dli = mk('li'); var dla = mk('a', '', (x.name || 'document') + (sizeTxt(x.bytes) ? ' (' + sizeTxt(x.bytes) + ')' : '')); dla.href = blobUrl(x.data, x.type); dla.target = '_blank'; dla.download = x.name || 'document'; dli.appendChild(dla); dl.appendChild(dli); }); li.appendChild(dl); } hul.appendChild(li); }); tdh.appendChild(hul); }
       tr.appendChild(tdh); tb.appendChild(tr);
     });
     rt.appendChild(tb); d.appendChild(rt);

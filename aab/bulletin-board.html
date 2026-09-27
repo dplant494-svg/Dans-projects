@@ -17,7 +17,8 @@
   gate-config.js beside the page supplies the endpoint (window.PCGATE.postUrl) and is
   read here without the gate; nothing in it is secret except the URL, which never
   travels in a file that is committed or emailed.
-  Rev 7, 26 September 2026 (Dan): advisory only. One form, acknowledge with evidence when the
+  Rev 8, 27 September 2026 (Dan): documents as evidence beside photographs; the comment is
+  required (DIR-37-0161 §2.2.4). Rev 7, 26 September 2026 (Dan): advisory only. One form, acknowledge with evidence when the
   advisory asks for it; a crew that has acknowledged is greyed out; Technical Services close.
   Rev 6, 26 September 2026: the action can be reported done only after both crews have
   acknowledged. Rev 5, 26 September 2026: the rig reports an action done ('actioned') with evidence; closing
@@ -98,7 +99,7 @@
     <h1>Seadrill Bulletin Board — rig acknowledgement</h1>
     <div class="sub">Choose your rig to see the Priority 3 advisories that apply to it. Acknowledge as the Technical Section Leader of your crew, with photographs when the advisory asks for evidence. Technical Services review and close.</div>
   </div>
-  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 7 &middot; 26 Sep 2026</span></div>
+  <div class="rev"><a class="tsbtn" href="register.html">TECHNICAL SERVICES &mdash; fleet compliance &amp; create AAB &rarr;</a><span>Bulletin Board rig page Rev 8 &middot; 27 Sep 2026</span></div>
 </header>
 <main>
   <div id="stale" class="banner warn" hidden></div>
@@ -118,7 +119,7 @@
 <script>
 (function () {
   'use strict';
-  var PAGE_REV = 7;
+  var PAGE_REV = 8;
   var WARN_BYTES = 20 * 1024 * 1024, REFUSE_BYTES = 30 * 1024 * 1024;   // the Bulletin Board's own guard
   var ROLES = ['Technical Section Leader', 'Subsea Supervisor', 'Subsea Engineer', 'Assistant Rig Manager', 'Rig Manager', 'OIM', 'Electrical Supervisor', 'Drilling Section Leader', 'MPD Supervisor', 'Maintenance Supervisor'];
   var STATE_CLASS = { 'outstanding': 'st-outstanding', 'partly acknowledged': 'st-partly', 'acknowledged': 'st-acknowledged', 'closed': 'st-closed', 'overdue': 'st-overdue', 'withdrawn': 'st-withdrawn' };
@@ -206,7 +207,7 @@
     body.appendChild(meta);
     if (st && st.state !== 'outstanding') {
       var hist = acksFor(rec.aabNumber, rigKey);
-      if (hist.length) { var hl = mk('ul', 'history'); hist.forEach(function (a) { hl.appendChild(mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + ((a.photos || []).length ? ' · ' + a.photos.length + ' photo(s)' : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : ''))); }); body.appendChild(hl); }
+      if (hist.length) { var hl = mk('ul', 'history'); hist.forEach(function (a) { hl.appendChild(mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + ((a.photos || []).length ? ' · ' + a.photos.length + ' photo(s)' : '') + ((a.attachments || []).length ? ' · ' + a.attachments.length + ' document(s)' : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : ''))); }); body.appendChild(hl); }
     }
     [['What happened', rec.whatHappened], ['Why it matters', rec.whyItMatters], ['Required action', rec.requiredAction]].forEach(function (p) { body.appendChild(mk('div', 'sec', p[0])); body.appendChild(mk('div', 'txt', p[1] || '—')); });
     if ((rec.referenceDocuments || []).length) { body.appendChild(mk('div', 'sec', 'Reference documents')); var rl = mk('ul', 'files'); rec.referenceDocuments.forEach(function (d) { rl.appendChild(mk('li', '', d)); }); body.appendChild(rl); }
@@ -253,11 +254,11 @@
     ['A', 'B'].forEach(function (c) { var l = mk('label'); var r = mk('input'); r.type = 'radio'; r.name = crewName; r.value = c; r.required = true; var done = doneCrews.indexOf(c) !== -1; if (done) { r.disabled = true; l.style.opacity = '.45'; l.title = 'Crew ' + c + ' has already acknowledged'; } l.appendChild(r); l.appendChild(document.createTextNode(' Crew ' + c + (done ? ' (done)' : ''))); crewWrap.appendChild(l); });
     f.appendChild(crewWrap);
     var at = field(f, 'Date', 'date', today()); at.required = true;
-    f.appendChild(mk('label', '', 'Comment (optional)'));
-    var comment = mk('textarea'); comment.rows = 2; f.appendChild(comment);
-    var photoInput = null, photoList = [];
+    f.appendChild(mk('label', '', 'Comment (required: DIR-37-0161 \u00A72.2.4 asks each TSL to add a comment)'));
+    var comment = mk('textarea'); comment.rows = 2; comment.required = true; comment.placeholder = 'What was checked, who was told'; f.appendChild(comment);
+    var photoInput = null, photoList = [], docList = [];
     if (true) {
-      f.appendChild(mk('label', '', rec.actionRequested ? 'Evidence photographs (required by this advisory; up to 6, resized to 1600 px)' : 'Photographs (optional; up to 6, resized to 1600 px)'));
+      f.appendChild(mk('label', '', rec.actionRequested ? 'Evidence photographs (this advisory asks for evidence; up to 6, resized to 1600 px)' : 'Photographs (optional; up to 6, resized to 1600 px)'));
       photoInput = mk('input'); photoInput.type = 'file'; photoInput.accept = 'image/*'; photoInput.multiple = true; f.appendChild(photoInput);
       var preview = mk('div', 'photos'); f.appendChild(preview);
       photoInput.addEventListener('change', function () {
@@ -265,6 +266,15 @@
         fl.forEach(function (file) { shrink(file, function (dataUrl) { photoList.push({ name: file.name, caption: '', data: dataUrl }); var fg = mk('figure'); var im = mk('img'); im.src = dataUrl; fg.appendChild(im); fg.appendChild(mk('figcaption', '', file.name)); preview.appendChild(fg); }); });
       });
     }
+    // Rev 8 (Dan, 27 Sep): documents as evidence too. PDF, Word, Excel, images; kept as posted,
+    // bare base64 like the AAB's own attachments; the total post is guarded at 20 / 30 MB.
+    f.appendChild(mk('label', '', 'Evidence documents (optional; PDF, Word, Excel or images, up to 6)'));
+    var docInput = mk('input'); docInput.type = 'file'; docInput.multiple = true; docInput.accept = '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*'; f.appendChild(docInput);
+    var docNote = mk('div', 'hint'); f.appendChild(docNote);
+    docInput.addEventListener('change', function () {
+      var fl = Array.prototype.slice.call(docInput.files || []).slice(0, 6); docList = []; docNote.textContent = '';
+      fl.forEach(function (file) { var rd = new FileReader(); rd.onload = function () { var b64 = String(rd.result).split(',')[1] || ''; docList.push({ name: file.name, type: file.type || 'application/octet-stream', bytes: file.size, data: b64 }); docNote.textContent = docList.map(function (d) { return d.name + ' (' + sizeTxt(d.bytes) + ')'; }).join(', '); }; rd.readAsDataURL(file); });
+    });
     var btn = mk('button', 'go', 'Post the acknowledgement'); btn.type = 'submit'; f.appendChild(btn);
     if (doneCrews.indexOf('A') !== -1 && doneCrews.indexOf('B') !== -1) { btn.disabled = true; f.appendChild(mk('div', 'hint', 'Both crews have acknowledged.')); }
     var msg = mk('div', 'msg'); f.appendChild(msg);
@@ -273,7 +283,8 @@
       var crew = (f.querySelector('input[name="' + crewName + '"]:checked') || {}).value || '';
       if (!crew) { msg.className = 'msg err'; msg.textContent = 'Choose your crew.'; return; }
       if (!String(role.value || '').trim()) { msg.className = 'msg err'; msg.textContent = 'Enter your role.'; return; }
-      if (rec.actionRequested && !photoList.length) { msg.className = 'msg err'; msg.textContent = 'This advisory asks for evidence: attach at least one photograph.'; return; }
+      if (!comment.value.trim()) { msg.className = 'msg err'; msg.textContent = 'Add a comment (the directive asks for one).'; return; }
+      if (rec.actionRequested && !photoList.length && !docList.length) { msg.className = 'msg err'; msg.textContent = 'This advisory asks for evidence: attach at least one photograph or document.'; return; }
       var record = {
         meta: { kind: 'aab-ack', tool: 'AAB Acknowledgement', rev: PAGE_REV, asset: rigCodes[rigKey] || rigKey, rigkey: rigKey, saved: new Date().toISOString() },
         aabNumber: rec.aabNumber, revision: Number(rec.revision), action: action,
@@ -281,7 +292,7 @@
         // Supervisor (Dan, 26 Sep); the originator travels on the record so the flow
         // needs no second lookup. Display copies of title and originator name too.
         aabTitle: rec.title || '', originatorName: rec.originatorName || '', originatorEmail: rec.originatorEmail || '',
-        by: name.value.trim(), role: role.value.trim(), crew: crew, at: at.value, comment: comment.value.trim(), photos: photoList
+        by: name.value.trim(), role: role.value.trim(), crew: crew, at: at.value, comment: comment.value.trim(), photos: photoList, attachments: docList
       };
       var json = JSON.stringify(record);
       if (json.length > REFUSE_BYTES) { msg.className = 'msg err'; msg.textContent = 'Too large to post (' + sizeTxt(json.length) + '). Use fewer photographs.'; return; }
