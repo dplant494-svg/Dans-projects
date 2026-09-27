@@ -435,7 +435,7 @@
   .aab-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
   .aab-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--sd-text-light); padding: 6px 8px; border-bottom: 1px solid var(--sd-border); white-space: nowrap; }
   .aab-table td { padding: 7px 8px; border-bottom: 1px solid var(--sd-grid); vertical-align: top; }
-  .aab-table .aab-num { font-weight: 700; color: var(--sd-blue); white-space: nowrap; }
+  .aab-table .aab-num { font-weight: 700; color: var(--sd-blue); white-space: nowrap; background: none; border: 0; padding: 0; font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
   .aab-table .aab-sub { font-size: 11px; color: var(--sd-text-light); }
   .aab-chip { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 9px; margin: 0 4px 4px 0; border: 1px solid transparent; white-space: nowrap; cursor: pointer; }
   .aab-chip.st-outstanding { background: #eef0f4; color: #3d4a63; border-color: #d0d8e8; }
@@ -4507,6 +4507,42 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   }
   $('errors-btn').addEventListener('click', openErrorsModal);
 
+  // AABs tab (Dan, 27 Sep): open the master AAB from the dashboard with its attachments. The
+  // full record (bulletin, photographs, every acknowledgement with evidence) lives in
+  // aab\aab-data.js beside the Bulletin Board, not in reports-data.js, so it is fetched on the
+  // first click (../aab/ on the share and on the PC alike) and drawn by the board's own
+  // aab-register.js, read-only: closing stays on the Technical Services page.
+  var aabLibLoaded = null;
+  function loadAabLib() {
+    if (aabLibLoaded) return aabLibLoaded;
+    aabLibLoaded = new Promise(function (resolve, reject) {
+      function add(src, next) { var sc = document.createElement('script'); sc.src = src + '?t=' + Date.now(); sc.onload = next; sc.onerror = function () { aabLibLoaded = null; reject(new Error(src)); }; document.head.appendChild(sc); }
+      add('../aab/aab-data.js', function () { add('../aab/aab-register.js', function () { resolve(); }); });
+    });
+    return aabLibLoaded;
+  }
+  function openAabModal(rec) {
+    var overlay = mk('div', 'report-overlay');
+    var frame = mk('div', 'report-frame');
+    frame.style.maxWidth = '1100px';
+    var head = mk('div', 'report-head');
+    var title = mk('div', 'rh-title');
+    title.appendChild(mk('div', 'rh-rig', 'AAB ' + rec.aabNumber + ' rev ' + rec.revision + (rec.title ? ' \u00B7 ' + rec.title : '')));
+    title.appendChild(mk('div', 'rh-sub', 'Priority ' + (rec.priority || 3) + ' advisory \u00B7 issued ' + (rec.issueDate || '\u2014') + ' \u00B7 due ' + (rec.dueDate || '\u2014') + (rec.originatorName ? ' \u00B7 originator ' + rec.originatorName : '') + ' \u00B7 read-only here; closing is on the Technical Services page'));
+    head.appendChild(title);
+    var closeBtn = mk('button', 'report-close', '\u2715'); closeBtn.type = 'button'; closeBtn.setAttribute('aria-label', 'Close'); head.appendChild(closeBtn);
+    var body = mk('div', 'report-body'); body.appendChild(mk('p', 'errors-note', 'Loading the advisory from aab-data.js\u2026'));
+    frame.appendChild(head); frame.appendChild(body); overlay.appendChild(frame);
+    document.body.appendChild(overlay); document.body.classList.add('no-scroll');
+    function close() { overlay.remove(); document.body.classList.remove('no-scroll'); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+    loadAabLib().then(function () { window.AAB_REGISTER.renderRecord(body, rec.aabNumber, {}); })
+      .catch(function (err) { body.innerHTML = ''; body.appendChild(mk('p', 'errors-note', 'The advisory could not be loaded: ' + err.message + ' is not beside this dashboard. On the share it is sacred\\aab\\aab-data.js, written by every scan; on the PC, C:\\TSC-Dashboard\\aab\\. The fleet compliance page (password) shows the same record.')); });
+  }
+
 
   // AABs tab: the Priority 3 loop lives on the Seadrill Bulletin Board (Dan, 24 Sep 2026:
   // one board; rigs work from its open page, the fleet compliance sits behind the
@@ -4544,7 +4580,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var tbody = document.createElement('tbody');
     recs.forEach(function (rec) {
       var tr = document.createElement('tr');
-      var td1 = document.createElement('td'); td1.appendChild(mk('div', 'aab-num', rec.aabNumber)); td1.appendChild(mk('div', 'aab-sub', 'rev ' + rec.revision + (rec.status === 'withdrawn' ? ' \u00B7 withdrawn' : '') + (rec.actionRequested ? ' \u00B7 evidence asked for' : ' \u00B7 acknowledge only'))); tr.appendChild(td1);
+      var td1 = document.createElement('td'); var numBtn = mk('button', 'aab-num', rec.aabNumber); numBtn.type = 'button'; numBtn.title = 'Open the advisory with its bulletin, photographs and each rig\u2019s acknowledgements'; numBtn.addEventListener('click', function () { openAabModal(rec); }); td1.appendChild(numBtn); td1.appendChild(mk('div', 'aab-sub', 'rev ' + rec.revision + (rec.status === 'withdrawn' ? ' \u00B7 withdrawn' : '') + (rec.actionRequested ? ' \u00B7 evidence asked for' : ' \u00B7 acknowledge only'))); tr.appendChild(td1);
       var td2 = mk('td', '', rec.title || '(untitled)'); if (rec.category) td2.appendChild(mk('div', 'aab-sub', rec.category)); tr.appendChild(td2);
       tr.appendChild(mk('td', '', 'P' + (rec.priority || 3) + (rec.corporateMandatory ? ' mandatory' : '')));
       tr.appendChild(mk('td', '', (rec.sfi || []).map(function (s) { return s.code || s.group; }).filter(Boolean).join(', ') || '\u2014'));

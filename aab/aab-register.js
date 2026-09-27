@@ -148,7 +148,7 @@
 
     d.appendChild(mk('h4', '', 'Rigs (' + rows.length + ')'));
     var rt = mk('table', 'rigtab'); var th = mk('thead'); var tr0 = mk('tr');
-    ['Rig', 'State', 'Crews', 'Last acknowledgement', 'Evidence', 'Closed', 'History and evidence'].forEach(function (h) { tr0.appendChild(mk('th', '', h)); }); th.appendChild(tr0); rt.appendChild(th);
+    ['Rig', 'State', 'Acknowledged by', 'Evidence', 'Closed', 'History and evidence'].forEach(function (h) { tr0.appendChild(mk('th', '', h)); }); th.appendChild(tr0); rt.appendChild(th);
     var tb = mk('tbody');
     rows.forEach(function (r) {
       var tr = mk('tr'); tr.appendChild(mk('td', '', r.rig));
@@ -158,12 +158,19 @@
       tds.appendChild(stc); tds.appendChild(wl);
       if (opts && opts.canClose && r.state === 'acknowledged') tds.appendChild(closeForm(rec, r, data));
       tr.appendChild(tds);
-      tr.appendChild(mk('td', '', (r.ackCrews || []).length ? r.ackCrews.join(' and ') : '—'));
-      tr.appendChild(mk('td', '', r.acknowledgedAt ? r.acknowledgedAt + (r.acknowledgedBy ? ' · ' + r.acknowledgedBy : '') : '—'));
+      // v2.69 (Dan, 27 Sep: the close-out must show both crews and who acknowledged): one line per
+      // acknowledgement from the status row's ackList, crew, name, role and date.
+      var tda = mk('td'); tda.style.whiteSpace = 'nowrap';
+      var ackLines = (r.ackList || []).filter(function (a) { return a.action !== 'close'; });
+      if (ackLines.length) ackLines.forEach(function (a) { tda.appendChild(mk('div', '', (a.crew ? 'Crew ' + a.crew + ' · ' : '') + (a.by || '?') + (a.role ? ' (' + a.role + ')' : '') + (a.at ? ' · ' + a.at : ''))); });
+      else if ((r.ackCrews || []).length) tda.textContent = 'Crew ' + r.ackCrews.join(' and ') + (r.acknowledgedBy ? ' · ' + r.acknowledgedBy : '') + (r.acknowledgedAt ? ' · ' + r.acknowledgedAt : '');
+      else tda.textContent = '—';
+      tr.appendChild(tda);
       var tde = mk('td', '', r.evidenceCount ? r.evidenceCount + ' item(s)' : (rec.actionRequested ? (r.state === 'acknowledged' ? 'MISSING' : 'asked for') : 'not asked for')); if (r.evidenceMissing) tde.style.color = '#c0392b'; tr.appendChild(tde);
       tr.appendChild(mk('td', '', r.closedAt ? r.closedAt + (r.closedBy ? ' · ' + r.closedBy : '') : '—'));
       var tdh = mk('td'); var hist = acks.filter(function (a) { return a.rigKey === r.rigKey; });
-      if (!hist.length) tdh.textContent = '—';
+      if (!hist.length && (r.ackList || []).length) { var fl = mk('ul'); r.ackList.forEach(function (a) { fl.appendChild(mk('li', '', (a.at || '') + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.photos ? ' · ' + a.photos + ' photo(s)' : '') + (a.documents ? ' · ' + a.documents + ' document(s)' : '') + (a.comment ? ' — ' + a.comment : ''))); }); tdh.appendChild(fl); }
+      else if (!hist.length) tdh.textContent = '—';
       else { var hul = mk('ul'); hist.forEach(function (a) { var li = mk('li', '', (a.at || String(a.saved).slice(0, 10)) + ' · rev ' + a.revision + ' · ' + (a.action === 'close' ? 'closed by Technical Services' : 'acknowledged') + (a.crew ? ' · crew ' + a.crew : '') + (a.by ? ' · ' + a.by : '') + (a.role ? ' (' + a.role + ')' : '') + (a.comment ? ' — ' + a.comment : '')); var ap = photos(a.photos); if (ap) li.appendChild(ap); if ((a.attachments || []).length) { var dl = mk('ul'); a.attachments.forEach(function (x) { if (!x || !x.data) return; var dli = mk('li'); var dla = mk('a', '', (x.name || 'document') + (sizeTxt(x.bytes) ? ' (' + sizeTxt(x.bytes) + ')' : '')); dla.href = blobUrl(x.data, x.type); dla.target = '_blank'; dla.download = x.name || 'document'; dli.appendChild(dla); dl.appendChild(dli); }); li.appendChild(dl); } hul.appendChild(li); }); tdh.appendChild(hul); }
       tr.appendChild(tdh); tb.appendChild(tr);
     });
@@ -181,7 +188,7 @@
     var key = rec.aabNumber + '|' + rec.revision + '|' + row.rigKey;
     if (posted[key]) return mk('div', 'sub', 'Closure posted; the state updates within ten minutes.');
     var f = mk('form', 'close');
-    f.appendChild(mk('div', 'sub', row.evidenceMissing ? 'This advisory asks for evidence and none is attached: ask the rig, or close with a reason.' : 'Review the acknowledgements' + (row.evidenceCount ? ' and the ' + row.evidenceCount + ' photograph(s)' : '') + ', then close this rig\u2019s case.'));
+    f.appendChild(mk('div', 'sub', row.evidenceMissing ? 'This advisory asks for evidence and none is attached: ask the rig, or close with a reason.' : 'Review the acknowledgements' + (row.evidenceCount ? ' and the ' + row.evidenceCount + ' item(s) of evidence' : '') + ', then close this rig\u2019s case.'));
     var name = mk('input'); name.placeholder = 'Your name'; name.required = true; f.appendChild(name);
     var comment = mk('textarea'); comment.rows = 2; comment.placeholder = 'Review comment (required)'; comment.required = true; f.appendChild(comment);
     var btn = mk('button', '', 'Close this rig\u2019s case'); btn.type = 'submit'; f.appendChild(btn);
@@ -210,5 +217,17 @@
     return f;
   }
 
-  window.AAB_REGISTER = { render: render, waitingOn: waitingOn, STATE_CLASS: STATE_CLASS, STATE_HELP: STATE_HELP };
+  // One advisory in full (text, documents, photographs, each rig's acknowledgements and evidence)
+  // for the reports dashboard's AABs tab (Dan, 27 Sep: open the master AAB with its attachments
+  // from the dashboard). Read-only: no close form.
+  function renderRecord(el, aabNumber, opts) {
+    ensureCss(); var data = window.AAB_DATA || null; var root = mk('div', 'aabreg'); el.innerHTML = ''; el.appendChild(root);
+    if (!data) { root.appendChild(mk('div', 'empty', 'aab-data.js is not beside the board yet.')); return; }
+    var recs = (data.records || []).filter(function (r) { return r.aabNumber === aabNumber; }).sort(function (a, b) { return b.revision - a.revision; });
+    var rec = recs.filter(function (r) { return r.current; })[0] || recs[0];
+    if (!rec) { root.appendChild(mk('div', 'empty', 'AAB ' + aabNumber + ' is not in aab-data.js.')); return; }
+    var rows = (data.status || []).filter(function (r) { return r.aabNumber === aabNumber; });
+    root.appendChild(detail(rec, rows, data, { canClose: false }));
+  }
+  window.AAB_REGISTER = { render: render, renderRecord: renderRecord, waitingOn: waitingOn, STATE_CLASS: STATE_CLASS, STATE_HELP: STATE_HELP };
 })();

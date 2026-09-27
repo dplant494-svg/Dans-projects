@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.68'
+$ScriptVersion = '2.69'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -2826,6 +2826,7 @@ foreach ($num in $aabCurrent.Keys) {
             closedAt    = $(if ($lastClose) { [string]$lastClose.at } else { '' })
             closedBy    = $(if ($lastClose) { [string]$lastClose.by } else { '' })
             historyCount = $rigAcks.Count
+            ackList     = @($eligible | ForEach-Object { [ordered]@{ action = [string]$_.action; crew = [string]$_.crew; at = [string]$_.at; by = [string]$_.by; role = [string]$_.role; photos = @($_.photos).Count; documents = @($_.attachments).Count; comment = [string]$_.comment } })   # v2.69: each acknowledgement by name for the register and the dashboard
         }) | Out-Null
     }
 }

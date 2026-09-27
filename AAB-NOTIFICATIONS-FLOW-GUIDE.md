@@ -86,14 +86,15 @@ join(union(split(concat(coalesce(body('Parse_JSON')?['originatorEmail'], outputs
 12. **Send an email (V2)**, rename **Ack Email**:
     - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), if(empty(replace(outputs('AckTo'), ';', '')), outputs('OfficeList'), outputs('AckTo')))`
     - CC: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), concat(outputs('OfficeList'), if(empty(outputs('Gatekeeper')), '', concat(';', outputs('Gatekeeper')))))`
-    - Subject: fx `concat(if(equals(outputs('TestMode'), true), '[TEST MODE] ', ''), '[AAB ', outputs('AckWhat'), '] ', outputs('AabNo'), ' rev ', outputs('Rev'), ' - ', outputs('AckRig'), ' crew ', coalesce(body('Parse_JSON')?['crew'],'?'))`
+    - Subject: fx `concat(if(equals(outputs('TestMode'), true), '[TEST MODE] ', ''), '[AAB ', outputs('AckWhat'), '] ', outputs('AabNo'), ' rev ', outputs('Rev'), ' - ', outputs('AckRig'), if(empty(coalesce(body('Parse_JSON')?['crew'],'')), '', concat(' crew ', body('Parse_JSON')?['crew'])))`
+      (27 Sep: a Technical Services closure has no crew, so the crew part is left off instead of printing `crew ?`)
     - Body (code view):
 
 ```
 @{if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('AckTo'), '<br>CC: ', outputs('OfficeList'), ';', outputs('Gatekeeper'), '</b></p>'), '')}
-<p><b>@{outputs('AckRig')}</b> has @{outputs('AckWhat')} AAB <b>@{outputs('AabNo')}</b> rev @{outputs('Rev')}@{if(empty(coalesce(body('Parse_JSON')?['aabTitle'],'')), '', concat(' - ', body('Parse_JSON')?['aabTitle']))}.</p>
-<p>By: @{body('Parse_JSON')?['by']} (@{body('Parse_JSON')?['role']}, crew @{body('Parse_JSON')?['crew']}) on @{body('Parse_JSON')?['at']}<br>Comment: @{body('Parse_JSON')?['comment']}</p>
-<p><a href="@{outputs('DashLink')}">Open the fleet compliance page</a> (the state updates within ten minutes; evidence photographs are on the record there).</p>
+<p>@{if(equals(outputs('AckWhat'), 'acknowledged'), concat('<b>', outputs('AckRig'), '</b> has acknowledged AAB'), 'Technical Services have reviewed and closed AAB')} <b>@{outputs('AabNo')}</b> rev @{outputs('Rev')}@{if(empty(coalesce(body('Parse_JSON')?['aabTitle'],'')), '', concat(' - ', body('Parse_JSON')?['aabTitle']))}@{if(equals(outputs('AckWhat'), 'acknowledged'), '', concat(' for <b>', outputs('AckRig'), '</b>'))}.</p>
+<p>By: @{body('Parse_JSON')?['by']} (@{body('Parse_JSON')?['role']}@{if(empty(coalesce(body('Parse_JSON')?['crew'],'')), '', concat(', crew ', body('Parse_JSON')?['crew']))}) on @{body('Parse_JSON')?['at']}<br>Comment: @{body('Parse_JSON')?['comment']}</p>
+<p><a href="@{outputs('DashLink')}">Open the fleet compliance page</a> (the state updates within ten minutes; the evidence photographs and documents are on the record there).</p>
 <p>Technical Services - Well Control Engineering</p>
 ```
 
