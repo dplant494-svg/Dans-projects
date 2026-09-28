@@ -101,13 +101,20 @@ account, no anonymous access: the demo website channel is not enabled.
 
 ## 6. Which Power Platform environment, which DLP policies, can sharing be set for that environment only?
 
-The agent and the WCE flows are in the **SEADRILL-WC-DEV** environment (id
-`76e054f3-a40c-e46e-8457-4bd43fc3ad06`), the Power Platform environment Seadrill created for
-Well Control [ISIT to confirm the environment name as they see it]. The DLP policies that apply
-are whichever ISIT have assigned to that environment plus the tenant-wide ones; the only
-exception ever requested is the HTTP trigger exception of August, which is granted and in use.
-The agent itself uses two connectors, SharePoint (knowledge) and Teams (channel), both in the
-Business group of every standard policy.
+The agent lives in the **Seadrill Apps PROD** environment, the Power Platform environment the
+company's production apps sit in, which is where Copilot Studio placed it when it was created
+under the Seadrill licence. The WCE Power Automate flows (the report intake, the precharge, AAB
+and CBM-to-OEM notifications) are in **SEADRILL-WC-DEV** (id
+`76e054f3-a40c-e46e-8457-4bd43fc3ad06`), the environment created for Well Control. The two do
+not talk to each other: the agent reads a SharePoint library, the flows write files, and neither
+calls the other.
+
+The DLP policies that apply to each are whichever ISIT have assigned to those environments plus
+the tenant-wide ones. The only exception ever requested is the HTTP trigger exception of August,
+on SEADRILL-WC-DEV, which is granted and in use. The agent itself uses two connectors, SharePoint
+(knowledge) and Teams (channel), both in the Business group of every standard policy, so it needs
+no exception. If ISIT would rather the agent sat in SEADRILL-WC-DEV beside the flows, it can be
+exported and imported there as a solution; say so and I will do it before it is published.
 
 Yes, sharing can be set for the environment alone. Copilot Studio's "share agents with
 everyone/security groups" and the Teams app availability are governed per environment and per
@@ -185,8 +192,8 @@ Technical Superintendent, Well Control Engineering
 
 ## Notes for Dan (not part of the email)
 
-- Question 6: confirm the environment name in Copilot Studio (top-right environment picker) before
-  sending; the id above is the one the flows run in.
+- Question 6: the agent is in Seadrill Apps PROD (Copilot Studio's picker), the flows in SEADRILL-WC-DEV;
+  both stated. If IT prefer the agent moved beside the flows, that is a solution export/import, not a rebuild.
 - Question 4: add Lee as co-owner on the agent (Copilot Studio → the agent → **Manage** → **Security**
   → **Co-owners**) and on each flow (flow → **Share**) before the email goes, so the sentence is true.
 - Question 8: fill in the head count, the monthly estimate and the cost centre code.
