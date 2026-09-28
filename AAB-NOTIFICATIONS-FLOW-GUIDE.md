@@ -86,7 +86,16 @@ join(union(split(concat(coalesce(body('Parse_JSON')?['originatorEmail'], outputs
 12. Compose **TestBanner** (28 Sep: the red test-mode line lives in its own card because the
     body editor refuses HTML inside an expression): fx
     `if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('AckTo'), '<br>CC: ', outputs('OfficeList'), ';', outputs('Gatekeeper'), '</b></p>'), '')`
-12a. **Send an email (V2)**, rename **Ack Email**:
+12b. Two **Select** cards (Data Operation) so the acknowledgement email carries the evidence itself
+    (Dan, 28 Sep: 'no attachments either'; proven the same day with a crew B photograph):
+    - **AckPhotos**: From fx `coalesce(body('Parse_JSON')?['photos'], json('[]'))`; Map (key/value mode):
+      `Name` → `coalesce(item()?['name'], 'photo.jpg')`, `ContentBytes` → `base64ToBinary(last(split(item()?['data'], ',')))`
+      (`last(split(...))` strips the `data:image/jpeg;base64,` prefix the rig page puts on photographs).
+    - **AckDocs**: From fx `coalesce(body('Parse_JSON')?['attachments'], json('[]'))`; Map:
+      `Name` → `coalesce(item()?['name'], 'document')`, `ContentBytes` → `base64ToBinary(last(split(item()?['data'], ',')))`.
+12c. **Send an email (V2)**, rename **Ack Email**:
+    - Attachments (Advanced parameters, **Switch to input entire array**): fx `union(body('AckPhotos'), body('AckDocs'))`.
+      Empty on a closure, because Technical Services attach nothing.
     - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), if(empty(replace(outputs('AckTo'), ';', '')), outputs('OfficeList'), outputs('AckTo')))`
     - CC: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), concat(outputs('OfficeList'), if(empty(outputs('Gatekeeper')), '', concat(';', outputs('Gatekeeper')))))`
     - Subject: fx `concat(if(equals(outputs('TestMode'), true), '[TEST MODE] ', ''), '[AAB ', outputs('AckWhat'), '] ', outputs('AabNo'), ' rev ', outputs('Rev'), ' - ', outputs('AckRig'), if(empty(coalesce(body('Parse_JSON')?['crew'],'')), '', concat(' crew ', body('Parse_JSON')?['crew'])))`
