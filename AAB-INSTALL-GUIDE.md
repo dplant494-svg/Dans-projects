@@ -120,11 +120,13 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    **outstanding**, and the dashboard's AABs tab shows the counts.
 5. Open `…/sacred/aab/bulletin-board.html?rig=<the rig's key>` (keys: `nov`, `auriga`, `saturn`,
    `jupiter`, `tellus`, `carina`, `polaris`, `vela`, `gemini`, `capella`, `libongos`,
-   `quenguela`, `cam`). Acknowledge as crew A. Then as crew B. Then **Report the action done**
-   with a comment and a photograph.
+   `quenguela`, `cam`). Acknowledge as crew A with a comment and a photograph. Then as crew B
+   with a comment and a document (PDF, Word, Excel or an image). A crew that has posted is
+   greyed out.
 6. Each post lands in PostedReports as `seadrill-aab-ack_…json` and the flow mails the
-   originator and the rig's four (test mode: office only). The next scan moves the rig chip
-   through **partly acknowledged**, **action open**, **actioned**.
+   originator and the rig's four (TSL, Subsea Supervisor, ARM, Rig Manager; test mode: office
+   only) with the evidence attached. The next scan moves the rig chip through
+   **partly acknowledged** to **acknowledged**.
 6a. On the fleet compliance page (password) the row shows **Awaiting your review: 1**. Open
    the AAB, and in the rig's row review the evidence, type your name and a comment, click
    **Close this rig's case**. After the next scan the chip is **closed**. The rig never
@@ -133,6 +135,11 @@ C:\TSC-Dashboard\scripts\Deploy-Dashboard.ps1
    next scan prints `AAB overdue chase: 1 new row(s)` and the chase flow (Part D of the
    flow guide) mails once a day until the rig closes it.
 8. Settings B2 `No`.
+
+**Proven end to end on 28 September 2026** (Dan, test mode, West Vela, C10250746 and C10250747):
+issued email with the bulletin PDF, crew A and crew B acknowledgement emails with the photograph
+attached, the closure email "West Vela: Technical Services have reviewed and closed AAB …", the
+fleet page with both crews by name, the dashboard row opening the advisory with its attachments.
 
 The TEST records stay on the dashboard as history. When you want them gone, tell me and
 they come out of PostedReports by hand, the way the OEM test copies did. The archive

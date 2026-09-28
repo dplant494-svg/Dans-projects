@@ -223,6 +223,13 @@ wording, and sourcing the SFI list).
 
 ## 6. Who builds what, in order
 
+**Status, 28 September 2026: the loop is built and proven in test mode.** Scanner v2.69, rig page
+Rev 8, fleet compliance page with Technical Services close, Eric's create page Rev 10, the
+dashboard's master AAB register opening the record with its attachments, and Dan's AAB
+Notifications flow (issued email with the bulletin; acknowledgement emails to the originator and
+the rig's four with the evidence attached; closure email). Still open: the daily overdue chase
+(Part D of the flow guide), the SharePoint toolbox button, Eric's PDF, the SFI names.
+
 | Step | Owner | Needs first | Deliverable |
 |---|---|---|---|
 | 1 ✅ Rev 8 + schema 2.0 handoff received 24 Sep | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack), the logo, `sample-reports/aab/` | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, `pdf`/`pdfName`, Load AAB file proven on the two test records, one saved test record on `West Vela` only, **not posted** |
