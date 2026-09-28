@@ -59,7 +59,10 @@ what must not change, and what is safe.
    - `meta`: `sss`, `rigmgr`, `oim`, `arigmgr`, `tsl`, `elec`, `dsl`, `tech`,
      `mpd`, `wo`, `other[] = [{ name, title }]`, `summary24`/`next24`
      (HTML strings)
-   - `tiles[]`: `title`, `status`, `fodb`, `tileDate`, `notes` (HTML),
+   - `tiles[]`: `title`, `status`, `fodb`, `tileDate`, `notes` (HTML; from WCGRRT REV 166 it may carry
+     `<span class="rte-ref">` fragments with an inline `<img>` data URI, a `rte-ref-lbl` label and a
+     `rte-ref-cap` caption, rolling handoff entry 37: the dashboard renders the image inline and
+     removes the screen-only `rte-ref-del` ×; the digest keeps label and caption as text, v2.70),
      `imgData` (`data:image/...` URI or `""`),
      `equipEntries[]`: `type`, `manual` (bool), `manualName`, `manualSfi`,
      `ramSize`, `surfaceTest`, `flagEot`/`flagCrit` (bools), `notes` (HTML),
@@ -261,3 +264,13 @@ under "Surface tests" and never prints the labels block itself. Tested on a synt
 post (`sample-reports/seadrill-report_SSCE-Equipment_2026-09-23_acoustic-sample.json`, 69 keys,
 69 labels, West Saturn Stack 1 shape); nothing real has been posted yet.
 
+**Reference-photograph grades (SSORT 148, rolling handoff entries 38.4 and 39):** a grade shown on a
+reference photograph in the tool is Seadrill field experience, held in the build and (from 148) in the
+browser's `localStorage`, never posted. It is never a `cbmGrades[]` row and never enters a rollup; only a
+grade a crew assigned to a component is a record. If such a store ever ships in a payload it gets its own
+key and its own table.
+
+**`meta.asset === "SSCE Equipment"` (SSORT 148, entry 38.1; WCGRRT 153 before it):** the test asset, not a
+rig. In `NON_RIG_BUCKETS` on the dashboard: off the fleet ranking, the Compliance grid and count, and the
+Rig Monitoring grid unless the rig filter selects it; listed under its own group in the rig filter so its
+reports stay findable. `SSCE Asset` is its pre-153 spelling and is folded into it by the scanner.

@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.69'
+$ScriptVersion = '2.70'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -449,7 +449,8 @@ function ConvertTo-DigestText {
     if (-not $Html) { return '' }
     if ($Html.StartsWith('data:')) { return '' }                       # a bare embedded image
     if ($Html.Length -gt 4000 -and ($Html -notmatch '\s')) { return '' } # bare base64
-    $t = $Html -replace '<img[^>]*>', ' ' -replace 'data:[a-z]+/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+', ' '
+    $t = $Html -replace '<span class="rte-ref-del"[^>]*>[^<]*</span>', ''   # v2.70: WCGRRT 166 inline reference images; the screen-only × never reaches the digest
+    $t = $t -replace '<img[^>]*>', ' ' -replace 'data:[a-z]+/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+', ' '
     $t = $t -replace '<br\s*/?>', ' ' -replace '</(p|div|tr|li|h[1-6])>', ' | ' -replace '<[^>]+>', ' '
     $t = $t -replace '&nbsp;', ' ' -replace '&amp;', '&' -replace '&lt;', '<' -replace '&gt;', '>' -replace '&quot;', '"' -replace '&#39;', "'"
     $t = (($t -replace '\s+', ' ') -replace '(\s*\|\s*)+', ' | ').Trim(' |'.ToCharArray())

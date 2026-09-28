@@ -327,6 +327,13 @@
   .rv-tile-body { padding: 12px 14px; }
   .rv-notes { white-space: pre-wrap; font-size: 13px; margin-bottom: 10px; }
   .rv-notes:last-child { margin-bottom: 0; }
+  /* WCGRRT REV 166 (rolling handoff entry 37): inline reference images inside narrative HTML.
+     The sanitiser keeps <img>; the tool's screen-only delete control is hidden here as in print. */
+  .rv-notes .rte-ref { display: inline-block; max-width: 440px; vertical-align: top; margin: 4px 10px 4px 0; white-space: normal; }
+  .rv-notes .rte-ref img { display: block; max-width: 100%; height: auto; border: 1px solid #c9d3ea; border-radius: 4px; cursor: zoom-in; }
+  .rv-notes .rte-ref-del { display: none !important; }
+  .rv-notes .rte-ref-lbl { font-weight: 700; font-size: 11px; color: var(--sd-blue); margin-right: 6px; }
+  .rv-notes .rte-ref-cap { font-size: 11px; color: #5a6478; }
   .rv-equip { border-top: 1px solid var(--sd-grid); padding-top: 10px; margin-top: 10px; }
   .rv-equip:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
   .rv-equip-head { font-weight: 700; margin-bottom: 4px; }
@@ -1476,6 +1483,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   function rvNotes(html) {
     var d = mk('div', 'rv-notes');
     d.appendChild(sanitizeHtml(html));
+    // entry 37: a reference image opens in the lightbox like a photograph; the × control never renders
+    Array.prototype.forEach.call(d.querySelectorAll('.rte-ref-del'), function (x) { x.parentNode.removeChild(x); });
+    Array.prototype.forEach.call(d.querySelectorAll('.rte-ref img'), function (im) { im.addEventListener('click', function () { openLightbox(im.src); }); });
     return d;
   }
 
@@ -2405,8 +2415,10 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     grid.textContent = '';
     var checks = window.DASHBOARD_DATA.rigChecks || [];
     var rigSet = {}, rigs = [];
-    checks.forEach(function (e) { if (e.rig && !rigSet[e.rig]) { rigSet[e.rig] = true; rigs.push(e.rig); } });
-    Object.keys(BWM_STATUS.byRig).forEach(function (rig) { if (!rigSet[rig]) { rigSet[rig] = true; rigs.push(rig); } });
+    // entry 38.1: the test asset and the other non-rig buckets are not fleet units; shown only when selected
+    function fleetRig(rg) { return rg && (!NON_RIG_BUCKETS[rg] || state.rig === rg); }
+    checks.forEach(function (e) { if (fleetRig(e.rig) && !rigSet[e.rig]) { rigSet[e.rig] = true; rigs.push(e.rig); } });
+    Object.keys(BWM_STATUS.byRig).forEach(function (rig) { if (fleetRig(rig) && !rigSet[rig]) { rigSet[rig] = true; rigs.push(rig); } });
     if (!rigs.length) {
       msg.hidden = false; grid.hidden = true;
       msg.textContent = 'No Daily Checks or FLM readings received yet.';
@@ -4299,7 +4311,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // list is newest-first; first record per rig = latest checklist.
     var latestByRig = {};
     list.forEach(function (r) { if (!latestByRig[r.rig]) latestByRig[r.rig] = r; });
-    var rigs = Object.keys(latestByRig).sort();
+    // SSORT 148 (entry 38.1): 'SSCE Equipment' is the test asset, not a rig. It stays off the fleet
+    // grid and counts unless the rig filter has selected it, as for the other non-rig buckets.
+    var rigs = Object.keys(latestByRig).filter(function (rg) { return !NON_RIG_BUCKETS[rg] || state.rig === rg; }).sort();
 
     cardsWrap.appendChild(mk('div', 'rv-section-label', 'Latest checklist per rig (' + rigs.length + ')'));
     var grid = mk('div', 'ts-grid');

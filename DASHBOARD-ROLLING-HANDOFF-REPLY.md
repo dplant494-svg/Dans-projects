@@ -960,3 +960,65 @@ Failure / Downtime Notification (your `FAILURE-NOTIFICATION-BUILD-SPEC.md`, queu
 the email flow is ours and the handoff entry with the keys is yours before it ships), and
 the Riser Tally (Dan, 26 Sep: per rig, embedded in SSORT with the other tools, after the
 failure reporting). Both are on the dashboard plan as items 31 and 32; neither is started.
+
+
+## Entries 37 to 39 and the 27 September action summary — reply, 28 September 2026 (scanner v2.70)
+
+### Entry 37 — inline reference images: rendered, and they were never being stripped
+
+Checked before building anything: the dashboard's narrative sanitiser removes `script`, `style`,
+`iframe`, `object`, `embed`, `link`, `meta`, `form`, `base`, every `on*` attribute and any
+`javascript:` URL, and **nothing else**. An `<img>` with a data URI passes through, so a REFA
+posted from REV 166 was never going to vanish. What was missing was the styling and the ×.
+Done in this build:
+
+- `.rte-ref` renders as an inline block under the sentence it belongs to, the image at up to
+  440 px with the REFA label and the writer's caption beneath it; a click opens the same
+  lightbox as a photograph.
+- `.rte-ref-del` is removed from the fragment on render and hidden by CSS as well, so the ×
+  can never show, on screen or in print.
+- The Copilot digest (v2.70) drops the × span before it strips images, so the digest reads
+  "…outside the limit at REFA REFA <caption> and was repeated…": the label and the caption
+  survive as text, the picture does not (digests carry no images, as before).
+
+Proven on a synthetic `SSCE Equipment` rig visit post with the exact fragment from 37.2: one
+image, zero × controls, label and caption in place.
+
+### Entry 38 — `SSCE Equipment` was already a non-rig; two rollups tightened
+
+`SSCE Equipment` (and its pre-REV-153 spelling `SSCE Asset`) has been in the dashboard's
+`NON_RIG_BUCKETS` since WCGRRT 153: off the fleet ranking chart, listed under its own group in
+the rig filter. This build adds the two places it could still have leaked into a fleet view:
+the **Compliance** tab's "latest checklist per rig" grid and count, and the **Rig Monitoring**
+grid. Both now show the test asset only when the rig filter has selected it. The CBM heatmap is
+per selected rig and was never a rollup. The scanner never counts it in the AAB fleet states
+(those come from the AAB's own rig list).
+
+The nine keys that stopped: nothing to do, as you say. The heatmap draws rows from the keys
+present and history from what was posted; an absent key is an absent row, never "missing".
+
+38.5 (West Vela EDS): no posted report carries an EDS key on this side either (checked the
+index). We hold no NOV EDS documents for other rigs, so nothing to compare.
+
+### Entry 39 — reference-photo captions: understood, and the rule is recorded
+
+Nothing arrives, nothing built. The rule, recorded in `INTEGRATION-CONTRACT.md`: a grade on a
+reference photograph is Seadrill field experience and is never a `cbmGrades[]` row; only a
+grade a crew assigned to a component is. If a caption store ever ships in a payload it gets
+its own key and its own table, never the heatmap.
+
+### The 27 September action summary, item by item
+
+| # | Summary says | State on this side |
+|---|---|---|
+| 1 | Inline reference images | Done above (v2.70). |
+| 2 | `acst_*`, `ehbs_*`, `dd_*`, `soakLabels` | Built 23 Sep (scanner v2.62, dashboard the same build): acoustic, EHBS and drawdown render under the equipment entry with the posted verdicts shown, never recomputed. |
+| 3 | `calcData` | Built 24 Sep (`rvCalc`): per-cavity readings with `unit` respected, `est` shown as an estimate, blanks as not measured, `na` never a fail. Our ask for per-cavity `status` / `checks[]` stands (reply to entry 36). |
+| 4 | `SSCE Equipment` not a rig | Was already; two rollups tightened above. |
+| 5 | Grade 3 in the fail bucket (entry 21) | **Decided 23 Sep, with you**: grades 1 and 2 blue, 3 orange "acceptable with findings, monitor", 4 and 5 red. Not open. |
+| 6 | 30 MB vs 40 MB (entry 9) | **Decided 15 Sep**: the CBM and PDC ceiling is 40 MB on this side (v2.48), matching SSORT. Not open. |
+| 33 | Ram block key family; Post to OEM held | The seven ram block classes render (v2.64 prefix rule); the OEM flow's Part D is Dan's next flow build, from your 28 Sep note. |
+| 19 | Heatmap history splice at the July boundary | Built 22 Sep (v2.61): pre-REV-80 positional rows are their own rows, labelled "(template before 19 Jul 2026)", with `cbm-key-map.json` for the known re-points. |
+| 17, 15, 11, 10 | | Answered in this file on 16 and 19 September; nothing owed. |
+
+The failure notification handoff has its own reply: `FAILURE-NOTIFICATION-REPLY-FOR-TOOLS.md`.
