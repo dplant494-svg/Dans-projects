@@ -83,19 +83,24 @@ startsWith(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), 'seadrill
 join(union(split(concat(coalesce(body('Parse_JSON')?['originatorEmail'], outputs('Gatekeeper'), ''), ';', coalesce(first(body('AckRigRow')?['value'])?['TslEmail'],''), ';', coalesce(first(body('AckRigRow')?['value'])?['SubseaSupervisorEmail'],''), ';', coalesce(first(body('AckRigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('AckRigRow')?['value'])?['RigManagerEmail'],'')), ';'), json('[]')), ';')
 ```
 
-12. **Send an email (V2)**, rename **Ack Email**:
+12. Compose **TestBanner** (28 Sep: the red test-mode line lives in its own card because the
+    body editor refuses HTML inside an expression): fx
+    `if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('AckTo'), '<br>CC: ', outputs('OfficeList'), ';', outputs('Gatekeeper'), '</b></p>'), '')`
+12a. **Send an email (V2)**, rename **Ack Email**:
     - To: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), if(empty(replace(outputs('AckTo'), ';', '')), outputs('OfficeList'), outputs('AckTo')))`
     - CC: fx `if(equals(outputs('TestMode'), true), outputs('OfficeList'), concat(outputs('OfficeList'), if(empty(outputs('Gatekeeper')), '', concat(';', outputs('Gatekeeper')))))`
     - Subject: fx `concat(if(equals(outputs('TestMode'), true), '[TEST MODE] ', ''), '[AAB ', outputs('AckWhat'), '] ', outputs('AabNo'), ' rev ', outputs('Rev'), ' - ', outputs('AckRig'), if(empty(coalesce(body('Parse_JSON')?['crew'],'')), '', concat(' crew ', body('Parse_JSON')?['crew'])))`
       (27 Sep: a Technical Services closure has no crew, so the crew part is left off instead of printing `crew ?`)
-    - Body (code view):
+    - Body, pasted into the normal (rich text) view as plain text, no HTML, six lines (as built 28 Sep;
+      Outlook links the page address by itself):
 
 ```
-@{if(equals(outputs('TestMode'), true), concat('<p style="color:#b00"><b>TEST MODE. Real run would go To: ', outputs('AckTo'), '<br>CC: ', outputs('OfficeList'), ';', outputs('Gatekeeper'), '</b></p>'), '')}
-<p>@{if(equals(outputs('AckWhat'), 'acknowledged'), concat('<b>', outputs('AckRig'), '</b> has acknowledged AAB'), 'Technical Services have reviewed and closed AAB')} <b>@{outputs('AabNo')}</b> rev @{outputs('Rev')}@{if(empty(coalesce(body('Parse_JSON')?['aabTitle'],'')), '', concat(' - ', body('Parse_JSON')?['aabTitle']))}@{if(equals(outputs('AckWhat'), 'acknowledged'), '', concat(' for <b>', outputs('AckRig'), '</b>'))}.</p>
-<p>By: @{body('Parse_JSON')?['by']} (@{body('Parse_JSON')?['role']}@{if(empty(coalesce(body('Parse_JSON')?['crew'],'')), '', concat(', crew ', body('Parse_JSON')?['crew']))}) on @{body('Parse_JSON')?['at']}<br>Comment: @{body('Parse_JSON')?['comment']}</p>
-<p><a href="@{outputs('DashLink')}">Open the fleet compliance page</a> (the state updates within ten minutes; the evidence photographs and documents are on the record there).</p>
-<p>Technical Services - Well Control Engineering</p>
+@{outputs('TestBanner')}
+@{outputs('AckRig')}@{if(equals(outputs('AckWhat'), 'acknowledged'), ' has acknowledged AAB ', ': Technical Services have reviewed and closed AAB ')}@{outputs('AabNo')} rev @{outputs('Rev')}@{if(empty(coalesce(body('Parse_JSON')?['aabTitle'],'')), '', concat(' - ', body('Parse_JSON')?['aabTitle']))}.
+By: @{body('Parse_JSON')?['by']} (@{body('Parse_JSON')?['role']}@{if(empty(coalesce(body('Parse_JSON')?['crew'],'')), '', concat(', crew ', body('Parse_JSON')?['crew']))}) on @{body('Parse_JSON')?['at']}
+Comment: @{body('Parse_JSON')?['comment']}
+Open the fleet compliance page (the state updates within ten minutes; the evidence photographs and documents are on the record there): @{outputs('DashLink')}
+Technical Services - Well Control Engineering
 ```
 
 ### IsAck → False: the issued email, one per applicable rig
@@ -138,9 +143,12 @@ join(union(split(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''
 ```
 
       - **Attachments** (Show all, + Add new item). Name: fx
-        `if(equals(outputs('HasAtt'), true), first(body('PrimaryAtt'))?['name'], 'no-bulletin.txt')`.
+        `if(greater(length(coalesce(body('Parse_JSON')?['attachments'], json('[]'))), 0), coalesce(first(body('Parse_JSON')?['attachments'])?['name'], 'bulletin.pdf'), 'no-bulletin.txt')`.
         Content: fx
-        `if(equals(outputs('HasAtt'), true), base64ToBinary(first(body('PrimaryAtt'))?['data']), base64ToBinary('Tm8gYnVsbGV0aW4gd2FzIGF0dGFjaGVkIHRvIHRoaXMgQUFCLg=='))`
+        `if(greater(length(coalesce(body('Parse_JSON')?['attachments'], json('[]'))), 0), base64ToBinary(coalesce(first(body('Parse_JSON')?['attachments'])?['data'], '')), base64ToBinary('Tm8gYnVsbGV0aW4gd2FzIGF0dGFjaGVkIHRvIHRoaXMgQUFCLg=='))`
+        (28 Sep, as built and proven: the first attachment on the record is the one the board marks
+        BULLETIN, so the email takes it directly; PrimaryAtt and HasAtt stay in the flow but nothing
+        reads them any more. The `primary` filter never matched on Dan's tenant.)
         (the fallback is a one-line text file saying no bulletin was attached, so the card
         never fails on an AAB without one). A second attachment item for the AAB's own PDF,
         once Eric's tool produces one: Name `coalesce(body('Parse_JSON')?['pdfName'],'AAB.pdf')`,
@@ -212,8 +220,8 @@ copies it into the **Digests** library, which is SharePoint.
   does not match the code the board used (`nov`, `cam` are the odd ones), or the four
   address cells are empty.
 - **The attachment is `no-bulletin.txt` although the board showed a BULLETIN file:** the
-  PrimaryAtt filter (step 13) is comparing `True` with `true`. Its left box must be
-  `toLower(string(item()?['primary']))`.
+  attachment boxes are still reading PrimaryAtt. Use the two expressions in step 16 that read
+  `body('Parse_JSON')?['attachments']` directly (proven 28 Sep).
 - **The attachment is `no-bulletin.txt`:** the AAB was posted without a PDF. The board
   allows it; the dashboard shows the record; Eric decides whether to revise.
 - **Chase mails the same row twice in a day:** two scans on one day cannot, the state file
