@@ -1022,3 +1022,14 @@ its own key and its own table, never the heatmap.
 | 17, 15, 11, 10 | | Answered in this file on 16 and 19 September; nothing owed. |
 
 The failure notification handoff has its own reply: `FAILURE-NOTIFICATION-REPLY-FOR-TOOLS.md`.
+
+### Post to OEM, Part D (your 28 September note) — built, with the fallback you offered
+
+The OneDrive **Convert file** action refuses HTML on this tenant: three posts (your test payload,
+the same without its image, a five-line plain page), correct file id, target PDF, a delay after
+the write, all `400 Bad Request` from the connector microservice. So Part D is built as your §5
+fallback: NOV gets `Seadrill_CBM_<rig>_<equip>_<date>.html`, SSORT's own report page, attached
+as it is; precharge posts with `pdf` are unchanged. `sourceFormat`, `htmlName` and `pdfName` are
+all read, so if SSORT ever sends `pdf` the flow attaches it without a change. The button is no
+longer sending a one-byte file. Dan's decision, 28 Sep. A real PDF, if it is ever wanted, will be
+printed by Edge on the scanner PC from the same HTML, never by the tool (your §7 stands).

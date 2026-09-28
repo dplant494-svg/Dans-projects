@@ -156,7 +156,30 @@ Email's To, CC, Subject and Body wrapped on `outputs('TestMode')`. So:
 Before test mode existed (22 Sep morning) the test was done by putting your own address
 in the NOV sheet's **Email** column; that is no longer needed and should not be done.
 
-## Part D — SSORT 148 posts HTML, not PDF: the convert step (15 minutes, before the button ships)
+## Part D — SSORT 148 posts HTML, not PDF: NOV gets the HTML report (as built, 28 September 2026)
+
+**Outcome, 28 Sep (Dan):** the OneDrive **Convert file** action refuses HTML on this tenant. Proven
+three times in the built flow with a correct file id and target type PDF: SSORT's report page,
+the same page without its embedded image, and a five-line plain page all came back
+`400 Bad Request` from the connector microservice, with a 10-second delay after Create file
+making no difference. So the convert step below is **not** built; the flow attaches SSORT's own
+report page as an HTML file instead, which opens in any browser and prints as the same
+document the engineer sees. Dan, 28 Sep: "ok lets do the HTML". A real PDF, if ever wanted,
+is printed by Edge on the scanner PC (an offered scanner build), not by the tool.
+
+**As built.** In `NeedsConvert` (left box `and(equals(outputs('HasPdf'), false), equals(outputs('HasHtml'), true))`
+is equal to `true`):
+- **True** (an SSORT HTML post): one card, **Set variable** `PdfFile` = fx
+  `base64ToBinary(body('Parse_JSON')?['html'])`.
+- **False** (a post carrying `pdf`): **Set variable** `PdfFile` = fx
+  `base64ToBinary(if(equals(outputs('HasPdf'), true), body('Parse_JSON')?['pdf'], 'Cg=='))`.
+- **OEM Email**, Attachments: Name fx `if(equals(outputs('HasPdf'), true), outputs('PdfName'), outputs('HtmlName'))`,
+  Content fx `variables('PdfFile')`. `PdfFile` is the Object variable initialised under the trigger;
+  `HasHtml` and `HtmlName` are the two composes after `HasPdf` (D2 below).
+
+The original design, kept for the record:
+
+### Part D as designed (the convert step; refused by the tenant, not built)
 
 **Why (rolling handoff entry 31, 24 Sep):** SSORT has no PDF renderer. Its Post to OEM sends
 `sourceFormat: "html"`, `htmlName`, `html` (base64 of a standalone HTML report) and `pdfName`,
