@@ -6,6 +6,8 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 
 ## Rolling plan (last updated 28 Sept 2026)
 
+**Done**: draft site in `site/` (noindex), before/after photos in `assets/`, live sobriety counter from 2 April 2025, apply form (Netlify), Drinkline pointer, disclaimer. Placeholders listed in `site/NOTES.md`.
+
 **Decide first**
 1. Name and domain. Check `roughneckfitness.com`, `.co.uk`, `.fit` on Namecheap. Fallbacks in the same register: Crew Change Fitness, Hitch Fit, Days On Coaching, Offshore Strong, Toolpusher Training. Pick one whose Instagram handle is also free.
 2. How much of the story goes public. Sobriety is the most powerful part and the most personal. Options: front and centre (the "Days" counter on the site), mentioned once in the story, or private. Owner's call; the site works either way. Nothing on the site needs to say where you live.

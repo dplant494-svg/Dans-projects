@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roughneck Fitness — Online coaching built on rotation</title>
+<meta name="description" content="Online fitness coaching for rig, offshore and rotational workers, from a coach who lost 72 lb and got sober on a two-week hitch.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://roughneckfitness.com/">
+<meta name="theme-color" content="#14171A">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Roughneck Fitness — Online coaching built on rotation">
+<meta property="og:description" content="72 lb down. Sober since April 2025. Coaching for people who train on a two-week hitch.">
+<meta property="og:image" content="https://roughneckfitness.com/img/after-gym-front.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2314171A'/%3E%3Cpath d='M0 48h64v16H0z' fill='%23FF6A13'/%3E%3Cpath d='M0 48l16 16H0zM24 48l16 16H24zM48 48l16 16H48z' fill='%2314171A'/%3E%3Cpath d='M22 12h14a9 9 0 0 1 3 17.5L44 44h-9l-4-13h-2v13h-7zm7 6v7h6a3.5 3.5 0 0 0 0-7z' fill='%23E8E4DC'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Roughneck Fitness",
+  "url": "https://roughneckfitness.com/",
+  "description": "Online fitness coaching for rotational and offshore workers.",
+  "email": "coach@roughneckfitness.com"
+}
+</script>
+<style>
+  :root{
+    --steel:#14171A; --iron:#1C2126; --plate:#262C33; --seam:#343B44;
+    --orange:#FF6A13; --orange-deep:#D9560A;
+    --chalk:#E8E4DC; --mute:#9AA0A8; --line:rgba(232,228,220,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;color-scheme:dark}
+  body{font-family:'Barlow',system-ui,sans-serif;font-size:1.05rem;line-height:1.6;color:var(--chalk);background:var(--steel)}
+  img{display:block;max-width:100%}
+  a{color:var(--chalk)}
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--orange);outline-offset:3px}
+  .container{width:min(1140px,100% - 2rem);margin-inline:auto}
+  section{padding:5.5rem 0}
+  h1,h2,h3{font-family:'Barlow Condensed',sans-serif;font-weight:800;line-height:.95;text-transform:uppercase;letter-spacing:.01em}
+  h2{font-size:clamp(2.4rem,5.5vw,4rem)}
+  h3{font-size:1.5rem;font-weight:700}
+  .label{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)}
+  .label.dim{color:var(--mute)}
+  .lede{max-width:38rem;color:var(--mute);font-size:1.15rem;margin-top:1rem}
+  .btn{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:1.1rem;padding:.9rem 1.6rem;border:2px solid var(--orange);text-decoration:none;transition:background .15s,color .15s}
+  .btn-solid{background:var(--orange);color:var(--steel)}
+  .btn-solid:hover{background:var(--orange-deep);border-color:var(--orange-deep)}
+  .btn-line{color:var(--chalk)}
+  .btn-line:hover{background:var(--orange);color:var(--steel)}
+  .hazard{height:14px;background:repeating-linear-gradient(135deg,var(--orange) 0 20px,var(--steel) 20px 40px)}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;background:rgba(20,23,26,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  nav .container{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.8rem 0}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+  .brand svg{width:40px;height:40px}
+  .brand b{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.35rem;letter-spacing:.06em;text-transform:uppercase;line-height:1}
+  .brand small{display:block;font-family:'IBM Plex Mono',monospace;font-size:.6rem;letter-spacing:.22em;color:var(--orange);font-weight:400}
+  nav ul{list-style:none;display:flex;gap:1.4rem;align-items:center}
+  nav ul a{font-family:'Barlow Condensed',sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.1em;font-size:.95rem;text-decoration:none;color:var(--mute)}
+  nav ul a:hover{color:var(--chalk)}
+  nav ul a.cta{color:var(--orange)}
+  @media (max-width:46rem){nav ul li:not(:last-child){display:none}.brand b{font-size:1.1rem}.brand small{display:none}}
+
+  /* hero */
+  .hero{padding:4rem 0 3rem}
+  .hero .container{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:3rem;align-items:center}
+  @media (max-width:52rem){.hero .container{grid-template-columns:1fr}}
+  .hero h1{font-size:clamp(2.8rem,6.2vw,4.8rem);margin-top:1rem}
+  .hero h1 em{font-style:normal;color:var(--orange)}
+  .hero .actions{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:2rem}
+  .counter{display:inline-grid;grid-template-columns:auto auto;border:2px solid var(--chalk);margin-top:2.2rem}
+  .counter span{padding:.7rem 1.1rem}
+  .counter .k{font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;display:flex;align-items:center;border-right:2px solid var(--chalk);color:var(--mute)}
+  .counter .v{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.6rem;line-height:1;color:var(--orange)}
+  .counter .v small{font-size:.9rem;font-weight:600;letter-spacing:.1em;color:var(--chalk);margin-left:.4rem}
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+  .ba figure{position:relative;aspect-ratio:3/4.4;overflow:hidden;background:var(--iron);border:1px solid var(--line)}
+  .ba img{width:100%;height:100%;object-fit:cover}
+  .ba figcaption{position:absolute;left:0;bottom:0;background:var(--steel);color:var(--chalk);font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:.5rem .8rem;border-top:2px solid var(--orange);border-right:2px solid var(--orange)}
+  .ba figure.after figcaption{background:var(--orange);color:var(--steel);border-color:var(--steel)}
+
+  /* stats strip */
+  .stats{background:var(--iron);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:0}
+  .stats .container{display:grid;grid-template-columns:repeat(4,1fr)}
+  @media (max-width:46rem){.stats .container{grid-template-columns:repeat(2,1fr)}}
+  .stat{padding:1.6rem 1rem;border-right:1px solid var(--line);text-align:center}
+  .stat:last-child{border-right:0}
+  .stat b{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.6rem;line-height:1;color:var(--chalk)}
+  .stat span{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+
+  /* story */
+  .story .container{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:3.5rem;align-items:start}
+  @media (max-width:52rem){.story .container{grid-template-columns:1fr}}
+  .story .pics{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;position:sticky;top:5rem}
+  .story .pics img{aspect-ratio:3/4;object-fit:cover;object-position:50% 30%;border:1px solid var(--line)}
+  .story .pics img:last-child{margin-top:2.5rem}
+  .story p{margin-top:1rem;color:#CFCBC3}
+  .story p.big{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1.6rem;line-height:1.2;color:var(--chalk);text-transform:none}
+  .story h2{margin-top:.8rem}
+  .sig{margin-top:1.6rem;font-family:'IBM Plex Mono',monospace;font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--orange)}
+
+  /* who */
+  .who{background:var(--iron)}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2.4rem}
+  @media (max-width:46rem){.cards{grid-template-columns:1fr}}
+  .card{background:var(--plate);border:1px solid var(--seam);padding:1.6rem;border-top:4px solid var(--orange)}
+  .card .label{display:block;margin-bottom:.6rem}
+  .card p{color:var(--mute);margin-top:.5rem;font-size:1rem}
+
+  /* programmes */
+  .tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2.4rem}
+  @media (max-width:52rem){.tiers{grid-template-columns:1fr}}
+  .tier{border:2px solid var(--seam);padding:1.8rem;display:flex;flex-direction:column;gap:.9rem;background:var(--iron)}
+  .tier.hot{border-color:var(--orange)}
+  .tier .price{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.8rem;line-height:1}
+  .tier .price small{font-size:1rem;font-weight:600;color:var(--mute);letter-spacing:.06em}
+  .tier ul{list-style:none;color:#CFCBC3;font-size:.98rem}
+  .tier li{padding:.35rem 0;border-bottom:1px solid var(--line)}
+  .tier li:last-child{border-bottom:0}
+  .tier .btn{align-self:flex-start;margin-top:auto}
+  .tier .status{font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+  .fine{color:var(--mute);font-size:.9rem;margin-top:1.4rem;max-width:46rem}
+
+  /* process */
+  .steps{list-style:none;counter-reset:s;display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2.4rem}
+  @media (max-width:52rem){.steps{grid-template-columns:1fr 1fr}}
+  @media (max-width:32rem){.steps{grid-template-columns:1fr}}
+  .steps li{counter-increment:s;border-top:2px solid var(--seam);padding-top:1rem}
+  .steps li::before{content:"0" counter(s);font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:2.4rem;color:var(--orange);line-height:1;display:block}
+  .steps b{display:block;font-family:'Barlow Condensed',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.2rem;letter-spacing:.04em;margin:.4rem 0 .3rem}
+  .steps p{color:var(--mute);font-size:.98rem}
+
+  /* apply */
+  .apply{background:var(--iron)}
+  .apply .container{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:3rem;align-items:start}
+  @media (max-width:52rem){.apply .container{grid-template-columns:1fr}}
+  form{display:grid;gap:1rem}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media (max-width:32rem){.row{grid-template-columns:1fr}}
+  label{display:grid;gap:.35rem;font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+  input,select,textarea{width:100%;font:inherit;font-family:'Barlow',sans-serif;font-size:1rem;color:var(--chalk);background:var(--steel);border:1px solid var(--seam);padding:.85rem 1rem}
+  textarea{min-height:7rem;resize:vertical}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  form button{font:inherit;cursor:pointer;justify-self:start}
+  .note{color:var(--mute);font-size:.9rem}
+
+  /* photo band */
+  .band{padding:0;position:relative;min-height:34rem;display:grid;align-items:end;background:var(--steel)}
+  .band img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%;opacity:.55;filter:grayscale(1)}
+  .band .container{position:relative;padding:3rem 0}
+  .band blockquote{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:clamp(1.8rem,4vw,3rem);line-height:1.05;text-transform:uppercase;max-width:22ch}
+  .band cite{display:block;margin-top:1rem;font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--orange)}
+
+  /* footer */
+  footer{padding:2.5rem 0 3rem;border-top:1px solid var(--line);color:var(--mute);font-size:.9rem}
+  footer .container{display:grid;gap:1.2rem}
+  footer .row2{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  footer a{color:var(--mute)}
+  .help{border:1px solid var(--seam);padding:1rem 1.2rem;font-size:.9rem;color:#CFCBC3}
+  .help b{color:var(--chalk)}
+</style>
+</head>
+<body id="top">
+
+<nav>
+  <div class="container">
+    <a class="brand" href="#top" aria-label="Roughneck Fitness">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#14171A"/><path d="M0 48h64v16H0z" fill="#FF6A13"/><path d="M0 48l16 16H0zM24 48l16 16H24zM48 48l16 16H48z" fill="#14171A"/><path d="M22 12h14a9 9 0 0 1 3 17.5L44 44h-9l-4-13h-2v13h-7zm7 6v7h6a3.5 3.5 0 0 0 0-7z" fill="#E8E4DC"/></svg>
+      <span><b>Roughneck Fitness</b><small>Online coaching · built on rotation</small></span>
+    </a>
+    <ul>
+      <li><a href="#story">Story</a></li>
+      <li><a href="#who">Who it's for</a></li>
+      <li><a href="#programmes">Programmes</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a class="cta" href="#apply">Apply</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container">
+    <div>
+      <span class="label">Online coaching for people who work away</span>
+      <h1>72 lb down.<br><em>Sober since April 2025.</em><br>Built on a two-week hitch.</h1>
+      <p class="lede">No secret. Food you can get from a galley, a programme you can run in a rig gym, and a plan for the days off that used to undo it all. Coached by someone who's done the rotation, the drinking, and the turnaround.</p>
+      <div class="counter" aria-live="polite">
+        <span class="k">Days on</span>
+        <span class="v"><span id="days">544</span><small>sober</small></span>
+      </div>
+      <div class="actions">
+        <a class="btn btn-solid" href="#apply">Apply for coaching</a>
+        <a class="btn btn-line" href="#programmes">See the programmes</a>
+      </div>
+    </div>
+    <div class="ba" aria-label="Before and after">
+      <figure><img src="img/before-beach-beer.jpg" alt="Before: on holiday, overweight, a beer in each hand" loading="eager"><figcaption>Before · 2024</figcaption></figure>
+      <figure class="after"><img src="img/after-gym-front.jpg" alt="After: lean and muscular in a gym mirror, September 2026" loading="eager"><figcaption>Now · Sep 2026</figcaption></figure>
+    </div>
+  </div>
+</header>
+<div class="hazard" role="presentation"></div>
+
+<section class="stats" aria-label="Numbers">
+  <div class="container">
+    <div class="stat"><b>72 lb</b><span>Lost</span></div>
+    <div class="stat"><b id="days2">544</b><span>Days sober</span></div>
+    <div class="stat"><b>15</b><span>Months, documented</span></div>
+    <div class="stat"><b>2/2</b><span>Weeks on, weeks off</span></div>
+  </div>
+</section>
+
+<section class="story" id="story">
+  <div class="container">
+    <div class="pics">
+      <img src="img/before-mirror.jpg" alt="Before: bathroom mirror selfie, heavy" loading="lazy">
+      <img src="img/after-gym-hands.jpg" alt="Now: gym mirror, lean, hands on hips" loading="lazy">
+    </div>
+    <div>
+      <span class="label">The story</span>
+      <h2>I know exactly what the rotation does to you.</h2>
+      <p class="big">Two weeks on, two weeks off, for years. Long shifts, galley food, no sleep, and then home with a pocket full of money and nothing to do but drink it. I was 72 pounds heavier than I am now and I told myself it was the job.</p>
+      <p>On 2 April 2025 I stopped drinking. That was the whole plan at first: just don't drink today. Two months later I walked into a gym and started filming everything, because I didn't trust myself to remember what it had been like.</p>
+      <p>Fifteen months on, I've got the physique I never thought I'd have, a sobriety counter I check every morning, and a folder of videos that shows every step. I'm now training as a qualified personal trainer so I can coach this properly, not just tell people what worked for me.</p>
+      <p>Roughneck Fitness is for the version of me who was standing on that beach with two drinks. If that's you, I know how to get you out.</p>
+      <p class="sig">— [Coach name], founder</p>
+    </div>
+  </div>
+</section>
+
+<section class="who" id="who">
+  <div class="container">
+    <span class="label">Who it's for</span>
+    <h2>Built for the two-on, two-off life.</h2>
+    <p class="lede">Rigs, offshore, FIFO, shift crews, anyone whose year is split between being away and being home. General fitness advice ignores that. This doesn't.</p>
+    <div class="cards">
+      <article class="card"><span class="label">On the hitch</span><h3>Train with what's there</h3><p>Programmes written for a container gym with a rack, a few dumbbells and a cable stack. Twelve-hour shifts accounted for. Galley food ordered the right way.</p></article>
+      <article class="card"><span class="label">Days off</span><h3>The dangerous fortnight</h3><p>Home time is where the work gets undone. A plan for the first 48 hours back, the social pressure, and the drink you've stopped having or want to stop having.</p></article>
+      <article class="card"><span class="label">Crew change</span><h3>Structure that travels</h3><p>Check-ins that fit around flights and heli days. Nothing that needs a Wi-Fi signal to work. Progress photos in the same mirror every hitch.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-label="In the gym">
+  <img src="img/after-gym-bw.jpg" alt="Full-length gym mirror photo, training kit on, September 2026" loading="lazy">
+  <div class="container">
+    <blockquote>Nobody on a rig needs motivation. They need a plan that survives a night shift.<cite>Roughneck Fitness</cite></blockquote>
+  </div>
+</section>
+
+<section id="programmes">
+  <div class="container">
+    <span class="label">Programmes</span>
+    <h2>Three ways in. Start with one.</h2>
+    <div class="tiers">
+      <article class="tier hot">
+        <span class="status">Available at launch</span>
+        <h3>The Hitch</h3>
+        <div class="price">£39 <small>one-off</small></div>
+        <ul>
+          <li>Four-week programme for a rig or hotel gym</li>
+          <li>Every session on video, form cues included</li>
+          <li>Galley food guide: what to pick, how much</li>
+          <li>The days-off plan</li>
+          <li>Yours to keep, re-run every rotation</li>
+        </ul>
+        <a class="btn btn-solid" href="#apply">Get on the list</a>
+      </article>
+      <article class="tier">
+        <span class="status">Opening on qualification</span>
+        <h3>Crew</h3>
+        <div class="price">£79 <small>/ month</small></div>
+        <ul>
+          <li>Coaching app with your programme and nutrition targets</li>
+          <li>Weekly check-in, written feedback</li>
+          <li>Form check on your lifts by video</li>
+          <li>Private group of people on the same rota</li>
+          <li>Cancel any time</li>
+        </ul>
+        <a class="btn btn-line" href="#apply">Join the waitlist</a>
+      </article>
+      <article class="tier">
+        <span class="status">Opening on qualification · limited places</span>
+        <h3>One to one</h3>
+        <div class="price">£199 <small>/ month</small></div>
+        <ul>
+          <li>Everything in Crew</li>
+          <li>Programme and nutrition written for your rota, kit and goals</li>
+          <li>Weekly video call, on or off the hitch</li>
+          <li>Direct message access</li>
+          <li>Twelve-week minimum</li>
+        </ul>
+        <a class="btn btn-line" href="#apply">Apply</a>
+      </article>
+    </div>
+    <p class="fine">Coaching tiers open once the Level 3 personal-training qualification is complete and insured. Until then The Hitch is a training programme, not personalised coaching, and the waitlist gets first places at launch price.</p>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="container">
+    <span class="label">How it works</span>
+    <h2>No fluff. A process.</h2>
+    <ol class="steps">
+      <li><b>Apply</b><p>Two minutes. Your rota, your kit, your goal, and whether drink is part of the picture. No judgement either way.</p></li>
+      <li><b>Call</b><p>Twenty minutes on the phone. If it's not a fit I'll say so and point you somewhere better.</p></li>
+      <li><b>Plan</b><p>Your programme lands in the app before your next hitch, built for the gym you'll actually be in.</p></li>
+      <li><b>Report</b><p>Weekly check-in: weight, photos, sessions done, how the days off went. Adjust, repeat, next rotation.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="apply" id="apply">
+  <div class="container">
+    <div>
+      <span class="label">Apply</span>
+      <h2>Tell me about your rotation.</h2>
+      <p class="lede">Applications, not sign-ups. I take on people I can actually help. You'll hear back within two days.</p>
+      <div class="help" style="margin-top:1.6rem"><b>If drinking is the problem right now:</b> this is a fitness programme, not treatment. Talk to your GP, or call Drinkline on 0300 123 1110 (UK, free, confidential). Then come back. I'll still be here.</div>
+    </div>
+    <form name="apply" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="apply">
+      <p class="hp"><label>Leave this empty <input name="bot-field"></label></p>
+      <div class="row">
+        <label>Name <input type="text" name="name" required autocomplete="name"></label>
+        <label>Email <input type="email" name="email" required autocomplete="email"></label>
+      </div>
+      <div class="row">
+        <label>Rotation <select name="rotation"><option>2 on / 2 off</option><option>3 on / 3 off</option><option>4 on / 4 off</option><option>Shift work, home most nights</option><option>Other</option></select></label>
+        <label>Interested in <select name="tier"><option>The Hitch (£39 programme)</option><option>Crew (waitlist)</option><option>One to one (waitlist)</option><option>Not sure yet</option></select></label>
+      </div>
+      <label>Where do you train on the hitch? <input type="text" name="kit" placeholder="e.g. container gym with a rack and dumbbells to 40 kg"></label>
+      <label>What do you want to change, honestly? <textarea name="goal" required></textarea></label>
+      <button class="btn btn-solid" type="submit">Send application</button>
+      <p class="note">Goes straight to the coach. No list, no newsletter.</p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="row2">
+      <span>&copy; 2026 Roughneck Fitness. All rights reserved.</span>
+      <span><a href="#">Instagram</a> &middot; <a href="mailto:coach@roughneckfitness.com">coach@roughneckfitness.com</a> &middot; <a href="#top">Back to top</a></span>
+    </div>
+    <p>Training and nutrition guidance for healthy adults. Not medical advice. Check with a doctor before starting a new programme, especially after a period of heavy drinking. Results shown are one person's and not a guarantee of yours.</p>
+    <p>Site by <a href="https://plantworksstudio.com" rel="noopener">Plantworks Studio</a></p>
+  </div>
+</footer>
+
+<script>
+  // Sobriety counter: days since 2 April 2025, in the visitor's local date.
+  (function(){
+    var start = new Date(2025, 3, 2); // months are zero-based
+    var now = new Date();
+    var days = Math.floor((Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()) - Date.UTC(start.getFullYear(),start.getMonth(),start.getDate())) / 86400000);
+    if (days > 0) { document.getElementById('days').textContent = days; document.getElementById('days2').textContent = days; }
+  })();
+</script>
+</body>
+</html>
