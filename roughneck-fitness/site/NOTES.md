@@ -26,7 +26,7 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 - Level 3 PT qualification in progress; Crew and One-to-one open only after it's done and insured.
 
 ## Images
-`img/` holds web-sized copies (max 1400 px, JPEG 82) made from `../assets/`. Originals stay in `assets/`. The pool photo with the coach's wife is not in the repo pending her OK.
+`img/` holds web-sized copies (max 1400 px, JPEG 82) made from `../assets/`. Originals stay in `assets/`. The pool photo with the coach's wife is in with her OK (28 Sept 2026).
 
 ## Form
 Netlify form `apply` → `/thanks/`. Enable form detection before the first deploy, then set the notification email.

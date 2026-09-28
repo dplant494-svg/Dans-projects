@@ -97,9 +97,10 @@
   /* story */
   .story .container{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:3.5rem;align-items:start}
   @media (max-width:52rem){.story .container{grid-template-columns:1fr}}
-  .story .pics{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;position:sticky;top:5rem}
+  .story .pics{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;align-items:start;position:sticky;top:5rem}
   .story .pics img{aspect-ratio:3/4;object-fit:cover;object-position:50% 30%;border:1px solid var(--line)}
-  .story .pics img:last-child{margin-top:2.5rem}
+  .story .pics img:nth-child(2){margin-top:2.5rem}
+  .story .pics img:nth-child(4){margin-top:-2.5rem}
   .story p{margin-top:1rem;color:#CFCBC3}
   .story p.big{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:1.6rem;line-height:1.2;color:var(--chalk);text-transform:none}
   .story h2{margin-top:.8rem}
@@ -221,6 +222,8 @@
     <div class="pics">
       <img src="img/before-mirror.jpg" alt="Before: bathroom mirror selfie, heavy" loading="lazy">
       <img src="img/after-gym-hands.jpg" alt="Now: gym mirror, lean, hands on hips" loading="lazy">
+      <img src="img/before-pool.jpg" alt="Before: by a hotel pool with my wife" loading="lazy">
+      <img src="img/after-gym-flex.jpg" alt="Now: flexing in the gym, grinning" loading="lazy">
     </div>
     <div>
       <span class="label">The story</span>
