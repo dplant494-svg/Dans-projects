@@ -33,9 +33,14 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 11. First five clients at half price for testimonials and permission to show results. Same pattern as the studio launch offer.
 12. One post a day for the first month, from the archive. Then three a week.
 
-## What Plantworks needs to build the site
+## Assets so far
+- `assets/before/`: three "before" stills (bedroom, mirror, beach with a beer). The beach one is the sobriety "before"; the mirror one is the physique "before".
+- A fourth before photo (pool, with wife) is held out of the repo until she says it can be used.
+- Sobriety date: **2 April 2025**. A counter on the site computes days from that date (544 on 28 Sept 2026).
+- Transformation start: June 2025.
+
+## Still needed to build the site
 - Name and domain.
-- Sobriety start date (for the counter) and the transformation start date, if going public.
 - Six to ten stills: day one, milestones, now. A 30–60 second clip for the hero (muted, looping).
 - The story in your words. Record it on the phone, paste the transcript.
 - Qualification body and expected completion date (Active IQ, YMCA Awards, etc.).
