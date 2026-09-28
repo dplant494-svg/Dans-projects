@@ -140,8 +140,8 @@ centre, and none is planned.
   a Microsoft 365 Copilot licence to use an agent published to Teams; the agent's use is
   metered in Copilot Studio messages against the tenant's capacity (message packs or
   pay-as-you-go), not per user.
-- **Expected use:** about 30 people, a few questions each per working day. Call it 1,500
-  questions a month, roughly 4,500 Copilot Studio messages. At the published pay-as-you-go rate
+- **Expected use:** an estimate of 1,500 questions a month across Technical Services, the
+  Subsea Superintendents and the rig subsea teams, roughly 4,500 Copilot Studio messages. At the published pay-as-you-go rate
   of one cent a message that is about **$50 a month**; if ISIT prefer a fixed line, one Copilot
   Studio message pack (25,000 messages, about $200 a month) covers it several times over. Copilot Studio's own analytics report the actual number, and I
   will send ISIT the first month's figure.
@@ -198,6 +198,6 @@ Technical Superintendent, Well Control Engineering
   both stated. If IT prefer the agent moved beside the flows, that is a solution export/import, not a rebuild.
 - Question 4: add Lee as co-owner on the agent (Copilot Studio → the agent → **Manage** → **Security**
   → **Co-owners**) and on each flow (flow → **Share**) before the email goes, so the sentence is true.
-- Question 8: head count and monthly estimate are the session's numbers (30 people, about 1,500 questions a month, about $50 a month pay-as-you-go or a $200 message pack); Lee confirms the cost centre code and the billing model, so copy him.
+- Question 8: head count and monthly estimate are the session's numbers (about 1,500 questions a month, about $50 a month pay-as-you-go or a $200 message pack); Lee confirms the cost centre code and the billing model, so copy him.
 - Question 10: the hourly "digests still fresh" flow is a ten-minute build; say the word and I write it
   click by click.
