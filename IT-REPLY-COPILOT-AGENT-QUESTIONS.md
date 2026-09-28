@@ -1,6 +1,6 @@
 # Reply to IT — the WCE Reports Assistant (Copilot Studio agent), your ten questions answered
 
-**From:** Dan Plant, Technical Superintendent, Well Control Engineering
+**From:** Dan Plant, Technical Superintendent, Well Control Engineering · **Cc:** Lee Arnold
 **Date:** 28 September 2026 · **Follows:** my request of 16 September to publish the agent in Teams
 **Replace the bracketed bits before sending.**
 
@@ -140,13 +140,15 @@ centre, and none is planned.
   a Microsoft 365 Copilot licence to use an agent published to Teams; the agent's use is
   metered in Copilot Studio messages against the tenant's capacity (message packs or
   pay-as-you-go), not per user.
-- **Expected use:** about [30] people, a few questions each per working day at most. Call it
-  [1,500] questions a month, each a handful of messages: well inside one Copilot Studio message
+- **Expected use:** about 30 people, a few questions each per working day at most. Call it
+  1,500 questions a month, each a handful of messages: well inside one Copilot Studio message
   pack (25,000 messages a month) and, at the published pay-as-you-go rate, a few tens of dollars
   a month if metered that way. Copilot Studio's own analytics report the actual number, and I
   will send ISIT the first month's figure.
-- **Cost centre:** Technical Services, Well Control Engineering, [cost centre code]. The
-  scanner, the dashboards and the flows cost nothing beyond the licences Seadrill already holds
+- **Cost centre and billing:** Technical Services, Well Control Engineering. Lee Arnold, WCE
+  Manager, will confirm the cost centre code and whether it is billed as a message pack or
+  pay-as-you-go against the Copilot Studio capacity; he is copied on this email. The scanner,
+  the dashboards and the flows cost nothing beyond the licences Seadrill already holds
   (SharePoint, Power Automate standard connectors, IIS on sacred).
 
 ## 9. Will it be used offshore? Tested on a rig? Firewalls?
@@ -196,6 +198,6 @@ Technical Superintendent, Well Control Engineering
   both stated. If IT prefer the agent moved beside the flows, that is a solution export/import, not a rebuild.
 - Question 4: add Lee as co-owner on the agent (Copilot Studio → the agent → **Manage** → **Security**
   → **Co-owners**) and on each flow (flow → **Share**) before the email goes, so the sentence is true.
-- Question 8: fill in the head count, the monthly estimate and the cost centre code.
+- Question 8: head count and monthly estimate are the session's numbers (30 people, 1,500 questions a month); Lee confirms the cost centre code and the billing model, so copy him.
 - Question 10: the hourly "digests still fresh" flow is a ten-minute build; say the word and I write it
   click by click.
