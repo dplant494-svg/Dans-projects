@@ -243,3 +243,4 @@ test the pipeline end-to-end before touching the real folder, set
   Costa del Sol businesses: the studio's own site, client sites (The Fifth
   Quarter restaurant), and the business plan. Unrelated to the dashboard work
   above. See `plantworks-studio/README.md`.
+- `roughneck-fitness/` — online fitness coaching brand, plan only so far (see its README).
