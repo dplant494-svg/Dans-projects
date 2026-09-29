@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SACRED to Production — programme chart, 30 September 2026</title>
+<style>
+ @page { size: A4 landscape; margin: 9mm 10mm 9mm 10mm; }
+ * { box-sizing: border-box; }
+ body { font-family: "Segoe UI", Arial, Helvetica, sans-serif; color:#0a1530; margin:0; font-size:8.6pt; }
+ header { background:#002C77; color:#fff; padding:8px 14px 7px; border-bottom:3px solid #EDB71E; display:flex; justify-content:space-between; align-items:flex-end; }
+ header .eyebrow { color:#EDB71E; font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+ header h1 { margin:2px 0 1px; font-size:14pt; font-weight:600; }
+ header p { margin:0; color:#C9D4EA; font-size:8pt; }
+ header .right { text-align:right; color:#C9D4EA; font-size:8pt; }
+ .page { page-break-after: always; }
+ .page:last-child { page-break-after: auto; }
+ #chart { position:relative; margin-top:6px; }
+ .grid { position:absolute; top:0; bottom:0; border-left:1px solid #e3e8f1; }
+ .grid.month { border-left:1px solid #b9c4d8; }
+ .months { position:relative; height:16px; margin-left:var(--lab); }
+ .months div { position:absolute; top:0; height:16px; font-size:7.5pt; font-weight:700; color:#002C77; padding-left:3px; border-left:1px solid #b9c4d8; }
+ .weeks { position:relative; height:10px; margin-left:var(--lab); border-bottom:1px solid #b9c4d8; }
+ .weeks div { position:absolute; top:0; font-size:5.8pt; color:#7a879c; padding-left:2px; }
+ .row { position:relative; height:var(--rh); border-bottom:1px solid #eef1f6; }
+ .row.sec { height:14px; background:#eef2f9; border-bottom:1px solid #b9c4d8; }
+ .row.sec .lab { font-weight:700; color:#002C77; font-size:8.6pt; width:auto; }
+ .lab { position:absolute; left:0; top:0; width:var(--lab); height:100%; padding:0 6px 0 4px; display:flex; align-items:center; line-height:1.08; font-size:6.6pt; white-space:nowrap; overflow:hidden; border-right:1px solid #b9c4d8; }
+ .lab b { color:#002C77; }
+ .area { position:absolute; left:var(--lab); right:0; top:0; height:100%; }
+ .bar { position:absolute; top:3px; height:calc(var(--rh) - 6px); border-radius:2px; font-size:6.6pt; line-height:calc(var(--rh) - 6px); padding:0 4px; white-space:nowrap; overflow:visible; color:#fff; }
+ .bar.done { background:#2e8b57; }
+ .bar.plan { background:#2f5fb3; }
+ .bar.est  { background:#8fb0e8; color:#0a1530; border:1px dashed #2f5fb3; }
+ .bar.wait { background:#e3e7ee; color:#3a4660; border:1px dashed #7a879c; }
+ .bar.crit { box-shadow: 0 0 0 1.6px #c8102e; }
+ .bar .t { position:absolute; left:100%; margin-left:4px; color:#0a1530; }
+ .bar .ti { color:#fff; }
+ .ms { position:absolute; top:50%; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; transform:rotate(45deg); background:#EDB71E; border:1.4px solid #002C77; }
+ .ms.done { background:#2e8b57; }
+ .ms.crit { border-color:#c8102e; border-width:2px; }
+ .mst { position:absolute; top:50%; transform:translateY(-50%); margin-left:8px; font-size:6.6pt; white-space:nowrap; }
+ .today { position:absolute; top:0; bottom:0; border-left:2px solid #EDB71E; z-index:5; }
+ .todayt { position:absolute; top:-1px; font-size:6.4pt; color:#8a6a00; font-weight:700; margin-left:3px; }
+ .legend { display:flex; gap:14px; font-size:7.4pt; margin-top:5px; align-items:center; color:#3a4660; flex-wrap:wrap; }
+ .legend i { display:inline-block; width:18px; height:9px; border-radius:2px; vertical-align:middle; margin-right:4px; }
+ .legend .d { position:relative; display:inline-block; width:9px; height:9px; transform:rotate(45deg); background:#EDB71E; border:1.4px solid #002C77; margin:0 8px 0 3px; }
+ footer { margin-top:5px; font-size:7pt; color:#5a6880; border-top:1px solid #d0d8e8; padding-top:3px; }
+ /* page 2 */
+ h2 { color:#002C77; font-size:11pt; border-bottom:2px solid #EDB71E; padding-bottom:2px; margin:10px 0 5px; }
+ table { border-collapse:collapse; width:100%; font-size:8pt; }
+ th, td { border:1px solid #d0d8e8; padding:3px 6px; vertical-align:top; text-align:left; }
+ th { background:#002C77; color:#fff; font-weight:600; }
+ td.n { white-space:nowrap; font-weight:700; color:#002C77; width:40px; }
+ td.d { white-space:nowrap; width:120px; }
+ .two { display:flex; gap:16px; }
+ .two > div { flex:1; }
+ ul { margin:3px 0 0 16px; padding:0; line-height:1.35; }
+ li { margin-bottom:2px; }
+</style></head><body>
+<div class="page">
+<header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
+<h1>SACRED to Production — programme chart</h1>
+<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 30 September 2026 by Dan Plant</p></div>
+<div class="right">Critical path in red: the scanner leaves Dan's PC for the sacred server on <b style="color:#fff">18 October 2026</b><br>Every bar to the right of it moves day for day with it</div></header>
+<div id="chart"></div>
+<div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on IT / ISIT</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 30 Sep</span></div>
+<footer>Sources: <code>DASHBOARD-PRODUCTION-TIMELINE-REPLY.md</code> (joint plan with the reporting-tools session, 11 to 14 Sep), <code>IT-REPLY-COPILOT-AGENT-QUESTIONS.md</code> (28 Sep), <code>SCANNER-SERVER-MIGRATION-IT-HANDOFF.md</code>, <code>WEEK-PLAN-2026-09-14.md</code>. Dates marked estimate are not commitments. Page 2 lists the milestones and what changed since the 11 September chart.</footer>
+</div>
+
+<div class="page">
+<header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
+<h1>Milestones and what changed since the 11 September chart</h1>
+<p>Page 2 of 2 · 30 September 2026</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from 18 October: ISIT (Adam Snyder)</div></header>
+<div class="two"><div>
+<h2>Milestones</h2>
+<table><tr><th>#</th><th>Milestone</th><th>Date</th><th>Gate</th></tr>
+<tr><td class="n">M1</td><td>Precharge notifications live end to end</td><td class="d">11 Sep 2026, done</td><td>—</td></tr>
+<tr><td class="n">M1a</td><td>Ask SACRED AI live: Copilot Studio agent on the scanner's report digests, button on the dashboard</td><td class="d">13 Sep 2026, done</td><td>Teams publishing: waiting on IT</td></tr>
+<tr><td class="n">M1b</td><td>SQL database created on Fabric by Dan, no IT resource</td><td class="d">13 Sep 2026, done</td><td>60-day trial: capacity or extension by mid-November</td></tr>
+<tr><td class="n">M1c</td><td>SPARC handoff received; Maximo answered (daily 06:00 export already exists)</td><td class="d">14 Sep 2026, done</td><td>landing folder, Manpreet</td></tr>
+<tr><td class="n">M1d</td><td>CBM to OEM flow proven; AAB loop proven end to end in test mode; TSC Help Centre installed</td><td class="d">22 to 29 Sep 2026, done</td><td>—</td></tr>
+<tr><td class="n">M1e</td><td>IT's ten questions answered; Lee Arnold co-owner on the agent and the flows</td><td class="d">28 Sep 2026, done</td><td>—</td></tr>
+<tr><td class="n">M2</td><td><b>Files transferred to the sacred server</b> (<code>D:\TSC-Dashboard</code>), Dan with Adam Snyder in Houston</td><td class="d"><b>18 Oct 2026</b></td><td>service account ready</td></tr>
+<tr><td class="n">M3</td><td>Reading-key and identity conventions agreed between loader and scanner</td><td class="d">9 Oct 2026, estimate</td><td>reporting-tools session</td></tr>
+<tr><td class="n">M4</td><td>SSCE release / cancel flow live; West Polaris item returnable</td><td class="d">16 Oct 2026, estimate</td><td>reporting-tools session</td></tr>
+<tr><td class="n">M5</td><td>Server task running every ten minutes under the service account, acceptance checklist 1 to 5 passed; dual run with Dan's PC begins</td><td class="d">23 Oct 2026</td><td>M2</td></tr>
+<tr><td class="n">M6</td><td>Scanner normalised export feeding loader dry runs over the full history</td><td class="d">6 Nov 2026, estimate</td><td>M3</td></tr>
+<tr><td class="n">M7</td><td>Dan's PC task disabled after two clean weeks; ISIT own the server task</td><td class="d">6 Nov 2026</td><td>M5</td></tr>
+<tr><td class="n">M8</td><td>"Last successful scan" failure email in place (the stamp has been on disk since 14 Sep); Digests freshness alert flow in place from early October</td><td class="d">20 Nov 2026</td><td>—</td></tr>
+<tr><td class="n">M8a</td><td>Notification flows re-pointed to the IT-provided service identity</td><td class="d">when IT provide it</td><td>ISIT</td></tr>
+<tr><td class="n">M8b</td><td>Pilot validated by Dan and Lee; submitted for Architecture, Security and Governance review</td><td class="d">Nov 2026, estimate</td><td>M5, M8a</td></tr>
+<tr><td class="n">M9</td><td>Database instance; scanner dual-write on</td><td class="d">Jan 2027</td><td>first IT resource</td></tr>
+<tr><td class="n">M10</td><td>Parity proven: the same pages fed from the database, files as fallback</td><td class="d">mid-Feb 2027</td><td>M9 + two-week window</td></tr>
+<tr><td class="n">M11</td><td>ISIT accept the pages, scanner and task as a supported service</td><td class="d">Feb 2027</td><td>M7, M8, M10</td></tr>
+</table>
+</div><div>
+<h2>What changed since the 11 September chart</h2>
+<ul>
+<li><b>The server transfer has a date and a person: 18 October, Dan with Adam Snyder in Houston.</b> On the 11 September chart it was "copied, ISIT have not started". The copy is refreshed on the day, so the server gets the current scanner (v2.71 today), the state files and the config.</li>
+<li><b>Ask SACRED AI is live</b> (13 Sep) in Seadrill Apps PROD with web search and general knowledge off. Only the Teams app approval is outstanding, submitted 16 Sep. First rig test (West Capella) the day it is allowed.</li>
+<li><b>The database started in September, not January.</b> Fabric SQL exists in Dan's workspace on a 60-day trial. The January IT ask is a paid capacity, not an Azure instance. The scanner side (reading keys, normalised export) runs October to November.</li>
+<li><b>Three more notification loops exist:</b> CBM reports to NOV (proven 22 Sep, HTML attachment 28 Sep, go-live email to NOV in October), the AAB loop on the Seadrill Bulletin Board (proven end to end in test mode 28 Sep; pilot under a documented deviation with the MOC and HAZID while DIR-37-0161 is revised), and the TSC Help Centre (installed 29 Sep, flow 30 Sep). All share one pattern: post, scanner, page, notification with a dashboard link, receipt.</li>
+<li><b>Test mode</b> is built into every notification flow: while on, only the office list is mailed and the subject says so. No rig or NOV address receives a test.</li>
+<li><b>Monitoring:</b> the scanner writes its last-successful-scan stamp on every complete run (since 14 Sep). The hourly Digests freshness alert promised to IT is built in early October, before the move, and keeps watching after it.</li>
+<li><b>Training:</b> the two-day class in Houston, 19 and 20 October, the two days after the transfer: reporting tools on the Monday; dashboards, precharge process, AAB and Help Centre on the Tuesday. Packs final by 12 October.</li>
+<li><b>Scanner today:</b> v2.71, no modules, nothing installed, reads three SharePoint libraries through OneDrive sync, does a full parse only when something changed (about a second otherwise). The service account needs read on the three report libraries, write on Digests and on the two IIS folders. No secrets, nothing to rotate.</li>
+<li><b>Removed from the chart:</b> the hosted application (Dan, 11 Sep). The programme ends with ISIT accepting the pages, scanner and task as a supported service.</li>
+</ul>
+<h2>Open, waiting on others</h2>
+<ul>
+<li>Teams app approval for Ask SACRED AI (IT, submitted 16 Sep).</li>
+<li>Service account for the server task and the notification flows (ISIT, needed by 18 Oct).</li>
+<li>Where Manpreet's daily 06:00 Maximo export lands (Manpreet, via Dan).</li>
+<li>Fabric capacity or trial extension by mid-November (IT).</li>
+</ul>
+</div></div>
+<footer>Dates marked estimate are not commitments and move with the critical path. Questions: Dan Plant, Technical Superintendent, Well Control Engineering.</footer>
+</div>
+
+<script>
+const LAB = 380, RH = 17;
+document.documentElement.style.setProperty('--lab', LAB+'px');
+document.documentElement.style.setProperty('--rh', RH+'px');
+const D = (m,d,y=2026)=>new Date(Date.UTC(y,m-1,d));
+const T0 = D(8,31), T1 = D(3,1,2027);
+const chart = document.getElementById('chart');
+const W = chart.clientWidth - LAB;
+const x = d => ((d - T0)/(T1 - T0))*W;
+// header rows
+const months = [[D(9,1),'Sep 2026'],[D(10,1),'Oct'],[D(11,1),'Nov'],[D(12,1),'Dec'],[D(1,1,2027),'Jan 2027'],[D(2,1,2027),'Feb']];
+let h = '<div class="months">'+months.map(([d,n])=>`<div style="left:${x(d)}px">${n}</div>`).join('')+'</div>';
+let wk = '<div class="weeks">';
+for (let d = new Date(T0); d < T1; d = new Date(d.getTime()+7*864e5)) wk += `<div style="left:${x(d)}px">${d.getUTCDate()}</div>`;
+h += wk + '</div>';
+const rows = [
+ ['sec','Scanner and the sacred server — the critical path'],
+ ['bar','<b>Scanner on Dan\'s PC</b>, scheduled task every 10 min, v2.71', [['done crit',D(9,9),D(9,30),''],['plan crit',D(9,30),D(11,6),'until two clean weeks on the server']]],
+ ['bar','Copy ready for ISIT since 9 Sep; October agreed in the IT reply', [['wait',D(9,9),D(10,18),'waiting on ISIT to schedule']]],
+ ['ms','<b>Files transferred to the sacred server</b>, Dan + Adam Snyder, Houston', [['crit',D(10,18),'18 Oct: D:\\TSC-Dashboard, current scanner, state files, config']]],
+ ['bar','Server task under the service account; first run by hand; acceptance 1 to 5', [['plan crit',D(10,18),D(10,23),'']]],
+ ['bar','Dual run, server and PC; PC task disabled after two clean weeks (M7)', [['plan crit',D(10,23),D(11,6),'']], [['',D(11,6),'6 Nov: Dan\'s PC retired']]],
+ ['bar','ISIT own the task; Dan owns the script and sends versions', [['plan',D(11,6),D(2,26,2027),'supported service from February (M11)']]],
+ ['bar','Digests freshness alert flow (hourly check, emails Dan and Lee)', [['plan',D(10,1),D(10,9),'']]],
+ ['bar','"Last successful scan" stamp (on disk since 14 Sep) and its failure email (M8)', [['done',D(9,14),D(9,30),''],['plan',D(11,6),D(11,20),'email']]],
+ ['sec','Ask SACRED AI — Copilot Studio agent, Seadrill Apps PROD'],
+ ['ms','Agent live on the dashboard, 266 digests on day one', [['done',D(9,13),'13 Sep, done']]],
+ ['bar','Teams app: submitted for admin approval 16 Sep', [['wait',D(9,16),D(10,18),'waiting on IT; first rig test (West Capella) the day it is allowed']]],
+ ['ms','IT\'s ten questions answered; Lee Arnold co-owner on the agent and the flows', [['done',D(9,28),'28 Sep, done']]],
+ ['bar','Walk ISIT through the agent and the server transfer, Houston', [['plan',D(10,18),D(10,23),'']]],
+ ['sec','Notification loops — Power Automate, SEADRILL-WC-DEV, all with test mode'],
+ ['ms','Precharge notifications live end to end (M1); ARM and Rig Manager added 23 Sep', [['done',D(9,11),'11 Sep, done']]],
+ ['bar','CBM reports to NOV: proven 22 Sep, HTML 28 Sep; NOV go-live and SSORT button', [['done',D(9,15),D(9,28),''],['plan',D(10,1),D(10,16),'go-live email, Post to OEM button']]],
+ ['bar','AAB loop, Bulletin Board: proven in test mode 28 Sep; pilot under deviation', [['done',D(9,22),D(9,28),''],['est',D(10,5),D(11,27),'pilot under the DIR-00-0011 deviation, MOC and HAZID; DIR-37-0161 revision in parallel']]],
+ ['bar','TSC Help Centre: installed 29 Sep; notifications flow 30 Sep; tools\' Post button', [['done',D(9,26),D(9,30),''],['plan',D(9,30),D(10,16),'']]],
+ ['bar','Rig visit report email with a dashboard link (guide written 13 Sep)', [['est',D(10,26),D(11,13),'after the class']]],
+ ['sec','Database (Fabric SQL) and Maximo'],
+ ['ms','SQL database created by Dan on Fabric (M1b); 60-day trial', [['done',D(9,13),'13 Sep, done']], null, [['',D(11,12),'trial ends about 12 Nov: capacity or extension']]],
+ ['bar','Reading-key and identity conventions agreed (M3)', [['est',D(9,30),D(10,9),'']]],
+ ['bar','Scanner normalised export feeding loader dry runs, full history (M6)', [['est',D(10,12),D(11,6),'']]],
+ ['bar','Maximo item export: reader built 15 Sep; feed once the landing folder is known', [['done',D(9,15),D(9,16),''],['wait',D(9,16),D(10,9),'landing folder, Manpreet'],['est',D(10,9),D(11,27),'']]],
+ ['bar','Database instance, dual-write (M9, Jan); pages fed from the database (M10, Feb)', [['est',D(1,4,2027),D(1,29,2027),''],['est',D(2,1,2027),D(2,15,2027),'']]],
+ ['sec','Applications — reporting-tools session dates from the joint plan'],
+ ['bar','WCGRRT REV 166, SSORT REV 148, Precharge Pro Rev 87 in service on sacred', [['done',D(9,1),D(9,30),''],['plan',D(9,30),D(2,26,2027),'revisions by rolling handoff, integration contract kept']]],
+ ['ms','SSCE release / cancel flow live; West Polaris item returnable (M4)', [['',D(10,16),'16 Oct, estimate']]],
+ ['bar','SPARC parts catalogue integrated with SSORT', [['est',D(10,12),D(1,15,2027),'']]],
+ ['sec','People, training and handover'],
+ ['ms','Operational readiness checklist review with Lee Arnold', [['',D(9,30),'30 Sep']]],
+ ['bar','Training packs final 12 Oct; two-day class in Houston, 19 and 20 October', [['plan',D(10,5),D(10,12),''],['plan',D(10,19),D(10,21),'class']]],
+ ['bar','ISIT shadow-running the task and the pages', [['plan',D(11,6),D(1,29,2027),'']]],
+ ['bar','Architecture, Security, Governance review (M8b); pilot validated by Dan and Lee', [['est',D(11,9),D(12,4),'']]],
+ ['ms','ISIT accept the pages, scanner and task as a supported service (M11)', [['crit',D(2,26,2027),'']]],
+];
+for (const r of rows) {
+  if (r[0]==='sec') { h += `<div class="row sec"><div class="lab">${r[1]}</div></div>`; continue; }
+  let inner = '';
+  if (r[0]==='bar') {
+    for (const [cls,s,e,t] of r[2]) {
+      const l = x(s), w = Math.max(x(e)-l, 4);
+      inner += `<div class="bar ${cls}" style="left:${l}px;width:${w}px"><span class="t">${t}</span></div>`;
+    }
+    if (r[3]) for (const [cls,d,t] of r[3]) inner += `<div class="ms ${cls}" style="left:${x(d)}px"></div>` + (t?`<div class="mst" style="left:${x(d)}px">${t}</div>`:'');
+  } else {
+    for (const [cls,d,t] of r[2]) inner += `<div class="ms ${cls}" style="left:${x(d)}px"></div>` + (t?`<div class="mst" style="left:${x(d)}px">${t}</div>`:'');
+  }
+  if (r[4]) for (const [cls,d,t] of r[4]) inner += `<div class="ms ${cls}" style="left:${x(d)}px;background:#fff"></div><div class="mst" style="left:${x(d)}px">${t}</div>`;
+  h += `<div class="row"><div class="lab">${r[1]}</div><div class="area">${inner}</div></div>`;
+}
+chart.innerHTML = h;
+// grid lines and today
+const gridHost = document.createElement('div'); gridHost.style.cssText='position:absolute;left:'+LAB+'px;right:0;top:26px;bottom:0;pointer-events:none;';
+for (const [d] of months) { const g=document.createElement('div'); g.className='grid month'; g.style.left=x(d)+'px'; gridHost.appendChild(g); }
+const today = D(9,30); const t=document.createElement('div'); t.className='today'; t.style.left=x(today)+'px'; t.innerHTML='<span class="todayt">today</span>'; gridHost.appendChild(t);
+chart.appendChild(gridHost);
+</script>
+</body></html>
