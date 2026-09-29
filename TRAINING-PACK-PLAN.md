@@ -13,14 +13,15 @@
 | 2, 10:15 | Rig Visit Dashboard tab by tab | Dashboard session | none needed |
 | 2, 13:00 | BOP Fleet Planning, SSCE Requests | Dashboard session | none needed |
 | 2, 13:00 | WCE COC Dashboard (the Certification Tracker) and the request cycle | COC Tracker session (Lee's tool) | `TRAINING-HANDOFF-COC-TRACKER.md` |
-| 2, 13:00 | AAB tab and the Seadrill Bulletin Board | Dashboard session (rig page, fleet page, dashboard, slides, guide); Eric (create page, review) | `TRAINING-HANDOFF-AAB-ERIC.md` |
+| 2, 13:00 | AAB tab and the Seadrill Bulletin Board | Dashboard session, all of it: the module is written (`TRAINING-MODULE-AAB.md`), the slides and the guide are done; Eric may take the review minutes on the day | none needed |
 | 2, 14:45 | The loop: how the tools connect today and the plan to connect the rest (added 29 Sep) | Dashboard session; SPARC session (SPARC, Maximo, connection order); COC Tracker session (five minutes) | `TRAINING-HANDOFF-SPARC.md` §1, `TRAINING-HANDOFF-COC-TRACKER.md` §2 |
 | 2, 15:30 | What is coming | Dashboard session; SPARC session (five minutes) | `TRAINING-HANDOFF-SPARC.md` §2 |
 | 2, 16:15 | Feedback session | Dan | none |
 
 ## What the dashboard session builds, once the content is in
 
-- Slide decks per module on the Seadrill template (the AAB pair and the SACRED deck seed them).
+- Slide decks per module on the Seadrill template (the AAB pair and the SACRED deck seed them). The AAB
+  module is complete: trainer's script, mistakes, workbook questions, slide content (`TRAINING-MODULE-AAB.md`).
 - The trainee workbook: the exercise, the questions from every handoff, the "why did it stop me" table.
 - The trainer's script with the answers, module by module, from the walkthrough scripts.
 - `config.training.json`: a second scanner configuration reading a training folder and deploying to the
