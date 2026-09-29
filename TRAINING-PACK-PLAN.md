@@ -18,6 +18,15 @@
 | 2, 15:30 | What is coming | Dashboard session; SPARC session (five minutes) | `TRAINING-HANDOFF-SPARC.md` §2 |
 | 2, 16:15 | Feedback session | Dan | none |
 
+## The decks
+
+- **Day 1:** `WCE_Reporting_Tools_-_Day_1_Training.pptx`, built by the reporting-tools session (19 slides, received 29 Sep).
+- **Day 2:** `WCE_Reporting_Tools_-_Day_2_Training.pptx`, built by the dashboard session on 29 Sep in the same template and
+  the same slide patterns (title, module dividers, three-column content, the checks table, the closing line): 24 slides,
+  the two-day agenda with the AAB in it, precharge process, the Rig Visit Dashboard, fleet planning and SSCE/COC, the AAB
+  (four slides), the loop (three slides including "what a failure looks like, and who sees it"), what is coming, feedback.
+  The Precharge Pro, COC Dashboard and SPARC walkthrough slides drop in when those handoffs come back.
+
 ## What the dashboard session builds, once the content is in
 
 - Slide decks per module on the Seadrill template (the AAB pair and the SACRED deck seed them). The AAB
