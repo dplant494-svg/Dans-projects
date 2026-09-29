@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.71'
+$ScriptVersion = '2.72'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -3807,7 +3807,7 @@ elseif ($deployPath) {
             # Restricted TOPSET bodies must never reach the open share; also
             # excluded from $expected below so a copy from before the file
             # became restricted gets cleaned up as stale.
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name) -or $helpFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder; v2.72: Help Centre files live in help-data.js, never the reports folder
             $destName = $f.Name + '.js'
             $have = $onServer[$destName]
             if (-not $have -or ($f.LastWriteTime -gt $have.LastWriteTime)) {
@@ -3826,7 +3826,7 @@ elseif ($deployPath) {
         }
         $expected = @{}
         foreach ($f in $files) {
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name) -or $helpFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder; v2.72: Help Centre files live in help-data.js, never the reports folder
             $expected[$f.Name + '.js'] = $true
         }
         foreach ($old in @($onServer.Values)) {
