@@ -73,6 +73,8 @@
   .banner-meta .ask-copilot { display: inline-block; margin-top: 8px; padding: 8px 16px; background: var(--sd-yellow); color: var(--sd-blue); border: 0; border-radius: 22px; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: none; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
   .banner-meta .ask-copilot:hover { filter: brightness(1.08); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
   .banner-meta .ask-copilot .spark { display: inline-block; margin-right: 6px; font-size: 15px; line-height: 1; }
+  .banner-meta .help-centre-btn { display: inline-block; margin-top: 8px; margin-left: 8px; padding: 7px 14px; background: #fff; color: var(--sd-blue); border: 2px solid var(--sd-yellow); border-radius: 22px; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: none; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+  .banner-meta .help-centre-btn:hover { filter: brightness(1.04); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
 
   .page-body { padding: 24px 32px 32px; }
 
@@ -4127,6 +4129,17 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       ask.title = 'Ask SACRED AI about these reports. Opens the WCE Reports Assistant in Teams; it answers from the same reports this dashboard shows.';
       el.appendChild(ask);
     }
+    // v2.72: the TSC Help Centre is reachable from every tab, requests or none (Dan, 29 Sep:
+    // 'why is the help desk not on the dashboard?'). Password on the page itself.
+    if (!data.copilotUrl) el.appendChild(document.createElement('br'));
+    var help = document.createElement('a');
+    help.className = 'help-centre-btn';
+    help.href = '../help/help-centre.html';
+    help.target = '_blank';
+    help.rel = 'noopener';
+    help.textContent = 'TSC Help Centre';
+    help.title = 'The rigs\u2019 requests for help from Technical Services: each request, who it went to, the delivery receipt and the trail. Password.';
+    el.appendChild(help);
   }
 
   // ---------- rig & type filter options ----------
@@ -4625,11 +4638,13 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var rows = (window.DASHBOARD_DATA || {}).helpRequests || [];
     if (state.rig) rows = rows.filter(function (r) { return r.rig === state.rig; });
     el.innerHTML = '';
-    if (!rows.length) { el.hidden = true; return; }
     var open = rows.filter(function (r) { return r.state === 'open'; }).length, ack = rows.filter(function (r) { return r.state === 'acknowledged'; }).length;
     var down = rows.filter(function (r) { return r.rigDown && r.state !== 'closed'; }).length, bad = rows.filter(function (r) { return r.state !== 'closed' && (r.receiptState === 'failed' || r.receiptState === 'none'); }).length;
     el.className = 'aab-line' + ((open || down || bad) ? ' attention' : ''); el.hidden = false;
-    el.appendChild(mk('b', '', 'TSC Help Centre: ' + open + ' open request(s)' + (ack ? ', ' + ack + ' being worked' : '') + (down ? ', ' + down + ' with the rig down' : '') + (bad ? ', ' + bad + ' with a delivery problem' : '')));
+    // v2.72: the line stays visible with no requests, so the link to the Help Centre is always here.
+    var head = rows.length ? ('TSC Help Centre: ' + open + ' open request(s)' + (ack ? ', ' + ack + ' being worked' : '') + (down ? ', ' + down + ' with the rig down' : '') + (bad ? ', ' + bad + ' with a delivery problem' : ''))
+      : ('TSC Help Centre: no requests' + (state.rig ? ' from ' + state.rig : '') + ' on record');
+    el.appendChild(mk('b', '', head));
     el.appendChild(document.createTextNode(' \u00B7 the requests, their delivery receipts and the trail are on the '));
     var a = mk('a', '', 'TSC Help Centre'); a.href = '../help/help-centre.html'; a.target = '_blank'; el.appendChild(a);
     el.appendChild(document.createTextNode(' (password). The email is the mechanism; the Help Centre is the record.'));
