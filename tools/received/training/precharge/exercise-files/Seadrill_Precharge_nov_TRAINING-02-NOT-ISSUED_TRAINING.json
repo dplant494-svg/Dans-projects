@@ -1,0 +1,345 @@
+{
+  "meta": {
+    "tool": "Seadrill BOP Precharge Calculator",
+    "schema": 1,
+    "saved": "2026-09-29T18:22:52.679Z"
+  },
+  "config": "nov",
+  "units": {
+    "wd": "ft",
+    "temp": "F",
+    "vol": "gal"
+  },
+  "touched": {
+    "gem": false,
+    "cap": false,
+    "cam": false,
+    "dcb": false,
+    "nov": false,
+    "sat": false
+  },
+  "fields": {
+    "config": {
+      "v": "nov"
+    },
+    "well": {
+      "v": "TRAINING-02 NOT ISSUED"
+    },
+    "bopSel": {
+      "v": "1"
+    },
+    "wd": {
+      "v": "6500"
+    },
+    "subT": {
+      "v": "40"
+    },
+    "surfT": {
+      "v": "78"
+    },
+    "shReqTop": {
+      "v": "3826"
+    },
+    "mawhpTop": {
+      "v": "12000"
+    },
+    "fvrPrint": {
+      "c": false
+    },
+    "wellHop": {
+      "c": false
+    },
+    "hopPrintAll": {
+      "c": false
+    },
+    "dcbOEM": {
+      "v": "3300"
+    },
+    "pipeRam": {
+      "v": "2300"
+    },
+    "lmrpMOP": {
+      "v": "1500"
+    },
+    "fsvMOP": {
+      "v": "690"
+    },
+    "hasLMRP": {
+      "c": true
+    },
+    "rcf": {
+      "v": "8.34"
+    },
+    "rsw": {
+      "v": "8.54"
+    },
+    "hpu": {
+      "v": "40"
+    },
+    "pSup": {
+      "v": "5000"
+    },
+    "lSup": {
+      "v": "5000"
+    },
+    "fSup": {
+      "v": "3000"
+    },
+    "cd1": {
+      "v": "4000"
+    },
+    "cd2": {
+      "v": "5000"
+    },
+    "P2lo": {
+      "v": "3500"
+    },
+    "P2hi": {
+      "v": "3950"
+    },
+    "P3lo": {
+      "v": "2150"
+    },
+    "P3hi": {
+      "v": "2400"
+    },
+    "P4lo": {
+      "v": "3250"
+    },
+    "P4hi": {
+      "v": "3650"
+    },
+    "P5lo": {
+      "v": "1600"
+    },
+    "P5hi": {
+      "v": "1750"
+    },
+    "Blo": {
+      "v": "2150"
+    },
+    "Bhi": {
+      "v": "2550"
+    },
+    "Elo": {
+      "v": "2750"
+    },
+    "Ehi": {
+      "v": "3150"
+    },
+    "P1fix": {
+      "v": "300"
+    },
+    "dmSup": {
+      "v": "5000"
+    },
+    "dmShReq": {
+      "v": "3200"
+    },
+    "dmFVR": {
+      "v": "132.3"
+    },
+    "dmVol": {
+      "v": "1920"
+    },
+    "aSeq": {
+      "c": true
+    },
+    "aSupply": {
+      "v": "5000"
+    },
+    "aMOP": {
+      "v": "3826"
+    },
+    "aCSR": {
+      "v": "46"
+    },
+    "aBSR": {
+      "v": "46"
+    },
+    "aTB": {
+      "v": "1.2"
+    },
+    "nov10": {
+      "c": false
+    },
+    "aRat": {
+      "v": "1.184"
+    },
+    "aN": {
+      "v": "4"
+    },
+    "aGvol": {
+      "v": "850.587"
+    },
+    "aCap": {
+      "v": "112"
+    },
+    "aMWP": {
+      "v": "6000"
+    },
+    "aMaxT": {
+      "v": "130"
+    },
+    "cSup": {
+      "v": "5000"
+    },
+    "cShReq": {
+      "v": "3600"
+    },
+    "cFVR": {
+      "v": "37.30"
+    },
+    "cVol": {
+      "v": "880"
+    },
+    "cap10": {
+      "c": true
+    },
+    "capHe": {
+      "c": false
+    },
+    "cMopflps": {
+      "v": "550"
+    },
+    "cSealCR": {
+      "v": "6.46"
+    },
+    "satSeq": {
+      "c": true
+    },
+    "satMOP": {
+      "v": "3736"
+    },
+    "satSupply": {
+      "v": "5000"
+    },
+    "satCSR": {
+      "v": "46"
+    },
+    "satBSR": {
+      "v": "46"
+    },
+    "satTB": {
+      "v": "2.5"
+    },
+    "sat10": {
+      "c": false
+    },
+    "satRat": {
+      "v": "1.09"
+    },
+    "satGvol": {
+      "v": "1250"
+    },
+    "satCap": {
+      "v": "168"
+    },
+    "gShReq": {
+      "v": "2050"
+    },
+    "gSup": {
+      "v": "5000"
+    },
+    "gBSR": {
+      "v": "37.3"
+    },
+    "gMopflps": {
+      "v": "550"
+    },
+    "gSealCR": {
+      "v": "6.46"
+    },
+    "gCSR": {
+      "v": "36.36"
+    },
+    "gTB": {
+      "v": "0"
+    },
+    "gem10": {
+      "c": false
+    },
+    "gVol": {
+      "v": "880"
+    },
+    "gMWP": {
+      "v": "7500"
+    },
+    "gMaxT": {
+      "v": "130"
+    },
+    "dcbSeq": {
+      "c": true
+    },
+    "dcbShReq": {
+      "v": "2642"
+    },
+    "dcbMAWHP": {
+      "v": "15000"
+    },
+    "dcbCSR": {
+      "v": "37.3"
+    },
+    "dcbBSR": {
+      "v": "37.3"
+    },
+    "dcbTB": {
+      "v": "1.2"
+    },
+    "dcb10": {
+      "c": false
+    },
+    "dcbRat": {
+      "v": "1.184"
+    },
+    "dcbSupply": {
+      "v": "5000"
+    },
+    "dcbCfgLbl": {
+      "v": "4 × 28"
+    },
+    "dcbVol": {
+      "v": "850.587"
+    },
+    "dcbCap": {
+      "v": "112.008"
+    },
+    "dcbGv": {
+      "v": "833.344"
+    },
+    "dcbSplit": {
+      "c": false
+    },
+    "dcbBsrVol": {
+      "v": "850.6"
+    },
+    "dcbBsrCap": {
+      "v": "111.32"
+    },
+    "dcbBsrGv": {
+      "v": "850.6"
+    },
+    "dcbBsrShReq": {
+      "v": "3601"
+    },
+    "dmManualPC": {
+      "v": ""
+    },
+    "cManualPC": {
+      "v": ""
+    },
+    "satManualPC": {
+      "v": ""
+    },
+    "gManualPC": {
+      "v": ""
+    },
+    "dcbManualPC": {
+      "v": ""
+    },
+    "novManualPC": {
+      "v": "3875"
+    }
+  },
+  "hops": []
+}

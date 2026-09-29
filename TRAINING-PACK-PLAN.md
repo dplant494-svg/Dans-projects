@@ -1,6 +1,6 @@
 # Training class pack — who supplies what, module by module (29 September 2026)
 
-**Class:** week plan item 22, two days, agenda `WCE-Training-Class-Agenda.pdf` (draft 3, 29 Sep).
+**Class:** week plan item 22, **Monday 19 and Tuesday 20 October 2026**, agenda `WCE-Training-Class-Agenda.pdf` (draft 4, 29 Sep). Draft 1 of each contribution by 5 October, final pack by 12 October.
 **Owner:** Dan. **Pack built by:** the dashboard session. **Content from:** four handoffs, sent 29 Sep.
 
 | Day, time | Module | Content from | Handoff |
@@ -9,7 +9,7 @@
 | 1, 10:15 | WCGRRT: surface tests, attachments, Post, Load latest posted | Reporting-tools session | same |
 | 1, 13:00 | SSORT: CBM, pre-deployment, Post to OEM | Reporting-tools session, Brad Waldron | same |
 | 1, 14:45 | Exercise on SSCE Equipment via the training folder | Reporting-tools session (sheet and samples); dashboard session (`config.training.json`, sandbox) | same |
-| 2, 08:00 | Precharge process | Precharge Pro session (form, calculator, sheet, PDF); dashboard session (loop, inbox); Dan and Lee (signatures, MOC) | `TRAINING-HANDOFF-PRECHARGE.md`, `TRAINING-HANDOFF-LEE.md` |
+| 2, 08:00 | Precharge process | **Precharge Pro session: draft 1 received 29 Sep** (three modules, nine questions, three exercise files with the answer key, 28 screenshots to follow as a zip); dashboard session (loop, inbox); Dan and Lee (signatures, MOC) | `TRAINING-HANDOFF-PRECHARGE.md` (answered: `TRAINING-PRECHARGE-PACK-REPLY.md`), `TRAINING-HANDOFF-LEE.md` |
 | 2, 10:15 | Rig Visit Dashboard tab by tab | Dashboard session | none needed |
 | 2, 13:00 | BOP Fleet Planning, SSCE Requests | Dashboard session | none needed |
 | 2, 13:00 | WCE COC Dashboard (the Certification Tracker) and the request cycle | COC Tracker session (Lee's tool) | `TRAINING-HANDOFF-COC-TRACKER.md` |
@@ -25,7 +25,8 @@
   the same slide patterns (title, module dividers, three-column content, the checks table, the closing line): 24 slides,
   the two-day agenda with the AAB in it, precharge process, the Rig Visit Dashboard, fleet planning and SSCE/COC, the AAB
   (four slides), the loop (three slides including "what a failure looks like, and who sees it"), what is coming, feedback.
-  The Precharge Pro, COC Dashboard and SPARC walkthrough slides drop in when those handoffs come back.
+  The precharge segment is in (five slides from the Precharge Pro pack, 29 Sep); the COC Dashboard and SPARC slides drop in
+  when those handoffs come back. 28 slides.
 
 ## What the dashboard session builds, once the content is in
 
