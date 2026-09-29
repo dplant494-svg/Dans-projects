@@ -800,6 +800,7 @@
         <section class="card">
           <h2>Master AAB register</h2>
           <div class="source-line">One row per AAB: the master case created once on the Seadrill Bulletin Board, with the rigs selected on it mirrored as their own cases. A chip's colour is that rig's state from the acknowledgements it has posted; click a chip for who is left to act. Rigs work from the <a href="../aab/bulletin-board.html" target="_blank">Bulletin Board</a>; the fleet compliance with the evidence is on the <a href="../aab/register.html" target="_blank">Technical Services page</a> (password). Priority 3 advisories only: this app creates the Priority 3 parent; Priority 1 and 2 stay in the corporate process (Dan, 26 Sep 2026).</div>
+          <div class="aab-line" id="help-line" hidden></div>
           <div class="aab-line" id="aab-line" hidden></div>
           <div class="rig-mon-empty" id="aab-none" hidden>No AAB posted yet.</div>
           <div class="table-scroll"><table class="aab-table" id="aab-master"></table></div>
@@ -4467,7 +4468,8 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   }
   function openErrorsModal() {
     var problems = errorsState.problems || [];
-    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk' && p.kind !== 'replay'; });
+    var bad = problems.filter(function (p) { return p.kind !== 'large' && p.kind !== 'shrunk' && p.kind !== 'replay' && p.kind !== 'help-noreceipt'; });
+    var help = problems.filter(function (p) { return p.kind === 'help-noreceipt'; });   // v2.71: an assistance request the flow did not confirm
     var large = problems.filter(function (p) { return p.kind === 'large'; });
     var shrunk = problems.filter(function (p) { return p.kind === 'shrunk'; });   // v2.59: replaced by a smaller post
     var replay = problems.filter(function (p) { return p.kind === 'replay'; });   // v2.63: old CBM keys under a newer SSORT stamp
@@ -4502,6 +4504,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       });
       body.appendChild(ul);
     }
+    section('Assistance requests without a delivery receipt', 'The rig posted a request for help and the TSC Help Notifications flow has not confirmed the email went (no receipt after an hour, or NOT SENT). Check the flow\u2019s run history and email the request by hand from the Help Centre.', help);
     section('Not on this dashboard', 'These files are in the report folders but could not be used: usually a post cut short in transit, or a file that is not a report export. Run scripts\\Archive-ProblemFiles.ps1 on the scanner PC to move them out of the folders into the archive; the poster can re-send the report.', bad);
     section('Oversized, still shown', 'Over the ceiling (10 MB, or 40 MB for CBM inspections). The report is on the dashboard; the photos or attachments need reducing at source in the reporting tool.', large);
     section('Replaced by a smaller post, still shown', 'A later post under the same filename had fewer entries or photos than the one before it. This happens when a daily report is posted with its tile date left on an earlier day: the tool names the file by that date and overwrites it. The earlier version is kept on the server under reports\\_replaced; re-post each day with its own tile date.', shrunk);
@@ -4615,8 +4618,25 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     table.appendChild(tbody);
     ['overdue', 'outstanding', 'partly acknowledged', 'acknowledged', 'closed', 'withdrawn'].forEach(function (st) { legend.appendChild(mk('span', 'aab-chip ' + AAB_ST[st], st)); legend.appendChild(document.createTextNode(' ' + AAB_HELP[st] + '  ')); });
   }
+  // v2.71: TSC Help Centre line (the assistance requests posted from the tools; the record is the
+  // passworded Help Centre page, never rows on this dashboard).
+  function renderHelpLine() {
+    var el = $('help-line'); if (!el) return;
+    var rows = (window.DASHBOARD_DATA || {}).helpRequests || [];
+    if (state.rig) rows = rows.filter(function (r) { return r.rig === state.rig; });
+    el.innerHTML = '';
+    if (!rows.length) { el.hidden = true; return; }
+    var open = rows.filter(function (r) { return r.state === 'open'; }).length, ack = rows.filter(function (r) { return r.state === 'acknowledged'; }).length;
+    var down = rows.filter(function (r) { return r.rigDown && r.state !== 'closed'; }).length, bad = rows.filter(function (r) { return r.state !== 'closed' && (r.receiptState === 'failed' || r.receiptState === 'none'); }).length;
+    el.className = 'aab-line' + ((open || down || bad) ? ' attention' : ''); el.hidden = false;
+    el.appendChild(mk('b', '', 'TSC Help Centre: ' + open + ' open request(s)' + (ack ? ', ' + ack + ' being worked' : '') + (down ? ', ' + down + ' with the rig down' : '') + (bad ? ', ' + bad + ' with a delivery problem' : '')));
+    el.appendChild(document.createTextNode(' \u00B7 the requests, their delivery receipts and the trail are on the '));
+    var a = mk('a', '', 'TSC Help Centre'); a.href = '../help/help-centre.html'; a.target = '_blank'; el.appendChild(a);
+    el.appendChild(document.createTextNode(' (password). The email is the mechanism; the Help Centre is the record.'));
+  }
   function renderAabLine() {
     var el = $('aab-line'); if (!el) return;
+    renderHelpLine();
     renderAabMaster();
     var none = $('aab-none');
     var status = (window.DASHBOARD_DATA || {}).aabStatus || [];

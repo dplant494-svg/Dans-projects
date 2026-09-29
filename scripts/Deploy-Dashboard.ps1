@@ -178,6 +178,28 @@ if (Test-Path -Path $aabSrcDir) {
     }
 }
 
+# v2.71: TSC Help Centre (help\): the passworded assistance-request register, its script, its
+# set-password page, gate-config.js (Dan's, never committed) and the scanner's help-data.js.
+# 'helpDeployPath' names the folder (default: help\ beside the dashboard folder).
+$helpSrcDir = Join-Path $repoRoot 'help'
+if (Test-Path -Path $helpSrcDir) {
+    $helpDeployDir = Join-Path (Split-Path -Parent $DeployPath) 'help'
+    if ($config -and $config.PSObject.Properties['helpDeployPath'] -and $config.helpDeployPath) {
+        $helpDeployDir = [Environment]::ExpandEnvironmentVariables($config.helpDeployPath)
+    }
+    if (-not (Test-Path -Path $helpDeployDir)) { New-Item -ItemType Directory -Path $helpDeployDir -Force | Out-Null }
+    foreach ($name in @('help-centre.html', 'help-centre.js', 'set-password.html', 'gate-config.js', 'help-data.js')) {
+        $src = Join-Path $helpSrcDir $name
+        if (Test-Path -Path $src) {
+            Copy-Item -Path $src -Destination (Join-Path $helpDeployDir $name) -Force
+            Write-Host "Published help\$name to $helpDeployDir" -ForegroundColor Green
+        }
+        elseif ($name -eq 'gate-config.js') {
+            Write-Warning "No help\gate-config.js yet - the Help Centre will refuse entry until you create one with help\set-password.html and add the postUrl line (TSC-HELP-CENTRE-INSTALL-GUIDE.md Part B)"
+        }
+    }
+}
+
 # SSCE Requests Dashboard: page + current data file. Source file is named
 # requests-dashboard.html (not dashboard.html - this project already had
 # two identically-named dashboard.html files in different folders, which

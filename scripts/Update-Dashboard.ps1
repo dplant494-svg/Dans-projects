@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.70'
+$ScriptVersion = '2.71'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1215,7 +1215,71 @@ function ConvertTo-AabBool { param($Value)
     if ($null -eq $Value) { return $false }
     return (([string]$Value).Trim() -match '^(true|yes|y|1)$')
 }
-function ConvertTo-AabText { param($Value) if ($null -eq $Value) { return '' } return ([string]$Value) }
+function ConvertTo-AabText { param($Value) if ($null -eq $Value) { return '' } if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') } return ([string]$Value) }   # v2.71: a JSON date the reader turned into [datetime] goes back out as ISO, never locale text
+# v2.71: TSC Help Centre (DASHBOARD-TSC-HELP-CENTRE-HANDOFF, 29 Sep 2026). A rig's assistance
+# request (seadrill-help_*, meta.kind 'help') is a record, never a report: no digest, no
+# heatmap, no rig list. The Help Centre page posts seadrill-help-ack_* (acknowledge, update,
+# close). The flow's delivery receipts (help-receipt_*.json) live in a synced library folder
+# (helpReceiptPath), never in PostedReports. Written whole to help\help-data.js, slim to
+# reports-data.js (helpRequests[]). The email is the mechanism; this is the record.
+$helpFiles = @{}
+$helpRaw = New-Object System.Collections.Generic.List[object]
+$helpAckRaw = New-Object System.Collections.Generic.List[object]
+function Read-HelpRequest { param($Json, $Meta, $File)
+    $id = (ConvertTo-AabText (Get-Prop $Json 'requestId')).Trim()
+    if (-not $id) { $id = [System.IO.Path]::GetFileNameWithoutExtension($File.Name) }
+    $rigKey = (ConvertTo-AabText (Get-Prop $Meta 'rigkey')).Trim().ToLowerInvariant()
+    $rig = (ConvertTo-AabText (Get-Prop $Meta 'asset')).Trim()
+    if (-not $rigKey -and $rig) { foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $rig) { $rigKey = [string]$k } } }
+    if (-not $rig -and $rigKey -and $AabRigCodes.Contains($rigKey)) { $rig = [string]$AabRigCodes[$rigKey] }
+    $hours = $null; $hv = ConvertTo-AabText (Get-Prop $Json 'hoursDown'); $hd = 0.0
+    if ($hv -and [double]::TryParse($hv, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$hd)) { $hours = [math]::Round($hd, 1) }
+    $known = @('meta','attachments','photos','photodump','requestid','notifykind','rigdown','hoursdown','occurredat','synergicase','subject','dryrun','description')
+    $fields = [ordered]@{}
+    foreach ($k in (Get-KeyNames $Json)) {
+        $ks = [string]$k; if ($known -contains $ks.ToLowerInvariant()) { continue }
+        $v = Get-Prop $Json $ks
+        if ($null -eq $v) { continue }
+        if ($v -is [string]) { if ($v.Trim() -eq '' -or $v.Length -gt 4000) { continue }; $fields[$ks] = $v }
+        elseif ($v -is [ValueType]) { $fields[$ks] = [string]$v }
+    }
+    return [ordered]@{
+        file        = $File.Name
+        modified    = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+        requestId   = $id
+        rigKey      = $rigKey
+        rig         = $rig
+        notifyKind  = (ConvertTo-AabText (Get-Prop $Json 'notifyKind')).Trim()
+        rigDown     = (ConvertTo-AabBool (Get-Prop $Json 'rigDown'))
+        hoursDown   = $hours
+        occurredAt  = (ConvertTo-AabText (Get-Prop $Json 'occurredAt')).Trim()
+        synergiCase = (ConvertTo-AabText (Get-Prop $Json 'synergiCase')).Trim()
+        subject     = (ConvertTo-AabText (Get-Prop $Json 'subject')).Trim()
+        description = (ConvertTo-AabText (Get-Prop $Json 'description'))
+        dryRun      = (ConvertTo-AabBool (Get-Prop $Json 'dryRun'))
+        by          = (ConvertTo-AabText (Get-Prop $Meta 'sss')).Trim()
+        rev         = (ConvertTo-AabText (Get-Prop $Meta 'rev')).Trim()
+        reporttype  = (ConvertTo-AabText (Get-Prop $Meta 'reporttype')).Trim()
+        saved       = (ConvertTo-AabText (Get-Prop $Meta 'saved')).Trim()
+        fields      = $fields
+        attachments = (Read-AabAttachments -Json $Json)
+        photos      = (Read-AabPhotos (Get-Prop $Json 'photos'))
+    }
+}
+function Read-HelpAck { param($Json, $Meta, $File)
+    $id = (ConvertTo-AabText (Get-Prop $Json 'requestId')).Trim()
+    if (-not $id) { return $null }
+    $action = (ConvertTo-AabText (Get-Prop $Json 'action')).Trim().ToLowerInvariant()
+    if ($action -ne 'close' -and $action -ne 'update') { $action = 'acknowledge' }
+    return [ordered]@{
+        file = $File.Name; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
+        requestId = $id; action = $action
+        by = (ConvertTo-AabText (Get-Prop $Json 'by')).Trim(); role = (ConvertTo-AabText (Get-Prop $Json 'role')).Trim()
+        at = (ConvertTo-AabText (Get-Prop $Json 'at')).Trim(); comment = (ConvertTo-AabText (Get-Prop $Json 'comment'))
+        saved = (ConvertTo-AabText (Get-Prop $Meta 'saved')).Trim()
+        attachments = (Read-AabAttachments -Json $Json)
+    }
+}
 # v2.67: Windows PowerShell 5.1's JavaScriptSerializer walks a PSObject's members and
 # meets a circular reference (PSParameterizedProperty). Sort-Object and pipelines wrap
 # dictionaries in PSObjects, so everything is unwrapped to plain hashtables, arrays and
@@ -1686,6 +1750,19 @@ foreach ($f in $files) {
         continue
     }
 
+    # v2.71: TSC Help Centre requests and the page's acknowledgements: records, never reports.
+    $metaKindH = [string](Get-Prop $meta 'kind')
+    if ($metaKindH -eq 'help-ack' -or $f.Name -like 'seadrill-help-ack_*') {
+        $helpFiles[$f.Name] = $true
+        $hack = Read-HelpAck -Json $json -Meta $meta -File $f
+        if ($hack) { $helpAckRaw.Add($hack) | Out-Null } else { Add-Problem $f 'help-invalid' 'a Help Centre record without a requestId - cannot be joined to a request, not filed' }
+        continue
+    }
+    if ($metaKindH -eq 'help' -or ([string](Get-Prop $meta 'reporttype')) -eq 'TSC Assistance Request' -or $f.Name -like 'seadrill-help_*') {
+        $helpFiles[$f.Name] = $true
+        $helpRaw.Add((Read-HelpRequest -Json $json -Meta $meta -File $f)) | Out-Null
+        continue
+    }
     # v2.65: AAB records and acknowledgements (see $aabRaw above). Recognised by
     # meta.kind, by recordType, or by the seadrill-aab_ / seadrill-aab-ack_ prefix as a
     # fallback for a post whose meta was mangled: neither may ever surface as a report.
@@ -2832,6 +2909,65 @@ foreach ($num in $aabCurrent.Keys) {
     }
 }
 $aabStatusSorted = @($aabStatus | Sort-Object -Property @{ Expression = { if ($_.overdue) { 0 } else { 1 } } }, @{ Expression = { [string]$_.dueDate } }, @{ Expression = { [string]$_.aabNumber } }, @{ Expression = { [string]$_.rig } })
+# v2.71: Help Centre states. Newest file per requestId is the request (a re-post with the Synergi
+# number joins the same record); acks in saved order; open -> acknowledged -> closed. Receipts
+# from helpReceiptPath (the flow writes help-receipt_<requestId>_<stamp>.json there). Hours since
+# the event is computed at scan time and labelled so on every page; hoursDown stays as posted.
+$helpByReq = @{}
+foreach ($r in $helpRaw) { $id = [string]$r.requestId; if (-not $helpByReq.ContainsKey($id) -or ([string]$r.saved -gt [string]$helpByReq[$id].saved) -or ([string]$r.saved -eq [string]$helpByReq[$id].saved -and [string]$r.modified -gt [string]$helpByReq[$id].modified)) { $helpByReq[$id] = $r } }
+$helpAcksSorted = @($helpAckRaw | Sort-Object -Property @{ Expression = { [string]$_.saved } })
+$helpReceipts = @{}
+$helpReceiptDir = ''
+if ($config.PSObject.Properties['helpReceiptPath'] -and $config.helpReceiptPath) { $helpReceiptDir = [Environment]::ExpandEnvironmentVariables($config.helpReceiptPath) }
+elseif ($config.PSObject.Properties['aabChaseFile'] -and $config.aabChaseFile) { $helpReceiptDir = Join-Path (Split-Path -Parent ([Environment]::ExpandEnvironmentVariables($config.aabChaseFile))) 'help-receipts' }
+if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir)) {
+    foreach ($rf in (Get-ChildItem -Path $helpReceiptDir -Filter 'help-receipt_*.json' -File -ErrorAction SilentlyContinue)) {
+        try {
+            $rj = Get-Content -Path $rf.FullName -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+            $rid = (ConvertTo-AabText (Get-Prop $rj 'requestId')).Trim(); if (-not $rid) { continue }
+            $rkind = (ConvertTo-AabText (Get-Prop $rj 'kind')).Trim().ToLowerInvariant(); if ($rkind -ne 'directive') { $rkind = 'assistance' }
+            $sentTo = @(); foreach ($x in (ConvertTo-AabList (Get-Prop $rj 'sentTo'))) { if ($x -is [System.Collections.IEnumerable] -and -not ($x -is [string])) { foreach ($y in $x) { if ($y) { $sentTo += [string]$y } } } elseif ($x) { $sentTo += [string]$x } }
+            $rec = [ordered]@{ ok = (ConvertTo-AabBool (Get-Prop $rj 'ok')); sentTo = $sentTo; sentCount = $sentTo.Count; sentAt = (ConvertTo-AabText (Get-Prop $rj 'sentAt')).Trim(); error = (ConvertTo-AabText (Get-Prop $rj 'error')).Trim(); chatCreated = (ConvertTo-AabBool (Get-Prop $rj 'chatCreated')); chatId = (ConvertTo-AabText (Get-Prop $rj 'chatId')).Trim(); created = (ConvertTo-AabBool (Get-Prop $rj 'chatCreated')); file = $rf.Name }
+            $rk = "$rid|$rkind"
+            if (-not $helpReceipts.ContainsKey($rk) -or ([string]$rec.sentAt -gt [string]$helpReceipts[$rk].sentAt)) { $helpReceipts[$rk] = $rec }
+        } catch { Write-Warning "Help receipt skipped ($($rf.Name)): $($_.Exception.Message)" }
+    }
+}
+$helpStatus = New-Object System.Collections.Generic.List[object]
+$helpNow = Get-Date
+foreach ($id in $helpByReq.Keys) {
+    $r = $helpByReq[$id]
+    $acks = @($helpAcksSorted | Where-Object { [string]$_.requestId -eq $id })
+    $state = 'open'
+    if (@($acks | Where-Object { $_.action -eq 'close' }).Count -gt 0) { $state = 'closed' }
+    elseif (@($acks | Where-Object { $_.action -eq 'acknowledge' -or $_.action -eq 'update' }).Count -gt 0) { $state = 'acknowledged' }
+    $hoursSince = $null; $occ = [datetime]::MinValue
+    if ($r.occurredAt -and [datetime]::TryParse([string]$r.occurredAt, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AdjustToUniversal, [ref]$occ)) { $hoursSince = [math]::Round(($helpNow.ToUniversalTime() - $occ).TotalHours, 1); if ($hoursSince -lt 0) { $hoursSince = 0 } }
+    $postedAt = [string]$r.saved; if (-not $postedAt) { $postedAt = [string]$r.modified }
+    $ageMin = 0; $pd = [datetime]::MinValue
+    if ([datetime]::TryParse($postedAt, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AdjustToUniversal, [ref]$pd)) { $ageMin = [int]($helpNow.ToUniversalTime() - $pd).TotalMinutes }
+    $receipt = $null; if ($helpReceipts.ContainsKey("$id|assistance")) { $receipt = $helpReceipts["$id|assistance"] }
+    $receiptState = 'pending'
+    if ($receipt) { $receiptState = $(if ($receipt.ok) { 'sent' } else { 'failed' }) } elseif ($ageMin -ge 20) { $receiptState = 'none' }
+    $directive = $null; if ($helpReceipts.ContainsKey("$id|directive")) { $directive = $helpReceipts["$id|directive"] }
+    if ($state -ne 'closed' -and -not $r.dryRun -and $r.rigKey -ne '' -and $r.rig -ne 'SSCE Equipment' -and (($receiptState -eq 'none' -and $ageMin -ge 60) -or $receiptState -eq 'failed')) {
+        Add-Problem ([pscustomobject]@{ Name = $r.file; Length = 0; LastWriteTime = $helpNow; FullName = $r.file }) 'help-noreceipt' $(if ($receiptState -eq 'failed') { "the TSC Help Notifications flow reported NOT SENT for this request ($($receipt.error))" } else { "no delivery receipt from the TSC Help Notifications flow after $ageMin minutes - check the flow's run history and the email by hand" })
+    }
+    $helpStatus.Add([pscustomobject]@{
+        requestId = $id; rigKey = [string]$r.rigKey; rig = [string]$r.rig; subject = [string]$r.subject
+        notifyKind = [string]$r.notifyKind; rigDown = [bool]$r.rigDown; hoursDown = $r.hoursDown; occurredAt = [string]$r.occurredAt
+        hoursSince = $hoursSince; synergiCase = [string]$r.synergiCase; state = $state; postedAt = $postedAt; by = [string]$r.by; rev = [string]$r.rev
+        dryRun = [bool]$r.dryRun; ackCount = $acks.Count
+        lastAction = $(if ($acks.Count) { [string]$acks[$acks.Count - 1].action } else { '' }); lastBy = $(if ($acks.Count) { [string]$acks[$acks.Count - 1].by } else { '' }); lastAt = $(if ($acks.Count) { [string]$acks[$acks.Count - 1].at } else { '' })
+        receiptState = $receiptState; receipt = $receipt; directiveChat = $directive
+        attachmentCount = @($r.attachments).Count + @($r.photos).Count; file = [string]$r.file
+    }) | Out-Null
+}
+$helpStatusSorted = @($helpStatus | Sort-Object -Property @{ Expression = { switch ($_.state) { 'open' { 0 } 'acknowledged' { 1 } default { 2 } } } }, @{ Expression = { if ($_.rigDown) { 0 } else { 1 } } }, @{ Expression = { [string]$_.postedAt }; Descending = $true })
+if ($helpRaw.Count -gt 0 -or $helpAckRaw.Count -gt 0) {
+    $hc = @{ open = 0; acknowledged = 0; closed = 0 }; foreach ($row in $helpStatusSorted) { $hc[$row.state] = [int]$hc[$row.state] + 1 }
+    Write-Host ("TSC Help Centre: {0} request(s): {1} open, {2} acknowledged, {3} closed; {4} record(s) from the page; {5} receipt(s) read" -f $helpStatusSorted.Count, $hc.open, $hc.acknowledged, $hc.closed, $helpAckRaw.Count, $helpReceipts.Count) -ForegroundColor Cyan
+}
 # slim records for reports-data.js: everything but the binary payloads
 $aabRecordsSlim = New-Object System.Collections.Generic.List[object]
 foreach ($num in $aabByNumber.Keys) {
@@ -2873,6 +3009,7 @@ $payload = [pscustomobject]@{
     aabRecords   = $aabRecordsSorted      # v2.65: every AAB revision, slim (no attachment or photo bytes); aab-data.js carries them
     aabAcks      = $aabAcksSlim           # v2.65
     aabStatus    = $aabStatusSorted       # v2.65: one row per current AAB per applicable rig, overdue first
+    helpRequests = $helpStatusSorted      # v2.71: TSC Help Centre states (no attachments); the page reads help-data.js
     problems     = $problems.ToArray()
 }
 # Marine Integrity was retired from WCGRRT at REV 155 (2026-09-09): the view
@@ -3284,6 +3421,37 @@ catch {
     Write-Warning "AAB data file failed (scan unaffected): $($_.Exception.Message)"
 }
 
+# v2.71: help\help-data.js for the TSC Help Centre page: the requests whole (fields, attachments,
+# photographs), the page's records, and the states. Config: helpOutputFile, helpDeployPath.
+$helpOutputFile = Join-Path $repoRoot 'help\help-data.js'
+if ($config.PSObject.Properties['helpOutputFile'] -and $config.helpOutputFile) {
+    $helpOutputFile = [Environment]::ExpandEnvironmentVariables($config.helpOutputFile)
+    if (-not [System.IO.Path]::IsPathRooted($helpOutputFile)) { $helpOutputFile = Join-Path $repoRoot $helpOutputFile }
+}
+try {
+    $helpFullReq = New-Object System.Collections.Generic.List[object]
+    foreach ($id in $helpByReq.Keys) { $c = [ordered]@{}; foreach ($k in @($helpByReq[$id].Keys)) { $c[$k] = $helpByReq[$id][$k] }; $helpFullReq.Add($c) | Out-Null }
+    $helpFullStatus = New-Object System.Collections.Generic.List[object]
+    foreach ($row in $helpStatusSorted) { $o = [ordered]@{}; foreach ($pp in $row.PSObject.Properties) { $o[$pp.Name] = $pp.Value }; $helpFullStatus.Add($o) | Out-Null }
+    $helpFull = [ordered]@{
+        generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+        scanner     = $ScriptVersion
+        rigCodes    = $AabRigCodes
+        requests    = $helpFullReq.ToArray()
+        acks        = @($helpAcksSorted)
+        status      = $helpFullStatus.ToArray()
+    }
+    $helpDir = Split-Path -Parent $helpOutputFile
+    if (-not (Test-Path -Path $helpDir)) { New-Item -ItemType Directory -Path $helpDir -Force | Out-Null }
+    if ($PSVersionTable.PSEdition -eq 'Core') { $helpJson = $helpFull | ConvertTo-Json -Depth 24 -Compress }
+    else { $helpJson = ConvertTo-JsonArray @((ConvertTo-AabPlain $helpFull)); $helpJson = $helpJson.Substring(1, $helpJson.Length - 2) }
+    [System.IO.File]::WriteAllText($helpOutputFile, "window.HELP_DATA = $helpJson;`n", (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "Wrote $($helpFullReq.Count) assistance request(s), $($helpAcksSorted.Count) Help Centre record(s) to $helpOutputFile" -ForegroundColor Green
+}
+catch {
+    Write-Warning "Help Centre data file failed (scan unaffected): $($_.Exception.Message)"
+}
+
 # SSCE -> COC dashboard write-back: for every APPROVED request, mark the
 
 # matching Central Spares item unavailable/assigned on a REVIEW COPY of the
@@ -3605,6 +3773,17 @@ elseif ($deployPath) {
             if ([System.IO.Path]::GetFullPath($aabDeployTarget) -ne [System.IO.Path]::GetFullPath($aabOutputFile)) {   # a test set may write and serve from one folder
                 Copy-Item -Path $aabOutputFile -Destination $aabDeployTarget -Force
                 Write-Host "Deployed aab-data.js to $aabDeployPath" -ForegroundColor Green
+            }
+        }
+        # v2.71: help-data.js to the Help Centre folder on the share (helpDeployPath; default <share>\help).
+        if (Test-Path -Path $helpOutputFile) {
+            $helpDeployPath = Join-Path (Split-Path -Parent $deployPath) 'help'
+            if ($config.PSObject.Properties['helpDeployPath'] -and $config.helpDeployPath) { $helpDeployPath = [Environment]::ExpandEnvironmentVariables($config.helpDeployPath) }
+            if (-not (Test-Path -Path $helpDeployPath)) { New-Item -ItemType Directory -Path $helpDeployPath -Force | Out-Null }
+            $helpDeployTarget = Join-Path $helpDeployPath 'help-data.js'
+            if ([System.IO.Path]::GetFullPath($helpDeployTarget) -ne [System.IO.Path]::GetFullPath($helpOutputFile)) {
+                Copy-Item -Path $helpOutputFile -Destination $helpDeployTarget -Force
+                Write-Host "Deployed help-data.js to $helpDeployPath" -ForegroundColor Green
             }
         }
 

@@ -15,3 +15,6 @@ aab/gate-config.js
 aab/aab-data.js
 aab-overdue-pending.json
 aab-overdue-state.json
+# TSC Help Centre (scanner v2.71): per-installation, never committed
+help/gate-config.js
+help/help-data.js
