@@ -7,17 +7,29 @@ Three parts of the two-day class rest on tools and records that are yours, not D
 dashboard session has no access to them. This is the list, module by module, with what is needed
 for each so the pack is complete.
 
-## 1. The COC dashboard and the SSCE request cycle (Day 2, 13:00 to 14:30, about twenty minutes)
+## 1. The WCE COC Dashboard and the SSCE request cycle (Day 2, 13:00 to 14:30, about fifteen minutes)
 
-The class shows the SSCE Requests Dashboard (ours) and **the WCE COC Dashboard** (yours: the
-Certification Tracker and the CoC Register behind it, the Submit Request button, the approve or
-deny with comment, the "Allocated" grey-out that the scanner writes back). Needed:
+The class shows the SSCE Requests Dashboard (ours) beside **the WCE COC Dashboard** (yours: the CoC
+Register behind it, the Submit Request button, the approve or deny with comment that comes back from
+the requests page, and the "Allocated" grey-out the scanner writes back). Needed:
 
-- A walkthrough script of raising a request from the COC dashboard and seeing its decision come
+- A walkthrough script of raising a request from the COC Dashboard and seeing its decision come
   back, twenty steps, screenshots on a test item, with the three mistakes a rig makes.
-- One paragraph each on what the Certification Tracker and the CoC Register are, who keeps them,
-  and what "certified", "allocated" and "expired" mean on the screen.
+- One paragraph on what the CoC Register is, who keeps it, and what "certified", "allocated" and
+  "expired" mean on the screen.
 - The current build of `Seadrill_WCE_COC_Dashboard.html` the class will use, frozen for the week.
+
+## 1a. The Certification Tracker (Day 2, 13:00 to 14:30, about ten minutes)
+
+A separate tool from the COC Dashboard and shown separately. Needed:
+
+- One paragraph on what the Certification Tracker is, what it tracks (which certificates, which
+  equipment, which expiry rule), who updates it and how often, and how it relates to the CoC Register
+  and to SPARC.
+- A five-step walkthrough with screenshots: find an item, read its certification state, see what an
+  expiring certificate looks like and what happens next.
+- What the dashboard's compliance and expiry watch should read from it, if anything, so the class
+  hears one story about certification rather than two.
 
 ## 2. SPARC, and where the estate is heading (Day 2, 14:45 to 16:00, about fifteen minutes of it)
 
@@ -48,3 +60,16 @@ Markdown plus PNG screenshots (1600 px, light mode, test items and SSCE Equipmen
 handoff travels. Draft to Dan two weeks before the class date, one review round, final a week before.
 The dashboard session lays all of it out on the Seadrill template and writes the trainer's script
 around it.
+
+## 4. The loop: how the tools connect, and the plan to connect the rest (Day 2, 14:45 to 15:30, your fifteen minutes of it)
+
+Added by Dan on 29 September: a forty-five minute module on how one post becomes a dashboard row,
+an email and a record today, and how the remaining tools will be joined up. The dashboard session
+presents the intake, SharePoint, the scanner, the sacred server, the notification loops, the
+database and the Copilot agent. The part only you can give:
+
+- **SPARC and Maximo:** how SPARC links to Maximo today (the daily export, the item profile), what
+  a rig sees from it, and what joins it to the COC Dashboard and the Certification Tracker.
+- **The connection plan as you see it:** which of your tools connect to the SACRED pipeline first,
+  in what order, and what each connection gives the rig; five to eight points for one slide, and
+  whether you present those fifteen minutes yourself.

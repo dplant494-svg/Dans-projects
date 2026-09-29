@@ -1,6 +1,6 @@
 # Training class pack — who supplies what, module by module (29 September 2026)
 
-**Class:** week plan item 22, two days, agenda `WCE-Training-Class-Agenda.pdf` (draft 2, 23 Sep).
+**Class:** week plan item 22, two days, agenda `WCE-Training-Class-Agenda.pdf` (draft 3, 29 Sep).
 **Owner:** Dan. **Pack built by:** the dashboard session. **Content from:** four handoffs, sent 29 Sep.
 
 | Day, time | Module | Content from | Handoff |
@@ -12,10 +12,12 @@
 | 2, 08:00 | Precharge process | Precharge Pro session (form, calculator, sheet, PDF); dashboard session (loop, inbox); Dan and Lee (signatures, MOC) | `TRAINING-HANDOFF-PRECHARGE.md`, `TRAINING-HANDOFF-LEE.md` §3 |
 | 2, 10:15 | Rig Visit Dashboard tab by tab | Dashboard session | none needed |
 | 2, 13:00 | BOP Fleet Planning, SSCE Requests | Dashboard session | none needed |
-| 2, 13:00 | COC dashboard and the request cycle | **Lee** (COC dashboard, Certification Tracker, CoC Register) | `TRAINING-HANDOFF-LEE.md` §1 |
+| 2, 13:00 | WCE COC Dashboard and the request cycle | **Lee** (COC Dashboard, CoC Register) | `TRAINING-HANDOFF-LEE.md` §1 |
+| 2, 13:00 | Certification Tracker | **Lee** | `TRAINING-HANDOFF-LEE.md` §1a |
 | 2, 13:00 | AAB tab and the Seadrill Bulletin Board | Dashboard session (rig page, fleet page, dashboard, slides, guide); Eric (create page, review) | `TRAINING-HANDOFF-AAB-ERIC.md` |
-| 2, 14:45 | What is coming | Dashboard session; **Lee** for SPARC and the estate direction | `TRAINING-HANDOFF-LEE.md` §2 |
-| 2, 16:00 | Feedback session | Dan | none |
+| 2, 14:45 | The loop: how the tools connect today and the plan to connect the rest (added 29 Sep) | Dashboard session; **Lee** for SPARC, Maximo and his connection order | `TRAINING-HANDOFF-LEE.md` §4 |
+| 2, 15:30 | What is coming | Dashboard session; **Lee** for SPARC and the estate direction | `TRAINING-HANDOFF-LEE.md` §2 |
+| 2, 16:15 | Feedback session | Dan | none |
 
 ## What the dashboard session builds, once the content is in
 
@@ -28,8 +30,8 @@
 
 ## For Dan: what to ask Lee for
 
-Everything in `TRAINING-HANDOFF-LEE.md`: the COC dashboard walkthrough and the Certification Tracker
-and CoC Register descriptions; the SPARC slide points and whether he presents them; the precharge MOC,
+Everything in `TRAINING-HANDOFF-LEE.md`: the COC Dashboard walkthrough and the CoC Register description; the
+Certification Tracker on its own; his SPARC and Maximo part of the loop module; the SPARC slide points and whether he presents them; the precharge MOC,
 the AAB pilot MOC and HAZID status, and the pre-deployment MOC if it is through. None of those are
 reachable from this side.
 
