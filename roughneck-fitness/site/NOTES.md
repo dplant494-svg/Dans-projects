@@ -15,15 +15,14 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 | `coach@roughneckfitness.com` | footer, JSON-LD | the real mailbox |
 | Instagram `#` | footer | the handle |
 | "Before · 2024" caption | hero | the real date of the beach photo |
-| Prices £39 / £79 / £199 | programmes | confirmed prices |
+| Prices £39 / £89 / £199 | plans and coaching | confirmed prices |
 | Story text | story section | the coach's own words from the recorded transcript; current text is a draft written from the brief |
 
 ## Facts the page states (check each)
 - 72 lb lost.
 - Sober since 2 April 2025 (counter is computed live from this date in the visitor's local time).
 - Training filmed since June 2025 ("15 months, documented" in the stats strip: update the number or make it live).
-- 2 weeks on / 2 weeks off rotation.
-- Level 3 PT qualification in progress; Crew and One-to-one open only after it's done and insured.
+- Level 3 PT qualification in progress; one-to-one coaching opens only after it's done and insured. The plans are sold as programmes with general diet guidance, and say so.
 
 ## Images
 `img/` holds web-sized copies (max 1400 px, JPEG 82) made from `../assets/`. Originals stay in `assets/`. The pool photo with the coach's wife is in with her OK (28 Sept 2026).

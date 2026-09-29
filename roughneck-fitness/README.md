@@ -1,17 +1,19 @@
 # Roughneck Fitness (working name)
 
-Online fitness coaching. Personal brand built on a documented transformation: 72 lb down, bodybuilder physique, 500+ days sober, filmed since June 2025. Oil-and-gas identity as homage. Owner is on a UK Level 3 personal-trainer course.
+Online fitness coaching and training plans. Personal brand built on a documented transformation: 72 lb down, bodybuilder physique, 500+ days sober, filmed since June 2025. Oil-and-gas identity as homage. Owner is on a UK Level 3 personal-trainer course.
 
 Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a client (portfolio piece); nothing personal crosses over to the studio site.
 
 ## Rolling plan (last updated 28 Sept 2026)
 
-**Done**: draft site in `site/` (noindex), before/after photos in `assets/`, live sobriety counter from 2 April 2025, apply form (Netlify), Drinkline pointer, disclaimer. Placeholders listed in `site/NOTES.md`.
+**Source material**: a Google Drive folder named `Roughneck Fitness` (owner to create; Drive is connected here). Subfolders: `photos`, `videos`, `story`. Story as a Google Doc or a voice-memo transcript. Photos and docs can be read from here directly; videos can be listed and pulled but not cut, so trim clips on the phone first.
+
+**Done**: draft site in `site/` (noindex, repositioned 29 Sept for the general market), before/after photos in `assets/`, live sobriety counter from 2 April 2025, apply form (Netlify), Drinkline pointer, disclaimer. Placeholders listed in `site/NOTES.md`.
 
 **Decide first**
 1. Name and domain. Check `roughneckfitness.com`, `.co.uk`, `.fit` on Namecheap. Fallbacks in the same register: Crew Change Fitness, Hitch Fit, Days On Coaching, Offshore Strong, Toolpusher Training. Pick one whose Instagram handle is also free.
 2. How much of the story goes public. Sobriety is the most powerful part and the most personal. Options: front and centre (the "Days" counter on the site), mentioned once in the story, or private. Owner's call; the site works either way. Nothing on the site needs to say where you live.
-3. Niche before "generalised". The sharp version: coaching for rotational and offshore workers (rigs, FIFO, shift crews) who train on a 2-on/2-off life, eat what the galley serves, and drink on days off. Nobody serves that well and you've lived it. Broaden to general public later, once there are results to show.
+3. Positioning (decided 29 Sept): general market, not rig workers only (owner's call: too small a market). The rig identity stays in the name, the story and the tone. The product structure is by training environment: Full Gym, Rig & Site, Hotel. Diet guide included in every plan. Products: single plan £39, all three £89, one-to-one coaching £199/month once qualified.
 
 **Before selling anything**
 4. Finish the Level 3 PT qualification. Public liability and professional indemnity insurance (Insure4Sport or Protectivity, roughly £60–£100 a year) needs it. Selling coaching before that is a risk not worth taking.
@@ -23,12 +25,14 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 8. Site: single page, same engineering as the studio sites. Hero with the transformation, the story, who it's for, programmes, how it works, results, and an **apply** form (not a buy button). Applications come to the inbox; you pick who you take.
 9. Payments: Stripe Payment Links for the self-serve programme, subscription via the coaching app for 1:1.
 
-**Offer (draft, to be priced properly later)**
-| Tier | What | Price idea |
+**Offer (on the site)**
+| Tier | What | Price |
 |---|---|---|
-| The Hitch | 4-week self-serve programme for a rig gym, PDF + video | £39 one-off |
-| Crew | Group coaching in the app, weekly check-in, community | £79/month |
-| 1:1 | Full online coaching, custom programme and nutrition, weekly video call | £199/month |
+| One plan | Full Gym, Rig & Site, or Hotel: 4-week programme, video demos, diet guide, tracking sheet | £39 one-off |
+| All three | The three plans, switch as the week changes, future updates | £89 one-off |
+| One to one | Programme and diet written for the client, app, weekly check-in and call | £199/month, 12-week minimum, opens on qualification |
+
+**Plans**: drafted in `plans/` as Word documents (`build-plans.js` regenerates them). They are marked DRAFT FOR COACH REVIEW: the owner, as the qualified person, reads and signs off every exercise, rep range and diet line before anything is sold. Video demos for each exercise are the owner's to film.
 
 **Launch**
 10. Content is already shot. Cut the footage into: one 60-second transformation reel, a "day 1 vs day 500" still, and ten short clips. Instagram, TikTok and YouTube Shorts. Here short video is the channel; for Plantworks it wasn't.
