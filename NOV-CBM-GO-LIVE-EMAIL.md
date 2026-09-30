@@ -17,7 +17,8 @@ forwarding them by hand. Here is what to expect.
 **What arrives**
 
 - One email per inspection, subject `[Seadrill CBM Report for OEM review] CBM Report - <rig> - <equipment> - <date>`, from our Well Control Engineering mailbox.
-- One attachment: `Seadrill_CBM_<rig>_<equipment>_<date>.html`, the report exactly as the rig's reporting tool renders it, with the task table, the 1 to 5 grades against your grade level evaluation guide, the crew's comments and the photographs, all inside the file. It opens in any browser, on a PC or a phone, with no login and no link to follow. The one-page guide attached shows how to open it and how to print it or save it as a PDF.
+- The report as an attachment, `Seadrill_CBM_<rig>_<equipment>_<date>.html`, exactly as the rig's reporting tool renders it, with the task table, the 1 to 5 grades against your grade level evaluation guide, the crew's comments and the photographs, all inside the file. It opens in any browser, on a PC or a phone, with no login and no link to follow. The one-page guide attached shows how to open it and how to print it or save it as a PDF.
+- Where the crew attached test records to an equipment entry (pressure test charts and similar), they arrive as separate PDF attachments in the same email, and the report lists each one by name and what it evidences.
 - The Seadrill people in copy on each email are the Subsea Superintendent for the rig and our Technical Services team. Replies go to them; the sending mailbox is not read.
 
 **What we would ask**

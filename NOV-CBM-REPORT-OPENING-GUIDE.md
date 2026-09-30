@@ -1,11 +1,12 @@
 # Seadrill CBM inspection reports: opening the attachment
 
 **For:** NOV CBM review team · **From:** Seadrill Technical Services, Well Control Engineering
-**Date:** 28 September 2026
+**Date:** 30 September 2026 (28 September, with the test records added)
 
 Seadrill's rigs now send their Condition Based Monitoring (CBM) inspection reports to NOV
-automatically, as soon as the inspection is posted. Each report arrives as one email with one
-attachment.
+automatically, as soon as the inspection is posted. Each report arrives as one email with the
+report as an attachment and, where the crew attached them, the test records (pressure test charts
+and similar) as separate PDF attachments in the same email.
 
 ## The email
 
@@ -29,6 +30,13 @@ save it to Files.
 
 **Android.** Tap the attachment. Outlook or Gmail open it in the browser; some phones ask which
 app to use, choose Chrome.
+
+## Test records
+
+Where the crew attached test records to an equipment entry, they arrive as their own attachments
+beside the report, usually PDF. Open them the way you open any PDF. The report itself lists each
+one by name, what it evidences and its size, so you can see what was attached even before you
+open them.
 
 ## Printing or saving as PDF
 

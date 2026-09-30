@@ -230,7 +230,9 @@ ConvertedPdf, nothing is sent to NOV, Power Automate emails you the failure, and
 button still says sent, which is why the tools session is changing that wording to
 "Sent for OEM delivery". Until Part D is proven, the button does not ship.
 
-## Part D3 — NOV gets the test records too: `files[]` as separate attachments (rolling handoff entry 42.6, designed 30 September 2026, not yet built)
+## Part D3 — NOV gets the test records too: `files[]` as separate attachments (rolling handoff entry 42.6; built and proven by Dan, 30 September 2026)
+
+**As built, 30 Sep:** the full Parse JSON schema replaced (with `saved`, `sourceFormat`, `htmlName`, `html`, `files`), the two Select cards **OemFiles** and **MainAtt** after NeedsConvert, OEM Email Attachments switched to the entire array with the one `union(...)` expression; the first save refused with "Enter a valid array" because the paste landed as text, cleared and re-entered as an fx token, saved. Proven in test mode on the sample file: the office four received the [TEST MODE] email with two attachments, the HTML report and the test PDF, which opened. The tools session flips `OEM_SEND_FILES` on this proof.
 
 **Why:** SSORT 152 lets the crew attach test records (pressure-test charts, PDFs) to a CBM
 equipment entry (`cbmatt`). The OEM copy travels as HTML, and a PDF cannot ride inside it, so

@@ -1149,3 +1149,18 @@ is unchanged, a `data:` link inside it is still the wrong route.
 **For the class (19 and 20 October):** SSORT 152 is now the build the class trains on, unless
 you say otherwise in the training handoff 2 reply; the attach step goes into module 3 and one
 attached PDF into the exercise's CBM report.
+
+
+---
+
+## Part D3 proven, 30 Sep 2026, afternoon: switch `OEM_SEND_FILES` on
+
+Dan built Part D3 into the CBM to OEM flow today (the Parse JSON schema with `files`, the two
+Select cards, the email's attachments as the array) and proved it in test mode on
+`sample-reports/seadrill-oem_SSCE-Equipment_2026-09-30_upper-triple_files-sample.json`: the office
+four received the `[TEST MODE]` email with two attachments, the HTML report and the test PDF, which
+opened. **Please flip `OEM_SEND_FILES` to true** in the next SSORT revision and say so in the rolling
+handoff; from that revision the crew's confirm can read "attached for NOV" and the metadata table
+stays as the list. The NOV opening guide now carries a "Test records" section and the go-live email
+mentions them. Keep the 30 MB refuse on the OEM copy as the hard stop; NOV's gateway limit is still
+unknown and a bounce comes back through the NOT SENT branch.
