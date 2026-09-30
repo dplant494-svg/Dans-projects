@@ -1,3 +1,5 @@
+> **Withdrawn 30 September 2026 (Dan):** nothing is needed from Lee for the class. Every module says the change is under MOC, in one line, and moves on. Kept for the record.
+
 # Training class handoff — for Lee: the MOCs and the signatures
 
 **To:** Lee Arnold (WCE Manager) · **From:** the dashboard session, via Dan · **Date:** 29 September 2026
