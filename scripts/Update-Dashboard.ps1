@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.73'
+$ScriptVersion = '2.74'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1923,6 +1923,7 @@ foreach ($f in $files) {
     }
 
     $tilesRaw = Get-Prop $json 'tiles'
+    $cbmEquipList = @()   # v2.74: the CBM equipment on the report (class, and the instance when the tool names one), for the report row (Dan, 30 Sep: the file name no longer carries it)
     $cbmAttCount = 0   # v2.73: cbmData.cbmatt[] test records and documents (SSORT 152, rolling handoff entry 42), counted into the row's attachments
     $tileCount = 0
     # v2.50/v2.51: a daily report's date. meta.reportDate when the tool sends one
@@ -2283,6 +2284,8 @@ foreach ($f in $files) {
                 }
                 $cbmEquip = Get-CbmInstanceLabel -Model ([string](Get-Prop $cbm 'rcpt_model')) `
                     -Serial ([string](Get-Prop $cbm 'rcpt_serial')) -FallbackClass $cbmClass
+                $cbmEquipLabel = $cbmClass; if ($cbmEquip -and $cbmEquip -ne $cbmClass) { $cbmEquipLabel = "$cbmClass ($cbmEquip)" }   # v2.74
+                if ($cbmEquipList -notcontains $cbmEquipLabel) { $cbmEquipList += $cbmEquipLabel }
                 $cbmDate = [string](Get-Prop $cbm 'date')
                 if (-not $cbmDate) { $cbmDate = [string](Get-Prop $meta 'date') }
                 foreach ($it0 in (Get-CbmGradedItems -Cbm $cbm)) {
@@ -2701,6 +2704,7 @@ foreach ($f in $files) {
             modified      = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
             tileCount     = $tileCount
             attachments   = $attachCount                             # v2.59: REV 161 attachments[] count
+            cbmEquipment  = ($cbmEquipList -join '; ')               # v2.74: 'Riser Adapter' or 'Gate Valves (Choke Line Isolation)'; '' when not a CBM report
             criticalTotal = $criticalItems.Count
             criticalOpen  = $criticalOpen
             actionsTotal  = $actionItems.Count

@@ -1351,6 +1351,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       }
       var typ = document.createElement('div'); typ.className = 'visit-type';
       typ.textContent = _isPlan ? ((r.rig ? r.rig + ' · ' : '') + 'Planning Report') : (r.type || r.reporttype || 'Report');
+      if (r.cbmEquipment) typ.textContent += ' \u00B7 ' + r.cbmEquipment;   // v2.74: the CBM equipment class (and instance), since the file name no longer carries it
       var file = document.createElement('div'); file.className = 'file'; file.textContent = r.file + (r.rev ? ' \u00B7 ' + r.rev : '');   // v2.63: the tool build that posted, when the tool wrote one
       tdRig.appendChild(rig); tdRig.appendChild(typ); tdRig.appendChild(file);
       // CBM-to-OEM loop (scanner v2.49): a 'Post to OEM' from the tool leaves an
