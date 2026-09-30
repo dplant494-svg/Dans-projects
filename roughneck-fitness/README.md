@@ -11,7 +11,7 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 **Done**: draft site in `site/` (noindex, repositioned 29 Sept for the general market), before/after photos in `assets/`, live sobriety counter from 2 April 2025, apply form (Netlify), Drinkline pointer, disclaimer. Placeholders listed in `site/NOTES.md`.
 
 **Decide first**
-1. Name and domain. Check `roughneckfitness.com`, `.co.uk`, `.fit` on Namecheap. Fallbacks in the same register: Crew Change Fitness, Hitch Fit, Days On Coaching, Offshore Strong, Toolpusher Training. Pick one whose Instagram handle is also free.
+1. Name and domain: **Roughneck Fitness, roughneck-fitness.com** (bought 30 Sept 2026). Instagram handle still to claim: try `roughneck.fitness` or `roughneckfitnessuk`.
 2. How much of the story goes public. Sobriety is the most powerful part and the most personal. Options: front and centre (the "Days" counter on the site), mentioned once in the story, or private. Owner's call; the site works either way. Nothing on the site needs to say where you live.
 3. Positioning (decided 29 Sept): general market, not rig workers only (owner's call: too small a market). The rig identity stays in the name, the story and the tone. The product structure is by training environment: Full Gym, Rig & Site, Hotel. Diet guide included in every plan. Products: single plan £39, all three £89, one-to-one coaching £199/month once qualified.
 

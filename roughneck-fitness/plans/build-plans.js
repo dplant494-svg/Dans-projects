@@ -103,7 +103,7 @@ const safety = () => [
   bullet('The diet section is general guidance, not a prescription. Anyone with a medical condition affecting diet (diabetes, kidney issues, an eating disorder history) should follow their clinician\'s advice over this document.'),
   bullet('Results shown on the website are one person\'s. Yours depend on what you do with this.'),
   P(''),
-  P('Roughneck Fitness · roughneckfitness.com · coach@roughneckfitness.com', { color: MUTE, size: 18 }),
+  P('Roughneck Fitness · roughneck-fitness.com · coach@roughneck-fitness.com', { color: MUTE, size: 18 }),
 ];
 
 // ---------- the three plans ----------

@@ -11,8 +11,8 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 | What | Where | Replace with |
 |---|---|---|
 | `[Coach name]` | story sign-off | the coach's name as it should appear publicly |
-| `roughneckfitness.com` | canonical, OG, JSON-LD | the domain once bought |
-| `coach@roughneckfitness.com` | footer, JSON-LD | the real mailbox |
+| Domain | done: `roughneck-fitness.com` (Namecheap, 30 Sept 2026) | |
+| `coach@roughneck-fitness.com` | footer, JSON-LD | the real mailbox |
 | Instagram `#` | footer | the handle |
 | "Before · 2024" caption | hero | the real date of the beach photo |
 | Prices £39 / £89 / £199 | plans and coaching | confirmed prices |
