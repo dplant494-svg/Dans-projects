@@ -174,6 +174,16 @@ Minimum viable, about an hour a week. The leads are in Facebook groups and refer
 - **Share image**: `site/og-image.png` (1200×630) is set as `og:image` on both pages, so the link shows a proper card on WhatsApp, Facebook, LinkedIn and iMessage. Regenerate from `templates/og-card.html` (screenshot at 1200×630) if the strapline changes.
 - **Not worth it now**: TikTok, X beyond claiming the handle, paid ads until there are reviews to point them at.
 
+## Competition (noted 30 Sept 2026)
+
+One search for "web design Marbella" returns at least eight agencies: marbellawebsitedesign.es (Ben Coupland, British, 20+ years, brochure to e-commerce, hosting, maintenance, SEO, free consultation, no public prices), marbellawebsitedesign.com (a different company with almost the same name), diseñowebmarbella.es, sebcreativos.es, peppermintcreate.com, wedesignmarbella.com, redlinecompany.com, tomlumsden.es. Most are WordPress shops selling to the same English-speaking business owners.
+
+What that means for us:
+- Don't fight for "web design Marbella" on Google. It's owned by people who've been at it for years. Aim at the phrases they don't: "bilingual website Costa del Sol", "página web bilingüe Marbella", "web design Estepona / San Pedro / Sotogrande / Fuengirola", and UK-side local terms once there is a UK client.
+- Our differences are already on the site and must stay visible: public fixed prices (none of them show prices), bilingual done properly with hreflang (they offer "translation"), no WordPress and no plugins to hack or patch, and two home markets.
+- They all offer a free consultation and named hosting/maintenance services. We do too (the 20-minute call, the Care plan). Nothing to add there.
+- The channel that beats them is not Google, it's referrals and the Facebook groups. An agency with 20 years of local clients wins on search; a new one wins by being the person who answered the question in the group.
+
 ## Working conventions
 
 - One folder per client under `clients/`, each a deploy folder with its own `NOTES.md`.
