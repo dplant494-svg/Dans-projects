@@ -1,0 +1,1036 @@
+{
+ "version": 3,
+ "exportedAt": "2026-09-30T07:54:37.416Z",
+ "meta": {
+  "asset": "SSCE Equipment",
+  "date": "2026-10-03",
+  "dateend": "",
+  "wce": "",
+  "sss": "A. Trainee",
+  "rigmgr": "",
+  "oim": "",
+  "arigmgr": "",
+  "tsl": "",
+  "elec": "",
+  "dsl": "",
+  "tech": "",
+  "other": [],
+  "location": "",
+  "wo": "",
+  "type": "",
+  "reporttype": "",
+  "discipline": "",
+  "synCase": "",
+  "synTitle": "",
+  "synCategory": "",
+  "synRespunit": "",
+  "synIdunit": "",
+  "synParty": "",
+  "synUrl": "",
+  "campPull": "",
+  "campOndeck": "",
+  "campRequired": "",
+  "campExpected": "",
+  "campActual": "",
+  "bopDesig": "",
+  "next24": "",
+  "dayLog": [],
+  "dayLogMonth": [],
+  "bopSlots": [],
+  "rev": "SSORT REV 152"
+ },
+ "tiles": [
+  {
+   "title": "Pre-Deployment Checklist",
+   "status": "",
+   "fodb": "",
+   "notes": "",
+   "tileDate": "",
+   "imgData": "",
+   "equipEntries": [],
+   "vsrData": null,
+   "caData": null,
+   "inspData": null,
+   "cbmData": null,
+   "r53Data": null,
+   "sbopData": null,
+   "pdcData": {
+    "pdc_ack": "1",
+    "pdc_rig": "Confirmed",
+    "pdc_well": "Confirmed 2",
+    "pdc_stack": "Confirmed 3",
+    "pdc_date": "2026-10-01",
+    "pdc_1_resp": "",
+    "pdc_1_rem": "Confirmed 4",
+    "pdc_2_resp": "",
+    "pdc_2_rem": "Confirmed 5",
+    "pdc_3_resp": "",
+    "pdc_3_rem": "Confirmed 6",
+    "pdc_4_resp": "",
+    "pdc_4_rem": "Confirmed 7",
+    "pdc_5_resp": "",
+    "pdc_5_rem": "Confirmed 8",
+    "pdc_6_resp": "",
+    "pdc_6_rem": "Confirmed 9",
+    "pdc_7_resp": "",
+    "pdc_7_rem": "Confirmed 10",
+    "pdc_8_resp": "Confirmed 11",
+    "pdc_8_rem": "Confirmed 12",
+    "pdc_9_resp": "",
+    "pdc_9_rem": "Confirmed 13",
+    "pdc_10_resp": "",
+    "pdc_10_rem": "Confirmed 14",
+    "pdc_11_resp": "",
+    "pdc_11_rem": "Confirmed 15",
+    "pdc_12_resp": "",
+    "pdc_12_rem": "Confirmed 16",
+    "pdc_13_resp": "",
+    "pdc_13_rem": "Confirmed 17",
+    "pdc_14_resp": "",
+    "pdc_14_rem": "Confirmed 18",
+    "pdc_15_resp": "",
+    "pdc_15_rem": "Confirmed 19",
+    "pdc_16_resp": "",
+    "pdc_16_rem": "Confirmed 20",
+    "pdc_17_resp": "",
+    "pdc_17_rem": "Confirmed 21",
+    "pdc_18_resp": "",
+    "pdc_18_rem": "Confirmed 22",
+    "pdc_19_resp": "",
+    "pdc_19_rem": "Confirmed 23",
+    "pdc_20_resp": "",
+    "pdc_20_rem": "Confirmed 24",
+    "pdc_M1_resp": "",
+    "pdc_M1_rem": "Confirmed 25",
+    "pdcbop_desig": "Single",
+    "pdcbop_s1_mfr": "",
+    "pdcbop_s1_cav": "",
+    "pdcbop_s1_status": "",
+    "pdc_elec_checks_resp": "",
+    "pdc_elec_checks_rem": "Confirmed 26",
+    "pdc_elec_rars_relay": "1",
+    "pdc_elec_rars_spades": "1",
+    "pdc_nc_r0_desc": "Confirmed 27",
+    "pdc_nc_r0_reason": "Confirmed 28",
+    "pdc_nc_r0_ref": "Confirmed 29",
+    "pdc_nc_r1_desc": "Confirmed 30",
+    "pdc_nc_r1_reason": "Confirmed 31",
+    "pdc_nc_r1_ref": "Confirmed 32",
+    "pdc_nc_r2_desc": "Confirmed 33",
+    "pdc_nc_r2_reason": "Confirmed 34",
+    "pdc_nc_r2_ref": "Confirmed 35",
+    "pdc_exempt": "Completed and verified by the subsea team prior to deployment.",
+    "pdc_so0_name": "Confirmed 36",
+    "pdc_so0_date": "2026-10-01",
+    "pdc_so1_name": "Confirmed 37",
+    "pdc_so1_date": "2026-10-01",
+    "pdc_so2_name": "Confirmed 38",
+    "pdc_so2_date": "2026-10-01",
+    "pdc_so3_name": "Confirmed 39",
+    "pdc_so3_date": "2026-10-01",
+    "pdc_so4_name": "Confirmed 40",
+    "pdc_so4_date": "2026-10-01",
+    "pdc_elec_ph_ews": [
+     {
+      "src": "data:image/jpeg;base64,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",
+      "caption": "UBSR cavity sealing face"
+     },
+     {
+      "src": "data:image/jpeg;base64,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",
+      "caption": "CSR cavity sealing face"
+     },
+     {
+      "src": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCACqAPADASIAAhEBAxEB/8QAHAABAQEBAQEBAQEAAAAAAAAAAgEGAAUHBAMI/8QANxABAAECBAQEBAUCBgMAAAAAAQACBAMFBhEHIWWREhPB4TE1QXQUIlFhcxU0CBYyUnGBM0Kh/8QAGQEBAQEBAQEAAAAAAAAAAAAAAAECAwQF/8QAHxEBAAIDAAMBAQEAAAAAAAAAAAECERJRITEyQSID/9oADAMBAAIRAxEAPwDytMaYr1LiXFFF1h23kUFdVWIctvSe6cNev5d395OGp86+zfWY0J8nxERMw9vmZbU4bdey7v7ynDfr2Xd/eYsIwjavDE9bM4cddy7v7xHDjruXd/eYwIwjavDE9bI4dddy/v7xHDrrmX9/eY0IwjavDE9bE4d9cy/v7xHDzrmX9/eY4Iwk2rwxPWvOHvW7Dv7xHD7rdh395kAjCNq8MT1rjh/1qw7+8Rw/61Yd/eZEIwjavDE9a00B1qw7+8RoHrNj395kgjCNq8MT1rDQXWbHvKaD6zY9/eZQIwjavDE9ao0J1ix7xGhesWPeZUIwjavDE9ak0N1iy7xGhur2XeZYIwk2rwxPWoND9Xsu8Rojq9l3mXCMI2rwxPWmNE9Wsu8Rorq1l3mZCMI2rwxPWlNF9Vs+8Rovqtn3maCIJNq8MT1pTRnVbPvPPzjJKsmrwaasejG82lqGg5bTzQml1gfLvtz0l/mazMQnmJYrhqfOfs31mOCbPhsfOftH1mOCat8wse5cEYSBEEw0oRhIEYQOCMJAiCQUIwkCIIFCMJAiCQUIwkCIIFCMJAiCBQjCQIggUIwkCIIFCMJAiCQUIgnBEEChEEgRhAoRBIEYQOCabV58u+3PSZsJpdXny77c9JuvzLM+4YrhsfOftH1mOCbLhufOftH1mPCbt8wR7lQiCcEQTDShEEgRhIKEQTgiCBQiCQIwkFCIJAjCBQiCQIwgUIgkCMIFCIJAjCBQiCQIwgcEYSBGEg4IwkCMIHBGEgRBAoRhIEQQKE0mrj5d9uekzoTR6tPl/wDAek3X5lmfcMXw4PnH2j6zHhNjw4PnH2j6zIBN2+YI9y4IwkCMJhpwRhIEQSChGEgRhIOCMJAiCBQjCQIggUIwkCIIFCMJAiCBQjCQIggUIwkCIJBQiCcEQQKEQSBGEChEEgRhA4IwkCMIHBNJq0+X/wAB6TOhNHqw+X/wHpN1+ZZn3DFcOT5x9o+syATY8OT5x9o+syATdvmCPcqEQTgiCc2lCIJwRBIKEQSBGEChEE4IggUIgkCMIFCIJAjCBQiCQIwgUIgkCMJBwRhIEYQOCMJAjCBwRhIEQQKEYSBEEChEE4IggUJotWHy/wDgPSZ4Jo9Vny/+A9JuvzLM+4Yrh0fOPtH1mRCa/h2fN/tH1mSCat8wR7lwRhIEYTDTgjCQIwkHBGEgRhA4IwkCMIHBGEgRBAoRhIEYQOCMJAiCBQjCQIgkFCIJwRBAoRBIEYQKEQSBGEDgjCQIwgcEYSBGEDgmi1Wf2H8BM+E0Oqj+w/gJqvzLM+4Yvh2fN/tX1mRCa/h4fN/tX1mSCbt8wR7lQiCcEQTm0oRBOCIIFCIJwRBAoRBIEYQKEQTgiCBQiCQIwgUIgkCMJBwRhIEYQOCMJAjCBwRhIEQQKEYSBEEChEE4IggUIgkCMJBQmg1Uf2H8BPACaHVJ/YfwE3X5lmfcMVw9Pm/2r6zJhPW05qGvT+Jj10W2HcefQUNNby2ntGv+iWHb2nT+ZrETKeYlkQjCaw190Sw7e0Rr7oth29pNa9XM8ZMIwmrNe9FsO3tEa86LY9vaNa9MzxlAjCao130ax7e0Rrro1j29o1r0zPGVCMJqTXPRrHt7RGuOj2Pb2jWvTM8ZYIwmnNcdHsu3tEa36RZdvaTWvTM8ZgIwmmNbdIsu3tEa16RZdvaNa9MzxmQjCaU1p0my7e0RrPpNl29o1r0zPGaCIJpDWfSbPt7RGsulWfaTWvTM8ZwIgmjNY9Ks+3tEaw6VZ9o1r0zPGdCIJojV/S7TtEau6Xado1r0zPGdCMJoDV3S7TtEat6Zado1r0zPGfCMJ75qzplp2iNV9Mte0a16ZnjwAiCe+aq6ba9ojVXTbXtJrXpmePBCaDVB/YfwEhqnptr2n480zWrNa8KqrBpwvLp8IUvLaX+YrMRKeZl/mcJScShPU5qEoTglCBwRBIREDiUJwREDpZxKQOJScEsCkpJEEDgiJCIgcSk4lJBQlCQigcShOCUIFCUnEpApKE4lCBwSk6IIHBEEgShAzRPqpSv+HZQUM45/tynysJrtI8S830hlt1lOFaZZmeW3VRXiWeZYHnYXi5cw3P0P25fCbrOPaS+76H3LTh1slL/SrnZfgflpnjZvqCivTuPY6v1Vp/UeY4uZ4DlmHltdGJiW6YhzqaKafDsb7qfDc3d9p80q41akq1FaZ2W2V0tnbV2ttZ0YFVNvg0VAVeGkq335H1+kxeBfYuBmWHmFNNDi0Yxjgj4fEVb9t50n/SPxnV/rLMMXU2FrG8vcXUuVVaUscHzL3LKMMxbmmny3lVTThtRu8/8AVzD4fSf5v0/k+V6t4i4WWYfnW+V399iU4Zg7U10YS1NIbiHLb6T9dHFvUOFrXE1dhUWWHe42GYWLgU0VeRiUFO21VLVv9B+PxJ/DR2o7K14jWGoMwot8utC7cfGpt6K3DwhHfw0/mq23fhzktaLTBETDYZtwt0jcWGo6dOZnndeZadrPxNF3RRVRi089/LKQV5JzeafDZGf2uOEWnrzSeY5jlrqKwzOxwqK3Azaq3pat3/2wqFroHnt4tv15zy9X8Z80u7zM7TIqMstbTHuvN/H21o4dxdU01b0OIvx+B8aR5f8AM/PmnHDP82ssxta8ryK3/qWF5dzi29tXRi4jsBW1ePdqA5b7n7Rmp5fr1boPQmlcO4ya6z/NsHUWBaUY5iYmCVWmLiPPywppazf9V2N9934TccTdFWF/p3A1Xm7f4ltYZVgYODb2NVNNdeIvxrqqpqCg3N3bf4/pz+dXHG3UtzluJa1WuUU3eNbFpiZnTa7XdeGfRr8W36/T6/rP51cY8/xLrzsW0yvEwqsvMtxbWvCrcHGwvo1Hj3aubzE+LyjapiW7w/8ADvY1ZJQNzm39Srs/P/FlWD+DpxNt/LaP/J/38Prv9JkNSaN0dprRmT5jcXOeYmcZvYU3OBhYdWE4FFewrVvSJTvVyBXlPPu+LGa5jlNFhf5Np2+xcLB/D4V9dWBi3GHR9NqqlOX05f8A3nBZ6/8AxuZ6Zc/y+yuMuyLCLcwabbzfOwvDt+amuspqq5HPkDz2dtpJmv4uJZvJLHDzHNrW1xcK9xcPFxCmqiywvNx6j6lFO5uz6rmnCTStGT2Wa2+Z5rlWBVf0Wt3/AFPFt63Bpfjv5TtRUO25U7n1CfObHVGNkurnUeT2+DbV4dziY+BgNG+Hh01L+TY25eF25bftNHmnGPOc1sKrDEybTuDbVXFN04WFZfkcQd1aaqmmrxO+/iH4/R5yV1iPJOfx+7iRw5yfSuU4d9lNrqOvDqxApvLiq3xrXFofgleFVvTvubeI5zQ8J8yyvT/DLUOb4VeYW99hVlNxj4GHg1VH+wo8Yic+fi/V2mEz7iZmOeZDiZFhZRkWUWONi042Nh5ZaeT51R8PF+Z+oP68ieblmsL/ACrTOZadwcG1qtMyrprxa66anEpadtvCiB8PqMu0RbMGJx5fcjTGQ3+sb/8AzFVfZzc2+SYWPh13NGD4cPDfGO1NNNNLUfTcf+fhPDx9AaNzzSul7TJ8C/s7jNrmrybvGow6sWoBa/NT6eGmrwlPLfb95iMLjDn2HqKrPWzyqvGrsqbCvArwa3Crwx35nj33/wC9v2lwuL+d4GXYFlb5bktvTa3FVxa4uHbVFdstTUmH+bamnm07bf6XaXeqYls854A2VJbOW4+a2Q3tNti/1CrBxPMw128zD8p5H7VbP7E/Rg5VpjJtEa8sNO3WZ49VrT5F1+NKeddKm9DSHLfc5m/L9J88zPifmWYXeBe2+T6fyu9wcf8AE/irGwpoxcSvff8ANXUq7u+/w335z92bcZM7zjLMxy6vKsjtsPMqdrmu2tqqK8Sr/evj51bAbu8bV/DEsEEUhEE4tuJScEpA4iJCIIHBEEgREDiUnBKEDNEoTiWUcEQSEsChFISkCkpJFA4lJ0sDgiCQigcEQSSwKEpOlkFCUJCUgUiCQigcEoTpYFJSSIgcEQSEUDiIJJYFCUJIiB//2Q==",
+      "caption": "UPR packer, as fitted"
+     },
+     {
+      "src": "data:image/jpeg;base64,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",
+      "caption": "Door sealing face"
+     }
+    ],
+    "pdc_elec_ph_ir": [],
+    "pdc_elec_ph_fibre": []
+   },
+   "calcData": null
+  }
+ ],
+ "criticalRows": [],
+ "actionRows": [],
+ "eotArchive": [],
+ "noteArchive": [],
+ "checklist": {
+  "statuses": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "notes": [
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   "",
+   ""
+  ],
+  "appendix": {
+   "ckl-appa": [
+    {
+     "added": false,
+     "ele": "Diverter",
+     "desc": "SHAFFER, 21 1/4\", 500 PSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Overboard Valves",
+     "desc": "PIPER VALVES, 18\" ANSI 300 RTJ",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Flex Joint",
+     "desc": "OILSTATES 3 KPSI, 21 1/4\", 500 PSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Slip Joint",
+     "desc": "SHAFFER HF-T, 79.1-65 ft STROKE",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Tensioning Ring",
+     "desc": "SHAFFER 1750 TONS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Keel Joint",
+     "desc": "SHAFFER HF-T 27 ft",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Termination Joint",
+     "desc": "SHAFFER HF-T 63 ft",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Moonpool Drapes",
+     "desc": "TECHFLOW C&K / CONDUIT, COPPERSTATES BOOSTER",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Goosenecks",
+     "desc": "SHAFFER C&K, BOOSTER, CONDUIT",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Riser Joint",
+     "desc": "SHAFFER HF-T 90 ft — 5 lines per joint",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Riser Adaptor",
+     "desc": "SHAFFER HF-T",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Jumper Hoses",
+     "desc": "2x COFLEXIP C&K 15 KPSI, 2x COFLEXIP CONDUIT 5 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Mud Booster Valve",
+     "desc": "SHAFFER DB VALVES, MWP 10 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Bulleyes",
+     "desc": "FLEX JOINT / LMRP / BOP — 2.5 and 4 degree",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Flex Joint",
+     "desc": "OILSTATES, 18 3/4\" ID, 6 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Annular",
+     "desc": "SHAFFER WEDGE COVER, 18 3/4\", 10 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Gas Bleed Off Line",
+     "desc": "SHAFFER HB VALVES, 15 KPSI, FAILSAFE CLOSE",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Riser Connector",
+     "desc": "VETCO H4 ExF, 18 3/4\", 15 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Annular",
+     "desc": "SHAFFER WEDGE COVER, 18 3/4\", 10 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Shear Ram (BSR)",
+     "desc": "SHAFFER NXT, 22\" OPERATOR CVX, 15 KPSI, POSLOCKS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Middle Shear Ram",
+     "desc": "N/A — Not fitted (West Polaris)",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Shear Ram (CSR)",
+     "desc": "SHAFFER NXT, 22\" OPERATOR CASING V BLOCKS, POSLOCKS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Pipe Ram",
+     "desc": "PIPE RAMS NXT, 14 1/2\", 15 KPSI, ULTRALOCKS 2B",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Middle Pipe Ram",
+     "desc": "PIPE RAMS NXT, 14 1/2\", 15 KPSI, ULTRALOCKS 2B",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Pipe Ram",
+     "desc": "PIPE RAMS NXT, 14 1/2\", 15 KPSI, ULTRALOCKS 2B",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Pipe / Test Ram",
+     "desc": "PIPE RAMS NXT, 14 1/2\", 15 KPSI, NO LOCKS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Wellhead Connector",
+     "desc": "VETCO H4 SHD, 18 3/4\", 15 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Yellow Pod",
+     "desc": "SHAFFER 5TH GEN MUX, 112 POD",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Blue Pod",
+     "desc": "SHAFFER 5TH GEN MUX, 112 POD",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Choke & Kill Stab Connector",
+     "desc": "SHAFFER MINI CONNECTORS, LOCKS INCLUDED",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Wetmate Connector",
+     "desc": "SHAFFER 5TH GEN, 1 x 4 PIN",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "LMRP Isolation Valves",
+     "desc": "SHAFFER HB VALVES, 15 KPSI, FAILSAFE OPEN",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "LMRP Accumulators",
+     "desc": "ACCUMULATOR INC. BLADDER TYPE, 15 GALLONS, TOP LOADED",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP Accumulators",
+     "desc": "ACCUMULATOR INC. BLADDER TYPE, 15 GALLONS, TOP LOADED",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Acoustic Backup System",
+     "desc": "SHAFFER 5TH GEN, 3 KPSI, KONGSBERG CONTROLS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "EHBS System",
+     "desc": "SHAFFER 5TH GEN, 5/3 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Failsafe Valves",
+     "desc": "SHAFFER HB VALVES, 15 KPSI, FAILSAFE CLOSE",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "MUX Reels",
+     "desc": "RADOIL REELS, 11,000 ft",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Hotline Reel",
+     "desc": "RADOIL REELS, 11,000 ft",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "MUX Cable Connector",
+     "desc": "SEACON",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Subsea Electronic Module (SEM)",
+     "desc": "SHAFFER SEA, 2 cans x each pod",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Acoustic Beacon",
+     "desc": "KONGSBERG BEACONS, 10,000 ft RATED",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Driller Control Panel",
+     "desc": "SILVERTECH 5TH GEN MUX",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "TP Control Panel",
+     "desc": "SILVERTECH 5TH GEN MUX",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "HPU",
+     "desc": "SHAFFER KOOMEY, 2 x 165T-5 KPSI TRIPLEX PUMPS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "CCU",
+     "desc": "SILVERTECH 5TH GEN MUX",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP Orientation Pin and Funnel",
+     "desc": "FMC, 10 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP Test Pump",
+     "desc": "CLOVER CTU-20P-D2-4B",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP P&T Sensor",
+     "desc": "WELLBORE SENSOR PR/PT, 3 1/16\", 15 KPSI",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "ROV Intervention Panels",
+     "desc": "OCEANEERING API 17H DUAL RECEPTACLES",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    }
+   ],
+   "ckl-appb": [
+    {
+     "added": false,
+     "ele": "Diverter",
+     "desc": "NOV (Shaffer), 21-1/4\", 500 PSI, 5,000 psi studded bottom connection",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Overboard Valves",
+     "desc": "NOV P/N 20092785, PIPER 18\", 740 psi WP, ANSI 300 FLG",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Slip / Telescoping Joint",
+     "desc": "2 x NOV FT-H Telescopic Joint — 65 ft Stroke, OL 79 ft 1-7/16\"",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Tension Ring",
+     "desc": "NOV FT-H Marine Riser Rotating Tension Ring — 1,800 Tons",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Moonpool Drapes",
+     "desc": "Technip Coflex for NOV P/N 076.60413 — C/K/Booster, 3\" 15k psi",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Goosenecks",
+     "desc": "C&K T-Style Swivel, Booster T-Style ABS-11 YEL — C&K 15,000 psi",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Riser Joint",
+     "desc": "NOV FT-H — 9x90 ft Slick, 18x2k, 22x4k, 22x6k, 22x8k, 17x10k",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Riser Adaptor",
+     "desc": "NOV TYPE FT HB, 18 3/4\", 10M FLG BTM, P/N 20095180",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Flex Joint",
+     "desc": "NOV/Oil States P/N 20032032 — 5,000 psi, 10 degree radial movement",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Choke Flex Loop",
+     "desc": "Oil States P/N SV50703-004, NOV P/N 10561424-001, S/N 14920",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Kill Flex Loop",
+     "desc": "Oil States P/N SV50703-003, NOV P/N 10561422-001, S/N 14919",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Mud Boost Valve",
+     "desc": "NOV 4-1/16\", 10,000 psi type HB, P/N 20095155",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Bulleyes",
+     "desc": "2 x 2.5 degree — Radoil, port aft lower BOP and stbd fwd LMRP",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Flex Joint (Subsea)",
+     "desc": "Oil States Model PD14385 Rev3, 6.0K, NOV P/N 20078772",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Annular",
+     "desc": "NOV, 18 3/4\", 10,000 psi Wedge Cover Spherical BOP, P/N 20033636",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Annular",
+     "desc": "NOV, 18 3/4\", 10,000 psi Wedge Cover Spherical BOP, P/N 20033636",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Gas Bleed Off Line",
+     "desc": "NOV 3-1/16\", 15,000 psi straight block type HB, P/N 20095153",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "LMRP Connector",
+     "desc": "Vetco H-4 Model ExF HAR 10M, S/N 0000142219-1",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Blind Shear Rams (Upper)",
+     "desc": "NOV NXT Single Ram BOP, 15,000 psi, 18 3/4\", 22\" POS LOK DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Casing Shear Rams (Middle)",
+     "desc": "NOV NXT Triple Ram BOP, 15,000 psi, 18 3/4\", 22\" POS LOK DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Blind Shear Rams (Lower)",
+     "desc": "NOV NXT Triple Ram BOP, 15,000 psi, 18 3/4\", 22\" POS LOK DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Upper Pipe Rams",
+     "desc": "NOV NXT Triple Ram BOP, 15,000 psi, 18 3/4\", 14\" UL 2B DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Middle Pipe Rams",
+     "desc": "NOV NXT Triple Ram BOP, 15,000 psi, 18 3/4\", 14\" UL 2B DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Lower Pipe Rams",
+     "desc": "NOV NXT Triple Ram BOP, 15,000 psi, 18 3/4\", 14\" UL 2B DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Test Rams (Lowest)",
+     "desc": "NOV NXT Triple Ram BOP, 15,000 psi, 18 3/4\", 14\" UL 2B ILF LOWER DOORS",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Wellhead Connector",
+     "desc": "Vetco H-4 SHD, P/N 177227-2H809, S/N 0000139479-1, NOV P/N 20076516",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Funnel",
+     "desc": "NOV, S/N 10630189-001-6",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Yellow Pod",
+     "desc": "NOV 112 Line, S/N 10643711-001/3, P/N 20077059",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Blue Pod",
+     "desc": "NOV 112 Line, S/N 10643711-001/2, P/N 20077059",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Choke and Kill LMRP Connections",
+     "desc": "NOV Male Stab P/N 10622895-001, Retractable Female P/N 20084079",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Wetmate Connector",
+     "desc": "NOV Wetmate Male/Female w/J-Box, P/N 20080903 and 20080902",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "LMRP Isolation Valves",
+     "desc": "NOV C&K 3-1/16\", 15,000 psi straight block type HB, P/N 20095153",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "LMRP Accumulators",
+     "desc": "2 x 80 gal, 2 x 15 gal annular surge, 2 x 15 gal pod pilot — Tobul",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP Accumulators",
+     "desc": "NOV DCA P/N 20090035 — 2 x 160 gal Tobul + failsafe system bottles",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Acoustic Valve Package",
+     "desc": "NOV Acoustic Pod Assembly, P/N 10564325-001",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Failsafe Valves",
+     "desc": "NOV (Shaffer) type HB Dual Block Gate Valve, 3-1/16\", 15,000 psi normally closed",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "MUX Reels",
+     "desc": "Radoil, 2 x reels c/w 13,000 ft multiplex cable, P/N 190.810-26-01",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Hotline Reel",
+     "desc": "Radoil, 13,000 ft, 1.72\", P/N 190,810-27-0",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "MUX Cable Connectors",
+     "desc": "SEACON SBP 8FOSM/4#10 — 12,000 ft rated, 5,300 psi",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Subsea Electronic Module (SEM)",
+     "desc": "NOV Pod Assembly 112 Line Pod Gen MUX, BOM 10617866-001",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Driller Control Panel (DCP)",
+     "desc": "EXPO NEMA 4X Two Door Enclosure, Cert ITS09ATEX16411U, S/N 23667",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "Toolpusher Control Panel (TCP)",
+     "desc": "EXPO NEMA 4X Two Door Enclosure, S/N 23668",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "HPU",
+     "desc": "NOV Shaffer 2 x 165T Triplex Pumps, 1,000 gal mixed tank",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "UPS Units",
+     "desc": "Gutor PEW 1010-110/120-EAN DUAL, 10 kVA, S/N 1110240001-01 to -06",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP Test Pumps",
+     "desc": "Clover, 2 pumps: 1 x 15,000 psi, 1 x 22,500 psi",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "BOP P/T Sensor",
+     "desc": "Wellbore Sensor Assembly 3-15M, 0-20,000 psi, NOV BOM-20081691",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "ROV Panels — BOP Stack",
+     "desc": "4 x ROV panels — acoustic/shear accum dump, stack conn POCV bypass",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    },
+    {
+     "added": false,
+     "ele": "ROV Panels — LMRP",
+     "desc": "2 x ROV panels — riser conn POCV bypass, LMRP accum dump, all stabs retract",
+     "asset": "",
+     "cert": "",
+     "expiry": ""
+    }
+   ]
+  },
+  "aab": {
+   "reviewed": "",
+   "approved": "",
+   "returned": "",
+   "deferred": ""
+  },
+  "vrr": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false,
+   false
+  ],
+  "signoff": [
+   "",
+   "",
+   "",
+   ""
+  ]
+ },
+ "photoDump": [],
+ "manualEot": [],
+ "photoDumpEot": false,
+ "failuresDb": null
+}

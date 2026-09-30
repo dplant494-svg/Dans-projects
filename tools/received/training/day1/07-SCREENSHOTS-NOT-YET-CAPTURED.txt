@@ -1,0 +1,10 @@
+The 24 screenshots are not in this pack.
+
+Capture is failing in the build session - every attempt returns a blank frame, on both
+tools and against the live server. 05-Screenshot-List.md specifies all 24 exactly, so the
+set can be taken in one pass by whoever gets there first.
+
+If time is short, shots 3, 8, 20 and 24 are the four the workbook actually needs - they
+are the dialogs a trainee has to read and act on.
+
+This will be resolved or reported by 3 October 2026.
