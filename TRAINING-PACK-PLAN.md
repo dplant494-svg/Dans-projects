@@ -5,7 +5,7 @@
 
 | Day, time | Module | Content from | Handoff |
 |---|---|---|---|
-| 1, 08:00 | WCGRRT: rig visit and daily reports | Reporting-tools session | `TRAINING-HANDOFF-REPORTING-TOOLS.md` |
+| 1, 08:00 | WCGRRT: rig visit and daily reports | Reporting-tools session | `TRAINING-HANDOFF-REPORTING-TOOLS.md`, superseded where they differ by `TRAINING-HANDOFF-REPORTING-TOOLS-2.md` (30 Sep: posts for real, file-name collision to settle, SSORT REV, Help button, Load latest posted) |
 | 1, 10:15 | WCGRRT: surface tests, attachments, Post, Load latest posted | Reporting-tools session | same |
 | 1, 13:00 | SSORT: CBM, pre-deployment, Post to OEM | Reporting-tools session (Brad Waldron will not attend, Dan 30 Sep) | same |
 | 1, 14:45 | Exercise on SSCE Equipment, posted for real (no sandbox: Dan, 30 Sep; the posts are deleted from PostedReports after the class and clear on the next scan) | Reporting-tools session (sheet and samples) | same |
