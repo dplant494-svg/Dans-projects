@@ -14,8 +14,8 @@ service February 2027) and the reply to IT's ten questions of 28 September.
 | Not met, with an owner and a date on each | 26 |
 | Not applicable | 1 (26, no project-delivered equipment) |
 | Rated High if not met | 2 (8 the library path to the server; 16 security and architecture review) |
-| Rated Medium | 11 |
-| Rated Low | 13 |
+| Rated Medium | 10 |
+| Rated Low | 14 |
 
 Every "not met" line has the evidence that exists, what is missing, who owns it and a date. Twelve of the 26
 are ISIT's own configuration (ManageEngine, CMDB, Service Desk, SIAM, SDP decision, backups, capacity) and
