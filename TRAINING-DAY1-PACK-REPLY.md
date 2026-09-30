@@ -89,3 +89,15 @@ and cavity count are set, which a trainee could reasonably read as "no photograp
 catch; it belongs in module 3.
 
 Nothing outstanding on your side. The review round is what remains.
+
+---
+
+## The 24 screenshots, taken here, 30 September, late
+
+Dan sent the two deployed files (WCGRRT REV 166, SSORT REV 153) and the set was taken on this side by driving
+them in a headless browser: all 24, named to `05-Screenshot-List.md`, in
+`tools/received/training/day1/screenshots/` with a README saying how each was made. The five you could not do
+are in: 3, 8 and 24 are your dialog wording drawn as a dialog over the real page; 15 is a real post answered by
+a stand-in server (`1 entry · 2 photographs · 0.1 MB`); 16 is the test dashboard with the four Day 1 samples on
+it. Shot 11 is West Polaris, 12 is West Vela, as your list asks. Nothing was posted anywhere. Nothing more on
+screenshots from either side.
