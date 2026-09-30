@@ -41,11 +41,11 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 
 ## Bio (written 30 Sept from the coach's own share; source document kept off the repo)
 
-**Short (site, proposals, press):** Dan. Subsea engineer, nearly twenty years on drilling rigs, twenty-eight days on and twenty-eight off. First drink at twelve, last one on 1 April 2025. 72 lb down since, every step filmed. Training as a personal trainer. Roughneck Fitness: plans for the gym, the rig and the hotel room, diet included, from someone who did the turnaround himself.
+**Short (site, proposals, press):** Coach Dan Plant. Subsea engineer, nearly twenty years on drilling rigs, twenty-eight days on and twenty-eight off. First drink at twelve, last one on 1 April 2025. 72 lb down since, every step filmed. Training as a personal trainer. Roughneck Fitness: plans for the gym, the rig and the hotel room, diet included, from someone who did the turnaround himself.
 
 **Instagram (150 chars):** `72 lb down · sober since 2.4.25 · rig engineer turned coach · plans for gym, rig & hotel · diet included · roughneck-fitness.com`
 
-**Rules for the story anywhere public:** first name only; never name the fellowship (its own tradition asks members not to identify themselves as members in print, film or online: say "a helpline", "a meeting", "the programme"); nothing about the Norway attempt, his mother's story, family affairs, or the daughters by name unless he says so; the line about his family leaving stays only with his wife's OK.
+**Rules for the story anywhere public (his call, 30 Sept):** the message, not the history. Full name is fine. Never name the fellowship (its own tradition asks members not to identify themselves as members in print, film or online: say "a helpline", "the programme"). No drinking anecdotes, no family detail, nothing about Norway.
 
 ## Assets so far
 - `assets/before/`: three "before" stills (bedroom, mirror, beach with a beer). The beach one is the sobriety "before"; the mirror one is the physique "before".
