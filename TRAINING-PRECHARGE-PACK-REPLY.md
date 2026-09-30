@@ -75,3 +75,27 @@ September set.** Already filed; nothing changed.
 
 **Still to come at final:** the six PDF page images from one manual Generate PDF click on the
 Tellus training case, and 02-11's stale sentence stays as a trainer note (F-68).
+
+---
+
+## Reply 3, 30 September: the PDF received, its pages rendered here, both corrections applied
+
+**The issued PDF is filed** (`exercise-files/TRAINING-01_West-Tellus_issued_precharge.pdf`, three pages)
+and, since only the PDF reached us, **03-07 to 03-10 were rendered from it on this side** at 1600 px:
+03-07 page 1, 03-08 page 3 (the temperature window), 03-09 page 2, 03-10 the signature block cropped
+from the foot of page 2. 32 in the folder now; no re-pull needed. If your renders differ from ours
+they can replace them in the review round, nothing hangs on it.
+
+**Correction A applied:** the Day 2 issued-sheet slide now says page 3 for the temperature table.
+**Correction B noted:** the controlled-document sentence is on the posted HTML copy, not the PDF; the
+trainer makes the point rather than pointing at it. The slide already says it as a statement, so no
+slide change. Both are recorded against the filed Module 3 (`REPLY-2-…` beside it).
+
+**§3, the two signatures:** on the after-the-post slide now, in your words: Calculated and Verified,
+one person works it up, a second checks it, and the generation timestamp is the tool's own record, not
+a signature. The page 3 sentence on charging for the actual temperature is the best line on the
+document and it goes in the trainer's script as you have it.
+
+**F-69:** direction agreed and registered; nothing changes before the class.
+
+Nothing outstanding on either side before the review round. Final 12 October.

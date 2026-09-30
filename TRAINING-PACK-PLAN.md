@@ -6,10 +6,10 @@
 | Day, time | Module | Content from | Handoff |
 |---|---|---|---|
 | 1, 08:00 | WCGRRT: rig visit and daily reports | Reporting-tools session | `TRAINING-HANDOFF-REPORTING-TOOLS.md`, superseded where they differ by `TRAINING-HANDOFF-REPORTING-TOOLS-2.md` (30 Sep: posts for real, file-name collision to settle, SSORT REV, Help button, Load latest posted) |
-| 1, 10:15 | WCGRRT: surface tests, attachments, Post, Load latest posted | Reporting-tools session | same |
+| 1, 10:15 | WCGRRT: surface tests, attachments, Post and the receipt (Load latest posted is not in REV 166; off Day 1, 30 Sep) | Reporting-tools session | same |
 | 1, 13:00 | SSORT: CBM, pre-deployment, Post to OEM | Reporting-tools session (Brad Waldron will not attend, Dan 30 Sep) | same |
 | 1, 14:45 | Exercise on SSCE Equipment, posted for real (no sandbox: Dan, 30 Sep; the posts are deleted from PostedReports after the class and clear on the next scan) | Reporting-tools session (sheet and samples) | same |
-| 2, 08:00 | Precharge process | **Precharge Pro session: draft 1 received 29 Sep** (three modules, nine questions, three exercise files with the answer key; **28 screenshots received 30 Sep**, filed and reconciled to the manifests; six PDF page images at final); dashboard session (loop, inbox); Dan (signatures; the MOC is one line, everything is under MOC: Dan, 30 Sep) | `TRAINING-HANDOFF-PRECHARGE.md` (answered: `TRAINING-PRECHARGE-PACK-REPLY.md`), `TRAINING-HANDOFF-LEE.md` |
+| 2, 08:00 | Precharge process | **Precharge Pro session: draft 1 received 29 Sep** (three modules, nine questions, three exercise files with the answer key; **32 screenshots**: 28 received 30 Sep, 03-07 to 03-10 rendered here from the issued PDF the same day; the PDF itself filed; Module 3 corrected: temperature window is page 3, the controlled-document sentence is on the posted HTML copy, not the PDF); dashboard session (loop, inbox); Dan (signatures; the MOC is one line, everything is under MOC: Dan, 30 Sep) | `TRAINING-HANDOFF-PRECHARGE.md` (answered: `TRAINING-PRECHARGE-PACK-REPLY.md`), `TRAINING-HANDOFF-LEE.md` |
 | 2, 10:15 | Rig Visit Dashboard tab by tab | Dashboard session | none needed |
 | 2, 13:00 | BOP Fleet Planning, SSCE Requests | Dashboard session | none needed |
 | 2, 13:00 | WCE COC Dashboard (the Certification Tracker) and the request cycle | COC Tracker session (Lee's tool) | `TRAINING-HANDOFF-COC-TRACKER.md` |
