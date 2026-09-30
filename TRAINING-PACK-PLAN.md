@@ -5,7 +5,7 @@
 
 | Day, time | Module | Content from | Handoff |
 |---|---|---|---|
-| 1, 08:00 | Opening: safety minute, roles and responsibilities, expectations (the class is days 1 and 2 of Lee's WCE SME workshop, 19 to 22 Oct; Dan presents everything else) | Lee | none; the tools session adds one opening slide to the Day 1 deck |
+| 1, 08:00 | Opening: safety minute, roles and responsibilities, expectations (the class is days 1 and 2 of Lee's WCE SME workshop, 19 to 22 Oct, `WCE-SME-Workshop-Agenda.html`; Dan presents everything else) | Lee | none; the tools session adds one opening slide to the Day 1 deck |
 | 1, 08:00 | WCGRRT: rig visit and daily reports | Reporting-tools session | `TRAINING-HANDOFF-REPORTING-TOOLS.md`, superseded where they differ by `TRAINING-HANDOFF-REPORTING-TOOLS-2.md` (30 Sep: posts for real, file-name collision to settle, SSORT REV, Help button, Load latest posted) |
 | 1, 10:15 | WCGRRT: surface tests, attachments, Post and the receipt (Load latest posted is not in REV 166; off Day 1, 30 Sep) | Reporting-tools session | same |
 | 1, 13:00 | SSORT: CBM, pre-deployment, Post to OEM | Reporting-tools session (Brad Waldron will not attend, Dan 30 Sep) | same |
