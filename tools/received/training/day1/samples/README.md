@@ -23,6 +23,15 @@ attached test record together.
 CBM sample exercises `cbmatt` end to end: two files, one PDF and one CSV, each with `name`, `type`,
 `bytes`, `note` and `added`, and the note carrying the task number the file evidences.
 
+## The revision stamped on them
+
+The three SSORT samples carry `meta.rev = "SSORT REV 152"`, because they were generated before 153
+deployed later the same day. **They are still accurate for the frozen build.** REV 153 changed one
+constant, two crew-facing messages and three comments; `buildReportPayload`, `CBM_SCHED` and every
+payload key are byte-identical, so a report posted from 153 differs from these only in that one
+`meta.rev` string. Nothing in the class turns on it. Say so if a trainee spots it — it is a fair
+thing to notice.
+
 ## Two honest notes
 
 - **The photographs are synthetic.** They are 240×170 labelled gradients generated in the browser,

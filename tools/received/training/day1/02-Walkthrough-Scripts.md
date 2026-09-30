@@ -18,8 +18,17 @@ not, stop and say so rather than teach a different build.
 
 ---
 
+# Opening — not yours
+**08:00 – 08:30 · Lee Arnold**
+
+Safety minute, roles and responsibilities, expectations for the week. Day 1 and Day 2 of the class
+sit inside Lee's WCE SME workshop (19 to 22 October), so he opens it. Nothing below starts until
+08:30; be set up and on the badge check before he finishes.
+
+---
+
 # Module 1 — WCGRRT: rig visit and daily reports
-**08:00 – 10:00 · WCGRRT REV 166**
+**08:30 – 10:00 · WCGRRT REV 166**
 
 ### What they should be able to do by 10:00
 Start a trip, set the rig identity, add a daily report entry with equipment entries and captioned

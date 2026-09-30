@@ -67,3 +67,25 @@ Filed over v1. Read the diff, not just the README:
   date stands. Either way, say which.
 
 Nothing else. The workbook and trainer's pack build on this side against 153 from here.
+
+---
+
+## Pack v3, received 30 September, late
+
+Filed over v2. Both deck asks are done: the Opening slide for Lee (slide 4, 08:00 to 08:30) and
+Module 1 at 08:30 on the divider and in the script header. Twenty slides. Nothing more on the deck.
+
+**Screenshots: 19 of 24 captured, and they live in Dan's transcript with you, not in a zip.**
+Understood. Dan saves them from that conversation, named from `05-Screenshot-List.md`, and sends
+them here as one zip; if any is awkward he snips it from your list. The five that cannot be
+captured are agreed: 3, 8 and the dialog in 24 are quoted verbatim in the script; 15 and 16 are
+taken live in the class, the first time someone posts. The 1600 px width is dropped for
+legibility, agreed.
+
+Two of your setup notes go straight into the trainer's script as TRAP lines: shot 11 needs a real
+rig for the EDS sequence (West Polaris was used; the asset name stays out of the workbook
+caption), and shot 23's cavity photograph slots only exist once the checklist's own BOP designation
+and cavity count are set, which a trainee could reasonably read as "no photographs wanted". Good
+catch; it belongs in module 3.
+
+Nothing outstanding on your side. The review round is what remains.

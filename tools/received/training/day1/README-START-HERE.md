@@ -17,9 +17,10 @@ touches it.
 | 2 | `02-Walkthrough-Scripts.md` | Four module scripts, 77 numbered steps. What the trainer clicks and says, with `SAY:` lines and `TRAP:` warnings. Screenshot markers `[SHOT 1]`–`[SHOT 24]`. |
 | 3 | `03-Exercise-Sheet.md` | One per trainee. Their allocated date, the four reports, the file names their work will produce, and spaces to record what the tool told them. |
 | 4 | `04-Questions-and-Answers.md` | Twelve questions, three per module, with answers for the trainer's copy. |
-| 5 | `05-Screenshot-List.md` | All 24 shots specified exactly. **Not yet captured — see "What is missing" below.** |
+| 5 | `05-Screenshot-List.md` | All 24 shots specified exactly, and which five cannot be captured. |
 | 6 | `06-Day-1-Deck.pptx` | The 19-slide deck with slides 3, 16, 17 and 18 edited. |
-| 7 | `samples/` | Four sample reports built from the frozen builds, plus a README explaining each. |
+| 7 | `07-SCREENSHOTS-STATUS.md` | **Capture worked** — 19 of 24 taken on the deployed builds, why no PNGs are in the zip, and the five that cannot be. |
+| 8 | `samples/` | Four sample reports built from the frozen builds, plus a README explaining each. |
 
 ## The frozen builds
 
@@ -33,6 +34,17 @@ attachments, where on 152 they were listed for NOV but not attached. That went l
 30 September once the dashboard side proved Part D3 of the OEM flow. Module 3's script, the
 exercise sheet and question 3.3 all say so; if you find anything in this pack still claiming
 NOV does not receive them, it is stale and wrong.
+
+## Lee's two edits, done
+
+The class sits inside Lee Arnold's WCE SME workshop (19 to 22 October), so **Lee opens Day 1 at
+08:00** with the safety minute, roles and responsibilities and expectations. Both asks from your
+reply are in this pack:
+
+- A new **Opening** slide before Module 1 — now slide 4, `Lee Arnold · safety minute, roles and
+  responsibilities, expectations for the week · 08:00–08:30`. The deck is 20 slides.
+- **Module 1 is 08:30–10:00** on the divider (now slide 5) and in the script header, which also
+  tells the trainer to be set up and past the badge check before Lee finishes.
 
 ## Three findings that change what was planned
 
