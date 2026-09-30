@@ -9,7 +9,7 @@
 | 1, 10:15 | WCGRRT: surface tests, attachments, Post, Load latest posted | Reporting-tools session | same |
 | 1, 13:00 | SSORT: CBM, pre-deployment, Post to OEM | Reporting-tools session (Brad Waldron will not attend, Dan 30 Sep) | same |
 | 1, 14:45 | Exercise on SSCE Equipment, posted for real (no sandbox: Dan, 30 Sep; the posts are deleted from PostedReports after the class and clear on the next scan) | Reporting-tools session (sheet and samples) | same |
-| 2, 08:00 | Precharge process | **Precharge Pro session: draft 1 received 29 Sep** (three modules, nine questions, three exercise files with the answer key, 28 screenshots to follow as a zip); dashboard session (loop, inbox); Dan (signatures; the MOC is one line, everything is under MOC: Dan, 30 Sep) | `TRAINING-HANDOFF-PRECHARGE.md` (answered: `TRAINING-PRECHARGE-PACK-REPLY.md`), `TRAINING-HANDOFF-LEE.md` |
+| 2, 08:00 | Precharge process | **Precharge Pro session: draft 1 received 29 Sep** (three modules, nine questions, three exercise files with the answer key; **28 screenshots received 30 Sep**, filed and reconciled to the manifests; six PDF page images at final); dashboard session (loop, inbox); Dan (signatures; the MOC is one line, everything is under MOC: Dan, 30 Sep) | `TRAINING-HANDOFF-PRECHARGE.md` (answered: `TRAINING-PRECHARGE-PACK-REPLY.md`), `TRAINING-HANDOFF-LEE.md` |
 | 2, 10:15 | Rig Visit Dashboard tab by tab | Dashboard session | none needed |
 | 2, 13:00 | BOP Fleet Planning, SSCE Requests | Dashboard session | none needed |
 | 2, 13:00 | WCE COC Dashboard (the Certification Tracker) and the request cycle | COC Tracker session (Lee's tool) | `TRAINING-HANDOFF-COC-TRACKER.md` |

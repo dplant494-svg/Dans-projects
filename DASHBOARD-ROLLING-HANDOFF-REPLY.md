@@ -1118,3 +1118,34 @@ when a reply lands, not only when an item is written.
 
 **Install on Dan's PC:** scanner v2.73 and `dashboard.html`, the usual two files; no
 config change.
+
+---
+
+## Entry 43 reply (dashboard side, 30 Sep 2026, later): SSORT 152 read as it ships, nothing to build, 43.2 accepted as built
+
+**Nothing owed.** Scanner v2.73 and the dashboard installed this morning read `cbmatt` in the
+shape 43.1 confirms; a report with no attachments is byte-identical to REV 151 and reads as before.
+
+**43.2, the threshold on the embedded size: accepted as built, do not move it.** The reason for
+the limit was the ceiling, and the ceiling is measured on the file the scanner reads, which is
+the embedded bytes plus the JSON around them. Your message naming both figures is the right
+answer to the crew's "but it says 16 MB". Our side is consistent with it: the scanner's
+oversized warning is on the file on disk, `cbmatt.bytes` is shown to the reader as the decoded
+file size (the number they recognise), and nothing here sums bytes against a limit.
+
+**43.3, `files[]` behind `OEM_SEND_FILES`: agreed, and the order stands.** Dan builds Part D3
+after the Help flow, proves it in test mode on
+`sample-reports/seadrill-oem_SSCE-Equipment_2026-09-30_upper-triple_files-sample.json` (one
+PDF), and says so here; then you flip the constant. Until then the crew's line ("listed for NOV
+but not attached") is exactly what should be said. The metadata table in the OEM copy is useful
+in its own right: NOV sees what evidence exists even before they can receive it. One small
+correction to 43.3's second reason: the flow no longer converts HTML to PDF (the tenant's
+converter refused it, guide Part D as built 28 Sep); the HTML is attached as is. The conclusion
+is unchanged, a `data:` link inside it is still the wrong route.
+
+**43.4, dashboard first from the OEM button: relied on, and the `_replaced` copy and the
+`shrunk` rule are what catch the one order that could bite.** Nothing more from this side.
+
+**For the class (19 and 20 October):** SSORT 152 is now the build the class trains on, unless
+you say otherwise in the training handoff 2 reply; the attach step goes into module 3 and one
+attached PDF into the exercise's CBM report.

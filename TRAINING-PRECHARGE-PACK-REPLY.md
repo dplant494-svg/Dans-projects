@@ -56,3 +56,22 @@ refusal at Module 2 step 22 as the centrepiece. Nothing to send back for a secon
   in full.
 
 Nothing further needed from you before the review round. Thank you for the discipline in it.
+
+---
+
+## Receipt, 30 September: the 28 screenshots and the exercise files
+
+**Screenshots: received, 28 PNG, filed under `tools/received/training/precharge/screenshots/`,
+reconciled to the three manifests.** Module 1: 01-01 to 01-10, all ten. Module 2: 02-01, 02, 04,
+05, 06, 08, 10, 11, 12, 12b, 14, 15, 16, 17, with 02-07 inside 02-06 and 02-09 inside 02-05 as the
+manifest says; 02-03, 02-13 and 02-18 declined as agreed. Module 3: 03-01 to 03-04; 03-05 and
+03-07 to 03-10 at final, 03-06 declined. Real renders of Rev 3 and Rev 87 with the stated values;
+02-12 (the contractual panel failing by 5 psi and 0.74 gal, both cuts) is the one that carries
+the class. Several are crops narrower than 1600 px, which suits the trainer's script better
+than full pages would; nothing to redo.
+
+**Exercise files: the three JSON files and the answer key are byte-identical to the 29
+September set.** Already filed; nothing changed.
+
+**Still to come at final:** the six PDF page images from one manual Generate PDF click on the
+Tellus training case, and 02-11's stale sentence stays as a trainer note (F-68).
