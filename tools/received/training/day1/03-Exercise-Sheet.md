@@ -102,8 +102,8 @@ seadrill-oem_SSCE-Equipment_2026-10-0n_Riser-Adapter_<timestamp>_cbm.json
 ```
 
 > **Two things to be clear about.** That one press posts to the dashboard **and** emails NOV — the
-> dashboard copy goes first. And your attached chart goes to the dashboard but is only **listed** for
-> NOV, not attached to their email, until the OEM attachment channel is finished. The confirm says so.
+> dashboard copy goes first. And your attached chart travels both ways: onto the dashboard, and as a
+> real attachment on the email NOV receives. Read the confirm — it tells you which.
 
 ---
 

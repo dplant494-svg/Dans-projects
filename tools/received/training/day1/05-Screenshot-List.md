@@ -37,7 +37,7 @@ points at it (shots 1 and 17 especially).
 | 11 | `11-eds-sequences.png` | The EDS form showing a rig's own sequences — pick a rig with a full sequence list, not `SSCE Equipment`, for this one shot |
 | 12 | `12-acoustic-no-system.png` | The acoustic form on **West Vela**, showing the no-system message — this is the trap in the script |
 | 13 | `13-ehbs-drawdown.png` | EHBS and drawdown forms, either together or side by side |
-| 14 | `14-reference-attachment.png` | A PDF attached to the reference document field, filename visible |
+| 14 | ~~`14-reference-attachment.png`~~ | **CANNOT EXIST — dropped.** WCGRRT REV 166 has no attach-a-document control on a Well Control daily report: the schedule attach lives inside `#planning-meta-block` (`display:none` unless the discipline is Planning) and the reference document belongs to the Vendor Surveillance report. Module 2 now *says* this instead. The attachment shots are 21 and 22, in SSORT. |
 | 15 | `15-post-receipt.png` | The receipt line under Post: `n entries · n photographs · n attachments · n.n MB` and the time |
 | 16 | `16-dashboard-row.png` | The dashboard filtered to SSCE Equipment with the posted report visible |
 
@@ -45,7 +45,7 @@ points at it (shots 1 and 17 especially).
 
 | # | File | What must be on screen |
 |---|---|---|
-| 17 | `17-ssort-rev-badge.png` | SSORT top bar with the **REV 152** badge legible, and the section dropdown showing the six SSORT types |
+| 17 | `17-ssort-rev-badge.png` | SSORT top bar with the **REV 153** badge legible, and the section dropdown showing the six SSORT types |
 | 18 | `18-cbm-riser-adapter.png` | CBM tile with **Riser Adapter** selected and section 1.1 open |
 | 19 | `19-grade-buttons.png` | Task **1.1.1** with grade **3** selected — buttons 1–5, N/A and the ⓘ scale all visible |
 | 20 | `20-grade-scale.png` | The GRADE LEVEL EVALUATION GUIDE panel open, all five levels readable |
@@ -64,3 +64,18 @@ points at it (shots 1 and 17 especially).
 - **Shots 3, 8, 20 and 24 are dialogs and panels.** They are the ones people actually need in the
   workbook, because they are the text a trainee has to read and act on. If time is short, capture
   those four first.
+
+## Four shots that cannot be captured, and why
+
+Stated here rather than left as gaps in a zip.
+
+| # | Why |
+|---|---|
+| **3** `03-no-rig-guard.png` | A native browser dialog. The automation that drives the tool dismisses these before a capture can happen, so there is no way to photograph one from here. **The full text is quoted verbatim in module 1 step 7** and is the thing the workbook actually needs. Capture it by hand in ten seconds if you want the picture. |
+| **8** `08-report-date-guard.png` | Same reason. Text quoted verbatim in module 1 step 20. |
+| **24** `24-post-to-oem.png` | The confirm is a native dialog, same reason. **The button in context was captured** and the confirm wording is quoted in module 3 step 69 and on the exercise sheet. |
+| **15** `15-post-receipt.png` | The receipt only appears after a **successful post**, and nothing is posted from a build session — that is Dan's rule and it is the right one. Capture this one live: it will be on screen the first time anyone posts in module 2 or the exercise. |
+| **16** `16-dashboard-row.png` | Needs a posted report on the dashboard, so the same applies. Take it from any real SSCE Equipment row, or during the class. |
+
+Everything else in the table above was captured on the deployed builds (WCGRRT REV 166, SSORT
+REV 153) on 30 September.

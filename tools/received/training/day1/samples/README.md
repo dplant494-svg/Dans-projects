@@ -1,16 +1,16 @@
 # Day 1 sample reports — "what good looks like"
 
 Four reports, one of each type the exercise produces, built from the **frozen builds**
-(WCGRRT REV 166, SSORT REV 152) on asset `SSCE Equipment`. **None of them was posted** — each was
+(WCGRRT REV 166, SSORT REV 153) on asset `SSCE Equipment`. **None of them was posted** — each was
 built through the tool's own form and captured from `buildReportPayload()` with the transport
 disabled.
 
 | File | Tool | Dated | Bytes | What it shows |
 |---|---|---|---|---|
 | `…_2026-10-01_daily-report.json` | WCGRRT 166 | 1 Oct | 34,621 | Three equipment entries with manufacturer, name, SFI and a written scope; two captioned photographs on the first |
-| `…_2026-10-02_surface-bop-testing.json` | SSORT 152 | 2 Oct | 29,076 | A BOP Function Test — 326 populated `soak` keys |
-| `…_2026-10-01_cbm-inspection.json` | SSORT 152 | 1 Oct | 45,911 | Riser Adapter: three graded tasks (3 / 2 / 1) with findings, two photographs, **two test records in `cbmatt`** with task numbers in the notes, sign-off complete |
-| `…_2026-10-03_pre-deployment-checklist.json` | SSORT 152 | 3 Oct | 43,509 | 52 populated keys, packer attestation, four cavity photographs |
+| `…_2026-10-02_surface-bop-testing.json` | SSORT 153 | 2 Oct | 29,076 | A BOP Function Test — 326 populated `soak` keys |
+| `…_2026-10-01_cbm-inspection.json` | SSORT 153 | 1 Oct | 45,911 | Riser Adapter: three graded tasks (3 / 2 / 1) with findings, two photographs, **two test records in `cbmatt`** with task numbers in the notes, sign-off complete |
+| `…_2026-10-03_pre-deployment-checklist.json` | SSORT 153 | 3 Oct | 43,509 | 52 populated keys, packer attestation, four cavity photographs |
 
 ## How to use them
 

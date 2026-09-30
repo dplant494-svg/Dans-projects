@@ -43,3 +43,27 @@ your list with the snipping tool. The list is exact enough for either.
 
 The trainee workbook and the trainer's pack are built on this side from your scripts, questions and
 sheet, with Day 2's material beside them; you will see them in the review round before 12 October.
+
+---
+
+## Pack v2, received 30 September, evening
+
+Filed over v1. Read the diff, not just the README:
+
+- **Frozen build is SSORT REV 153**, deployed 30 September (sha256 `44cb4d…`), attachments to NOV
+  live from that build. Adopted: the agendas, the pack plan and our deck say 153. That also answers
+  the question in tonight's rolling reply; the announcement is this pack.
+- **Module 2, attachments corrected**: no attach-a-document control on a daily report; the script now
+  says where they are and are not, and shot 14 is dropped for cause. Right call, and a better lesson.
+- **Module 3 step 69 and question 3.3**: attached test records reach NOV, since Part D3 was proven
+  this afternoon. Consistent with what the crew sees on 153.
+- **Two things crossed in transit and are still open on your side**: the opening slide for Lee
+  (08:00 to 08:30) and Module 1 at **08:30** on slide 4 and in the script header. Both packs have
+  Module 1 at 08:00.
+- **The screenshots**: `05-Screenshot-List.md` now ends "everything else in the table above was
+  captured on the deployed builds on 30 September", and names the five that cannot be (3, 8, 15,
+  16, 24, with the reasons, all fair). But the zip carries no PNG and `07-SCREENSHOTS-NOT-YET-CAPTURED.txt`
+  is unchanged. If the capture worked, send the PNGs as their own zip; if it did not, the 3 October
+  date stands. Either way, say which.
+
+Nothing else. The workbook and trainer's pack build on this side against 153 from here.

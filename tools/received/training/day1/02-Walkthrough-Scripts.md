@@ -1,6 +1,6 @@
 # Day 1 walkthrough scripts — the reporting tools
 
-**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 166**, SSORT **REV 152**
+**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 166**, SSORT **REV 153**
 **Led by:** Dan (all four modules; Brad Waldron is not attending and nothing below depends on him)
 **Asset:** `SSCE Equipment` throughout. Nothing is posted on a real rig name.
 
@@ -10,7 +10,7 @@ a screenshot for the workbook; the numbering runs continuously 1–24 across all
 matches `TRAINING-Day1-Screenshot-List.md`. `TRAP:` is something the room will get wrong if it is not
 said out loud.
 
-**Before the room arrives:** open WCGRRT REV 166 and SSORT REV 152 in two browser tabs from
+**Before the room arrives:** open WCGRRT REV 166 and SSORT REV 153 in two browser tabs from
 `\\sdrlazneuiis01d.corp.local\sacred\` and `…\SSORT\`. In both tabs press **⊘ New Trip** so there is
 no leftover state from setting up. Have the dashboard open in a third tab on the SSCE Equipment
 filter. Confirm both tools show the frozen revision in the badge before you start — if either does
@@ -138,12 +138,21 @@ failed post looks like.
 34. **SAY:** "EHBS comes in three flavours across the fleet — single, sequenced and DMAS — and you
     get your rig's one. You do not choose it and you should not need to know which you are."
 
-### 2. Attachments (15 min)
+### 2. Attachments — say where they are and are NOT (10 min)
 
-35. Attach a PDF to the reference document field. `[SHOT 14]`
-36. **SAY:** "A PDF or an Office file cannot be squeezed the way a photograph can. It carries its
-    full size into every copy of the report, so the tool warns you over 8 MB. If it is a scan, a
-    photograph of the document is far lighter and just as readable."
+35. **SAY, and get this right because it is easy to promise the wrong thing:** "On a Well Control
+    daily report in WCGRRT there is **no** attach-a-document control. Attaching a PDF exists in two
+    other places — the P6 schedule on a Planning report, and the reference document on a Vendor
+    Surveillance report — and neither of those is what you fill in on a normal day."
+36. **SAY:** "Where you *can* attach a document is the CBM inspection in SSORT, and we do that after
+    lunch. That is new this week and it is the right home for a pressure test chart."
+37. **SAY:** "So on a daily report, evidence means photographs, captioned. If you have a document
+    that matters — a chart, a certificate — it belongs on the CBM inspection for that equipment, or
+    emailed to the office, not squeezed into a daily report as a photograph of a screen."
+38. **SAY:** "And when you do attach one in SSORT: a PDF or an Office file cannot be squeezed the
+    way a photograph can. It carries its full size into every copy of the report, so the tool warns
+    you over 8 MB and refuses a single file over 20 MB. If it is a scan, a photograph of the
+    document is far lighter and just as readable."
 
 ### 3. Post, and the receipt (30 min)
 
@@ -170,7 +179,7 @@ failed post looks like.
 ---
 
 # Module 3 — SSORT: CBM, the grade scale, pre-deployment, Post to OEM
-**13:00 – 14:30 · SSORT REV 152**
+**13:00 – 14:30 · SSORT REV 153**
 
 ### What they should be able to do by 14:30
 Complete a CBM inspection with grades, photographs and an attached test record; complete a
@@ -178,7 +187,7 @@ pre-deployment checklist; and send a CBM report to NOV.
 
 ### 1. SSORT is a different tool (5 min)
 
-45. Open SSORT. Point at the badge: **REV 152**. `[SHOT 17]`
+45. Open SSORT. Point at the badge: **REV 153**. `[SHOT 17]`
 46. **SAY:** "Different tool, different job, and the section list is different: CBM Inspection,
     Surface BOP Testing, Calculators, Pre-Deployment Checklist, Conditional Assessment, R53 Report.
     Vessel Information here, Visit Information over there."
@@ -238,9 +247,9 @@ pre-deployment checklist; and send a CBM report to NOV.
     by email while the office gets the dashboard row."
 68. **SAY:** "Press it once. Every press sends another email. The confirm tells you what is about to
     happen — read it."
-69. **SAY, and be exact about this:** "Your attached test records go to the dashboard. They are
-    **listed** for NOV, not attached, until the email side is finished. The tool tells you so in the
-    confirm. Do not tell NOV a chart is attached when it is not."
+69. **SAY:** "Your attached test records go to the dashboard AND they are attached to the email NOV
+    receives — that went live on 30 September. The confirm tells you so. If it ever says they are
+    only listed, then the email side is switched off and you should say so to whoever asks."
 70. **SAY:** "And know what the tool does not tell you. In SSORT, if the dashboard post fails you do
     not get a warning — you get 'Report posted to the shared folder' or a tick and the word saved.
     The only proof a SSORT report landed is that it appears on the dashboard. WCGRRT warns you;

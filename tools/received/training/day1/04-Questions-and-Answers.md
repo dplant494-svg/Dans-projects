@@ -1,6 +1,6 @@
 # Day 1 workbook questions — three per module, with answers
 
-**Frozen builds:** WCGRRT REV 166, SSORT REV 152. Answers are for the trainer's copy; the trainee
+**Frozen builds:** WCGRRT REV 166, SSORT REV 153. Answers are for the trainer's copy; the trainee
 workbook carries the questions and the blank lines only.
 
 ---
@@ -84,9 +84,9 @@ receives of your attachments.**
 
 > **The dashboard post goes first** — the whole report, every section, under the normal file name.
 > **Then the OEM copy** is emailed to NOV's distribution list, copied to the office. Your attached
-> test records go to the dashboard, and are **listed for NOV but not attached** to their email until
-> the OEM attachment channel is finished. The confirm says so before you press. Press once — every
-> press sends another email.
+> test records go **both ways**: onto the dashboard, and as real attachments on NOV's email, live
+> since 30 September. The confirm tells you which before you press. Press once — every press sends
+> another email.
 
 ---
 

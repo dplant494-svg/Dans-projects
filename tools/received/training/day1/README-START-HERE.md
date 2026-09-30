@@ -23,9 +23,16 @@ touches it.
 
 ## The frozen builds
 
-**WCGRRT REV 166** and **SSORT REV 152**. SSORT 152 was deployed on 30 September;
-sha256 `05133b2283aec4cff5cf38c8a46e16733c737d8641a1ca0a64221335bc72c334`. Everything in this
-pack is written against those two and nothing else.
+**WCGRRT REV 166** and **SSORT REV 153**. SSORT 153 was deployed on 30 September;
+sha256 `44cb4db89d2c2910086ff6c6a1c23a80034b6f53b0b44b0b326e0c31d2b161a1`, 6,800,443 bytes.
+Everything in this pack is written against those two and nothing else.
+
+**SSORT moved from 152 to 153 during the day.** The only difference the class will see is one
+line in the Post to OEM confirm: the crew's attached test records now reach NOV as real email
+attachments, where on 152 they were listed for NOV but not attached. That went live on
+30 September once the dashboard side proved Part D3 of the OEM flow. Module 3's script, the
+exercise sheet and question 3.3 all say so; if you find anything in this pack still claiming
+NOV does not receive them, it is stale and wrong.
 
 ## Three findings that change what was planned
 
