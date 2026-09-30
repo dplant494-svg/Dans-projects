@@ -1,7 +1,7 @@
 # Operational Readiness Review, SACRED: the gap against ISIT's 30 criteria
 
-**For:** ISIT PMO, via Dan Plant · **Date:** 30 September 2026 · **Live document:**
-`Operation_Readiness_Review_ORR_Checklist_SACRED_v1.xlsx` (the ISIT checklist filled in, plus six sheets:
+**For:** ISIT PMO, via Dan Plant · **Date:** 30 September 2026, v2 (evening: the reporting-tools and Precharge Pro maintainers' returns pasted in; COC tracker and SPARC to follow via Lee) · **Live document:**
+`Operation_Readiness_Review_ORR_Checklist_SACRED_v2.xlsx` (the ISIT checklist filled in, plus six sheets:
 Support Model (RACI), Service components, Known error log, Test summary, DR and early-life support, Open actions)
 **Context:** the programme chart sent to IT (server handover Sunday 18 October 2026 with Adam Snyder; supported
 service February 2027) and the reply to IT's ten questions of 28 September.
@@ -71,3 +71,27 @@ their test records, their known errors, their component entries, their local-sav
 | 31 Oct | security and architecture submission; Fabric capacity decision |
 | 6 Nov | Dan's PC task disabled; runbooks reviewed; ManageEngine, CMDB, Service Desk configured; retention agreed; DR rebuild tested |
 | Feb 2027 | ISIT accept the service (M11) |
+
+## v2: what the two tool maintainers' returns added, the same evening
+
+Both returned in full within hours (filed under `tools/received/orr/`). Pasted onto the sheets: two
+runbooks, test records by revision, twenty more known errors, the tools' components with live hashes, the
+retention facts, and the acceptance tests. Five things ISIT should not have to dig for:
+
+1. **A stale second SSORT is served from the sacred share** (`sacred\index.html`, four revisions behind,
+   badged wrongly). Dan cannot delete it. ISIT to delete, by 10 October.
+2. **The intake URL, with its signature, is a literal in both tool files.** Anyone who can open a tool can
+   post into the intake. Raised for ISIT to rate with the security submission; the token is nowhere in
+   this pack.
+3. **The precharge gate is a curtain, not a lock**, and the requests folder is reachable by URL without
+   it; five of seven live request files carry an employee name and work email. Server-side IIS
+   authentication before production closes both. Not changed before the class.
+4. **Local data on rig machines is unmanaged and unbounded**: between save and post the rig holds the only
+   copy, and browser storage and the TSC REPORTS folder hold personnel names and photographs indefinitely.
+   The tools cannot enforce a policy; it has to come from machine management. For the retention decision.
+5. **The test records say what is a record and what is a reconstruction.** First-hand from SSORT 149 and
+   WCGRRT 166 (late September); earlier revisions have real hashes but no log kept on the day. The
+   precharge calculator is verified per rig: 4 of 13, 2 in progress, 7 not yet reviewed, and its
+   gate-check harness cannot currently run.
+
+None of the five changes the score; all five are on the Open actions sheet with owners and dates.
