@@ -46,6 +46,13 @@ How it works: a 20-minute call or chat about your business, a fixed-price propos
 Cómo funciona: una llamada o chat de 20 minutos sobre su negocio, una propuesta con precio fijo en dos días, 50 % para empezar, un enlace privado para revisar la web, y el resto al publicarla. La mayoría de las webs están en marcha en dos o tres semanas.
 ```
 
+**/fix**
+```
+No job too small. We fix, update or rescue existing sites from €90: broken forms, new pages, menu changes, speed or Google problems, or getting a site back from a developer who has stopped answering. Send the web address and what's wrong, and we'll quote today.
+
+Ningún trabajo es pequeño. Arreglamos, actualizamos o rescatamos webs existentes desde 90 €: formularios rotos, páginas nuevas, cambios en la carta, problemas de velocidad o de Google, o recuperar la web de un desarrollador que ya no contesta. Envíanos la dirección y qué falla, y te pasamos presupuesto hoy.
+```
+
 **/call**
 ```
 Happy to talk. Calls are in English; on WhatsApp we can chat in English or Spanish. When suits you?
