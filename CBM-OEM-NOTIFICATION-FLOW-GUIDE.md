@@ -230,6 +230,50 @@ ConvertedPdf, nothing is sent to NOV, Power Automate emails you the failure, and
 button still says sent, which is why the tools session is changing that wording to
 "Sent for OEM delivery". Until Part D is proven, the button does not ship.
 
+## Part D3 — NOV gets the test records too: `files[]` as separate attachments (rolling handoff entry 42.6, designed 30 September 2026, not yet built)
+
+**Why:** SSORT 152 lets the crew attach test records (pressure-test charts, PDFs) to a CBM
+equipment entry (`cbmatt`). The OEM copy travels as HTML, and a PDF cannot ride inside it, so
+the tool will send them beside the report as `files: [ { name, type, data } ]` on the `oem-copy`
+payload, `data` a full data URI. The flow attaches each one to the same email. Three cards.
+Until the tool sends `files`, the cards do nothing: a Select over an absent array is empty.
+
+**D3.1 Parse JSON.** Open the flow's **Parse JSON** card and add `files` to the schema:
+in the `properties` block, after `"pdfName":{"type":"string"}`, paste
+```
+,"files":{"type":"array"}
+```
+
+**D3.2 Two Select cards**, placed after **NeedsConvert** and before **OEM Email**:
+
+1. **Select**, rename **OemFiles**: From fx `coalesce(body('Parse_JSON')?['files'], json('[]'))`.
+   Map (switch to the key/value view): `Name` → fx `coalesce(item()?['name'], 'document')`,
+   `ContentBytes` → fx `base64ToBinary(last(split(item()?['data'], ',')))`.
+2. **Select**, rename **MainAtt**: From fx `createArray(1)`. Map: `Name` → fx
+   `if(equals(outputs('HasPdf'), true), outputs('PdfName'), outputs('HtmlName'))`,
+   `ContentBytes` → fx `variables('PdfFile')`.
+   (A one-row Select, so the report itself is in the same array shape as the files.)
+
+**D3.3 OEM Email, Attachments.** On the **OEM Email** card, Attachments: click **Switch to
+input entire array** (the small icon at the right of the Attachments block), delete what is
+there, and paste fx
+```
+union(body('MainAtt'), body('OemFiles'))
+```
+**Save.**
+
+**D3.4 Prove it in test mode.** Settings B2 `Yes`. Drop
+`sample-reports/seadrill-oem_SSCE-Equipment_2026-09-30_upper-triple_files-sample.json` (this
+repository, an OEM copy with one `files[]` PDF) into PostedReports. Expect the office four to
+get `[TEST MODE] [Seadrill CBM Report for OEM review] …` with **two** attachments: the HTML
+report and `SSCE_UpperTripleNXT_mudseal_test_2026-09-30.pdf`, which opens. The dashboard's
+Sent-to-NOV chip on that report lists the document in its tooltip. B2 `No`.
+
+**Size, said plainly:** the tool refuses an OEM copy above 30 MB, and that stays the number.
+NOV's mail gateway limit is not known to us; a copy the gateway bounces comes back to the
+office through the NOT SENT branch, and the tool's wording ("Sent for OEM delivery") is what
+keeps a crew from believing NOV received a chart that stayed behind.
+
 ## If it misfires
 
 - **No run:** the file name does not start with `seadrill-oem_`, or the trigger has

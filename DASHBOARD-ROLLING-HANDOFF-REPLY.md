@@ -1033,3 +1033,88 @@ as it is; precharge posts with `pdf` are unchanged. `sourceFormat`, `htmlName` a
 all read, so if SSORT ever sends `pdf` the flow attaches it without a change. The button is no
 longer sending a one-byte file. Dan's decision, 28 Sep. A real PDF, if it is ever wanted, will be
 printed by Edge on the scanner PC from the same HTML, never by the tool (your §7 stands).
+
+---
+
+## Entries 40 to 42 reply (dashboard side, 30 Sep 2026, scanner v2.73): the three decisions on 42, `cbmatt` built ahead of SSORT 152, nothing owed on 40 and 41
+
+**42.8, the three answers, first.**
+
+**1. The 40 MB CBM ceiling holds.** Control the input, as you recommend, and keep the rule
+that evidence is never degraded to fit a limit. The figures, since you asked for them:
+
+- **Per file: warn at 8 MB** in WCGRRT's words (a PDF or Office file cannot be compressed
+  the way a photo can). **Refuse a single file above 20 MB** at the point the crew attaches
+  it, with the reason on screen: one file that size plus a normal photograph set breaches
+  the ceiling in a single press, and a refusal at attach time is a file the crew can split
+  or re-export; a refusal at post time is a finished report that cannot leave the rig.
+- **Per report: warn when attachments pass 15 MB in total**, naming the running total and
+  the ceiling. No hard cap below the ceiling; `sdSizeOk` at 40 MB stays the one hard stop.
+- **Type whitelist as proposed:** PDF, images, CSV, plain text, Office. Nothing executable.
+
+The scanner side is unchanged by any of this: the ceiling is a warning here, never a
+rejection, and a report over it is ingested and listed on the Errors button as oversized.
+Attachment bytes count towards it automatically, because the check is the file's size.
+
+**2. Yes: a same-day repost is an update, not a duplicate row.** The file name is the key
+on this side. A later post under the same name replaces the earlier one; the previous
+copy is kept on the server under `reports\_replaced\<name>.<posted time>.js` (v2.59) so
+nothing posted is ever lost; and if the later post is *smaller* than the one it replaced
+(fewer entries or photographs) it is warned about and listed on the Errors button as
+"replaced by a smaller post, still shown", kind `shrunk`. In the order you describe
+(dashboard post first from the OEM button, a superset later from Post Report) that
+warning never fires. It would fire if a crew posted a full report and then trimmed it
+before pressing Post to OEM, and that is the right thing for it to do. Entry 11 was a
+different fault: two different days under one file name, fixed by REV 161 naming the
+file after the report date; that is not touched by this.
+
+**3. Yes, Part D can take `files[]` as real attachments for NOV.** Written into
+`CBM-OEM-NOTIFICATION-FLOW-GUIDE.md` as **Part D3**: a Select over `files[]` in the AAB
+flow's shape (`Name`, `ContentBytes` from `base64ToBinary(last(split(data, ',')))`), a
+one-row Select for the HTML or PDF the flow already attaches, and the OEM Email's
+Attachments switched to the array `union(body('MainAtt'), body('OemFiles'))`. Three
+cards. Dan builds it after the Help flow and proves it in test mode before the tool
+sends `files`; until then an absent `files` changes nothing, because the Select over an
+absent array is empty. The scanner reads `files[]` names into `oemCopies[]`
+(`fileCount`, `fileNames`) and the Sent-to-NOV chip's tooltip lists them. One honest
+limit: NOV's mail gateway size is not known to us; the OEM copy's own 30 MB refuse in
+the tool is the number to keep, and a NOT SENT on a large one comes back to the office
+by the flow's failure branch.
+
+**42.3, `cbmatt`, built now against the announced shape.** Scanner v2.73 counts each CBM
+tile's `cbmatt[]` into the report row's `attachments` beside WCGRRT's own `attachments[]`
+(the count only; the files stay in the report copy on the server). The viewer renders a
+"Test records and documents attached (n)" section under the tile's graded items:
+images inline at the dump size, anything else a download link, with type, size, the
+`added` time and the `note` (so `6.1.2 mud seal test…` reads under the file). The
+Copilot digest prints the array as a table of name, type, size, note and added, and
+never the bytes (a `data:` value is skipped by rule). The report cache never keeps the
+bytes either. Proven on `sample-reports/seadrill-report_SSCE-Equipment_2026-09-30_cbm-attachments-sample.json`
+(one PDF, one PNG) and on an OEM copy carrying one `files[]` entry; every one of the 32
+test rows' attachment counts reconciled against its raw file. One defect of ours found
+by it, fixed in the same build: a one-item JSON array reads back as a single object on
+PowerShell 7, and the REV 161 `attachments[]` count would have read it as zero there
+(never on Dan's Windows PowerShell 5.1 PC, which reads it as an array). All three counts
+now go through the list helper the AAB reader has always used. A single-item `cbmatt` on
+a real rig would have counted correctly on the production scanner regardless; it is
+fixed for the server move, where the edition may change.
+
+**41, the 22 Riser Adapter keys: nothing to build, confirmed.** The id parser takes
+`cbm_Riser_Adapter_1_1_10_ph` (the task number is `\d+`, not one digit), items are
+discovered from any of `_gr`, `_cm`, `_ph`, and the class name is read from `equip`,
+so the eleven tasks appear on the heatmap and in the viewer the day a rig posts them.
+**41.4, noted as a fact, not a parsing question:** Riser Adapter's historical zero
+graded tasks is real. Nothing on this side will go looking for rows that were never
+posted, and the class's history line starts the day the first REV 151 report lands.
+**41.6:** understood, and thank you for saying it plainly. Nothing broke.
+
+**40, `calcData`: already rendered.** The viewer was built against the entry 36 ask
+(26 Sep) and reads `status` on the cavity header and `checks[]` as a five-column table
+(check, measured, nominal, status chip, note) when present. Built today: `ramLabel` is
+now the cavity's headline in place of `ramType` when the tool sends it, so the header
+reads "Blind / Wireline Shear — CVX-W" rather than the raw type. Nothing else needed.
+**40.2:** the same rule is adopted here: our open-items line in `WEEK-PLAN` is updated
+when a reply lands, not only when an item is written.
+
+**Install on Dan's PC:** scanner v2.73 and `dashboard.html`, the usual two files; no
+config change.

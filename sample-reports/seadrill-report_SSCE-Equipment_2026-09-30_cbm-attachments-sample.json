@@ -1,0 +1,55 @@
+{
+ "version": 3,
+ "exportedAt": "2026-09-30T08:20:00.000Z",
+ "meta": {
+  "asset": "SSCE Equipment",
+  "date": "2026-09-30",
+  "dateend": "2026-09-30",
+  "wce": "Dan Plant",
+  "location": "Test",
+  "type": "CBM Inspection",
+  "discipline": "Subsea",
+  "reporttype": "CBM Inspection",
+  "rev": "SSORT REV 152"
+ },
+ "tiles": [
+  {
+   "title": "CBM \u2014 Upper Triple NXT Body",
+   "tileDate": "2026-09-30",
+   "cbmData": {
+    "equip": "Upper Triple NXT Body",
+    "date": "2026-09-22",
+    "cbm_Upper_Triple_NXT_Body_6_1_2_c0_gr": "2",
+    "cbm_Upper_Triple_NXT_Body_6_1_2_c0_cm": "Upper cavity ok",
+    "cbm_Upper_Triple_NXT_Body_6_1_2_c1_gr": "3",
+    "cbm_Upper_Triple_NXT_Body_6_1_2_c1_cm": "Middle cavity light wear",
+    "cbmlabels": {
+     "cbm_Upper_Triple_NXT_Body_6_1_2_c0_gr": "Visually inspect and record in CBMID Seal and skid plates \u2014 Upper Cavity",
+     "cbm_Upper_Triple_NXT_Body_6_1_2_c0_cm": "Visually inspect and record in CBMID Seal and skid plates \u2014 Upper Cavity",
+     "cbm_Upper_Triple_NXT_Body_6_1_2_c1_gr": "Visually inspect and record in CBMID Seal and skid plates \u2014 Middle Cavity",
+     "cbm_Upper_Triple_NXT_Body_6_1_2_c1_cm": "Visually inspect and record in CBMID Seal and skid plates \u2014 Middle Cavity"
+    },
+    "cbmatt": [
+     {
+      "name": "SSCE_UpperTripleNXT_mudseal_test_2026-09-30.pdf",
+      "type": "application/pdf",
+      "bytes": 297,
+      "note": "6.1.2 mud seal test to rated pressure, chart recorder trace",
+      "added": "2026-09-30T08:14:22.000Z",
+      "data": "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBvYmo8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PmVuZG9iagozIDAgb2JqPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgMjAwIDEwMF0vQ29udGVudHMgNCAwIFI+PmVuZG9iago0IDAgb2JqPDwvTGVuZ3RoIDQ0Pj5zdHJlYW0KQlQgL0YxIDEyIFRmIDIwIDUwIFRkIChNdWQgc2VhbCB0ZXN0KSBUaiBFVAplbmRzdHJlYW0KZW5kb2JqCnRyYWlsZXI8PC9Sb290IDEgMCBSPj4KJSVFT0YK"
+     },
+     {
+      "name": "chart-recorder-photo.png",
+      "type": "image/png",
+      "bytes": 70,
+      "note": "6.1.2 the same trace photographed",
+      "added": "2026-09-30T08:15:02.000Z",
+      "data": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+     }
+    ]
+   }
+  }
+ ],
+ "criticalRows": [],
+ "actionRows": []
+}

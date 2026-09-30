@@ -1,0 +1,26 @@
+{
+ "meta": {
+  "kind": "oem-copy",
+  "tool": "SSORT",
+  "asset": "SSCE Equipment",
+  "date": "2026-09-30",
+  "reporttype": "CBM Inspection",
+  "equipment": "Upper Triple NXT Body",
+  "wce": "Dan Plant",
+  "sourceFile": "seadrill-report_SSCE-Equipment_2026-09-30_cbm-attachments-sample.json",
+  "saved": "2026-09-30T08:30:00Z"
+ },
+ "oem": "NOV",
+ "subject": "Seadrill CBM Report for OEM review - SSCE Equipment - Upper Triple NXT Body - 2026-09-30",
+ "sourceFormat": "html",
+ "htmlName": "Seadrill_SSCE-Equipment_2026-09-30_Upper-Triple-NXT-Body_CBM.html",
+ "html": "PCFkb2N0eXBlIGh0bWw+PGh0bWw+PGJvZHk+PGgxPlNTQ0UgRXF1aXBtZW50IC0gQ0JNIEluc3BlY3Rpb24gLSBVcHBlciBUcmlwbGUgTlhUIEJvZHk8L2gxPjxwPlRlc3QgT0VNIGNvcHkgd2l0aCBvbmUgYXR0YWNoZWQgdGVzdCByZWNvcmQuPC9wPjwvYm9keT48L2h0bWw+",
+ "pdfName": "Seadrill_SSCE-Equipment_2026-09-30_Upper-Triple-NXT-Body_CBM.pdf",
+ "files": [
+  {
+   "name": "SSCE_UpperTripleNXT_mudseal_test_2026-09-30.pdf",
+   "type": "application/pdf",
+   "data": "data:application/pdf;base64,JVBERi0xLjQKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBvYmo8PC9UeXBlL1BhZ2VzL0tpZHNbMyAwIFJdL0NvdW50IDE+PmVuZG9iagozIDAgb2JqPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveFswIDAgMjAwIDEwMF0vQ29udGVudHMgNCAwIFI+PmVuZG9iago0IDAgb2JqPDwvTGVuZ3RoIDQ0Pj5zdHJlYW0KQlQgL0YxIDEyIFRmIDIwIDUwIFRkIChNdWQgc2VhbCB0ZXN0KSBUaiBFVAplbmRzdHJlYW0KZW5kb2JqCnRyYWlsZXI8PC9Sb290IDEgMCBSPj4KJSVFT0YK"
+  }
+ ]
+}

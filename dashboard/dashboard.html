@@ -1358,7 +1358,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       var oem = oemCopyFor(r);
       if (oem) {
         var chip = mk('div', 'oem-chip', 'Sent to ' + (oem.oem || 'OEM') + (oem.sent ? ' \u00B7 ' + String(oem.sent).replace('T', ' ').slice(0, 16) : ''));
-        chip.title = 'A copy of this report was emailed to the OEM by the CBM-to-OEM flow' + (oem.pdfName ? ' (' + oem.pdfName + ')' : '') + '. Posted as ' + oem.file + '.';
+        chip.title = 'A copy of this report was emailed to the OEM by the CBM-to-OEM flow' + (oem.pdfName ? ' (' + oem.pdfName + ')' : '') + (oem.fileCount ? ', with ' + oem.fileCount + ' document(s) attached: ' + (oem.fileNames || []).join(', ') : '') + '. Posted as ' + oem.file + '.';
         tdRig.appendChild(chip);
       }
       tr.appendChild(tdRig);
@@ -1927,7 +1927,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var wrap = mk('div', 'rv-soak');
     var v = function (x) { return (x === '' || x == null) ? '—' : String(x); };
     cavs.forEach(function (c) {
-      var head = (c.label || c.position || ('Cavity ' + (Number(c.id) + 1))) + ' · ' + (c.ramType || 'ram type not set') + (c.blockStyle ? ' · ' + c.blockStyle : '') + (c.plateMode ? ' · ' + (c.plateMode === 'with' ? 'with skid plates' : 'without skid plates') : '');
+      var head = (c.label || c.position || ('Cavity ' + (Number(c.id) + 1))) + ' · ' + (c.ramLabel || c.ramType || 'ram type not set') + (c.blockStyle ? ' · ' + c.blockStyle : '') + (c.plateMode ? ' · ' + (c.plateMode === 'with' ? 'with skid plates' : 'without skid plates') : '');
       var h = mk('div', 'rv-section-label', head);
       if (c.status) { h.appendChild(document.createTextNode(' ')); h.appendChild(calcStatusChip(c.status)); }
       wrap.appendChild(h);
@@ -3338,6 +3338,51 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
   }
 
+  // Attachments, shared by the report-level attachments[] (WCGRRT REV 161) and each CBM
+  // tile's cbmatt[] (SSORT 152, rolling handoff entry 42: test records and documents).
+  // Images show inline at the dump size; anything else is a download link built from the
+  // data URL that travels in the report copy on the server. Absent on older reports.
+  function rvAttachmentList(list, body, label) {
+    var atts = (list || []).filter(function (a) { return a && (a.data || a.name); });
+    if (!atts.length) return;
+    body.appendChild(mk('div', 'rv-section-label', label + ' (' + atts.length + ')'));
+    var attFigs = mk('div', 'rv-photos rv-dump');
+    var attList = mk('ul', 'rv-attachments');
+    atts.forEach(function (a) {
+      var data = String(a.data || ''), name = String(a.name || 'attachment'), note = String(a.note || '');
+      var bytes = Number(a.bytes || 0);
+      var sizeTxt = bytes ? (bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB') : '';
+      if (data.indexOf('data:image') === 0) {
+        var fig = document.createElement('figure');
+        var img = document.createElement('img');
+        img.src = data;
+        img.alt = name;
+        img.addEventListener('click', function () { openLightbox(data); });
+        fig.appendChild(img);
+        fig.appendChild(mk('figcaption', '', name + (note ? ' \u2014 ' + note : '')));
+        attFigs.appendChild(fig);
+        return;
+      }
+      var li = document.createElement('li');
+      if (data.indexOf('data:') === 0) {
+        var link = document.createElement('a');
+        link.href = data;
+        link.download = name;
+        link.textContent = name;
+        li.appendChild(link);
+      } else {
+        li.appendChild(mk('span', '', name));
+        li.appendChild(mk('span', 'meta', '(file not in this post)'));
+      }
+      var meta = [a.type || '', sizeTxt, a.added ? 'added ' + String(a.added).replace('T', ' ').slice(0, 16) : ''].filter(Boolean).join(' \u00B7 ');
+      if (meta) li.appendChild(mk('span', 'meta', meta));
+      if (note) li.appendChild(mk('div', 'note', note));
+      attList.appendChild(li);
+    });
+    if (attFigs.childNodes.length) body.appendChild(attFigs);
+    if (attList.childNodes.length) body.appendChild(attList);
+  }
+
   function rvCbm(cbm, body) {
     body.appendChild(mk('div', 'rv-section-label', 'CBM inspection details'));
     var grid = mk('div', 'rv-grid');
@@ -3437,6 +3482,9 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         body.appendChild(row);
       });
     }
+    // SSORT 152 (entry 42): test records and documents attached to this equipment, one array
+    // per tile; note carries the task reference. Shown as posted, never judged.
+    rvAttachmentList(cbm.cbmatt, body, 'Test records and documents attached');
 
     var summaries = Object.keys(cbm).filter(function (k) {
       if (equipPrefix && k.indexOf(equipPrefix) !== 0) return false;
@@ -3842,47 +3890,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     }
 
     // Attachments (WCGRRT REV 161, 19 Sep 2026): [{ name, type, note, bytes, data: <data URL> }].
-    // Images show inline at the dump size; anything else is a download link built from the
-    // data URL that travels in the report copy on the server. Absent on older reports.
-    var atts = (full.attachments || []).filter(function (a) { return a && (a.data || a.name); });
-    if (atts.length) {
-      body.appendChild(mk('div', 'rv-section-label', 'Attachments (' + atts.length + ')'));
-      var attFigs = mk('div', 'rv-photos rv-dump');
-      var attList = mk('ul', 'rv-attachments');
-      atts.forEach(function (a) {
-        var data = String(a.data || ''), name = String(a.name || 'attachment'), note = String(a.note || '');
-        var bytes = Number(a.bytes || 0);
-        var sizeTxt = bytes ? (bytes >= 1048576 ? (bytes / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(bytes / 1024)) + ' KB') : '';
-        if (data.indexOf('data:image') === 0) {
-          var fig = document.createElement('figure');
-          var img = document.createElement('img');
-          img.src = data;
-          img.alt = name;
-          img.addEventListener('click', function () { openLightbox(data); });
-          fig.appendChild(img);
-          fig.appendChild(mk('figcaption', '', name + (note ? ' \u2014 ' + note : '')));
-          attFigs.appendChild(fig);
-          return;
-        }
-        var li = document.createElement('li');
-        if (data.indexOf('data:') === 0) {
-          var link = document.createElement('a');
-          link.href = data;
-          link.download = name;
-          link.textContent = name;
-          li.appendChild(link);
-        } else {
-          li.appendChild(mk('span', '', name));
-          li.appendChild(mk('span', 'meta', '(file not in this post)'));
-        }
-        var meta = [a.type || '', sizeTxt].filter(Boolean).join(' \u00B7 ');
-        if (meta) li.appendChild(mk('span', 'meta', meta));
-        if (note) li.appendChild(mk('div', 'note', note));
-        attList.appendChild(li);
-      });
-      if (attFigs.childNodes.length) body.appendChild(attFigs);
-      if (attList.childNodes.length) body.appendChild(attList);
-    }
+    rvAttachmentList(full.attachments, body, 'Attachments');
 
     var critRows = full.criticalRows || [];
     if (critRows.length) {

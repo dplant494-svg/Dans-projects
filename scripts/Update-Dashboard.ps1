@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.72'
+$ScriptVersion = '2.73'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1730,6 +1730,8 @@ foreach ($f in $files) {
     if (([string](Get-Prop $meta 'kind')) -eq 'oem-copy' -or $f.Name -like 'seadrill-oem_*') {
         $oemCopyFiles[$f.Name] = $true
         $oemSent = ConvertTo-StableTimestamp (Get-Prop $meta 'saved')
+        $oemFiles = Get-Prop $json 'files'; $oemFileCount = 0; $oemFileNames = @()
+        foreach ($of in (ConvertTo-AabList $oemFiles)) { if ($null -eq $of -or $of -is [string]) { continue }; $oemFileCount++; $oemFileNames += [string](Get-Prop $of 'name') }   # ConvertTo-AabList: a one-item JSON array reads back as a single object on PowerShell 7
         if (-not $oemSent) { $oemSent = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
         $oemCopies.Add([pscustomobject]@{
             file       = $f.Name
@@ -1744,6 +1746,8 @@ foreach ($f in $files) {
             sourceFormat = [string](Get-Prop $json 'sourceFormat')   # v2.64: SSORT 148 posts 'html' (entry 31); the precharge shape posts pdf
             htmlName   = [string](Get-Prop $json 'htmlName')
             htmlBytes  = [int][math]::Floor(([string](Get-Prop $json 'html')).Length * 0.75)
+            fileCount  = $oemFileCount                                 # v2.73: files[] sent to NOV as separate attachments (entry 42.6), names only
+            fileNames  = $oemFileNames
             sent       = [string]$oemSent
             modified   = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
         }) | Out-Null
@@ -1919,6 +1923,7 @@ foreach ($f in $files) {
     }
 
     $tilesRaw = Get-Prop $json 'tiles'
+    $cbmAttCount = 0   # v2.73: cbmData.cbmatt[] test records and documents (SSORT 152, rolling handoff entry 42), counted into the row's attachments
     $tileCount = 0
     # v2.50/v2.51: a daily report's date. meta.reportDate when the tool sends one
     # (WCGRRT REV 161 adds a Report Date field), else the NEWEST tileDate - Brad's
@@ -2255,6 +2260,10 @@ foreach ($f in $files) {
             # the specific instance label comes from rcpt_model/rcpt_serial.
             $cbm = Get-Prop $tile 'cbmData'
             if ($cbm) {
+                # v2.73: cbmatt[] ({name,type,bytes,note,added,data}) rides on the tile; the
+                # count reaches the report row, the files stay in the report copy on the server.
+                $cbmAtt = Get-Prop $cbm 'cbmatt'
+                foreach ($ca in (ConvertTo-AabList $cbmAtt)) { if ($null -ne $ca -and -not ($ca -is [string])) { $cbmAttCount++ } }   # foreach over ConvertTo-AabList, as Read-AabAttachments does: a one-item array reads back as one object on PowerShell 7
                 $cbmClass = [string](Get-Prop $cbm 'equip')
                 if (-not $cbmClass.Trim()) {
                     $cbmClass = ([string](Get-Prop $tile 'title')) -replace '^.*—\s*', ''
@@ -2673,7 +2682,8 @@ foreach ($f in $files) {
         # the files stay in the report copy on the server and the dashboard serves them from there.
         $attArr = Get-Prop $json 'attachments'
         $attachCount = 0
-        if (($attArr -is [System.Collections.IEnumerable]) -and -not ($attArr -is [string])) { $attachCount = @($attArr | Where-Object { $_ }).Count }
+        foreach ($aa in (ConvertTo-AabList $attArr)) { if ($null -ne $aa -and -not ($aa -is [string])) { $attachCount++ } }   # v2.73: foreach over ConvertTo-AabList, so a single attachment counts as one on PowerShell 7 too
+        $attachCount += $cbmAttCount   # v2.73: plus the CBM tiles' cbmatt[] documents (entry 42)
         $summaryRec = [pscustomobject]@{
             file          = $f.Name
             rig           = [string]$rig
