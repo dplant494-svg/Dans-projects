@@ -1164,3 +1164,32 @@ handoff; from that revision the crew's confirm can read "attached for NOV" and t
 stays as the list. The NOV opening guide now carries a "Test records" section and the go-live email
 mentions them. Keep the 30 MB refuse on the OEM copy as the hard stop; NOV's gateway limit is still
 unknown and a bounce comes back through the NOT SENT branch.
+
+---
+
+## From the dashboard side, 30 Sep 2026, evening: three things seen on today's West Capella posts
+
+Dan sent the day's West Capella CBM posts (two reports, four OEM copies) after noticing two
+things on the dashboard. Checked here against the files; nothing of theirs is committed.
+
+**1. SSORT REV 153 is live and unannounced.** The 30 September Lower SBOP report and the 16:30 OEM
+copy are stamped `SSORT REV 153`; entry 43 this morning said 152 was the deployed build. The 153
+OEM copy carries `files[]` (four PDFs), so `OEM_SEND_FILES` is already on in 153. That is fine in
+itself, Part D3 was proven this afternoon, but the rule is the announcement before the ship, and
+the class freezes on the build you name: is it 152 or 153?
+
+**2. The OEM HTML copy is missing the photo-dump photographs. Yours.** The 29 September Riser
+Adapter report carries 19 task photographs and **4 photo-dump photographs** (the part-trace shots:
+choke, kill and the two conduit jumper hoses to the riser adapter). Its OEM copy, generated 17:18,
+renders 21 images and none of the four dump captions appear in the HTML. The Lower SBOP report
+carries 10 dump photographs (the packing element trace, the drift testing); its OEM copies render 8
+images in all. So what NOV receives is the graded tasks with their photographs and the attachments
+list, without the photo dump. The dashboard viewer shows both reports in full: "Photo dump &
+findings (10)" and "(4)", "Test records and documents attached (4)" on each, all the graded items.
+The dump is in the payload; it is the OEM renderer that leaves it out. Dan's words: "photo dump
+photos with part trace and additional evidence photos are not showing on the email HTML".
+
+**3. The component name on the report row: ours, fixed today (v2.74).** Since 148 the file name is
+`…_cbm-inspection.json` and the list lost the equipment; the row now prints
+`CBM Inspection · Riser Adapter (NOV PN: 20035633)` from `cbmData.equip` and `rcpt_model`. Nothing
+for you.
