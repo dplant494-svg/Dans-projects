@@ -39,6 +39,14 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 11. First five clients at half price for testimonials and permission to show results. Same pattern as the studio launch offer.
 12. One post a day for the first month, from the archive. Then three a week.
 
+## Bio (written 30 Sept from the coach's own share; source document kept off the repo)
+
+**Short (site, proposals, press):** Dan. Subsea engineer, nearly twenty years on drilling rigs, twenty-eight days on and twenty-eight off. First drink at twelve, last one on 1 April 2025. 72 lb down since, every step filmed. Training as a personal trainer. Roughneck Fitness: plans for the gym, the rig and the hotel room, diet included, from someone who did the turnaround himself.
+
+**Instagram (150 chars):** `72 lb down · sober since 2.4.25 · rig engineer turned coach · plans for gym, rig & hotel · diet included · roughneck-fitness.com`
+
+**Rules for the story anywhere public:** first name only; never name the fellowship (its own tradition asks members not to identify themselves as members in print, film or online: say "a helpline", "a meeting", "the programme"); nothing about the Norway attempt, his mother's story, family affairs, or the daughters by name unless he says so; the line about his family leaving stays only with his wife's OK.
+
 ## Assets so far
 - `assets/before/`: three "before" stills (bedroom, mirror, beach with a beer). The beach one is the sobriety "before"; the mirror one is the physique "before".
 - Pool photo with wife: in, with her OK (28 Sept 2026).

@@ -10,13 +10,13 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 
 | What | Where | Replace with |
 |---|---|---|
-| `[Coach name]` | story sign-off | the coach's name as it should appear publicly |
+| Coach name | done: "Dan", first name only, no surname anywhere on the site | |
 | Domain | done: `roughneck-fitness.com` (Namecheap, 30 Sept 2026) | |
 | `coach@roughneck-fitness.com` | footer, JSON-LD | the real mailbox |
 | Instagram `#` | footer | the handle |
 | "Before · 2024" caption | hero | the real date of the beach photo |
 | Prices £39 / £89 / £199 | plans and coaching | confirmed prices |
-| Story text | story section | the coach's own words from the recorded transcript; current text is a draft written from the brief |
+| Story text | done 30 Sept from the coach's own written share; kept off the site by design: the fellowship's name (its own anonymity tradition), the Norway attempt, family history, daughters' names, surname. One line ("my family had gone") to be checked with his wife. |
 
 ## Facts the page states (check each)
 - 72 lb lost.
