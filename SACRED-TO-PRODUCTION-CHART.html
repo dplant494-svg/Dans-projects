@@ -56,17 +56,17 @@
 <div class="page">
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>SACRED to Production — programme chart</h1>
-<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 30 September 2026 by Dan Plant</p></div>
+<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 1 October 2026 by Dan Plant (draft 2: the ORR actions, the WCE SME workshop week, SSORT 153 and the OEM attachments done)</p></div>
 <div class="right">Critical path in red: the scanner leaves Dan's PC for the sacred server on <b style="color:#fff">18 October 2026</b><br>Every bar to the right of it moves day for day with it</div></header>
 <div id="chart"></div>
-<div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on IT / ISIT</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 30 Sep</span></div>
+<div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on IT / ISIT</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 1 Oct</span></div>
 <footer>Sources: <code>DASHBOARD-PRODUCTION-TIMELINE-REPLY.md</code> (joint plan with the reporting-tools session, 11 to 14 Sep), <code>IT-REPLY-COPILOT-AGENT-QUESTIONS.md</code> (28 Sep), <code>SCANNER-SERVER-MIGRATION-IT-HANDOFF.md</code>, <code>WEEK-PLAN-2026-09-14.md</code>. Dates marked estimate are not commitments. Page 2 lists the milestones and what changed since the 11 September chart.</footer>
 </div>
 
 <div class="page">
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>Milestones and what changed since the 11 September chart</h1>
-<p>Page 2 of 2 · 30 September 2026</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from 18 October: ISIT (Adam Snyder)</div></header>
+<p>Page 2 of 2 · 1 October 2026, draft 2</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from 18 October: ISIT (Adam Snyder)</div></header>
 <div class="two"><div>
 <h2>Milestones</h2>
 <table><tr><th>#</th><th>Milestone</th><th>Date</th><th>Gate</th></tr>
@@ -101,6 +101,7 @@
 <li><b>Training:</b> the two-day class in Houston, 19 and 20 October, the two days after the transfer: reporting tools on the Monday; dashboards, precharge process, AAB and Help Centre on the Tuesday. Packs final by 12 October.</li>
 <li><b>Scanner today:</b> v2.71, no modules, nothing installed, reads three SharePoint libraries through OneDrive sync, does a full parse only when something changed (about a second otherwise). The service account needs read on the three report libraries, write on Digests and on the two IIS folders. No secrets, nothing to rotate.</li>
 <li><b>Removed from the chart:</b> the hosted application (Dan, 11 Sep). The programme ends with ISIT accepting the pages, scanner and task as a supported service.</li>
+<li><b>Draft 2, 1 October:</b> ISIT's Operational Readiness Review was gapped on 30 September (3 of 30 met, 26 dated with owners, 1 not applicable); its dated actions are a new section on page 1, with the ISIT decisions due 10 October, the 18 October handover list, the security submission by 31 October and the ManageEngine, CMDB and Service Desk configuration by 6 November. SSORT 153 is live and the test records reach NOV (Part D3 proven 30 Sep). The class sits inside Lee Arnold's WCE SME workshop, 19 to 22 October.</li>
 </ul>
 <h2>Open, waiting on others</h2>
 <ul>
@@ -145,9 +146,9 @@ const rows = [
  ['bar','Walk ISIT through the agent and the server transfer, Houston', [['plan',D(10,18),D(10,23),'']]],
  ['sec','Notification loops — Power Automate, SEADRILL-WC-DEV, all with test mode'],
  ['ms','Precharge notifications live end to end (M1); ARM and Rig Manager added 23 Sep', [['done',D(9,11),'11 Sep, done']]],
- ['bar','CBM reports to NOV: proven 22 Sep, HTML 28 Sep; NOV go-live and SSORT button', [['done',D(9,15),D(9,28),''],['plan',D(10,1),D(10,16),'go-live email, Post to OEM button']]],
+ ['bar','CBM reports to NOV: proven 22 Sep, HTML 28 Sep, test records attached 30 Sep (SSORT 153)', [['done',D(9,15),D(9,30),''],['plan',D(10,1),D(10,9),'NOV go-live email']]],
  ['bar','AAB loop, Bulletin Board: proven in test mode 28 Sep; pilot under deviation', [['done',D(9,22),D(9,28),''],['est',D(10,5),D(11,27),'pilot under the DIR-00-0011 deviation, MOC and HAZID; DIR-37-0161 revision in parallel']]],
- ['bar','TSC Help Centre: installed 29 Sep; notifications flow 30 Sep; tools\' Post button', [['done',D(9,26),D(9,30),''],['plan',D(9,30),D(10,16),'']]],
+ ['bar','TSC Help Centre: installed 29 Sep; notification and acknowledgement flows 1 Oct; Post button', [['done',D(9,26),D(9,30),''],['plan crit',D(10,1),D(10,2),''],['plan',D(10,5),D(10,16),'Post button in the tools']]],
  ['bar','Rig visit report email with a dashboard link (guide written 13 Sep)', [['est',D(10,26),D(11,13),'after the class']]],
  ['sec','Database (Fabric SQL) and Maximo'],
  ['ms','SQL database created by Dan on Fabric (M1b); 60-day trial', [['done',D(9,13),'13 Sep, done']], null, [['',D(11,12),'trial ends about 12 Nov: capacity or extension']]],
@@ -159,9 +160,17 @@ const rows = [
  ['bar','WCGRRT REV 166, SSORT REV 148, Precharge Pro Rev 87 in service on sacred', [['done',D(9,1),D(9,30),''],['plan',D(9,30),D(2,26,2027),'revisions by rolling handoff, integration contract kept']]],
  ['ms','SSCE release / cancel flow live; West Polaris item returnable (M4)', [['',D(10,16),'16 Oct, estimate']]],
  ['bar','SPARC parts catalogue integrated with SSORT', [['est',D(10,12),D(1,15,2027),'']]],
+ ['sec','Operational readiness (ISIT ORR): the dated actions'],
+ ['ms','ISIT decisions: library path to the server, SDP, SIAM; delete the stale SSORT copy', [['crit',D(10,10),'10 Oct, ISIT']]],
+ ['bar','Digests freshness alert flow; Help flow Part E; NOV go-live', [['plan',D(10,2),D(10,9),'']]],
+ ['bar','ORR returns: reporting tools and Precharge Pro in; COC tracker and SPARC via Lee', [['done',D(9,30),D(10,1),''],['plan',D(10,1),D(10,7),'Lee\'s']]],
+ ['ms','18 Oct: service account, backup, RACI confirmed, early-life support, DR handed over', [['crit',D(10,18),'']]],
+ ['ms','Security and architecture submission (M8b); intake URL rated; Fabric capacity decision', [['',D(10,31),'31 Oct']]],
+ ['bar','ISIT: ManageEngine, CMDB, Service Desk; runbooks reviewed; retention; DR rebuild tested', [['plan',D(10,19),D(11,6),'6 Nov']]],
+ ['bar','IIS authentication on the precharge folder and requests (F-25, F-70) before production', [['est',D(11,9),D(1,29,2027),'ISIT with Dan']]],
  ['sec','People, training and handover'],
- ['ms','Operational readiness checklist review with Lee Arnold', [['',D(9,30),'30 Sep']]],
- ['bar','Training packs final 12 Oct; two-day class in Houston, 19 and 20 October', [['plan',D(10,5),D(10,12),''],['plan',D(10,19),D(10,21),'class']]],
+ ['ms','ISIT Operational Readiness Review: checklist gapped, live workbook v2 to IT', [['done',D(9,30),'30 Sep, done: 3 met, 26 dated, 1 n/a']]],
+ ['bar','Packs final 12 Oct; WCE SME workshop Houston 19 to 22 Oct, class on days 1 and 2', [['plan',D(10,5),D(10,12),''],['plan crit',D(10,19),D(10,23),'workshop; UAT sign-off 20 Oct']]],
  ['bar','ISIT shadow-running the task and the pages', [['plan',D(11,6),D(1,29,2027),'']]],
  ['bar','Architecture, Security, Governance review (M8b); pilot validated by Dan and Lee', [['est',D(11,9),D(12,4),'']]],
  ['ms','ISIT accept the pages, scanner and task as a supported service (M11)', [['crit',D(2,26,2027),'']]],
@@ -185,7 +194,7 @@ chart.innerHTML = h;
 // grid lines and today
 const gridHost = document.createElement('div'); gridHost.style.cssText='position:absolute;left:'+LAB+'px;right:0;top:26px;bottom:0;pointer-events:none;';
 for (const [d] of months) { const g=document.createElement('div'); g.className='grid month'; g.style.left=x(d)+'px'; gridHost.appendChild(g); }
-const today = D(9,30); const t=document.createElement('div'); t.className='today'; t.style.left=x(today)+'px'; t.innerHTML='<span class="todayt">today</span>'; gridHost.appendChild(t);
+const today = D(10,1); const t=document.createElement('div'); t.className='today'; t.style.left=x(today)+'px'; t.innerHTML='<span class="todayt">today</span>'; gridHost.appendChild(t);
 chart.appendChild(gridHost);
 </script>
 </body></html>

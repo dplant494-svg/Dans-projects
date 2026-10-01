@@ -3,7 +3,7 @@
 **To:** [IT contact from the Copilot-agent questions thread]; Adam Snyder
 **Cc:** Lee Arnold
 **Subject:** SACRED to production: programme chart, scanner transfer to the server on 18 October
-**Attach:** `SACRED-to-Production-Programme-Chart-2026-09-30.pdf` (two pages)
+**Attach:** `SACRED-to-Production-Programme-Chart-2026-10-01.pdf` (two pages)
 
 ---
 
