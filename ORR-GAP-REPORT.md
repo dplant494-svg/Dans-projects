@@ -3,7 +3,7 @@
 **For:** ISIT PMO, via Dan Plant · **Date:** 30 September 2026, v2 (evening: the reporting-tools and Precharge Pro maintainers' returns pasted in; COC tracker and SPARC to follow via Lee) · **Live document:**
 `Operation_Readiness_Review_ORR_Checklist_SACRED_v2.xlsx` (the ISIT checklist filled in, plus six sheets:
 Support Model (RACI), Service components, Known error log, Test summary, DR and early-life support, Open actions)
-**Context:** the programme chart sent to IT (server handover Sunday 18 October 2026 with Adam Snyder; supported
+**Context:** the programme chart sent to IT (server handover in the week of 19 October 2026 with Adam Snyder; supported
 service February 2027) and the reply to IT's ten questions of 28 September.
 
 ## The score, honestly
@@ -21,7 +21,7 @@ Every "not met" line has the evidence that exists, what is missing, who owns it 
 are ISIT's own configuration (ManageEngine, CMDB, Service Desk, SIAM, SDP decision, backups, capacity) and
 cannot be met from our side; they are on the "Open actions" sheet with the ISIT role named.
 
-## The three things that matter before 18 October
+## The three things that matter before the week of 19 October
 
 1. **How the three report libraries reach the server (criterion 8, High).** Today OneDrive sync under Dan's
    account feeds the scanner. Under a service account on a server that has to be a scheduled pull or a sync
@@ -49,7 +49,7 @@ services); the build is submitted for the Architecture, Security and Governance 
 - A **test summary** of what was proven, how and when, from 11 September to today, plus the two planned proofs
   (the dual run and the class UAT) (9, 19).
 - A **DR and early-life support** page: what is the system of record, what to back up, a rebuild-from-nothing
-  procedure under an hour, rollback, the early-life proposal (18 Oct to 6 Nov dual run; ISIT shadow-run to
+  procedure under an hour, rollback, the early-life proposal (week-of-19-Oct to 13 Nov dual run; ISIT shadow-run to
   February), and a DR test proposal during the dual run (5, 28, 29, 30).
 - An **open actions** sheet: nineteen actions, each with an owner and a date.
 
@@ -66,7 +66,7 @@ their test records, their known errors, their component entries, their local-sav
 | 7 Oct | tool maintainers' returns |
 | 9 Oct | Digests freshness alert built |
 | 10 Oct | ISIT decisions: library path to the server, SDP required or not, SIAM applicable or not |
-| 18 Oct | transfer; service account; backup; RACI confirmed; early-life support accepted; DR procedure handed over |
+| week of 19 Oct | transfer; service account; backup; RACI confirmed; early-life support accepted; DR procedure handed over |
 | 20 Oct | UAT sign-off from the WCE SME class |
 | 31 Oct | security and architecture submission; Fabric capacity decision |
 | 6 Nov | Dan's PC task disabled; runbooks reviewed; ManageEngine, CMDB, Service Desk configured; retention agreed; DR rebuild tested |
@@ -95,3 +95,17 @@ retention facts, and the acceptance tests. Five things ISIT should not have to d
    gate-check harness cannot currently run.
 
 None of the five changes the score; all five are on the Open actions sheet with owners and dates.
+
+## v2.1, 1 October afternoon: the transfer week, and the production home
+
+- **The transfer is the week of 19 October, not Sunday the 18th.** Dan is in Houston for the WCE SME
+  workshop that week and does the transfer with Adam Snyder on one of its days. Every "18 Oct" date in the
+  workbook now reads "week of 19 Oct"; the dual run ends 13 November and the last-scan failure email is due
+  27 November. The programme chart is draft 4.
+- **New critical item, not in ISIT's checklist: the production home.** The sacred server
+  `sdrlazneuiis01d` is the sandbox. Transferring the scanner to it under a service account makes the task
+  ISIT's, but it does not make anything production: the pages, the share and the task still run on the
+  sandbox. ISIT have to say whether that server becomes the production server or a production server is
+  built, and plan the cutover, because the server name is in the dashboard links the notification flows
+  send, the SSORT write-back share, the scanner config and the rigs' bookmarks. Added to the Open actions
+  sheet (ORR 8 / 15, ISIT Infrastructure, decision 10 October) and to the chart as M2a.

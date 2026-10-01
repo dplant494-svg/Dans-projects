@@ -50,4 +50,4 @@ Two tool handoffs for the sessions that maintain his tools, and one page for him
 
 **No sandbox** (Dan, 30 Sep): the class posts on SSCE Equipment, which never enters a fleet count and puts every
 notification flow into test mode; Dan deletes the class's files from PostedReports afterwards. The pack is
-built as the handoffs come in; the server move on 18 October changes nothing the class sees.
+built as the handoffs come in; the server move in the week of 19 October changes nothing the class sees.
