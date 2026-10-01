@@ -6,12 +6,13 @@ CREATE TABLE dbo.[bwm_snapshots] (
     [bwm_week] NVARCHAR(400) NULL,
     [bwm_compiledBy] NVARCHAR(400) NULL,
     [bwm_reportDate] NVARCHAR(400) NULL,
-    [bwm_rows] NVARCHAR(400) NULL,
-    [reportDate] NVARCHAR(200) NOT NULL,
+    [bwm_rows] NVARCHAR(MAX) NULL,
+    [reportDate] NVARCHAR(400) NULL,
     [file] NVARCHAR(400) NULL,
-    [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME(),
-    CONSTRAINT [PK_bwm_snapshots] PRIMARY KEY ([reportDate])
+    [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME()
 );
+GO
+CREATE INDEX [IX_bwm_snapshots_file] ON dbo.[bwm_snapshots] ([file]);
 GO
 
 IF OBJECT_ID('dbo.help_acks','U') IS NULL
@@ -25,7 +26,7 @@ CREATE TABLE dbo.[help_acks] (
     [at] NVARCHAR(400) NULL,
     [comment] NVARCHAR(MAX) NULL,
     [saved] NVARCHAR(400) NULL,
-    [attachments] NVARCHAR(400) NULL,
+    [attachments] NVARCHAR(MAX) NULL,
     [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT [PK_help_acks] PRIMARY KEY ([file])
 );
