@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SACRED to Production — programme chart, 30 September 2026</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SACRED to Production — programme chart, 1 October 2026 (draft 3)</title>
 <style>
  @page { size: A4 landscape; margin: 9mm 10mm 9mm 10mm; }
  * { box-sizing: border-box; }
@@ -56,37 +56,37 @@
 <div class="page">
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>SACRED to Production — programme chart</h1>
-<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 1 October 2026 by Dan Plant (draft 2: the ORR actions, the WCE SME workshop week, SSORT 153 and the OEM attachments done)</p></div>
-<div class="right">Critical path in red: the scanner leaves Dan's PC for the sacred server on <b style="color:#fff">18 October 2026</b><br>Every bar to the right of it moves day for day with it</div></header>
+<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 1 October 2026 by Dan Plant (draft 3: <b>the database is built on Fabric by Dan and needs no IT resource</b>; the ORR actions, the WCE SME workshop week, SSORT 153 and the OEM attachments done)</p></div>
+<div class="right">Critical path in red: the scanner leaves Dan's PC for the sacred server on <b style="color:#fff">18 October 2026</b><br>Every bar to the right of it moves day for day with it<br><b style="color:#fff">Database: built by Dan on Fabric, no IT resource required</b></div></header>
 <div id="chart"></div>
 <div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on IT / ISIT</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 1 Oct</span></div>
-<footer>Sources: <code>DASHBOARD-PRODUCTION-TIMELINE-REPLY.md</code> (joint plan with the reporting-tools session, 11 to 14 Sep), <code>IT-REPLY-COPILOT-AGENT-QUESTIONS.md</code> (28 Sep), <code>SCANNER-SERVER-MIGRATION-IT-HANDOFF.md</code>, <code>WEEK-PLAN-2026-09-14.md</code>. Dates marked estimate are not commitments. Page 2 lists the milestones and what changed since the 11 September chart.</footer>
+<footer>Sources: <code>DASHBOARD-PRODUCTION-TIMELINE-REPLY.md</code> (joint plan with the reporting-tools session, 11 to 14 Sep), <code>IT-REPLY-COPILOT-AGENT-QUESTIONS.md</code> (28 Sep), <code>SCANNER-SERVER-MIGRATION-IT-HANDOFF.md</code>, <code>WEEK-PLAN-2026-09-14.md</code>, <code>DATABASE-BUILD-PLAN.md</code> (1 Oct). Dates marked estimate are not commitments. Page 2 lists the milestones and what changed since the 11 September chart.</footer>
 </div>
 
 <div class="page">
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>Milestones and what changed since the 11 September chart</h1>
-<p>Page 2 of 2 · 1 October 2026, draft 2</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from 18 October: ISIT (Adam Snyder)</div></header>
+<p>Page 2 of 2 · 1 October 2026, draft 3</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from 18 October: ISIT (Adam Snyder)</div></header>
 <div class="two"><div>
 <h2>Milestones</h2>
 <table><tr><th>#</th><th>Milestone</th><th>Date</th><th>Gate</th></tr>
 <tr><td class="n">M1</td><td>Precharge notifications live end to end</td><td class="d">11 Sep 2026, done</td><td>—</td></tr>
 <tr><td class="n">M1a</td><td>Ask SACRED AI live: Copilot Studio agent on the scanner's report digests, button on the dashboard</td><td class="d">13 Sep 2026, done</td><td>Teams publishing: waiting on IT</td></tr>
-<tr><td class="n">M1b</td><td>SQL database created on Fabric by Dan, no IT resource</td><td class="d">13 Sep 2026, done</td><td>60-day trial: capacity or extension by mid-November</td></tr>
+<tr><td class="n">M1b</td><td>SQL database created on Fabric by Dan, no IT resource: trial database 13 Sep; <b><code>SACRED DATA</code> built 1 Oct, 22 tables and 6 views</b> from the scanner's own export</td><td class="d">13 Sep and 1 Oct 2026, done</td><td>60-day trial: capacity on Lee's cost centre by mid-November (a licence line, not a resource)</td></tr>
 <tr><td class="n">M1c</td><td>SPARC handoff received; Maximo answered (daily 06:00 export already exists)</td><td class="d">14 Sep 2026, done</td><td>landing folder, Manpreet</td></tr>
 <tr><td class="n">M1d</td><td>CBM to OEM flow proven; AAB loop proven end to end in test mode; TSC Help Centre installed</td><td class="d">22 to 29 Sep 2026, done</td><td>—</td></tr>
 <tr><td class="n">M1e</td><td>IT's ten questions answered; Lee Arnold co-owner on the agent and the flows</td><td class="d">28 Sep 2026, done</td><td>—</td></tr>
 <tr><td class="n">M2</td><td><b>Files transferred to the sacred server</b> (<code>D:\TSC-Dashboard</code>), Dan with Adam Snyder in Houston</td><td class="d"><b>18 Oct 2026</b></td><td>service account ready</td></tr>
-<tr><td class="n">M3</td><td>Reading-key and identity conventions agreed between loader and scanner</td><td class="d">9 Oct 2026, estimate</td><td>reporting-tools session</td></tr>
+<tr><td class="n">M3</td><td>Reading-key and identity conventions fixed: the scanner's normalised export (schema 2) is the contract, <code>file</code>, <code>matchKey</code> and the rig identity as the keys</td><td class="d">1 Oct 2026, done</td><td>—</td></tr>
 <tr><td class="n">M4</td><td>SSCE release / cancel flow live; West Polaris item returnable</td><td class="d">16 Oct 2026, estimate</td><td>reporting-tools session</td></tr>
 <tr><td class="n">M5</td><td>Server task running every ten minutes under the service account, acceptance checklist 1 to 5 passed; dual run with Dan's PC begins</td><td class="d">23 Oct 2026</td><td>M2</td></tr>
-<tr><td class="n">M6</td><td>Scanner normalised export feeding loader dry runs over the full history</td><td class="d">6 Nov 2026, estimate</td><td>M3</td></tr>
+<tr><td class="n">M6</td><td>Scanner normalised export live on every scan (v2.76, 21 tables, 17,751 rows on 1 Oct); Dataflow Gen2 loads it into <code>SACRED DATA</code> hourly under Dan's sign-in; proof is the counts against the manifest</td><td class="d">export 1 Oct, done; load by 9 Oct, estimate</td><td>Dan, no IT</td></tr>
 <tr><td class="n">M7</td><td>Dan's PC task disabled after two clean weeks; ISIT own the server task</td><td class="d">6 Nov 2026</td><td>M5</td></tr>
 <tr><td class="n">M8</td><td>"Last successful scan" failure email in place (the stamp has been on disk since 14 Sep); Digests freshness alert flow in place from early October</td><td class="d">20 Nov 2026</td><td>—</td></tr>
 <tr><td class="n">M8a</td><td>Notification flows re-pointed to the IT-provided service identity</td><td class="d">when IT provide it</td><td>ISIT</td></tr>
 <tr><td class="n">M8b</td><td>Pilot validated by Dan and Lee; submitted for Architecture, Security and Governance review</td><td class="d">Nov 2026, estimate</td><td>M5, M8a</td></tr>
-<tr><td class="n">M9</td><td>Database instance; scanner dual-write on</td><td class="d">Jan 2027</td><td>first IT resource</td></tr>
-<tr><td class="n">M10</td><td>Parity proven: the same pages fed from the database, files as fallback</td><td class="d">mid-Feb 2027</td><td>M9 + two-week window</td></tr>
+<tr><td class="n">M9</td><td>Ask SACRED AI and Power BI reading the database; scanner dual-write (optional, once an app registration exists). <b>No IT resource: the database is already provisioned.</b></td><td class="d">Jan 2027, estimate</td><td>app registration only if dual-write is wanted</td></tr>
+<tr><td class="n">M10</td><td>Parity proven: the same pages fed from the database, files as fallback</td><td class="d">mid-Feb 2027</td><td>M6 + two-week window; an authenticated path to decide, not a provisioning ask</td></tr>
 <tr><td class="n">M11</td><td>ISIT accept the pages, scanner and task as a supported service</td><td class="d">Feb 2027</td><td>M7, M8, M10</td></tr>
 </table>
 </div><div>
@@ -94,13 +94,14 @@
 <ul>
 <li><b>The server transfer has a date and a person: 18 October, Dan with Adam Snyder in Houston.</b> On the 11 September chart it was "copied, ISIT have not started". The copy is refreshed on the day, so the server gets the current scanner (v2.71 today), the state files and the config.</li>
 <li><b>Ask SACRED AI is live</b> (13 Sep) in Seadrill Apps PROD with web search and general knowledge off. Only the Teams app approval is outstanding, submitted 16 Sep. First rig test (West Capella) the day it is allowed.</li>
-<li><b>The database started in September, not January.</b> Fabric SQL exists in Dan's workspace on a 60-day trial. The January IT ask is a paid capacity, not an Azure instance. The scanner side (reading keys, normalised export) runs October to November.</li>
+<li><b>The database is built, by Dan, with no IT resource.</b> <code>SACRED DATA</code> is a Fabric SQL database in Dan's workspace (created 1 Oct; 22 tables, 6 views, one <code>needs_attention</code> definition). The scanner writes a normalised export on every run (schema 2: reports, rig checks, CBM, AAB, precharge requests and issued sheets, Help Centre records, SSCE requests, 21 tables) and a Dataflow Gen2 loads it under Dan's own sign-in. Nothing to provision, no secret, nothing installed. The January row is no longer an IT ask: the only cost item is Fabric capacity on Lee's cost centre when the trial ends about 12 November, and an app registration later if the scanner is to write directly.</li>
 <li><b>Three more notification loops exist:</b> CBM reports to NOV (proven 22 Sep, HTML attachment 28 Sep, go-live email to NOV in October), the AAB loop on the Seadrill Bulletin Board (proven end to end in test mode 28 Sep; pilot under a documented deviation with the MOC and HAZID while DIR-37-0161 is revised), and the TSC Help Centre (installed 29 Sep, flow 30 Sep). All share one pattern: post, scanner, page, notification with a dashboard link, receipt.</li>
 <li><b>Test mode</b> is built into every notification flow: while on, only the office list is mailed and the subject says so. No rig or NOV address receives a test.</li>
 <li><b>Monitoring:</b> the scanner writes its last-successful-scan stamp on every complete run (since 14 Sep). The hourly Digests freshness alert promised to IT is built in early October, before the move, and keeps watching after it.</li>
 <li><b>Training:</b> the two-day class in Houston, 19 and 20 October, the two days after the transfer: reporting tools on the Monday; dashboards, precharge process, AAB and Help Centre on the Tuesday. Packs final by 12 October.</li>
 <li><b>Scanner today:</b> v2.71, no modules, nothing installed, reads three SharePoint libraries through OneDrive sync, does a full parse only when something changed (about a second otherwise). The service account needs read on the three report libraries, write on Digests and on the two IIS folders. No secrets, nothing to rotate.</li>
 <li><b>Removed from the chart:</b> the hosted application (Dan, 11 Sep). The programme ends with ISIT accepting the pages, scanner and task as a supported service.</li>
+<li><b>Draft 3, 1 October:</b> the database rows are redrawn. M1b, M3 and the export half of M6 are done; M9 is no longer "first IT resource". The ISIT asks on this chart are now only the service account, the Teams approval, the 10 October decisions and the ORR configuration work.</li>
 <li><b>Draft 2, 1 October:</b> ISIT's Operational Readiness Review was gapped on 30 September (3 of 30 met, 26 dated with owners, 1 not applicable); its dated actions are a new section on page 1, with the ISIT decisions due 10 October, the 18 October handover list, the security submission by 31 October and the ManageEngine, CMDB and Service Desk configuration by 6 November. SSORT 153 is live and the test records reach NOV (Part D3 proven 30 Sep). The class sits inside Lee Arnold's WCE SME workshop, 19 to 22 October.</li>
 </ul>
 <h2>Open, waiting on others</h2>
@@ -108,7 +109,7 @@
 <li>Teams app approval for Ask SACRED AI (IT, submitted 16 Sep).</li>
 <li>Service account for the server task and the notification flows (ISIT, needed by 18 Oct).</li>
 <li>Where Manpreet's daily 06:00 Maximo export lands (Manpreet, via Dan).</li>
-<li>Fabric capacity or trial extension by mid-November (IT).</li>
+<li>Fabric capacity on Lee's cost centre by about 12 November (a licence line; no IT engineering resource).</li>
 </ul>
 </div></div>
 <footer>Dates marked estimate are not commitments and move with the critical path. Questions: Dan Plant, Technical Superintendent, Well Control Engineering.</footer>
@@ -150,17 +151,17 @@ const rows = [
  ['bar','AAB loop, Bulletin Board: proven in test mode 28 Sep; pilot under deviation', [['done',D(9,22),D(9,28),''],['est',D(10,5),D(11,27),'pilot under the DIR-00-0011 deviation, MOC and HAZID; DIR-37-0161 revision in parallel']]],
  ['bar','TSC Help Centre: installed 29 Sep; notification and acknowledgement flows 1 Oct; Post button', [['done',D(9,26),D(9,30),''],['plan crit',D(10,1),D(10,2),''],['plan',D(10,5),D(10,16),'Post button in the tools']]],
  ['bar','Rig visit report email with a dashboard link (guide written 13 Sep)', [['est',D(10,26),D(11,13),'after the class']]],
- ['sec','Database (Fabric SQL) and Maximo'],
- ['ms','SQL database created by Dan on Fabric (M1b); 60-day trial', [['done',D(9,13),'13 Sep, done']], null, [['',D(11,12),'trial ends about 12 Nov: capacity or extension']]],
- ['bar','Reading-key and identity conventions agreed (M3)', [['est',D(9,30),D(10,9),'']]],
- ['bar','Scanner normalised export feeding loader dry runs, full history (M6)', [['est',D(10,12),D(11,6),'']]],
- ['bar','Maximo item export: reader built 15 Sep; feed once the landing folder is known', [['done',D(9,15),D(9,16),''],['wait',D(9,16),D(10,9),'landing folder, Manpreet'],['est',D(10,9),D(11,27),'']]],
- ['bar','Database instance, dual-write (M9, Jan); pages fed from the database (M10, Feb)', [['est',D(1,4,2027),D(1,29,2027),''],['est',D(2,1,2027),D(2,15,2027),'']]],
+ ['sec','Database (Fabric SQL) and Maximo — built by Dan, no IT resource required'],
+ ['ms','<b>SQL database built by Dan on Fabric (M1b)</b>: SACRED DATA, 22 tables, 6 views', [['done',D(9,13),''],['done',D(10,1),'1 Oct, done (trial 13 Sep)']], null, [['',D(11,12),'trial ends about 12 Nov: capacity, a licence line on Lee\'s cost centre']]],
+ ['ms','Reading keys and identity fixed by the scanner export, schema 2 (M3)', [['done',D(10,1),'1 Oct, done']]],
+ ['bar','Scanner export every scan (v2.76, 21 tables); Dataflow load; history (M6)', [['done',D(9,30),D(10,1),''],['plan',D(10,1),D(10,9),''],['est',D(10,12),D(11,6),'load from 1 Oct under Dan\'s sign-in; full history and counts by 6 Nov']]],
+ ['bar','Maximo item export: reader built 15 Sep; feed once the folder is known', [['done',D(9,15),D(9,16),''],['wait',D(9,16),D(10,9),'landing folder, Manpreet'],['est',D(10,9),D(11,27),'']]],
+ ['bar','Agent and Power BI on the database; dual-write optional (M9); pages from it (M10)', [['est',D(11,9),D(12,4),''],['est',D(1,4,2027),D(1,29,2027),''],['est',D(2,1,2027),D(2,15,2027),'no IT resource at any step']]],
  ['sec','Applications — reporting-tools session dates from the joint plan'],
  ['bar','WCGRRT REV 166, SSORT REV 148, Precharge Pro Rev 87 in service on sacred', [['done',D(9,1),D(9,30),''],['plan',D(9,30),D(2,26,2027),'revisions by rolling handoff, integration contract kept']]],
  ['ms','SSCE release / cancel flow live; West Polaris item returnable (M4)', [['',D(10,16),'16 Oct, estimate']]],
  ['bar','SPARC parts catalogue integrated with SSORT', [['est',D(10,12),D(1,15,2027),'']]],
- ['sec','Operational readiness (ISIT ORR): the dated actions'],
+ ['sec','Operational readiness (ISIT ORR): the dated actions — the only ISIT asks on this chart'],
  ['ms','ISIT decisions: library path to the server, SDP, SIAM; delete the stale SSORT copy', [['crit',D(10,10),'10 Oct, ISIT']]],
  ['bar','Digests freshness alert flow; Help flow Part E; NOV go-live', [['plan',D(10,2),D(10,9),'']]],
  ['bar','ORR returns: reporting tools and Precharge Pro in; COC tracker and SPARC via Lee', [['done',D(9,30),D(10,1),''],['plan',D(10,1),D(10,7),'Lee\'s']]],

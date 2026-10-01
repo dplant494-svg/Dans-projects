@@ -3,7 +3,7 @@
 **To:** [IT contact from the Copilot-agent questions thread]; Adam Snyder
 **Cc:** Lee Arnold
 **Subject:** SACRED to production: programme chart, scanner transfer to the server on 18 October
-**Attach:** `SACRED-to-Production-Programme-Chart-2026-10-01.pdf` (two pages)
+**Attach:** `SACRED-to-Production-Programme-Chart-2026-10-01.pdf` (two pages, draft 3 of 1 October)
 
 ---
 
@@ -26,6 +26,13 @@ What I need from ISIT before the 18th:
    secrets, nothing to rotate; the mechanism is the same as today.
 2. The Teams app approval for the Ask SACRED AI agent, submitted 16 September. Nobody but me can
    open it until then.
+
+One thing has come off your list since the last version: **the database**. I have built it myself on
+Microsoft Fabric (a SQL database called `SACRED DATA` in my workspace, 22 tables and 6 views, loaded
+from the scanner's own export under my sign-in). It needs no IT resource, no server, no secret and
+nothing installed. The only item that will come your way is Fabric capacity on Lee's cost centre when
+the trial ends in mid-November, which is a licence line, not engineering time. The January row on the
+earlier chart that said "first IT resource" is gone.
 
 The chart is honest about what is an estimate. Everything to the right of 18 October moves with
 it. The scanner today is v2.71, no modules, nothing installed, and the migration steps and the
@@ -50,3 +57,5 @@ Technical Superintendent, Well Control Engineering
   dates from the joint plan of 11 to 14 September. If you want their latest, send them the PDF and
   they can correct their five bars.
 - Attach the PDF, not the HTML.
+- Draft 3 (1 October) is the one to send: it records the database as built by you on Fabric with no IT
+  resource. The 30 September and draft 2 files are superseded.
