@@ -1,10 +1,11 @@
 -- SACRED database, schema v1: one table per export CSV written by Update-Dashboard.ps1 v2.75 (export_manifest.json).
 -- Target: Fabric SQL database (Azure SQL). Paste into the query editor and run once. Re-runnable: each CREATE is guarded.
 -- Columns are NVARCHAR by default; counts are INT; dates stay ISO text in v1 (cast in views). Keys follow the scanner's own identity rules.
+-- v1.1 (1 Oct, after the first run on SACRED DATA): key columns are NVARCHAR(200) so no key passes 900 bytes; child tables and the daily log carry an index, not a primary key.
 
 IF OBJECT_ID('dbo.aab_acks','U') IS NULL
 CREATE TABLE dbo.[aab_acks] (
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [modified] NVARCHAR(400) NULL,
     [aabNumber] NVARCHAR(400) NULL,
     [revision] INT NULL,
@@ -30,7 +31,7 @@ IF OBJECT_ID('dbo.aab_records','U') IS NULL
 CREATE TABLE dbo.[aab_records] (
     [file] NVARCHAR(400) NULL,
     [modified] NVARCHAR(400) NULL,
-    [aabNumber] NVARCHAR(400) NOT NULL,
+    [aabNumber] NVARCHAR(200) NOT NULL,
     [revision] INT NOT NULL,
     [recordId] NVARCHAR(400) NULL,
     [schemaVersion] NVARCHAR(400) NULL,
@@ -78,10 +79,10 @@ GO
 
 IF OBJECT_ID('dbo.aab_status','U') IS NULL
 CREATE TABLE dbo.[aab_status] (
-    [aabNumber] NVARCHAR(400) NOT NULL,
+    [aabNumber] NVARCHAR(200) NOT NULL,
     [revision] INT NOT NULL,
     [title] NVARCHAR(MAX) NULL,
-    [rigKey] NVARCHAR(400) NOT NULL,
+    [rigKey] NVARCHAR(200) NOT NULL,
     [rig] NVARCHAR(400) NULL,
     [issueDate] NVARCHAR(400) NULL,
     [dueDate] NVARCHAR(400) NULL,
@@ -113,28 +114,28 @@ GO
 
 IF OBJECT_ID('dbo.aab_status__ackList','U') IS NULL
 CREATE TABLE dbo.[aab_status__ackList] (
-    [aabNumber] NVARCHAR(400) NOT NULL,
-    [revision] INT NOT NULL,
-    [rigKey] NVARCHAR(400) NOT NULL,
-    [action] NVARCHAR(400) NOT NULL,
-    [crew] NVARCHAR(400) NOT NULL,
-    [at] NVARCHAR(400) NOT NULL,
+    [aabNumber] NVARCHAR(400) NULL,
+    [revision] INT NULL,
+    [rigKey] NVARCHAR(400) NULL,
+    [action] NVARCHAR(400) NULL,
+    [crew] NVARCHAR(400) NULL,
+    [at] NVARCHAR(400) NULL,
     [by] NVARCHAR(400) NULL,
     [role] NVARCHAR(400) NULL,
     [photos] INT NULL,
     [documents] NVARCHAR(400) NULL,
     [comment] NVARCHAR(MAX) NULL,
-    [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    CONSTRAINT [PK_aab_status__ackList] PRIMARY KEY ([aabNumber], [revision], [rigKey], [crew], [at], [action])
+    [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME()
 );
 GO
-
+CREATE INDEX [IX_aab_status__ackList_aabNumber] ON dbo.[aab_status__ackList] ([aabNumber]);
+GO
 IF OBJECT_ID('dbo.cbm_grades','U') IS NULL
 CREATE TABLE dbo.[cbm_grades] (
     [rig] NVARCHAR(400) NULL,
     [class] NVARCHAR(400) NULL,
     [equip] NVARCHAR(400) NULL,
-    [itemKey] NVARCHAR(400) NOT NULL,
+    [itemKey] NVARCHAR(200) NOT NULL,
     [itemLabel] NVARCHAR(400) NULL,
     [itemShape] NVARCHAR(400) NULL,
     [sortKey] NVARCHAR(400) NULL,
@@ -143,7 +144,7 @@ CREATE TABLE dbo.[cbm_grades] (
     [comment] NVARCHAR(MAX) NULL,
     [photos] INT NULL,
     [date] NVARCHAR(400) NULL,
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [rev] NVARCHAR(400) NULL,
     [era] NVARCHAR(400) NULL,
     [postedKey] NVARCHAR(400) NULL,
@@ -156,7 +157,7 @@ IF OBJECT_ID('dbo.compliance_checklists','U') IS NULL
 CREATE TABLE dbo.[compliance_checklists] (
     [rig] NVARCHAR(400) NULL,
     [date] NVARCHAR(400) NULL,
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [section] NVARCHAR(400) NULL,
     [item] NVARCHAR(400) NULL,
     [status] NVARCHAR(400) NULL,
@@ -168,25 +169,25 @@ GO
 
 IF OBJECT_ID('dbo.daily_log_entries','U') IS NULL
 CREATE TABLE dbo.[daily_log_entries] (
-    [rig] NVARCHAR(400) NOT NULL,
+    [rig] NVARCHAR(400) NULL,
     [month] NVARCHAR(400) NULL,
-    [date] NVARCHAR(400) NOT NULL,
-    [shift] NVARCHAR(400) NOT NULL,
+    [date] NVARCHAR(400) NULL,
+    [shift] NVARCHAR(400) NULL,
     [personnel] NVARCHAR(400) NULL,
-    [equip] NVARCHAR(400) NOT NULL,
+    [equip] NVARCHAR(400) NULL,
     [failure] NVARCHAR(400) NULL,
     [lesson] NVARCHAR(400) NULL,
     [note] NVARCHAR(400) NULL,
     [photos] INT NULL,
     [file] NVARCHAR(400) NULL,
-    [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    CONSTRAINT [PK_daily_log_entries] PRIMARY KEY ([rig], [date], [shift], [equip])
+    [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME()
 );
 GO
-
+CREATE INDEX [IX_daily_log_entries_rig] ON dbo.[daily_log_entries] ([rig]);
+GO
 IF OBJECT_ID('dbo.help_requests','U') IS NULL
 CREATE TABLE dbo.[help_requests] (
-    [requestId] NVARCHAR(400) NOT NULL,
+    [requestId] NVARCHAR(200) NOT NULL,
     [rigKey] NVARCHAR(400) NULL,
     [rig] NVARCHAR(400) NULL,
     [subject] NVARCHAR(MAX) NULL,
@@ -219,7 +220,7 @@ IF OBJECT_ID('dbo.marine_scores','U') IS NULL
 CREATE TABLE dbo.[marine_scores] (
     [rig] NVARCHAR(400) NULL,
     [date] NVARCHAR(400) NULL,
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [item] NVARCHAR(400) NULL,
     [score] NVARCHAR(400) NULL,
     [comment] NVARCHAR(MAX) NULL,
@@ -230,7 +231,7 @@ GO
 
 IF OBJECT_ID('dbo.oem_copies','U') IS NULL
 CREATE TABLE dbo.[oem_copies] (
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [rig] NVARCHAR(400) NULL,
     [date] NVARCHAR(400) NULL,
     [reporttype] NVARCHAR(400) NULL,
@@ -253,11 +254,11 @@ GO
 
 IF OBJECT_ID('dbo.problems','U') IS NULL
 CREATE TABLE dbo.[problems] (
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [bytes] INT NULL,
     [why] NVARCHAR(MAX) NULL,
     [modified] NVARCHAR(400) NULL,
-    [kind] NVARCHAR(400) NOT NULL,
+    [kind] NVARCHAR(200) NOT NULL,
     [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT [PK_problems] PRIMARY KEY ([file], [kind])
 );
@@ -268,7 +269,7 @@ CREATE TABLE dbo.[r53_events] (
     [rig] NVARCHAR(400) NULL,
     [date] NVARCHAR(400) NULL,
     [equip] NVARCHAR(400) NULL,
-    [item] NVARCHAR(400) NOT NULL,
+    [item] NVARCHAR(200) NOT NULL,
     [mfr] NVARCHAR(400) NULL,
     [model] NVARCHAR(400) NULL,
     [obsfailure] NVARCHAR(400) NULL,
@@ -277,7 +278,7 @@ CREATE TABLE dbo.[r53_events] (
     [findings] NVARCHAR(MAX) NULL,
     [lessons] NVARCHAR(MAX) NULL,
     [source] NVARCHAR(400) NULL,
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT [PK_r53_events] PRIMARY KEY ([file], [item])
 );
@@ -285,7 +286,7 @@ GO
 
 IF OBJECT_ID('dbo.reports','U') IS NULL
 CREATE TABLE dbo.[reports] (
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [rig] NVARCHAR(400) NULL,
     [reporttype] NVARCHAR(400) NULL,
     [type] NVARCHAR(400) NULL,
@@ -315,33 +316,33 @@ GO
 
 IF OBJECT_ID('dbo.reports__actionItems','U') IS NULL
 CREATE TABLE dbo.[reports__actionItems] (
-    [file] NVARCHAR(400) NOT NULL,
-    [desc] NVARCHAR(MAX) NOT NULL,
+    [file] NVARCHAR(400) NULL,
+    [desc] NVARCHAR(MAX) NULL,
     [sys] NVARCHAR(400) NULL,
     [resp] NVARCHAR(400) NULL,
     [target] NVARCHAR(400) NULL,
     [deadline] NVARCHAR(400) NULL,
     [leftWithRig] NVARCHAR(400) NULL,
     [hasPhoto] NVARCHAR(400) NULL,
-    [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    CONSTRAINT [PK_reports__actionItems] PRIMARY KEY ([file], [desc])
+    [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME()
 );
 GO
-
+CREATE INDEX [IX_reports__actionItems_file] ON dbo.[reports__actionItems] ([file]);
+GO
 IF OBJECT_ID('dbo.reports__criticalItems','U') IS NULL
 CREATE TABLE dbo.[reports__criticalItems] (
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(400) NULL,
     [done] NVARCHAR(400) NULL,
     [equip] NVARCHAR(400) NULL,
-    [sfi] NVARCHAR(400) NOT NULL,
+    [sfi] NVARCHAR(400) NULL,
     [date] NVARCHAR(400) NULL,
-    [issue] NVARCHAR(MAX) NOT NULL,
+    [issue] NVARCHAR(MAX) NULL,
     [mit] NVARCHAR(MAX) NULL,
-    [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-    CONSTRAINT [PK_reports__criticalItems] PRIMARY KEY ([file], [sfi], [issue])
+    [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME()
 );
 GO
-
+CREATE INDEX [IX_reports__criticalItems_file] ON dbo.[reports__criticalItems] ([file]);
+GO
 IF OBJECT_ID('dbo.rig_checks','U') IS NULL
 CREATE TABLE dbo.[rig_checks] (
     [rig] NVARCHAR(400) NULL,
@@ -352,7 +353,7 @@ CREATE TABLE dbo.[rig_checks] (
     [supervisor] NVARCHAR(400) NULL,
     [system] NVARCHAR(400) NULL,
     [item] NVARCHAR(400) NULL,
-    [itemKey] NVARCHAR(400) NOT NULL,
+    [itemKey] NVARCHAR(200) NOT NULL,
     [value] NVARCHAR(400) NULL,
     [unit] NVARCHAR(400) NULL,
     [pass] NVARCHAR(400) NULL,
@@ -361,7 +362,7 @@ CREATE TABLE dbo.[rig_checks] (
     [tp] NVARCHAR(400) NULL,
     [dp] NVARCHAR(400) NULL,
     [photos] INT NULL,
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [loaded_at] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
     CONSTRAINT [PK_rig_checks] PRIMARY KEY ([file], [itemKey])
 );
@@ -371,7 +372,7 @@ IF OBJECT_ID('dbo.topset_investigations','U') IS NULL
 CREATE TABLE dbo.[topset_investigations] (
     [rig] NVARCHAR(400) NULL,
     [date] NVARCHAR(400) NULL,
-    [file] NVARCHAR(400) NOT NULL,
+    [file] NVARCHAR(200) NOT NULL,
     [title] NVARCHAR(MAX) NULL,
     [status] NVARCHAR(400) NULL,
     [equipment] NVARCHAR(400) NULL,
