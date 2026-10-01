@@ -1,6 +1,6 @@
 # Roughneck Fitness (working name)
 
-Online fitness coaching and training plans. Personal brand built on a documented transformation: 72 lb down, bodybuilder physique, 500+ days sober, filmed since June 2025. Oil-and-gas identity as homage. Owner is on a UK Level 3 personal-trainer course.
+Online fitness coaching and training plans. Personal brand built on a documented transformation: 72 lb down, bodybuilder physique, 500+ days sober, filmed since July 2025. Oil-and-gas identity as homage. Owner is on a UK Level 3 personal-trainer course.
 
 Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a client (portfolio piece); nothing personal crosses over to the studio site.
 
@@ -51,7 +51,7 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 - `assets/before/`: three "before" stills (bedroom, mirror, beach with a beer). The beach one is the sobriety "before"; the mirror one is the physique "before".
 - Pool photo with wife: in, with her OK (28 Sept 2026).
 - Sobriety date: **2 April 2025**. A counter on the site computes days from that date (544 on 28 Sept 2026).
-- Transformation start: June 2025.
+- Transformation start: **2 July 2025**, with coach Shaun Joseph Tavenier. Day-one photo: `assets/before/before-home-front.jpg`.
 
 ## Still needed to build the site
 - Name and domain.

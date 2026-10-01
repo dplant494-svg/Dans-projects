@@ -21,7 +21,7 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 ## Facts the page states (check each)
 - 72 lb lost.
 - Sober since 2 April 2025 (counter is computed live from this date in the visitor's local time).
-- Training filmed since June 2025 ("15 months, documented" in the stats strip: update the number or make it live).
+- Programme started 2 July 2025 (day-one photo on the site). "15 months, documented" in the stats strip is right until November 2026; then update or make it live.
 - Level 3 PT qualification in progress; one-to-one coaching opens only after it's done and insured. The plans are sold as programmes with general diet guidance, and say so.
 
 ## Images
