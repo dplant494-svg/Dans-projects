@@ -1,7 +1,7 @@
 # The database, built without IT — the order of work from 1 October 2026
 
-**Owner:** Dan · **Engine:** the Fabric SQL database already in Dan's workspace (an Azure SQL database; created
-13 September on the Fabric trial) · **Design on record:** timeline reply §1.1, §4, §12 and the tools session's
+**Owner:** Dan · **Engine:** the Fabric SQL database `SACRED DATA` in Dan's workspace (an Azure SQL database, created
+1 October on the Fabric trial; the 13 September one was a test) · **Design on record:** timeline reply §1.1, §4, §12 and the tools session's
 §7 (relational core, raw payload kept, long-and-narrow readings, the scanner's reading-key convention, one
 definition of `needs_attention`, Azure SQL for the no-install scanner) · **Plan items:** 39 (this), 22 of the
 programme chart (M3, M6, M9, M10).
@@ -30,8 +30,13 @@ Seventeen tables today:
 `marine_scores`, `topset_investigations`, `compliance_checklists`, `oem_copies`, `aab_records`, `aab_acks`,
 `aab_status`, `aab_status__ackList`, `help_requests`, `problems`.
 
-Not in v1 of the export: the BOP planning snapshots, the SSCE requests and the precharge inbox (each has its own
-data file today; v2 of the export adds them once the first seventeen load cleanly).
+**v2 (scanner v2.76, 1 Oct, Dan: "what about precharges? all of our acknowledges and requests?"):** the outputs
+with their own data files are in too: `precharge_requests` (the inbox index: every request, its status new or
+issued, resubmitted or not), `precharge_issued` (every issued sheet by rig, well and stack, with its time; the
+sheets themselves are rows in `reports`), `help_acks` (the Help Centre's acknowledge, update and close records),
+`ssce_requests` (and their decisions), `bwm_snapshots` (the BOP planning snapshots, with child tables for their
+rows). The export now runs at the end of the scan so every output is in it. DDL for the new tables:
+`database/ddl-v2-add.sql`, run once after `ddl-v1.sql`. Schema 2 in the manifest.
 
 **Install on Dan's PC (one line in config.json, then one scan):**
 
