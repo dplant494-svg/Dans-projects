@@ -41,11 +41,11 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 
 ## Bio (written 30 Sept from the coach's own share; source document kept off the repo)
 
-**Short (site, proposals, press):** Coach Dan Plant, former rig worker turned coach. Nearly twenty years in oil and gas as a subsea engineer, twenty-eight days on and twenty-eight off. Trained for twenty-five years without ever having the consistency; sober since 2 April 2025, and that changed. 72 lb down since, every step filmed. Training as a personal trainer. Roughneck Fitness: plans for the gym, the rig and the hotel room, diet included, from someone who did the turnaround himself.
+**Short (site, proposals, press):** Coach Dan Plant, former rig worker turned coach. Nearly twenty years in oil and gas as a subsea engineer, twenty-eight days on and twenty-eight off. Trained for twenty-five years without ever having the consistency. Sober since 2 April 2025 with the help of a programme he doesn't name, and coached into shape by Shaun Joseph Tavenier (IFBB pro, former Mr Olympia competitor), whose ethos he coaches: do what you're told, follow the process. 72 lb down since, every step filmed. Training as a personal trainer. Roughneck Fitness: plans for the gym, the rig and the hotel room, diet included, from someone who did the turnaround himself.
 
 **Instagram (150 chars):** `72 lb down · sober since 2.4.25 · former rig worker turned coach · plans for gym, rig & hotel · diet included · roughneck-fitness.com`
 
-**Rules for the story anywhere public (his call, 30 Sept):** the message, not the history. Full name is fine. Never name the fellowship (its own tradition asks members not to identify themselves as members in print, film or online: say "a helpline", "the programme"). No drinking anecdotes, no family detail, nothing about Norway.
+**Rules for the story anywhere public (his call, 30 Sept):** the message, not the history. Full name is fine. Never name the fellowship (its own tradition asks members not to identify themselves as members in print, film or online: say "a helpline", "the programme"). No drinking anecdotes, no family detail, nothing about Norway. He did not do it alone and the site must never say he did: the programme (unnamed) and his coach Shaun get the credit.
 
 ## Assets so far
 - `assets/before/`: three "before" stills (bedroom, mirror, beach with a beer). The beach one is the sobriety "before"; the mirror one is the physique "before".

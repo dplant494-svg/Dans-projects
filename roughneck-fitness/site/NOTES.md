@@ -16,7 +16,7 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 | Instagram `#` | footer | the handle |
 | Before photo | done: pool-bar photo, 2024, confirmed | |
 | Prices £39 / £89 / £199 | plans and coaching | confirmed prices |
-| Story text | done 30 Sept from the coach's own written share, cut to the message only (his instruction): no drinking history, no fellowship name, no family detail. |
+| Story text | done 1 Oct: the message only, no drinking history, no family detail. The fellowship is "the programme and the people in it", never named. Credits his coach Shaun Joseph Tavenier (IFBB pro, former Mr Olympia competitor): **confirm spelling, that he's happy to be named, and the credentials, before launch.** |
 
 ## Facts the page states (check each)
 - 72 lb lost.
