@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.74'
+$ScriptVersion = '2.75'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -117,6 +117,14 @@ if (-not [System.IO.Path]::IsPathRooted($outputFile)) {
 # 'dashboardUrl' makes each digest link back to its report on the dashboard;
 # 'copilotUrl' is the agent's share link, shown on the dashboard as
 # 'Ask Copilot'. All three optional; nothing happens when they are absent.
+# v2.75: 'databaseExportPath' names a folder (a synced SharePoint folder, like the digests) into
+# which every full scan writes the normalised export for the database loader: one UTF-8 CSV per
+# table (long and narrow where the data is), flattened from the same arrays reports-data.js
+# carries, plus export_manifest.json with the schema version and row counts. Absent = no export.
+$databaseExportPath = ''
+if ($config.PSObject.Properties['databaseExportPath'] -and $config.databaseExportPath) {
+    $databaseExportPath = [Environment]::ExpandEnvironmentVariables([string]$config.databaseExportPath)
+}
 $digestPath = ''
 if ($config.PSObject.Properties['digestPath'] -and $config.digestPath) {
     $digestPath = [Environment]::ExpandEnvironmentVariables([string]$config.digestPath)
@@ -3032,6 +3040,89 @@ $payload = [pscustomobject]@{
 $marineRigCount = @($marineSorted | ForEach-Object { $_.rig } | Where-Object { $_ } | Sort-Object -Unique).Count
 if ($marineSorted.Count -gt 0) { Write-Host "Marine Integrity (archived, retired at WCGRRT REV 155): $($marineSorted.Count) record(s) across $marineRigCount rig(s)" -ForegroundColor Cyan }
 Write-Host ("CBM posts under the generic 'Ram Block' class (before the block-type split, rolling handoff entry 30.3): {0}{1}" -f $bareRamBlockFiles.Count, $(if ($bareRamBlockFiles.Count) { ' - ' + (($bareRamBlockFiles.Keys | Sort-Object) -join ', ') } else { ' - none' })) -ForegroundColor Cyan
+
+# ---------------------------------------------------------------------------
+# v2.75: the normalised export for the database (DATABASE-BUILD-PLAN.md). Every array in the
+# payload becomes one CSV; a nested array of objects becomes a child CSV named parent__property
+# carrying the parent's key columns; a nested object is flattened as property_field; an array
+# of scalars is joined with '; '. Nothing is recomputed: the rows are the dashboard's own.
+$DatabaseExportSchema = 1
+function ConvertTo-ExportScalar { param($Value)
+    if ($null -eq $Value) { return '' }
+    if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }
+    if ($Value -is [bool]) { return $(if ($Value) { 'true' } else { 'false' }) }
+    return [string]$Value
+}
+function ConvertTo-ExportArray { param($Value)   # a plain object[] from any array or list, without the @() operator (it throws 'Argument types do not match' on List[object] contents here)
+    $out = New-Object System.Collections.ArrayList
+    if ($null -eq $Value) { return $out.ToArray() }
+    if ($Value -is [string] -or -not ($Value -is [System.Collections.IEnumerable])) { [void]$out.Add($Value); return $out.ToArray() }
+    foreach ($x in $Value) { [void]$out.Add($x) }
+    return $out.ToArray()
+}
+function Test-ExportObject { param($Value) return ($null -ne $Value -and -not ($Value -is [string]) -and -not ($Value -is [ValueType]) -and (($Value -is [System.Collections.IDictionary]) -or ($Value -is [System.Management.Automation.PSObject]) -or ($Value -is [System.Management.Automation.PSCustomObject])) -and -not ($Value -is [System.Array])) }
+function Export-DatabaseTable {
+    param([string]$Name, $Rows, [string[]]$KeyCols, [hashtable]$Tables)
+    $flat = New-Object System.Collections.Generic.List[object]
+    $children = @{}
+    foreach ($row in (ConvertTo-ExportArray $Rows)) {
+        if ($null -eq $row) { continue }
+        $o = [ordered]@{}
+        foreach ($k in (Get-KeyNames $row)) {
+            $ks = [string]$k; $v = Get-Prop $row $ks
+            if ($v -is [System.Array] -or ($v -is [System.Collections.IList] -and -not ($v -is [string]))) {
+                $items = ConvertTo-ExportArray $v
+                if ($items.Count -gt 0 -and (Test-ExportObject $items[0])) {
+                    if (-not $children.ContainsKey($ks)) { $children[$ks] = New-Object System.Collections.Generic.List[object] }
+                    foreach ($it in $items) {
+                        $c = [ordered]@{}
+                        foreach ($kc in $KeyCols) { $c[$kc] = ConvertTo-ExportScalar (Get-Prop $row $kc) }
+                        foreach ($ck in (Get-KeyNames $it)) { $cv = Get-Prop $it ([string]$ck); if ($cv -is [System.Array] -or ($cv -is [System.Collections.IList] -and -not ($cv -is [string]))) { $c[[string]$ck] = ((ConvertTo-ExportArray $cv | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') } elseif (Test-ExportObject $cv) { $c[[string]$ck] = ($cv | ConvertTo-Json -Compress -Depth 6) } else { $c[[string]$ck] = ConvertTo-ExportScalar $cv } }
+                        $children[$ks].Add([pscustomobject]$c) | Out-Null
+                    }
+                    $o[$ks + '_count'] = $items.Count
+                } else { $o[$ks] = (($items | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') }
+            }
+            elseif (Test-ExportObject $v) { foreach ($nk in (Get-KeyNames $v)) { $nv = Get-Prop $v ([string]$nk); if ($nv -is [System.Array] -or ($nv -is [System.Collections.IList] -and -not ($nv -is [string]))) { $o[$ks + '_' + $nk] = ((ConvertTo-ExportArray $nv | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') } elseif (Test-ExportObject $nv) { $o[$ks + '_' + $nk] = ($nv | ConvertTo-Json -Compress -Depth 6) } else { $o[$ks + '_' + $nk] = ConvertTo-ExportScalar $nv } } }
+            else { $o[$ks] = ConvertTo-ExportScalar $v }
+        }
+        $flat.Add([pscustomobject]$o) | Out-Null
+    }
+    $Tables[$Name] = $flat
+    foreach ($ck in $children.Keys) { $Tables[$Name + '__' + $ck] = $children[$ck] }
+}
+if ($databaseExportPath) {
+    try {
+        if (-not (Test-Path -Path $databaseExportPath)) { New-Item -ItemType Directory -Path $databaseExportPath -Force | Out-Null }
+        $exportTables = @{}
+        Export-DatabaseTable -Name 'reports' -Rows $payload.reports -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'daily_log_entries' -Rows $payload.dailyLog.entries -KeyCols @('rig','month','day') -Tables $exportTables
+        Export-DatabaseTable -Name 'r53_events' -Rows $payload.dailyLog.r53Events -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'cbm_grades' -Rows $payload.cbmGrades -KeyCols @('file','itemKey') -Tables $exportTables
+        Export-DatabaseTable -Name 'rig_checks' -Rows $payload.rigChecks -KeyCols @('file','itemKey') -Tables $exportTables
+        Export-DatabaseTable -Name 'marine_scores' -Rows $payload.marineScores -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'topset_investigations' -Rows $payload.topsetInvestigations -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'compliance_checklists' -Rows $payload.complianceChecklists -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'oem_copies' -Rows $payload.oemCopies -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'aab_records' -Rows $payload.aabRecords -KeyCols @('aabNumber','revision') -Tables $exportTables
+        Export-DatabaseTable -Name 'aab_acks' -Rows $payload.aabAcks -KeyCols @('file') -Tables $exportTables
+        Export-DatabaseTable -Name 'aab_status' -Rows $payload.aabStatus -KeyCols @('aabNumber','revision','rigKey') -Tables $exportTables
+        Export-DatabaseTable -Name 'help_requests' -Rows $payload.helpRequests -KeyCols @('requestId') -Tables $exportTables
+        Export-DatabaseTable -Name 'problems' -Rows $payload.problems -KeyCols @('file') -Tables $exportTables
+        $manifestTables = New-Object System.Collections.Generic.List[object]
+        $exportRows = 0
+        foreach ($tn in ($exportTables.Keys | Sort-Object)) {
+            $rows = $exportTables[$tn].ToArray(); $fn = "export_$tn.csv"; $fp = Join-Path $databaseExportPath $fn
+            if ($rows.Count -gt 0) { $rows | Export-Csv -Path $fp -NoTypeInformation -Encoding UTF8 } else { Set-Content -Path $fp -Value '' -Encoding UTF8 }
+            $cols = New-Object System.Collections.ArrayList; if ($rows.Count) { foreach ($pn in $rows[0].PSObject.Properties.Name) { [void]$cols.Add([string]$pn) } }
+            $manifestTables.Add([pscustomobject]@{ table = $tn; file = $fn; rows = $rows.Count; columns = $cols.ToArray() }) | Out-Null
+            $exportRows += $rows.Count
+        }
+        $manifest = [pscustomobject]@{ schemaVersion = $DatabaseExportSchema; scanner = $ScriptVersion; generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); tables = $manifestTables.ToArray() }
+        Set-Content -Path (Join-Path $databaseExportPath 'export_manifest.json') -Value ($manifest | ConvertTo-Json -Depth 6) -Encoding UTF8
+        Write-Host "Database export: $($exportTables.Count) table(s), $exportRows row(s), schema $DatabaseExportSchema to $databaseExportPath" -ForegroundColor Cyan
+    } catch { Write-Warning "Database export failed: $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
+}
 
 $phaseTimes = [ordered]@{}
 $jsonOut = $payload | ConvertTo-Json -Depth 10
