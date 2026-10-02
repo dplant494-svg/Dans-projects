@@ -71,7 +71,7 @@ by Dan against the live page. Dan's time: about one day per tab, eight days.
 | Intake dual-write | the HTTP trigger flow gains one action: send the file to the Lovable endpoint as well as SharePoint; the tools do not change | 0.5 day |
 | Notification flows | unchanged; the dashboard link in each becomes the Lovable URL (one field per flow, 13 email cards) | 0.5 day |
 | Receipts | written by the platform instead of the scanner; same content | with the builder |
-| Ask SACRED AI | re-point the Copilot Studio agent at the new source, or an assistant inside the app; decide after the render test | 1 day |
+| Ask SACRED AI | an assistant inside the app, calling the Claude API from a server-side function with the database as its source (2 Oct, Dan: Copilot Studio is retired at cutover, which also closes the Teams app approval that has waited since 16 Sep). Needs: the API key held as a platform secret, never in the page; the security review to cover report text and names leaving the tenancy for the model call; the same display rule (an answer is an answer, never a recorded fact); the rig user signed in before asking | 2 days |
 | Freshness alert | the platform's own monitoring replaces the hourly Digests check | 0.5 day |
 | Maximo item export | the daily 06:00 file loads into the new store once the landing folder is known (same open item as today) | 0.5 day |
 
