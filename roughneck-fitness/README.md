@@ -51,6 +51,7 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 - `assets/before/`: three "before" stills (bedroom, mirror, beach with a beer). The beach one is the sobriety "before"; the mirror one is the physique "before".
 - Pool photo with wife: in, with her OK (28 Sept 2026).
 - Sobriety date: **2 April 2025**. A counter on the site computes days from that date (544 on 28 Sept 2026).
+- NABBA show prep, spring 2026: 18 weeks, reached stage condition, missed the show because he was offshore on rotation. On the site as one paragraph. Prep photos/videos in Drive `BODYBUILDING/NABBA PREP 2026` (weeks 18 down to 10).
 - Transformation start: **2 July 2025**, with coach Shaun Joseph Tavenier. Day-one photo: `assets/before/before-home-front.jpg`.
 
 ## Still needed to build the site

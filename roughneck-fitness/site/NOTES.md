@@ -22,6 +22,7 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 - 72 lb lost.
 - Sober since 2 April 2025 (counter is computed live from this date in the visitor's local time).
 - Programme started 2 July 2025 (day-one photo on the site). "15 months, documented" in the stats strip is right until November 2026; then update or make it live.
+- NABBA show prep spring 2026, 18 weeks, missed the show (offshore). Stated 2 Oct from Dan's own words.
 - Level 3 PT qualification in progress; one-to-one coaching opens only after it's done and insured. The plans are sold as programmes with general diet guidance, and say so.
 
 ## Images
