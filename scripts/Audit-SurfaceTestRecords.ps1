@@ -34,6 +34,7 @@ if ($script:UseSerializer) {
     Add-Type -AssemblyName System.Web.Extensions
     $script:ser = New-Object System.Web.Script.Serialization.JavaScriptSerializer
     $script:ser.MaxJsonLength = [int]::MaxValue
+    $script:ser.RecursionLimit = 1000
 }
 function Read-Json([string]$path) {
     $raw = [IO.File]::ReadAllText($path)
@@ -59,14 +60,20 @@ function Test-Key($node, [string]$name) {
     if ($node -is [System.Collections.IDictionary]) { return [bool]($node.Keys -contains $name) }
     return $false
 }
+# Value lookup by key, case-insensitive, returning the value under the key as actually
+# spelled. The serializer's Dictionary on Windows PowerShell is case-sensitive and the
+# tools write some keys in lower case (the scanner learned this with 'reportdate' in
+# September), so a lookup by the expected spelling alone returns nothing there.
 function Get-Val($node, [string]$name) {
-    if (Test-Key $node $name) { return $node[$name] }
+    if ($node -is [System.Collections.IDictionary]) {
+        foreach ($k in $node.Keys) { if ([string]$k -eq $name) { return $node[$k] } }
+    }
     return $null
 }
 function Test-Blank($v) { return ($null -eq $v) -or ([string]$v).Trim() -eq '' }
 
 $rows = New-Object System.Collections.ArrayList
-$script:files = 0; $script:unreadable = 0; $script:sbopTiles = 0; $script:ehbsTests = 0
+$script:files = 0; $script:unreadable = 0; $script:sbopTiles = 0; $script:ehbsTests = 0; $script:firstKeys = ''
 
 function Walk($node, [string]$file, [string]$rig, [string]$date) {
     if ($node -is [System.Collections.IDictionary]) {
@@ -74,7 +81,7 @@ function Walk($node, [string]$file, [string]$rig, [string]$date) {
         $sb = Get-Val $node 'sbopData'
         if ($sb -is [System.Collections.IDictionary]) {
             $script:sbopTiles++
-            $tt = [string](Get-Val $sb 'testType')
+            $tt = [string](Get-Val $sb 'testType'); if ($tt -eq '') { $tt = [string](Get-Val $sb 'testtype') }
             $soak = Get-Val $sb 'soak'
             $filled = 0
             if ($soak -is [System.Collections.IDictionary]) {
@@ -107,6 +114,7 @@ foreach ($folder in $Folders) {
         $script:files++
         $j = Read-Json $_.FullName
         if ($null -eq $j) { $script:unreadable++; return }
+        if (-not $script:firstKeys) { $script:firstKeys = (@($j.Keys | ForEach-Object { [string]$_ }) -join ',') + ' [' + $j.GetType().Name + ']' }
         $meta = Get-Val $j 'meta'
         $rig = ''; $date = ''
         if ($meta -is [System.Collections.IDictionary]) {
@@ -118,6 +126,11 @@ foreach ($folder in $Folders) {
     }
 }
 
+if ($script:files -gt 0 -and $script:sbopTiles -eq 0 -and $script:ehbsTests -eq 0) {
+    Write-Host ""
+    Write-Host "  NOTE: no surface-test tiles or EHBS tests were found in any file. If posted surface tests exist,"
+    Write-Host "  send this line to the dashboard session: first file root keys = $($script:firstKeys)"
+}
 $rows | Sort-Object finding, rig, date | Export-Csv -Path $OutCsv -NoTypeInformation -Encoding UTF8
 $aCount = @($rows | Where-Object { $_.finding -like 'A:*' }).Count
 $bCount = @($rows | Where-Object { $_.finding -like 'B:*' }).Count
