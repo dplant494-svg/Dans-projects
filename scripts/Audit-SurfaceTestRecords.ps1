@@ -52,8 +52,15 @@ function Get-Pairs($node) {
     }
     return ,$list
 }
+# Key test that works on both shapes: the JavaScriptSerializer's Dictionary<string,object>
+# (Windows PowerShell 5.1, whose one-argument Contains is not callable from PowerShell) and
+# the Hashtable from ConvertFrom-Json -AsHashtable (PowerShell 7).
+function Test-Key($node, [string]$name) {
+    if ($node -is [System.Collections.IDictionary]) { return [bool]($node.Keys -contains $name) }
+    return $false
+}
 function Get-Val($node, [string]$name) {
-    if ($node -is [System.Collections.IDictionary] -and $node.Contains($name)) { return $node[$name] }
+    if (Test-Key $node $name) { return $node[$name] }
     return $null
 }
 function Test-Blank($v) { return ($null -eq $v) -or ([string]$v).Trim() -eq '' }
@@ -78,7 +85,7 @@ function Walk($node, [string]$file, [string]$rig, [string]$date) {
             }
         }
         # B. EHBS timer delay
-        if ($node.Contains('ehbs_tim_delay') -or $node.Contains('ehbs_tim_csrStops')) {
+        if ((Test-Key $node 'ehbs_tim_delay') -or (Test-Key $node 'ehbs_tim_csrStops')) {
             $script:ehbsTests++
             $a = Get-Val $node 'ehbs_tim_csrStops'; $b = Get-Val $node 'ehbs_tim_shearStarts'; $d = Get-Val $node 'ehbs_tim_delay'
             if (-not (Test-Blank $a) -and -not (Test-Blank $b) -and (Test-Blank $d)) {
