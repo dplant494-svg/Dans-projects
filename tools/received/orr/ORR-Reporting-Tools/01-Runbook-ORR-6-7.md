@@ -111,7 +111,25 @@ revision folder is ever edited after it ships, every previous revision is intact
 no state to migrate: a report file written by an older revision is read by a newer one and vice
 versa, because payload keys are only ever added, never renamed or removed.
 
-## 8. The rule that protects the dashboard
+## 8. Release freeze before a training class or a fleet event
+
+A freeze is set when a date depends on the build standing still. The current one, set by Dan on
+2 October 2026:
+
+| | |
+|---|---|
+| Freeze from | **12 October 2026** |
+| Until | after the training class on 19 and 20 October |
+| Frozen builds | SSORT REV 156, WCGRRT REV 167 — whatever is live on the freeze date |
+| Ships anyway | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
+| Held | new NOV documents, new equipment classes, features, wording, cosmetics |
+
+Anything held is logged in `DASHBOARD-ROLLING-HANDOFF.md` with the date it was found, so nothing is
+lost, and shipped in order once the freeze lifts. The reason: training material, screenshots and a
+workbook are built against a specific revision, and a revision that moves underneath them makes the
+pack wrong rather than merely out of date.
+
+## 9. The rule that protects the dashboard
 
 **New payload keys only: additive, lower case, and announced in `DASHBOARD-ROLLING-HANDOFF.md`
 before they ship.** Never rename, re-type or remove an existing key; never change the filename

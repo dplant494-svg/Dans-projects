@@ -67,6 +67,57 @@ reply are in this pack:
 - **Module 1 is 08:30–10:00** on the divider (now slide 5) and in the script header, which also
   tells the trainer to be set up and past the badge check before Lee finishes.
 
+## Build freeze — 12 October 2026, set by Dan
+
+**From 12 October nothing ships to either tool before the class unless a rig is losing work.**
+
+| | |
+|---|---|
+| Freeze date | **12 October 2026** — the same day this pack goes final |
+| Class | 19 and 20 October 2026 |
+| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 167** |
+| What still ships during the freeze | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
+| What waits until after the class | new NOV documents, new equipment classes, new features, wording, cosmetics — however good |
+
+Anything found during the freeze is logged in `DASHBOARD-ROLLING-HANDOFF.md` and held. The reason
+for the date is plain: SSORT went 152 to 156 in four days, each for a good reason, and every one
+invalidated a badge screenshot and a frozen-build line in this pack. The pack cannot be final while
+the tool underneath it moves.
+
+## Build freeze — 12 October 2026, set by Dan
+
+**From 12 October nothing ships to either tool before the class unless a rig is losing work.**
+
+| | |
+|---|---|
+| Freeze date | **12 October 2026** — the same day this pack goes final |
+| Class | 19 and 20 October 2026 |
+| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 167** |
+| What still ships during the freeze | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
+| What waits until after the class | new NOV documents, new equipment classes, new features, wording, cosmetics — however good |
+
+Anything found during the freeze is logged in `DASHBOARD-ROLLING-HANDOFF.md` and held. The reason
+for the date is plain: SSORT went 152 to 156 in four days, each for a good reason, and every one
+invalidated a badge screenshot and a frozen-build line in this pack. The pack cannot be final while
+the tool underneath it moves.
+
+## Build freeze — 12 October 2026, set by Dan
+
+**From 12 October nothing ships to either tool before the class unless a rig is losing work.**
+
+| | |
+|---|---|
+| Freeze date | **12 October 2026** — the same day this pack goes final |
+| Class | 19 and 20 October 2026 |
+| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 167** |
+| What still ships during the freeze | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
+| What waits until after the class | new NOV documents, new equipment classes, new features, wording, cosmetics — however good |
+
+Anything found during the freeze is logged in `DASHBOARD-ROLLING-HANDOFF.md` and held. The reason
+for the date is plain: SSORT went 152 to 156 in four days, each for a good reason, and every one
+invalidated a badge screenshot and a frozen-build line in this pack. The pack cannot be final while
+the tool underneath it moves.
+
 ## Three findings that change what was planned
 
 1. **The exercise would have lost three reports in four.** SSORT names the posted file after the

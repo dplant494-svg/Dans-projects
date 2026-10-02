@@ -75,7 +75,7 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 
 **Outstanding, needs Dan:**
 - The deployed WCGRRT 167 and SSORT 156 files, to retake shots 1, 17, 18 and 19.
-- The freeze decision: 12 October, nothing ships after it unless a rig is losing work. Tell the tools session.
+- ~~The freeze decision~~ **Set by Dan 2 Oct: 12 October** (rolling handoff entry 48, runbook §8, pack v6).
 - The trainee list (names, rigs, how many), for the date allocation and the workbook covers. Ten assumed.
 - Which CoC tracker file the class sees on 20 October: the ported one if item 44 lands by 9 October.
 - After the class: delete the forty posts from PostedReports (and any OEM copies).
@@ -86,5 +86,10 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 - Lee's SPARC maintainer: the five-minute SPARC slide for "What is coming" (`TRAINING-HANDOFF-SPARC.md` §2).
 - Manpreet: the two fields carried through his refresh (item 44), and whether he attends for the CoC ten minutes.
 - Lee: the opening content for 08:00 on day 1 (safety minute, roles, expectations); the slide is in the deck for him.
-- Logistics (Houston office): one laptop per trainee with Edge, the two tools opened from the share, the dashboard,
-  the projector, printed workbooks. The office reaches the sacred server; nothing in the class needs a rig network.
+- Logistics (Houston office): **the superintendents bring their own laptops** (Dan, 2 Oct), so nothing to provide but
+  the projector and printed workbooks. Each laptop needs Edge and the office network to reach the sacred share and the
+  dashboard; the two tools are opened from the share (nothing installed). Before the room arrives: every laptop on the
+  network, both tools showing the frozen badge, Ctrl+F5 once.
+
+**2 Oct, late: pack v6** (freeze section added to the README, status and scripts; the README carries it three times, a paste slip to
+tell them). ORR return v3: runbook §8 records the freeze. Rolling handoff entry 48 is the freeze note; nothing shipped.

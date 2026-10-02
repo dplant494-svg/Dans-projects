@@ -36,17 +36,19 @@ must-fix — but a trainee comparing the workbook to the screen will notice.
 **Module 3's script covers the new behaviour** at steps 53a and 53b, so the trainer will not meet it
 cold whichever way the shots go.
 
-## 3. The thing actually worth deciding: when does the build freeze
+## 3. The build freeze — decided: 12 October
 
 SSORT has gone **152 → 153 → 154 → 155 → 156 in four days**, each for a good reason — a rig's bug
 report, a data-loss defect found underneath it, then two new NOV documents. Every one of those
 invalidates a badge screenshot and a "frozen build" line in this pack.
 
-The class is **19 October**. **A date after which nothing ships unless a rig is broken** would stop
-this pack chasing the tools. Suggested: **12 October**, the same day the pack goes final. Anything
-found after that is held unless it is losing someone's work.
+**Dan set it on 2 October: the freeze is 12 October 2026**, the same day this pack goes final.
+From that date nothing ships to either tool before the class unless a rig is losing work — data
+loss, a failed or silent post, anything stopping a rig recording or sending a report. New NOV
+documents, new classes and new features wait until after the 20th, however good.
 
-That is Dan's call, and it is the only thing from this side still open on the screenshots.
+So the frozen builds are whatever is live on 12 October. **Re-check shots 1 and 17 on that date**
+and retake them if the badge has moved; after that they cannot go stale again.
 
 ## The five that could never be captured, unchanged
 

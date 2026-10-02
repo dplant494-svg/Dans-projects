@@ -3,6 +3,8 @@
 **Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 167**, SSORT **REV 156**
 **Led by:** Dan (all four modules; Brad Waldron is not attending and nothing below depends on him)
 **Asset:** `SSCE Equipment` throughout. Nothing is posted on a real rig name.
+**Build freeze: 12 October 2026.** From that date neither tool changes before the class unless a rig
+is losing work, so what is written here will still be what is on screen on the 19th.
 
 **How to read this.** Numbered steps are what the trainer does and says. `SAY:` is a line to say more
 or less as written, because it is either a safety point or a thing people get wrong. `[SHOT n]` marks

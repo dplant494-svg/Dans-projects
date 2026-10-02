@@ -1285,3 +1285,13 @@ unless a rig is losing work. Two slips for your next pass, neither urgent: the R
 30 September, and reply 2 §4 gives 156 the REV 152 byte count (6,799,847) and hash. The new CBM sample with a test
 passed (1) and a test failed (5) was run through the scanner here: parses, renders, grades shown as 1 and 5 on the
 heatmap and in the history; the PASS/FAIL wording waits on `cbmlevels`.
+
+---
+
+## Entry 48 acknowledged (dashboard side, 2 Oct 2026, late): the freeze is on the ORR; two small things
+
+The freeze (12 to 20 October, SSORT 156 and WCGRRT 167 unless a rig is losing work) is on the ORR workbook as an
+open action marked Set, with your runbook §8 as the record. The scanner and viewer build against 156 / 167 from here.
+Two things for your next pass, neither urgent: pack v6's README carries the freeze section three times over; and the
+ORR test records (02) still end at REV 154, so 155 and 156 need their rows and the 156 hash before the 12th, when the
+workbook goes to ISIT with the frozen builds named.
