@@ -45,6 +45,8 @@ are missing rather than removed. The form and its posting code (`openSsceRequest
 the `ssce-request-form` markup) can be lifted from that file as they stand; the posting rules they follow are in
 `POSTCONTRACTFORDASHBOARDBUTTONS.md`.
 
+**Decision, 2 October (Dan): option 1.** The Request path and the two availability fields go back into the rebuilt tracker, ported by the SACRED session from its own build, and the scanner's write-back is re-pointed at the rebuilt file's data block. Plan item 44 has the order of work and the dates (port and scanner by 9 October; acceptance test before the 10 October decisions; live swap after). What SACRED needs from Manpreet: the two fields `available` and `assignedTo` carried through his refresh and rebuild scripts, so a Maximo refresh does not wipe the assignments.
+
 ## 3. Three ways to put it back, in order of preference
 
 1. **Port the Request path into the rebuilt tracker** (recommended). One button on a Shared Capital row, the same
