@@ -1,9 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SACRED to Production — programme chart, 1 October 2026 (draft 4)</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SACRED to Production — programme chart, 1 October 2026 (draft 5)</title>
 <style>
  @page { size: A4 landscape; margin: 9mm 10mm 9mm 10mm; }
  * { box-sizing: border-box; }
  body { font-family: "Segoe UI", Arial, Helvetica, sans-serif; color:#0a1530; margin:0; font-size:8.6pt; }
- header { background:#002C77; color:#fff; padding:8px 14px 7px; border-bottom:3px solid #EDB71E; display:flex; justify-content:space-between; align-items:flex-end; }
+ header { background:#002C77; color:#fff; padding:6px 14px 5px; border-bottom:3px solid #EDB71E; display:flex; justify-content:space-between; align-items:flex-end; }
  header .eyebrow { color:#EDB71E; font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
  header h1 { margin:2px 0 1px; font-size:14pt; font-weight:600; }
  header p { margin:0; color:#C9D4EA; font-size:8pt; }
@@ -56,8 +56,8 @@
 <div class="page">
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>SACRED to Production — programme chart</h1>
-<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 1 October 2026 by Dan Plant (draft 4: <b>the transfer moves to the week of 19 October</b>; <b>the database is built on Fabric by Dan and needs no IT resource</b>; <b>ISIT to name the production home</b>, the sacred server is the sandbox)</p></div>
-<div class="right">Critical path in red: the scanner leaves Dan's PC for the sacred server in the <b style="color:#fff">week of 19 October 2026</b> (Houston)<br>Every bar to the right of it moves day for day with it<br><b style="color:#fff">Open: sdrlazneuiis01d is the sandbox. ISIT to name the production home and the cutover</b><br>Database: built by Dan on Fabric, no IT resource required</div></header>
+<p>Dashboards, scanner, notification loops, Ask SACRED AI, database, training and handover · September 2026 to February 2027 · issued 1 October 2026 by Dan Plant (draft 5: <b>ISIT meeting 1 Oct</b>: UAT environment next, production go-live February 2027 with ISIT support funded from January, Lovable feasibility with Viren; transfer in the week of 19 October; database built on Fabric by Dan, no IT resource)</p></div>
+<div class="right">Critical path in red: the scanner leaves Dan's PC for the sacred server in the <b style="color:#fff">week of 19 October 2026</b> (Houston)<br>Every bar to the right of it moves day for day with it<br><b style="color:#fff">ISIT, 1 Oct: sandbox today, UAT next, production February 2027</b><br>Database: built by Dan on Fabric, no IT resource required</div></header>
 <div id="chart"></div>
 <div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on IT / ISIT</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 1 Oct</span></div>
 <footer>Sources: <code>DASHBOARD-PRODUCTION-TIMELINE-REPLY.md</code> (joint plan with the reporting-tools session, 11 to 14 Sep), <code>IT-REPLY-COPILOT-AGENT-QUESTIONS.md</code> (28 Sep), <code>SCANNER-SERVER-MIGRATION-IT-HANDOFF.md</code>, <code>WEEK-PLAN-2026-09-14.md</code>, <code>DATABASE-BUILD-PLAN.md</code> (1 Oct). Dates marked estimate are not commitments. Page 2 lists the milestones and what changed since the 11 September chart.</footer>
@@ -66,7 +66,7 @@
 <div class="page">
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>Milestones and what changed since the 11 September chart</h1>
-<p>Page 2 of 2 · 1 October 2026, draft 4</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from the week of 19 October: ISIT (Adam Snyder)</div></header>
+<p>Page 2 of 2 · 2 October 2026, draft 5</p></div><div class="right">Owner: Dan Plant · co-owner: Lee Arnold · server task from the week of 19 October: ISIT (Adam Snyder)</div></header>
 <div class="two"><div>
 <h2>Milestones</h2>
 <table><tr><th>#</th><th>Milestone</th><th>Date</th><th>Gate</th></tr>
@@ -88,7 +88,8 @@
 <tr><td class="n">M8b</td><td>Pilot validated by Dan and Lee; submitted for Architecture, Security and Governance review</td><td class="d">Nov 2026, estimate</td><td>M5, M8a</td></tr>
 <tr><td class="n">M9</td><td>Ask SACRED AI and Power BI reading the database; scanner dual-write (optional, once an app registration exists). <b>No IT resource: the database is already provisioned.</b></td><td class="d">Jan 2027, estimate</td><td>app registration only if dual-write is wanted</td></tr>
 <tr><td class="n">M10</td><td>Parity proven: the same pages fed from the database, files as fallback</td><td class="d">mid-Feb 2027</td><td>M6 + two-week window; an authenticated path to decide, not a provisioning ask</td></tr>
-<tr><td class="n">M11</td><td>ISIT accept the pages, scanner and task as a supported service, on the production home</td><td class="d">Feb 2027</td><td>M2a, M7, M8, M10</td></tr>
+<tr><td class="n">M4a</td><td><b>UAT environment</b> built by ISIT (Adam's estimate and the requirements next week; best-effort support until handover); wider vessel testing on it, sized to the 7 to 10 day heavy windows</td><td class="d">mid-Nov 2026, estimate</td><td>ISIT; rig access lifted (item 24)</td></tr>
+<tr><td class="n">M11</td><td><b>Production go-live</b>; ISIT accept the pages, scanner and task as a supported service, funded from January 2027</td><td class="d">Feb 2027</td><td>M2a, M4a, M7, M8, M10; budget Jan 2027</td></tr>
 </table>
 </div><div>
 <h2>What changed since the 11 September chart</h2>
@@ -96,19 +97,20 @@
 <li><b>The server transfer has a week and a person: the week of 19 October, Dan with Adam Snyder in Houston.</b> On the 11 September chart it was "copied, ISIT have not started". The copy is refreshed on the day, so the server gets the current scanner (v2.71 today), the state files and the config.</li>
 <li><b>Ask SACRED AI is live</b> (13 Sep) in Seadrill Apps PROD with web search and general knowledge off. Only the Teams app approval is outstanding, submitted 16 Sep. First rig test (West Capella) the day it is allowed.</li>
 <li><b>The database is built, by Dan, with no IT resource.</b> <code>SACRED DATA</code> is a Fabric SQL database in Dan's workspace (created 1 Oct; 22 tables, 6 views, one <code>needs_attention</code> definition). The scanner writes a normalised export on every run (schema 2: reports, rig checks, CBM, AAB, precharge requests and issued sheets, Help Centre records, SSCE requests, 21 tables) and a Dataflow Gen2 loads it under Dan's own sign-in. Nothing to provision, no secret, nothing installed. The January row is no longer an IT ask: the only cost item is Fabric capacity on Lee's cost centre when the trial ends about 12 November, and an app registration later if the scanner is to write directly.</li>
-<li><b>Three more notification loops exist:</b> CBM reports to NOV (proven 22 Sep, HTML attachment 28 Sep, go-live email to NOV in October), the AAB loop on the Seadrill Bulletin Board (proven end to end in test mode 28 Sep; pilot under a documented deviation with the MOC and HAZID while DIR-37-0161 is revised), and the TSC Help Centre (installed 29 Sep, flow 30 Sep). All share one pattern: post, scanner, page, notification with a dashboard link, receipt.</li>
+<li><b>Three more notification loops exist:</b> CBM reports to NOV (proven 22 Sep, test records attached 30 Sep), the AAB loop on the Seadrill Bulletin Board (proven in test mode 28 Sep; pilot under deviation with the MOC and HAZID), the TSC Help Centre (29 Sep). One pattern: post, scanner, page, notification with a dashboard link, receipt.</li>
 <li><b>Test mode</b> is built into every notification flow: while on, only the office list is mailed and the subject says so. No rig or NOV address receives a test.</li>
 <li><b>Monitoring:</b> the scanner writes its last-successful-scan stamp on every complete run (since 14 Sep). The hourly Digests freshness alert promised to IT is built in early October, before the move, and keeps watching after it.</li>
 <li><b>Training:</b> the two-day class in Houston, 19 and 20 October, the same week as the transfer: reporting tools on the Monday; dashboards, precharge process, AAB and Help Centre on the Tuesday. Packs final by 12 October.</li>
-<li><b>Scanner today:</b> v2.71, no modules, nothing installed, reads three SharePoint libraries through OneDrive sync, does a full parse only when something changed (about a second otherwise). The service account needs read on the three report libraries, write on Digests and on the two IIS folders. No secrets, nothing to rotate.</li>
+<li><b>Scanner today:</b> v2.76, no modules, nothing installed, reads three SharePoint libraries through OneDrive sync. The service account needs read on the three report libraries, write on Digests and the two IIS folders. No secrets.</li>
 <li><b>Removed from the chart:</b> the hosted application (Dan, 11 Sep). The programme ends with ISIT accepting the pages, scanner and task as a supported service.</li>
-<li><b>Draft 4, 1 October:</b> the transfer moves from Sunday 18 October to the week of 19 October (the workshop week, Dan in Houston); M5, M7 and M8 move a week with it. New critical item M2a: the sacred server is the sandbox, so even after the transfer nothing runs on a production server until ISIT name one and plan the cutover; it is not in the ORR and is now on the Open actions sheet (v2).</li>
-<li><b>Draft 3, 1 October:</b> the database rows are redrawn. M1b, M3 and the export half of M6 are done; M9 is no longer "first IT resource". The ISIT asks on this chart are now only the service account, the Teams approval, the 10 October decisions and the ORR configuration work.</li>
-<li><b>Draft 2, 1 October:</b> ISIT's Operational Readiness Review was gapped on 30 September (3 of 30 met, 26 dated with owners, 1 not applicable); its dated actions are a new section on page 1, with the ISIT decisions due 10 October, the handover list for the week of 19 October, the security submission by 31 October and the ManageEngine, CMDB and Service Desk configuration by 6 November. SSORT 153 is live and the test records reach NOV (Part D3 proven 30 Sep). The class sits inside Lee Arnold's WCE SME workshop, 19 to 22 October.</li>
+<li><b>Draft 5, 2 October, from ISIT's meeting notes of 1 October:</b> a UAT environment is the next step (Adam estimates; Dan and Adam define requirements and testers next week); production go-live February 2027 with full ISIT support funded from January, so everything before it is best effort; ISIT name the sandbox themselves and the rig access problem as "selective test provisioning", theirs to lift; a Lovable migration is proposed, Viren to confirm feasibility (one page on what SACRED is made of goes to him: the pages could move, the offline rig tools, the flows and the database cannot). New section on page 1.</li>
+<li><b>Draft 4, 1 October:</b> the transfer moved to the week of 19 October (M5, M7, M8 a week later); M2a added: the sacred server is the sandbox, ISIT to name the production home and plan the cutover.</li>
+<li><b>Draft 3, 1 October:</b> the database rows redrawn (M1b, M3 and the export half of M6 done; M9 no longer "first IT resource").</li>
 </ul>
 <h2>Open, waiting on others</h2>
 <ul>
 <li>Teams app approval for Ask SACRED AI (IT, submitted 16 Sep).</li>
+<li>UAT environment: Adam's effort estimate; Viren's Lovable feasibility; Infosys's supportability gaps and estimates (Saroj); Luis on timing and funding with Arnold and Torsten; rig access ("selective test provisioning") lifted for the testing rigs.</li>
 <li>Service account for the server task and the notification flows (ISIT, needed by the week of 19 Oct).</li>
 <li><b>The production home</b> (ISIT Infrastructure, decision 10 Oct): the sacred server is the sandbox; is it to become production, or is a production server built, and when is the cutover?</li>
 <li>Where Manpreet's daily 06:00 Maximo export lands (Manpreet, via Dan).</li>
@@ -119,7 +121,7 @@
 </div>
 
 <script>
-const LAB = 380, RH = 17;
+const LAB = 380, RH = 15.4;
 document.documentElement.style.setProperty('--lab', LAB+'px');
 document.documentElement.style.setProperty('--rh', RH+'px');
 const D = (m,d,y=2026)=>new Date(Date.UTC(y,m-1,d));
@@ -173,12 +175,18 @@ const rows = [
  ['ms','Security and architecture submission (M8b); intake URL rated; Fabric capacity decision', [['',D(10,31),'31 Oct']]],
  ['bar','ISIT: ManageEngine, CMDB, Service Desk; runbooks reviewed; retention; DR rebuild tested', [['plan',D(10,19),D(11,6),'6 Nov']]],
  ['bar','IIS authentication on the precharge folder and requests (F-25, F-70) before production', [['est',D(11,9),D(1,29,2027),'ISIT with Dan']]],
+ ['sec','ISIT meeting, 1 October: UAT, production February 2027, Lovable'],
+ ['bar','UAT environment (M4a): Adam\'s estimate, requirements and testers; ISIT build, best effort', [['wait',D(10,2),D(10,9),''],['est',D(10,12),D(11,13),'ISIT build; the transfer lands here if it is ready']]],
+ ['bar','Wider vessel testing on UAT, sized to the 7 to 10 day heavy windows; rig access lifted first', [['est',D(11,16),D(1,29,2027),'']]],
+ ['bar','Viren: Lovable feasibility (the pages could move; tools, flows and database stay)', [['wait',D(10,2),D(10,30),'decision; nothing duplicated until then']]],
+ ['bar','Saroj / Infosys: supportability gaps and estimates; Jason: 30-minute follow-up next week', [['wait',D(10,2),D(10,30),'']], [['',D(10,8),'Jason, follow-up']]],
+ ['bar','Luis: timing and funding with Arnold and Torsten; ISIT support funded from January', [['wait',D(10,2),D(12,18),'']], [['',D(1,4,2027),'budget release: full ISIT support']]],
  ['sec','People, training and handover'],
  ['ms','ISIT Operational Readiness Review: checklist gapped, live workbook v2 to IT', [['done',D(9,30),'30 Sep, done: 3 met, 26 dated, 1 n/a']]],
  ['bar','Packs final 12 Oct; WCE SME workshop Houston 19 to 22 Oct, class on days 1 and 2', [['plan',D(10,5),D(10,12),''],['plan crit',D(10,19),D(10,23),'workshop; UAT sign-off 20 Oct']]],
  ['bar','ISIT shadow-running the task and the pages', [['plan',D(11,13),D(1,29,2027),'']]],
  ['bar','Architecture, Security, Governance review (M8b); pilot validated by Dan and Lee', [['est',D(11,9),D(12,4),'']]],
- ['ms','ISIT accept the pages, scanner and task as a supported service (M11)', [['crit',D(2,26,2027),'']]],
+ ['ms','Production go-live; ISIT accept the pages, scanner and task as a supported service (M11)', [['crit',D(2,26,2027),'']]],
 ];
 for (const r of rows) {
   if (r[0]==='sec') { h += `<div class="row sec"><div class="lab">${r[1]}</div></div>`; continue; }
