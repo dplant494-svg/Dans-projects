@@ -1,52 +1,56 @@
-# Screenshots — status, 1 October 2026
+# Screenshots — status, 2 October 2026
 
-**Capture worked.** Your question in the pack v2 reply, answered: it started working late on
-30 September and **19 of the 24 shots were taken**, light mode, asset `SSCE Equipment` throughout,
-and nothing posted.
+**The dashboard session captured these itself.** Nothing is owed from the reporting-tools side and
+this item is closed here.
 
-**They were taken on WCGRRT REV 166 and SSORT REV 153.** Both tools moved to **REV 167** and
-**REV 154** on 1 October to fix the EHBS timer delay a rig reported, and a data-loss defect found
-underneath it (rolling handoff entry 45). **Two shots must be retaken: 1 and 17, the revision
-badges**, which now read the wrong number. Every other shot is unaffected — nothing visible in them
-changed between those builds.
+Two things to check before the pack goes final, both caused by the builds moving after the shots
+were taken rather than by anything wrong with the shots.
 
-This file replaces `07-SCREENSHOTS-NOT-YET-CAPTURED.txt`, which said capture was failing and is no
-longer true.
+## 1. Check the revision badges in shots 1 and 17
 
-## Captured (19)
+Those two are the only shots where the build number is the subject. The live builds are now:
 
-| Tool | Shots |
-|---|---|
-| WCGRRT (taken on REV 166) | **1** badge — **RETAKE** · **2** Visit Information populated (also serves **7**, Report Date) · **4** Daily Report Entry selected · **5** equipment entry · **6** captioned photographs · **9** restore bar · **10** BOP function test · **11** EDS Sequence 2 on West Polaris · **12** acoustic no-system on West Vela · **13** EHBS, sequenced class |
-| SSORT (taken on REV 153) | **17** badge — **RETAKE** · **18** Riser Adapter 1.1 · **19** grade 3 with the finding written · **20** the five-level scale · **21** attachments empty · **22** two files with task numbers and the running total · **23** packer attestation and the 42-slot requirement · **24** the Post to OEM button in context |
+| Tool | Revision | Deployed |
+|---|---|---|
+| **SSORT** | **REV 156** | 2 October |
+| **WCGRRT** | **REV 167** | 1 October |
 
-## Why no PNGs are in this zip
+If the shots were taken before 2 October the SSORT badge will read 153, 154 or 155. Any of those is
+wrong for the class and shot 17 needs retaking. Everything else in the set is unaffected — nothing
+visible in the other shots changed between those builds.
 
-The build session's capture tool returns images into the conversation, not files on disk, so there
-is nothing here to zip. The 19 images are in Dan's transcript for 30 September, each labelled with
-its filename from `05-Screenshot-List.md`; they can be saved from there in a few minutes.
+## 2. Shots 18 and 19 may show fewer grade rows than the class will see
 
-**If that is awkward, take them with the snipping tool instead** — `05-Screenshot-List.md` says
-exactly what must be on screen for each one, and every setup step needed to reach it is in
-`02-Walkthrough-Scripts.md`. Two of them need a moment's setup that is not obvious:
+**SSORT REV 156 changed what the CBM screen looks like**, and those two shots are of it:
 
-- **Shot 11 (EDS)** needs a real rig, not `SSCE Equipment` — West Polaris was used. Pick the
-  sequence as well, or the steps table does not render.
-- **Shot 23 (packer evidence)** needs the pre-deployment checklist's **own** BOP designation set to
-  Single **and** its cavity count set, or the cavity photograph slots do not exist at all. Worth
-  knowing for the class: a trainee who skips those two fields sees no cavity slots and could
-  reasonably conclude the checklist does not want them.
+- Riser Adapter now has **22 grade rows, not 11** — its Testing and Intrusive sections are graded
+  as well as General Inspections.
+- A grade row on a Testing or Intrusive task shows **1, 5 and N/A only**, with a yellow caveat line
+  reading *"NOV publishes only grades 1 and 5 for this item."*
+- There is a **23rd equipment class**, Riser Spider Assembly and Gimbal.
 
-## Five that cannot be captured, unchanged from the list
+If shots 18 and 19 were taken on REV 154 or earlier they show the old screen. They are still
+readable and the teaching point of each is unchanged, so this is a judgement call rather than a
+must-fix — but a trainee comparing the workbook to the screen will notice.
+
+**Module 3's script covers the new behaviour** at steps 53a and 53b, so the trainer will not meet it
+cold whichever way the shots go.
+
+## 3. The thing actually worth deciding: when does the build freeze
+
+SSORT has gone **152 → 153 → 154 → 155 → 156 in four days**, each for a good reason — a rig's bug
+report, a data-loss defect found underneath it, then two new NOV documents. Every one of those
+invalidates a badge screenshot and a "frozen build" line in this pack.
+
+The class is **19 October**. **A date after which nothing ships unless a rig is broken** would stop
+this pack chasing the tools. Suggested: **12 October**, the same day the pack goes final. Anything
+found after that is held unless it is losing someone's work.
+
+That is Dan's call, and it is the only thing from this side still open on the screenshots.
+
+## The five that could never be captured, unchanged
 
 **3**, **8** and the dialog in **24** are native browser dialogs, which the automation dismisses
-before a capture can happen; their text is quoted verbatim in the script, which is what the
-workbook needs. **15** (the post receipt) and **16** (the dashboard row) both require a successful
-post, and nothing is posted from a build session — take those two live, in module 2 or the
-exercise.
-
-## One change to the spec
-
-**The 1600 px width is dropped.** Emulating it only scales the page down to the pane and the text
-became unreadable. The 19 shots are at native width and sharp. For a workbook, legibility beats the
-nominal size.
+before a capture can happen; their text is quoted verbatim in the script, which is what the workbook
+needs. **15** (the post receipt) and **16** (the dashboard row) both require a successful post — take
+those live, in module 2 or the exercise.

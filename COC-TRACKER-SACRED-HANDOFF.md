@@ -32,6 +32,19 @@ Checked on the file uploaded 2 October (title "Seadrill — WCE Certificate of C
 - Annotations (compliance, remarks, Synergi number) are per browser, as the handoff says. That is fine for
   annotations; it is not a channel for requests, which have to leave the browser as a file.
 
+## 2a. Where the Request path came from, so nobody rebuilds it twice
+
+The Request button, the request form, the `ssce` folder in `APP_DATA` and the direct POST to the intake trigger
+were **built by the SACRED dashboard session in August and September 2026 on top of the REV6-era COC Dashboard**
+(repository commits "Add SSCE Requests Dashboard with approve/deny workflow and COC write-back", "Fix SSCE request
+form silently blocking submit", "Fix invisible radio buttons and checkboxes", "SSCE one-click posting"). That
+build is tracked in the SACRED repository as `requests-dashboard/coc-source/Seadrill_WCE_COC_Dashboard.html`
+(1.9 MB, 604 Shared Capital items with `available` / `assignedTo`), and it is the file on the SSORT share today.
+Manpreet's rebuild started from his own REV6 → REV7 → REV8 line and never had these additions, which is why they
+are missing rather than removed. The form and its posting code (`openSsceRequestForm`, `submitSsceRequest`,
+the `ssce-request-form` markup) can be lifted from that file as they stand; the posting rules they follow are in
+`POSTCONTRACTFORDASHBOARDBUTTONS.md`.
+
 ## 3. Three ways to put it back, in order of preference
 
 1. **Port the Request path into the rebuilt tracker** (recommended). One button on a Shared Capital row, the same

@@ -1,6 +1,6 @@
 # Day 1 walkthrough scripts — the reporting tools
 
-**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 167**, SSORT **REV 154**
+**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 167**, SSORT **REV 156**
 **Led by:** Dan (all four modules; Brad Waldron is not attending and nothing below depends on him)
 **Asset:** `SSCE Equipment` throughout. Nothing is posted on a real rig name.
 
@@ -10,7 +10,7 @@ a screenshot for the workbook; the numbering runs continuously 1–24 across all
 matches `TRAINING-Day1-Screenshot-List.md`. `TRAP:` is something the room will get wrong if it is not
 said out loud.
 
-**Before the room arrives:** open WCGRRT REV 167 and SSORT REV 154 in two browser tabs from
+**Before the room arrives:** open WCGRRT REV 167 and SSORT REV 156 in two browser tabs from
 `\\sdrlazneuiis01d.corp.local\sacred\` and `…\SSORT\`. In both tabs press **⊘ New Trip** so there is
 no leftover state from setting up. Have the dashboard open in a third tab on the SSCE Equipment
 filter. Confirm both tools show the frozen revision in the badge before you start — if either does
@@ -211,7 +211,7 @@ failed post looks like.
 ---
 
 # Module 3 — SSORT: CBM, the grade scale, pre-deployment, Post to OEM
-**13:00 – 14:30 · SSORT REV 154**
+**13:00 – 14:30 · SSORT REV 156**
 
 ### What they should be able to do by 14:30
 Complete a CBM inspection with grades, photographs and an attached test record; complete a
@@ -219,7 +219,7 @@ pre-deployment checklist; and send a CBM report to NOV.
 
 ### 1. SSORT is a different tool (5 min)
 
-45. Open SSORT. Point at the badge: **REV 154**. `[SHOT 17]`
+45. Open SSORT. Point at the badge: **REV 156**. `[SHOT 17]`
 46. **SAY:** "Different tool, different job, and the section list is different: CBM Inspection,
     Surface BOP Testing, Calculators, Pre-Deployment Checklist, Conditional Assessment, R53 Report.
     Vessel Information here, Visit Information over there."
@@ -228,7 +228,7 @@ pre-deployment checklist; and send a CBM report to NOV.
 
 47. Add **🩺 CBM Inspection**. Set **Rig / Vessel** to `SSCE Equipment`.
 48. Choose **Riser Adapter** from the equipment dropdown. `[SHOT 18]`
-49. **SAY:** "Twenty-two equipment classes, each one built from NOV's own condition-based monitoring
+49. **SAY:** "Twenty-three equipment classes, each one built from NOV's own condition-based monitoring
     schedule. What you see is what NOV asks for on that component — not a Seadrill invention."
 50. Walk section **1.1 General Inspections**. Grade task 1.1.1. `[SHOT 19]`
 51. Press the **ⓘ scale** button and show the five levels. `[SHOT 20]`
@@ -239,6 +239,15 @@ pre-deployment checklist; and send a CBM report to NOV.
     acceptable with findings, monitor. If you are tempted to put 2 because the equipment is going
     back in anyway, put 3 and write what you saw. The grade history per component is how the fleet
     spots a component going off."
+53a. **Scroll down to section 1.2 Testing and stop.** The grade row there shows **1, 5 and N/A
+    only**, with a yellow line saying *"NOV publishes only grades 1 and 5 for this item."*
+    **SAY:** "This is new. NOV grade their own pressure tests and dimensional checks as a pass or a
+    fail — grade 1 passed, grade 5 failed, no middle grade — so that is what the tool offers. A
+    test is an outcome, not a condition. You will see the same two buttons on every Testing and
+    Intrusive task in every class."
+53b. **SAY:** "So one CBM report now carries two different kinds of grade. On the inspection tasks
+    it is a condition, one to five. On the tests it is a pass or a fail. The note under each task
+    tells you which you are looking at — read it rather than assuming."
 54. Add a note and two photographs to the graded task.
 55. **SAY:** "Riser Adapter had no grading and no photographs at all until last week. Brad found it
     from the rig. If you find another one like it, say so — that is how it got fixed."
@@ -271,7 +280,7 @@ pre-deployment checklist; and send a CBM report to NOV.
     Set both, then show that a 7-cavity stack asks for **42 named slots** — 14 in each of the three
     sections, every box labelled for the position it belongs to (UBSR — FWD, UBSR — AFT, and so on).
 65. Show the twenty questions, the packer attestation and the cavity photographs.
-65. **SAY:** "The cavity photographs and the packer attestation are mandatory before posting. The
+66. **SAY:** "The cavity photographs and the packer attestation are mandatory before posting. The
     tool will stop you. That is not bureaucracy — it is the evidence that the stack was fit to run,
     and it is the first thing anyone asks for afterwards."
 

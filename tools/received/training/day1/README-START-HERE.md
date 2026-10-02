@@ -19,12 +19,12 @@ touches it.
 | 4 | `04-Questions-and-Answers.md` | Twelve questions, three per module, with answers for the trainer's copy. |
 | 5 | `05-Screenshot-List.md` | All 24 shots specified exactly, and which five cannot be captured. |
 | 6 | `06-Day-1-Deck.pptx` | The 19-slide deck with slides 3, 16, 17 and 18 edited. |
-| 7 | `07-SCREENSHOTS-STATUS.md` | **Capture worked** — 19 of 24 taken on the deployed builds, why no PNGs are in the zip, and the five that cannot be. |
+| 7 | `07-SCREENSHOTS-STATUS.md` | **The dashboard captured these itself** — closed here. Two checks before final, and the build-freeze question. |
 | 8 | `samples/` | Four sample reports built from the frozen builds, plus a README explaining each. |
 
 ## The frozen builds
 
-**WCGRRT REV 167** and **SSORT REV 154**. SSORT 154 was deployed on 30 September;
+**WCGRRT REV 167** and **SSORT REV 156**. SSORT 156 was deployed on 30 September;
 sha256 `44cb4db89d2c2910086ff6c6a1c23a80034b6f53b0b44b0b326e0c31d2b161a1`, 6,800,443 bytes.
 Everything in this pack is written against those two and nothing else.
 

@@ -45,7 +45,7 @@ points at it (shots 1 and 17 especially).
 
 | # | File | What must be on screen |
 |---|---|---|
-| 17 | `17-ssort-rev-badge.png` | SSORT top bar with the **REV 154** badge legible, and the section dropdown showing the six SSORT types |
+| 17 | `17-ssort-rev-badge.png` | SSORT top bar with the **REV 156** badge legible, and the section dropdown showing the six SSORT types |
 | 18 | `18-cbm-riser-adapter.png` | CBM tile with **Riser Adapter** selected and section 1.1 open |
 | 19 | `19-grade-buttons.png` | Task **1.1.1** with grade **3** selected — buttons 1–5, N/A and the ⓘ scale all visible |
 | 20 | `20-grade-scale.png` | The GRADE LEVEL EVALUATION GUIDE panel open, all five levels readable |
@@ -78,4 +78,4 @@ Stated here rather than left as gaps in a zip.
 | **16** `16-dashboard-row.png` | Needs a posted report on the dashboard, so the same applies. Take it from any real SSCE Equipment row, or during the class. |
 
 Everything else in the table above was captured on the deployed builds (WCGRRT REV 167, SSORT
-REV 154) on 30 September.
+REV 156) on 30 September.

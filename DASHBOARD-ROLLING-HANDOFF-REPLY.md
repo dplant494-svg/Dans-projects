@@ -1277,3 +1277,11 @@ answer is fine; what is not fine is the room meeting a revision the pack does no
 
 **Received and filed:** the full rolling handoff with entries 46 and 47 as
 `tools/received/DASHBOARD-ROLLING-HANDOFF-entries-46-47-2026-10-02.md`.
+
+**Later the same evening, on the pack v5:** the status note answers the deployment question (SSORT 156 deployed
+2 October; WCGRRT 167 on 1 October), so the frozen build is 167 / 156 and the ORR test records will follow. The
+suggested freeze date of **12 October** is right and is recommended to Dan as the rule: after it, nothing ships
+unless a rig is losing work. Two slips for your next pass, neither urgent: the README says 156 was deployed on
+30 September, and reply 2 §4 gives 156 the REV 152 byte count (6,799,847) and hash. The new CBM sample with a test
+passed (1) and a test failed (5) was run through the scanner here: parses, renders, grades shown as 1 and 5 on the
+heatmap and in the history; the PASS/FAIL wording waits on `cbmlevels`.
