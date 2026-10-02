@@ -115,6 +115,33 @@ no unmanaged data on rig machines); Power BI on the new store; the photo-grading
 The dates move with the app registration more than with anything else. Without SSO there is no production on either
 platform, which the ORR already says.
 
+## If Dan is on it five days a week (added 2 October, Dan's question)
+
+The build phases compress; the gates do not. Phases 1 to 3 are about 24 Dan-days of work, which is twelve weeks at
+two days a week or five weeks at five, and at five days Dan is the builder in Lovable rather than the reviewer of
+someone else's build, which is how the tools were made and is the faster model. What does not compress: the
+workshop week (19 to 22 October), the Entra app registration (ISIT lead time; no SSO means no production on any
+platform), the security review of a hosted store (runs in parallel from phase 0, not after the build), and the
+parity run, which is two clean calendar weeks of the rigs posting whatever Dan's hours are.
+
+| | Two days a week | Five days a week |
+|---|---|---|
+| Phase 1 foundations | early Nov | week of 26 Oct, done by 6 Nov |
+| Phase 2 page parity | mid-Nov to mid-Dec | 9 Nov to 27 Nov |
+| Phase 3 loops | December | 30 Nov to 4 Dec |
+| Phase 4 parity run | January | 7 to 18 Dec (two clean weeks before the Christmas crewing changes) |
+| Phase 5 cutover | February 2027 | first full week of January 2027 |
+| Saving | | about five weeks, if the app registration is in hand by early November and the security review has run alongside |
+
+Three conditions for the five-day version to hold: the production plan's Dan items are closed first (the transfer
+week, the class, the audit, the Dataflow load, which is about a week of Dan's time in October); the app
+registration is raised the day the go-ahead is official and chased weekly; and nobody adds the rig tools to the
+scope. If the app registration slips past mid-November, the five-day plan waits on it and lands in the same January
+as the two-day plan, with Dan's extra weeks spent on the parity checks and the ORR v3 instead.
+
+**Recommendation:** five days a week from 26 October, after the workshop, with the first two weeks on phase 1 while
+the app registration is chased. Reassess on 6 November against the two conditions that are not Dan's.
+
 ## Risks, and what is done about each
 
 | Risk | What is done |
