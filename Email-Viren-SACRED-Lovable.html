@@ -5,13 +5,13 @@
 <p>Hi Viren,</p>
 <p>Following yesterday's meeting, you have the action to confirm whether SACRED could move to Lovable and what a high-level plan would look like. To make that quick to judge, the attached page sets out what SACRED is actually made of. It is five parts joined by files, so each can be looked at on its own.</p>
 <ul>
-<li><b>The rig-side tools</b> are single self-contained HTML files that crews open on rig laptops, often offline, and that post one JSON file when finished. They cannot move to a hosted app and will stay as they are.</li>
+<li><b>The rig-side tools</b> are single self-contained HTML files that crews open on rig laptops, fill in over hours or days with local auto-save, and post as one JSON file when finished. Rigs have Starlink, so a hosted form is reachable in principle; but the tools are in service on fourteen rigs and the crews are trained, so moving them is a rebuild rather than a migration, and not one for February.</li>
 <li><b>The intake and the notification flows</b> are Power Automate and SharePoint in the Microsoft tenancy. Already hosted; nothing to migrate.</li>
 <li><b>The scanner and the pages</b> are a ten-minute PowerShell script and static HTML served by IIS. This is the part a hosted platform could replace, and it is the part ISIT find hard to host.</li>
 <li><b>The database</b> is a Microsoft Fabric SQL database loaded from the scanner's export. Already hosted in the tenancy.</li>
 <li><b>Ask SACRED AI</b> is a Copilot Studio agent reading the report digests in SharePoint. Unaffected by where the pages live.</li>
 </ul>
-<p>So the honest framing is: a migration could remove the IIS server, the share, the scheduled task and the backup and DNS rows on ISIT's gap list. It would not remove the posting contract, the flows, the data model or the authenticated path for rig users, and it would add a build of the dashboard views on the platform, a second data store outside the tenancy, and the question of whether the platform is reachable from the rig networks.</p>
+<p>So the honest framing is: a migration could remove the IIS server, the share, the scheduled task and the backup and DNS rows on ISIT's gap list. It would not remove the posting contract, the flows, the data model or the authenticated path for rig users, and it would add a build of the dashboard views on the platform, a second data store outside the tenancy, and the platform being provisioned for the rig networks the way the sacred server has to be.</p>
 <p>The quickest way to answer the feasibility is a half-day with the dashboard's data file and the database export, to see whether Lovable can render the Reports and Rig Monitoring views from them. I can give you both files and a walk-through of the data shape whenever suits. If it renders, the migration is a real option to plan for after February; if not, the question is answered without anyone building anything.</p>
 <p>Happy to take a call before you start.</p>
 <p>Kind regards,</p>

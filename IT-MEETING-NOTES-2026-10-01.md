@@ -61,8 +61,9 @@ effort, which is what the ORR says today. Luis is asking Arnold and Torsten whet
 
 **New: the Lovable question.** ISIT propose moving SACRED to Lovable to cut infrastructure and integration work.
 This needs a decision on facts, not a position. `SACRED-WHAT-IT-IS-MADE-OF.md` lists the five parts of SACRED,
-which of them could move to a hosted app platform and which cannot (the rig-side tools run offline on rig
-laptops; the posting contract and the notification flows live in the Microsoft tenancy), and what a migration
+which of them could move to a hosted app platform and which should not (the rig-side tools are file-based by
+design and in service on fourteen rigs, Starlink or not; the posting contract and the notification flows live in
+the Microsoft tenancy), and what a migration
 would and would not remove. The honest summary: Lovable could replace the IIS server and the static pages, which
 is ISIT's hosting burden; it would not remove the integration work, it would move it, and it would add a second
 data store outside the tenancy. Viren's feasibility should be judged against that page. Until the decision is

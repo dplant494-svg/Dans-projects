@@ -7,7 +7,7 @@ SACRED is five parts. They are joined by files, not by code calling code, which 
 
 | # | Part | What it is | Where it runs | Who owns it | Could it move to a hosted app platform? |
 |---|---|---|---|---|---|
-| 1 | **The rig-side tools** (WCE Rig Reporting Tool, SSORT, Precharge Pro, the AAB and Help pages) | Single self-contained HTML files. A crew opens one on a rig laptop, often with no or poor connectivity, fills it in over hours or days, and presses Post. Post sends one JSON file (0.5 to 40 MB) to an HTTP endpoint. | On the rig laptop, from a file. Served from the sacred share only as the place to download the current revision. | Dan Plant (owner); built with their build sessions | **No.** They must work offline and post one file. A hosted web app needs a live connection for every keystroke, and rigs do not have that. They stay as they are whatever happens to the rest. |
+| 1 | **The rig-side tools** (WCE Rig Reporting Tool, SSORT, Precharge Pro, the AAB and Help pages) | Single self-contained HTML files. A crew opens one on a rig laptop, fills it in over hours or days with local auto-save, and presses Post. Post sends one JSON file (0.5 to 40 MB) to an HTTP endpoint. Rigs have a live connection (Starlink); the tools are file-based by design so a half-finished report survives a dropout, a reboot or a change of shift, and so a report is one file that can be kept, re-posted or recovered. | On the rig laptop, from a file. Served from the sacred share only as the place to download the current revision. | Dan Plant (owner); built with their build sessions | **In principle, yes; in practice it is a rebuild, not a migration.** Fourteen rigs are trained on them and they are in service. A hosted form would have to match the local auto-save and the one-file record before any crew used it. Worth considering later for two reasons: live posting, and no unmanaged data left on rig machines (ORR item 27). Not for February. |
 | 2 | **The intake and the notification flows** | Power Automate: an HTTP trigger that writes each posted file into a SharePoint library; five flows that send the precharge, CBM to NOV, AAB, Help Centre and rig-visit emails and Teams posts from a distribution workbook, with test mode and receipts. | SEADRILL-WC-DEV environment; SharePoint site WellControl | Dan, Lee Arnold co-owner | **Already hosted** in the Microsoft tenancy. Nothing to migrate. If the pages moved, the links the flows send would change, which is a field edit per flow. |
 | 3 | **The scanner and the pages** | A PowerShell script (no modules) runs every ten minutes, reads the three SharePoint libraries through OneDrive sync, and writes static HTML pages plus a JSON data file and per-report digests. The dashboard, the Bulletin Board, the Help Centre and the precharge pages are those static files served by IIS from the sacred share. | Dan's PC today; the sacred server (sandbox) from the week of 19 October; UAT / production when ISIT provide them | Dan (script and pages); ISIT (server and task from the transfer) | **This is the part a platform could replace.** The pages are read-only views of files; a hosted app could render the same views from the same data. It would need an ingestion step to take the posted files from SharePoint (or the scanner's normalised export) into its own store, and an authenticated path for rig users. |
 | 4 | **The database** | Microsoft Fabric SQL database `SACRED DATA` (22 tables, 6 views), loaded from the scanner's normalised export on every run. No server, no secret. | Dan's Fabric workspace; capacity on Lee's cost centre from mid-November | Dan / Lee | **Already hosted** in the tenancy. A platform with its own database would be a second copy of the same data outside the tenancy, with its own security review. |
@@ -22,8 +22,8 @@ the DNS and hosting rows on ISIT's gap list. That is the hosting burden, and it 
 notification flows (part 2 stays and needs the new page links), the data model (the scanner's export is the schema;
 it would feed the platform's store instead of, or as well as, Fabric), the authenticated path for rig users (needed
 either way; the sandbox has none), the heavy-window load (7 to 10 day periods where a rig posts many large files),
-the rig connectivity problem (a rig that cannot reach the sacred server will not reach a hosted app unless the
-platform is reachable from the rig network, which has to be checked first), the security review (a hosted platform
+the rig access problem (the rigs that cannot reach the sacred server today are blocked by corporate network
+provisioning, not by their Starlink link; a hosted platform has to be provisioned for the rig networks the same way), the security review (a hosted platform
 holding rig reports with names and photographs is a larger review than static files on an internal server, not a
 smaller one), or the training and the people side.
 
@@ -34,9 +34,9 @@ shape), a second data store, a dependency on a vendor platform that is new to Se
 ## The honest position
 
 SACRED's hosting footprint is already small: one static web folder and one ten-minute script. The parts ISIT find
-hard to support are the ones with no platform answer: the offline rig tools, the posting contract, the flows and
-the people process. A migration is worth doing if ISIT would rather support a hosted app than a Windows server and
-a scheduled task, and if the platform is reachable from the rigs and passes the same security review. It is not a
+hard to support are the ones with no platform answer: the file-based rig tools, the posting contract, the flows
+and the people process. A migration is worth doing if ISIT would rather support a hosted app than a Windows server and
+a scheduled task, and if the platform is provisioned for the rig networks and passes the same security review. It is not a
 shortcut past the integration work, because the integration work is in parts 1, 2 and 4, which stay where they are.
 
 The useful first step for Viren is a half-day with the data file and the normalised export, to see whether the
