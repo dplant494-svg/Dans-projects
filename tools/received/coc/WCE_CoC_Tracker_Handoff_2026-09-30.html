@@ -1,0 +1,434 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>WCE CoC Tracker Handoff</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: single measured column on a slate ground; sticky rail of section jumps;
+   wide reference tables scroll inside their own frames. */
+:root{
+  --ground:#F2F4F8; --surface:#FFFFFF; --sunken:#EAEEF5;
+  --ink:#10192B; --ink-soft:#4A5872; --ink-faint:#7A88A0;
+  --rule:#D8DFEA; --rule-soft:#E7ECF4;
+  --navy:#002C77; --navy-ink:#00205A; --sky:#0079B4; --signal:#C79A00;
+  --red:#C31A28; --amber:#B8901A; --green:#1B7F4B; --violet:#6F56A0;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0B1018; --surface:#141B27; --sunken:#1B2431;
+    --ink:#E8EDF5; --ink-soft:#A9B5C8; --ink-faint:#7B89A0;
+    --rule:#2A3545; --rule-soft:#222C3A;
+    --navy:#8FB4F2; --navy-ink:#B9D0F8; --sky:#57B4E8; --signal:#E0B54A;
+    --red:#F0808C; --amber:#E0B54A; --green:#5FC28E; --violet:#AE96DE;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0B1018; --surface:#141B27; --sunken:#1B2431;
+  --ink:#E8EDF5; --ink-soft:#A9B5C8; --ink-faint:#7B89A0;
+  --rule:#2A3545; --rule-soft:#222C3A;
+  --navy:#8FB4F2; --navy-ink:#B9D0F8; --sky:#57B4E8; --signal:#E0B54A;
+  --red:#F0808C; --amber:#E0B54A; --green:#5FC28E; --violet:#AE96DE;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ground);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.62;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:900px;margin:0 auto;padding-inline:20px;padding-block:0 72px}
+h1,h2,h3{font-family:Archivo,"IBM Plex Sans",sans-serif;text-wrap:balance;margin:0}
+code,kbd,.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+a{color:var(--sky)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--sky);outline-offset:2px;border-radius:3px}
+
+/* ---- masthead ---- */
+.mast{padding-block:44px 26px;border-bottom:3px solid var(--navy)}
+.eyebrow{font-family:Archivo,sans-serif;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--sky)}
+.mast h1{font-size:clamp(30px,5.2vw,44px);font-weight:700;letter-spacing:-.018em;line-height:1.06;margin-top:10px;color:var(--navy-ink)}
+.mast .lede{font-size:16.5px;color:var(--ink-soft);margin:12px 0 0;max-width:62ch}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:26px}
+.fact{background:var(--surface);padding:12px 14px}
+.fact dt{font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);margin:0}
+.fact dd{margin:5px 0 0;font-size:14px;font-weight:500}
+.fact dd .mono{font-size:13px}
+
+/* ---- sticky contents rail ---- */
+.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--ground) 92%,transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);margin-inline:-20px;padding-inline:20px}
+.rail ol{display:flex;gap:4px;list-style:none;margin:0;padding:9px 0;overflow-x:auto;scrollbar-width:thin}
+.rail a{display:inline-block;white-space:nowrap;font-size:12px;font-weight:500;color:var(--ink-soft);
+  text-decoration:none;padding:4px 9px;border-radius:5px}
+.rail a:hover{background:var(--sunken);color:var(--ink)}
+.rail .n{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--ink-faint);margin-right:5px}
+
+/* ---- sections ---- */
+section{padding-block:38px 6px;scroll-margin-top:64px}
+section + section{border-top:1px solid var(--rule-soft)}
+.shead{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+.shead .num{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500;color:var(--sky);flex-shrink:0}
+h2{font-size:23px;font-weight:600;letter-spacing:-.012em;color:var(--navy-ink)}
+h3{font-size:15px;font-weight:600;margin:26px 0 8px;color:var(--ink)}
+p{margin:0 0 14px;max-width:70ch}
+ul,ol{margin:0 0 14px;padding-left:22px;max-width:70ch}
+li{margin-bottom:7px}
+li::marker{color:var(--ink-faint)}
+strong{font-weight:600}
+.lead{font-size:16px;color:var(--ink-soft)}
+
+/* ---- tables ---- */
+.tw{overflow-x:auto;border:1px solid var(--rule);background:var(--surface);margin:0 0 18px}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:min(100%,520px)}
+th{text-align:left;font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-faint);padding:9px 13px;border-bottom:1px solid var(--rule);white-space:nowrap;background:var(--sunken)}
+td{padding:9px 13px;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:500}
+td .mono,th .mono{font-size:12.5px}
+.num-col{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw--figures td:first-child{color:var(--ink-soft);font-weight:400}
+.tw--figures td:last-child{font-weight:500}
+
+/* ---- accents ---- */
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:11.5px;padding:1px 6px;border:1px solid var(--rule);
+  background:var(--sunken);border-radius:3px;white-space:nowrap}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill i{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+pre{background:var(--sunken);border:1px solid var(--rule);padding:13px 15px;overflow-x:auto;margin:0 0 18px;
+  font-size:12.5px;line-height:1.6}
+pre code{color:var(--ink)}
+.callout{border-left:3px solid var(--signal);background:var(--surface);padding:13px 16px;margin:0 0 18px}
+.callout p:last-child{margin-bottom:0}
+.callout--alert{border-left-color:var(--red)}
+.kicker{font-family:Archivo,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 0 6px}
+.step{display:grid;grid-template-columns:auto 1fr;gap:0 14px;margin-bottom:20px}
+.step .letter{font-family:Archivo,sans-serif;font-size:13px;font-weight:700;color:var(--surface);background:var(--navy);
+  width:26px;height:26px;border-radius:50%;display:grid;place-items:center;margin-top:1px}
+:root[data-theme="dark"] .step .letter,
+:root:not([data-theme="light"]) .step .letter{color:#0B1018}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .step .letter{color:#fff}}
+.step h3{margin:2px 0 6px}
+.step > div > p:last-child,.step > div > ol:last-child{margin-bottom:0}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--ink-faint)}
+@media (max-width:560px){
+  body{font-size:14.5px}
+  .mast{padding-block:30px 20px}
+  section{padding-block:30px 4px}
+}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <div class="eyebrow">Handoff document</div>
+    <h1>WCE Certificate of Conformance Tracker</h1>
+    <p class="lede">A single HTML file that tracks CoC status for well control equipment across the fleet, rebuilt from the Maximo extract whenever you need it. No server, no install, no network dependency.</p>
+    <dl class="facts">
+      <div class="fact"><dt>Deliverable</dt><dd><span class="mono">Seadrill_WCE_COC_Tracker.html</span></dd></div>
+      <div class="fact"><dt>Data template</dt><dd><span class="mono">…Data_Template_v3.xlsx</span></dd></div>
+      <div class="fact"><dt>Built</dt><dd>30 September 2026</dd></div>
+      <div class="fact"><dt>Owner</dt><dd>Manpreet Singh, Seadrill</dd></div>
+    </dl>
+  </header>
+
+  <nav class="rail" aria-label="Contents">
+    <ol>
+      <li><a href="#s1"><span class="n">01</span>What it is</a></li>
+      <li><a href="#s2"><span class="n">02</span>Files</a></li>
+      <li><a href="#s3"><span class="n">03</span>Data contract</a></li>
+      <li><a href="#s4"><span class="n">04</span>Reference tables</a></li>
+      <li><a href="#s5"><span class="n">05</span>Rules</a></li>
+      <li><a href="#s6"><span class="n">06</span>The application</a></li>
+      <li><a href="#s7"><span class="n">07</span>Refreshing data</a></li>
+      <li><a href="#s8"><span class="n">08</span>Storage</a></li>
+      <li><a href="#s9"><span class="n">09</span>Known gaps</a></li>
+      <li><a href="#s10"><span class="n">10</span>Verification</a></li>
+      <li><a href="#s11"><span class="n">11</span>Troubleshooting</a></li>
+      <li><a href="#s12"><span class="n">12</span>History</a></li>
+    </ol>
+  </nav>
+
+  <section id="s1">
+    <div class="shead"><span class="num">01</span><h2>What it is</h2></div>
+    <p class="lead">The tracker opens in any modern browser straight from a shared drive, SharePoint or an email attachment. Data, logo and code are embedded in the one file.</p>
+    <p>The Maximo extract is the master record. The tracker holds a snapshot of it and can rebuild itself from a fresh extract at any time, in the browser, without anyone editing the HTML.</p>
+    <div class="tw tw--figures"><table>
+      <caption class="sr-only"></caption>
+      <thead><tr><th>As built, 30 September 2026</th><th class="num-col">Figure</th></tr></thead>
+      <tbody>
+        <tr><td>Fleet components</td><td class="num-col">3,364</td></tr>
+        <tr><td><span class="pill"><i style="background:var(--red)"></i>Expired</span></td><td class="num-col">289</td></tr>
+        <tr><td><span class="pill"><i style="background:var(--amber)"></i>Due within 18 months</span></td><td class="num-col">485</td></tr>
+        <tr><td><span class="pill"><i style="background:var(--sky)"></i>Valid</span></td><td class="num-col">621</td></tr>
+        <tr><td><span class="pill"><i style="background:var(--ink-faint)"></i>No date on file</span></td><td class="num-col">1,969</td></tr>
+        <tr><td>Shared capital (0960), outside fleet totals</td><td class="num-col">604</td></tr>
+        <tr><td>Choke &amp; Kill manifold, inside the fleet figure</td><td class="num-col">978</td></tr>
+        <tr><td>Riser assets, across 17 vessels</td><td class="num-col">2,022</td></tr>
+        <tr><td>Vessels — 17 fleet plus Shared Capital</td><td class="num-col">18</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="s2">
+    <div class="shead"><span class="num">02</span><h2>Files</h2></div>
+    <div class="tw"><table>
+      <thead><tr><th>File</th><th>What it is</th><th>Needed to run?</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">Seadrill_WCE_COC_Tracker.html</span></td><td>The tracker. Data, logo and code in one file.</td><td><strong>Yes — the product</strong></td></tr>
+        <tr><td><span class="mono">…Data_Template_v3.xlsx</span></td><td>The Maximo extract. Despite the extension it is a CSV; the tracker handles either.</td><td>To refresh data</td></tr>
+        <tr><td><span class="mono">tracker_shell.html</span></td><td>Page skeleton: styles and layout.</td><td>Rebuild only</td></tr>
+        <tr><td><span class="mono">tracker_app.js</span></td><td>Model, routing, views, exports.</td><td>Rebuild only</td></tr>
+        <tr><td><span class="mono">tracker_import.js</span></td><td>Excel/CSV readers, Maximo mapping, import UI, boot.</td><td>Rebuild only</td></tr>
+        <tr><td><span class="mono">build_tracker_v3.py</span></td><td>Assembles the inputs plus the data into the final HTML.</td><td>Rebuild only</td></tr>
+        <tr><td><span class="mono">logo.txt</span></td><td>Seadrill logo as a base64 data URI.</td><td>Rebuild only</td></tr>
+        <tr><td><span class="mono">…Data_Template_v2.xlsx</span></td><td>The previous curated workbook — source of the reference tables. Keep it.</td><td>Rebuild only</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="s3">
+    <div class="shead"><span class="num">03</span><h2>Data contract</h2></div>
+    <p>One flat table, one row per asset per certificate. Columns are read by <strong>name</strong>, not position, so column order can change freely.</p>
+    <h3>Required columns</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Column</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">REPORT</span></td><td>Row type. <span class="tag">WCE Component</span> → WCE register · <span class="tag">CKM Component</span> → Choke &amp; Kill manifold · <span class="tag">Riser Asset</span> → riser register. Matching is loose: anything containing “riser” is riser, “ckm”/“choke” is manifold, everything else is WCE.</td></tr>
+        <tr><td><span class="mono">SITEID</span></td><td>Vessel ID (e.g. 2317). The join key for everything; a row without it is ignored.</td></tr>
+        <tr><td><span class="mono">NAME</span></td><td>Vessel display name</td></tr>
+        <tr><td><span class="mono">ASSETNUM</span></td><td>Asset number</td></tr>
+        <tr><td><span class="mono">ASSETUID</span></td><td>Maximo record ID</td></tr>
+        <tr><td><span class="mono">LOCATION</span></td><td>SFI reference, e.g. <span class="mono">331.BOP1.300</span></td></tr>
+        <tr><td><span class="mono">SDSFI</span> · <span class="mono">SFI_GROUP</span></td><td>SFI group code (3 digits) and its name</td></tr>
+        <tr><td><span class="mono">DESCRIPTION</span></td><td>Component description</td></tr>
+        <tr><td><span class="mono">ISSUEDDATE</span> · <span class="mono">EXPIREDATE</span></td><td>Last CoC and due date</td></tr>
+        <tr><td><span class="mono">CERTNUM</span> · <span class="mono">EDOCS</span></td><td>Certificate number, eDocs number</td></tr>
+        <tr><td><span class="mono">SERIALNUM</span> · <span class="mono">SDMODELNUM</span> · <span class="mono">SDCATALOGCODE</span></td><td>Serial, model, OEM part</td></tr>
+        <tr><td><span class="mono">STATUS</span></td><td>Maximo asset status — kept as a note on the component</td></tr>
+        <tr><td><span class="mono">27</span></td><td>Certificate interval, currently <span class="tag">5YR</span> on every row. Odd header; read as-is.</td></tr>
+      </tbody>
+    </table></div>
+    <p>Riser rows additionally use <span class="mono">ITEMNUM</span>, <span class="mono">CONDITIONCODE</span>, <span class="mono">ASSETTAG</span>, <span class="mono">SDRJTYPE</span>, <span class="mono">SDOEMMAKE</span>, <span class="mono">SDPHYSLOC</span>, <span class="mono">SDTOTUSEDDAY</span>, <span class="mono">SDCURUSEDDAY</span>, <span class="mono">SDLATESTCERTDATE</span>, <span class="mono">SDRISERJOINTLEN</span>, <span class="mono">SDWALLTHICKNESS</span>, <span class="mono">SDBUOYDEPTH</span>, <span class="mono">SDBUOYCOLOR</span> and <span class="mono">SITEID_1</span>.</p>
+
+    <h3>Format tolerances, all handled automatically</h3>
+    <ul>
+      <li><strong>File type is detected from content, not the extension.</strong> The current export is a CSV named <span class="mono">.xlsx</span> and loads fine; a real <span class="mono">.xlsx</span> works too.</li>
+      <li><strong>Encoding:</strong> UTF-8 first, Windows-1252 as fallback, so Maximo's special characters survive.</li>
+      <li><strong>Dates:</strong> <span class="mono">2024-07-27 21:48:00.0</span>, <span class="mono">2024-07-27</span>, <span class="mono">27/07/2024</span>, <span class="mono">27 July 2024</span> and Excel serial numbers all parse; the time part is dropped.</li>
+      <li><strong>Free text in a date cell</strong> (“N/A”, “COC - Not Required”) is kept verbatim and reads as <em>no date on file</em>. Loose text is never guessed at, so a typo can never become a real expiry date.</li>
+      <li><strong>Embedded newlines</strong> inside quoted fields — a few serial numbers have them — survive intact.</li>
+      <li>The tracker <strong>also still reads the older multi-sheet workbook</strong> (WCE_Components / CKM_Components / Riser_Assets / Vessels / Category / SFI_Groups). It picks the reader by looking at the columns.</li>
+    </ul>
+  </section>
+
+  <section id="s4">
+    <div class="shead"><span class="num">04</span><h2>What the export does not carry</h2></div>
+    <p>Four things the tracker needs are absent from the extract. They come from reference tables built once from the v2 workbook and stored inside the HTML, so a bare Maximo export is enough to refresh everything.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Missing</th><th>How it is filled</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr><td>Category name</td><td>Lookup on <strong>vessel + asset number</strong> first, then on <strong>SFI</strong>. Covers 100% of the current export. Last resort: the export's own <span class="mono">CATEGORY</span> text.</td><td class="num-col">4,071 asset keys<br>176 SFI keys</td></tr>
+        <tr><td>Section — BOP1 / BOP2 / SURFACE</td><td>Same lookup, same order. Anything unmatched shows as <strong>Not defined</strong>.</td><td class="num-col">—</td></tr>
+        <tr><td>Shared Capital register</td><td>Carried over from v2 and merged in, because the export contains none. Skipped automatically for any asset the export does supply.</td><td class="num-col">604 rows</td></tr>
+        <tr><td>Vessel programme and fleet flag</td><td>Stored vessel config. Every vessel is <strong>60-month</strong>; 0960 Shared Capital sits outside fleet totals.</td><td class="num-col">16 entries</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout">
+      <p>These tables travel with the file — <strong>Save copy</strong> writes them into the new copy, so the chain survives indefinitely. If a future export ever carries a <span class="mono">SECTION</span> column, a <span class="mono">Category</span> sheet or a <span class="mono">Vessels</span> sheet, those win over the stored tables.</p>
+    </div>
+  </section>
+
+  <section id="s5">
+    <div class="shead"><span class="num">05</span><h2>Rules the tracker applies</h2></div>
+
+    <h3>Status tiers</h3>
+    <p>Calculated from the due date against <strong>today</strong>, every time the file is opened — never imported.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Days to due</th><th>Tier</th></tr></thead>
+      <tbody>
+        <tr><td class="num-col">&lt; 0</td><td><span class="pill"><i style="background:var(--red)"></i>Expired</span></td></tr>
+        <tr><td class="num-col">0 – 182</td><td><span class="pill"><i style="background:#E8820C"></i>Due within 6 months</span></td></tr>
+        <tr><td class="num-col">183 – 365</td><td><span class="pill"><i style="background:var(--amber)"></i>Due within 1 year</span></td></tr>
+        <tr><td class="num-col">366 – 547</td><td><span class="pill"><i style="background:var(--violet)"></i>Due within 18 months</span></td></tr>
+        <tr><td class="num-col">&gt; 547</td><td><span class="pill"><i style="background:var(--sky)"></i>Valid</span></td></tr>
+        <tr><td class="num-col">no usable date</td><td><span class="pill"><i style="background:var(--ink-faint)"></i>No date on file</span></td></tr>
+      </tbody>
+    </table></div>
+    <p><em>Action required</em> on the dashboard is everything between Expired and Valid. Fleet totals exclude any vessel flagged out of fleet totals, currently Shared Capital alone.</p>
+    <p><strong>CBM / CoSC capability is retained but dormant.</strong> If a vessel is ever flagged <span class="mono">cbm</span>, its due date becomes Last CoSC + 1 year — falling back to the stated due date where there is no last date — and two tighter tiers apply, ≤ 1 month and ≤ 3 months. No vessel is flagged today.</p>
+
+    <h3>One row per asset — certificate collapse</h3>
+    <p>The export holds one row <strong>per certificate</strong>, so a recertified asset appears more than once. The tracker keeps one row per vessel + asset + register, choosing the certificate with the newest expiry; ties break on the newest issue date, then on whichever row has a certificate number. Superseded certificates are listed under <strong>Previous certificates</strong> in the detail panel and flagged with a <span class="tag">+n</span> badge beside the certificate number.</p>
+    <div class="callout callout--alert">
+      <p class="kicker">Why it matters</p>
+      <p>In the current export this collapsed 109 rows: 104 superseded certificates kept as history across 94 assets, 5 exact duplicates dropped. <strong>29 assets had been recertified but were still counted as expired under their old certificate.</strong> Headline expired fell from 392 to 289.</p>
+    </div>
+
+  </section>
+
+  <section id="s6">
+    <div class="shead"><span class="num">06</span><h2>The application</h2></div>
+    <h3>Navigation</h3>
+    <div class="tw"><table>
+      <thead><tr><th>View</th><th>Address</th><th>What it shows</th></tr></thead>
+      <tbody>
+        <tr><td>Fleet dashboard</td><td><span class="mono">#/</span></td><td>KPI tiles, fleet status split, by-vessel table with BOP 1 / BOP 2 / Surface / Not defined / C&amp;K / Riser columns, plus by-section and by-SFI-group rollups</td></tr>
+        <tr><td>All components</td><td><span class="mono">#/components</span></td><td>Every fleet component; filters for vessel, status, SFI group, WCE section, register, compliance and free text; sortable columns; 60 rows a page</td></tr>
+        <tr><td>Vessel</td><td><span class="mono">#/vessel/&lt;id&gt;</span></td><td>Status split, then WCE / Choke &amp; Kill Manifold / Riser tabs. The WCE tab carries a second row of sub-tabs: All sections · BOP 1 · BOP 2 · Surface · Not defined</td></tr>
+        <tr><td>Category</td><td><span class="mono">…?tab=wce&amp;cat=&lt;id&gt;</span></td><td>One category's components</td></tr>
+        <tr><td>SFI groups</td><td><span class="mono">#/sfi</span></td><td>Group cards with status bars</td></tr>
+        <tr><td>Riser register</td><td><span class="mono">#/riser</span></td><td>Fleet-wide riser assets, filterable by vessel</td></tr>
+        <tr><td>Shared capital</td><td><span class="mono">#/vessel/0960</span></td><td>Spares register: stock tiles (expired, no eDocs, allocated, on register), Model column, no compliance ticks</td></tr>
+      </tbody>
+    </table></div>
+    <p>Addresses are shareable — send a colleague <span class="mono">…Tracker.html#/components?tier=expired&amp;v=2317</span> and they land on exactly that view.</p>
+
+    <h3>Features</h3>
+    <ul>
+      <li><strong>Frozen column headers.</strong> Each table pane is sized to the space left below it, so the header row stays visible however far you scroll. Recalculated on every view change and on window resize.</li>
+      <li><strong>Detail panel</strong> on any row: every field, Maximo ID, certificate history, and the same OEM part held in shared capital.</li>
+      <li><strong>Annotations</strong> — compliance (Compliant / Non-compliant / To review), free-text remarks, Synergi number. Expired certificates are always non-compliant and cannot be overridden.</li>
+      <li><strong>Exports</strong> — CSV per view, Excel (.xls) per vessel, browser print / PDF. Both exports carry a superseded-certificate count.</li>
+      <li><strong>Search</strong> across asset, SFI, serial, certificate, description, model, OEM and vessel, from the top bar or <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>K</kbd>.</li>
+      <li><strong>Responsive</strong> down to phone width; the sidebar collapses behind a menu button.</li>
+    </ul>
+  </section>
+
+  <section id="s7">
+    <div class="shead"><span class="num">07</span><h2>Refreshing the data</h2></div>
+
+    <div class="step">
+      <div class="letter">A</div>
+      <div>
+        <h3>Manual — the normal route</h3>
+        <ol>
+          <li>Open the tracker.</li>
+          <li><strong>Update from Excel</strong>, top right → pick the Maximo export.</li>
+          <li>Read the confirmation: component, vessel and riser counts, plus any warnings.</li>
+          <li><strong>Save copy</strong> → a new standalone HTML carrying the new data. Distribute that.</li>
+        </ol>
+        <p>The load is a full replace: whatever the export contains becomes the tracker's data. Anything removed from the export disappears, except the carried-over shared capital.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="letter">B</div>
+      <div>
+        <h3>Automatic</h3>
+        <p>In the same dialog, save a <strong>direct-download URL</strong> for the export — SharePoint, OneDrive, file share — and tick <em>Refresh automatically</em>. From then on the tracker reloads it every time it opens. The link must return the file itself and allow cross-origin download; if it is blocked the tracker silently keeps its embedded data, so it never breaks, it just does not update.</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="letter">C</div>
+      <div>
+        <h3>Rebuild from source</h3>
+        <p>Needed only when the reference tables change or the code changes. Requires Python 3 with <span class="mono">openpyxl</span>.</p>
+<pre><code>python3 build_tracker_v3.py &lt;maximo-export&gt; &lt;v2-workbook&gt; &lt;output.html&gt;
+
+# for example
+python3 build_tracker_v3.py v3.xlsx new_template.xlsx Seadrill_WCE_COC_Tracker.html</code></pre>
+        <p>The script prints counts, the section split, merged spares, collapsed certificates and reference-table sizes. Check those against the previous run.</p>
+      </div>
+    </div>
+
+    <h3>Where to change common things</h3>
+    <div class="tw"><table>
+      <thead><tr><th>Change</th><th>Where</th></tr></thead>
+      <tbody>
+        <tr><td>Maximo URL pattern</td><td><span class="mono">MAXIMO_BASE</span> in tracker_app.js</td></tr>
+        <tr><td>eDocs URL pattern</td><td><span class="mono">DMS_BASE</span> in tracker_app.js</td></tr>
+        <tr><td>Synergi URL pattern</td><td><span class="mono">SYNERGI_BASE</span> in tracker_app.js</td></tr>
+        <tr><td>Status thresholds</td><td><span class="mono">tierFor()</span> in tracker_app.js</td></tr>
+        <tr><td>Section names and order</td><td><span class="mono">SECTION_LABEL</span>, <span class="mono">SECTION_FIRST</span> in tracker_app.js</td></tr>
+        <tr><td>Rows per page</td><td><span class="mono">PAGE_SIZE</span> in tracker_app.js</td></tr>
+        <tr><td>Column mapping from Maximo</td><td><span class="mono">MAXIMO_FIELDS</span> in tracker_import.js, and its mirror in build_tracker_v3.py</td></tr>
+        <tr><td>Mark a vessel CBM or out of fleet totals</td><td><span class="mono">Vessels</span> sheet in the v2 workbook, then rebuild — or add a Vessels sheet to a future export</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout">
+      <p><strong>If you change a mapping, change it in both places.</strong> tracker_import.js (browser) and build_tracker_v3.py (build) implement the same logic; they are verified to produce byte-identical data and should stay that way.</p>
+    </div>
+  </section>
+
+  <section id="s8">
+    <div class="shead"><span class="num">08</span><h2>Storage and privacy</h2></div>
+    <p>Compliance ticks, remarks and Synergi numbers live in the <strong>viewer's own browser</strong>, not in the file.</p>
+    <div class="tw"><table>
+      <thead><tr><th>localStorage key</th><th>Holds</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">coc.annot.v1</span></td><td>Compliance, remarks and Synergi number, keyed by vessel + SFI + asset + serial</td></tr>
+        <tr><td><span class="mono">coc.sourceUrl</span> · <span class="mono">coc.autoSync</span></td><td>Saved refresh link and whether auto-refresh is on</td></tr>
+        <tr><td><span class="mono">coc.lastSync</span></td><td>When the data was last refreshed, and from what</td></tr>
+      </tbody>
+    </table></div>
+    <p>So: annotations do not travel with a copy of the file, are not shared between people, and are lost if the browser's site data is cleared. Anything that must be shared belongs in the Maximo record or in Synergi. Nothing leaves the browser — the tracker makes no network calls except the auto-refresh link, if one is saved, and the links people click.</p>
+  </section>
+
+  <section id="s9">
+    <div class="shead"><span class="num">09</span><h2>Known gaps and watchlist</h2></div>
+    <h3>From the current export</h3>
+    <ol>
+      <li><strong>1,969 of 3,364 fleet components (59%) have no usable due date</strong> and cannot be scored. Worst: West Phoenix, West Elara, and the Choke &amp; Kill manifold, where only a fraction of rows carry issued and expiry dates.</li>
+      <li><strong>Shared Capital (0960) has no components in the export</strong> — the 604 items are carried over from v2. Once Maximo exports them they replace the carried-over copies automatically, and the carry-over can be retired.</li>
+      <li><strong>No cert type, notes, availability or assigned-to</strong> in the export, so those fields are empty for anything sourced from it. Maximo <span class="mono">STATUS</span> is preserved as a note.</li>
+      <li><strong>Two Choke &amp; Kill SFIs have no category mapping</strong> — <span class="mono">336.CK1.250</span> and <span class="mono">336.CK1.270</span>. Those items group under their SFI group name. Add them to the v2 Category sheet and rebuild to fix.</li>
+      <li><strong>98 assets appear more than once</strong>, one row per certificate. Handled by the collapse rule, but exporting only the current certificate would be cleaner at source.</li>
+      <li><strong>Vessel name inconsistencies</strong> in the source — “West&nbsp;&nbsp;Capella” with a double space, “Capital Spares” versus “Shared Capital”. The tracker normalises whitespace and takes the display name from the stored vessel config.</li>
+    </ol>
+    <h3>Design limits</h3>
+    <ol start="7">
+      <li>Sections and categories depend on the stored reference tables. A <strong>genuinely new SFI</strong>, one not in the v2 workbook, falls back to the Maximo CATEGORY text and shows as <em>Not defined</em>. Add it to the Category sheet and rebuild, or add a SECTION column to the export.</li>
+      <li>The auto-refresh link depends on the host allowing cross-origin download. SharePoint often does not, without a properly formed direct link.</li>
+      <li>The <span class="mono">.xls</span> export is the HTML-table flavour, so Excel opens it with a “different format” warning. Expected; CSV is the clean route for data.</li>
+    </ol>
+  </section>
+
+  <section id="s10">
+    <div class="shead"><span class="num">10</span><h2>Verification performed</h2></div>
+    <ul>
+      <li>Every row of the export reconciled against the tracker: 3,473 component rows and 2,022 riser rows matched on vessel, asset, SFI, description, serial and buoyancy fields — <strong>zero mismatches</strong>.</li>
+      <li>The Python build and the in-browser import produce <strong>byte-identical</strong> data, so the same file loaded either way gives the same tracker.</li>
+      <li>Save-copy round trip: reopened copy identical, reference tables intact — 4,071 asset keys, 176 SFI keys, 604 spare rows.</li>
+      <li>Frozen header verified on five table views — all components, filtered list, vessel category, vessel riser, fleet riser — with the header staying put when the pane is scrolled to the bottom.</li>
+      <li>Every view walked in a headless browser with a <strong>clean console</strong>: no errors on load, navigation, filtering, sorting, paging, import, export or save.</li>
+    </ul>
+  </section>
+
+  <section id="s11">
+    <div class="shead"><span class="num">11</span><h2>Troubleshooting</h2></div>
+    <div class="tw"><table>
+      <thead><tr><th>Symptom</th><th>Cause and fix</th></tr></thead>
+      <tbody>
+        <tr><td>“Could not read that file”</td><td>Not a recognised export. It needs REPORT, SITEID, ASSETNUM and ASSETUID columns (Maximo), or a WCE_Components sheet (old workbook).</td></tr>
+        <tr><td>Import works, categories wrong</td><td>Assets are new to the reference tables. Add them to the v2 Category sheet and rebuild, or accept the Maximo CATEGORY fallback.</td></tr>
+        <tr><td>Everything shows “Not defined”</td><td>The section lookup missed — likely new SFIs, or the reference tables were lost by building from a file that had none. Rebuild with build_tracker_v3.py.</td></tr>
+        <tr><td>Auto-refresh does nothing</td><td>Link blocked by CORS, expired, or not a direct download. Use Update from Excel and check the link in the dialog.</td></tr>
+        <tr><td>Compliance ticks vanished</td><td>They are per-browser. A different machine, browser or cleared site data starts empty — by design.</td></tr>
+        <tr><td>Headers stop freezing</td><td>Only in a browser without <span class="mono">position: sticky</span> (IE11). Use Edge or Chrome.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="s12">
+    <div class="shead"><span class="num">12</span><h2>History</h2></div>
+    <div class="tw"><table>
+      <thead><tr><th>Version</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td>REV6</td><td>Original dashboard, data hardcoded in the HTML</td></tr>
+        <tr><td>REV7</td><td>Excel data template and in-browser import, native .xlsx reader, auto-refresh link; asset number added to list views</td></tr>
+        <tr><td>REV8</td><td>Choke &amp; Kill manifold driven by its own sheet; duplicate Shared Capital section removed; date, category and vessel-name fixes</td></tr>
+        <tr><td>Rebuild</td><td>New single-file tracker written around the Excel schema — nothing hardcoded per vessel</td></tr>
+        <tr><td>+ Sections</td><td>WCE split into BOP 1 / BOP 2 / Surface / Not defined from column F</td></tr>
+        <tr><td><strong>Current</strong></td><td>Rebuilt on the Maximo flat export; frozen table headers; one row per asset with certificate history</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <footer>
+    Seadrill WCE CoC Tracker · handoff prepared 30 September 2026 · figures are from the 30 September build of the Maximo extract and change with each refresh.
+  </footer>
+</div>
+
+</body></html>

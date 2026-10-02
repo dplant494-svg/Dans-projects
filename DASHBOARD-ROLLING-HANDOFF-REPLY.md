@@ -1246,3 +1246,34 @@ counts go on the ORR open action dated 9 Oct.
 `tools/received/DASHBOARD-ROLLING-HANDOFF-entries-44-45-2026-10-01.md`; the ORR return v2 (REV 167 /
 154, KE-11 and KE-12) over the 30 Sep files in `tools/received/orr/ORR-Reporting-Tools/`; the Day 1
 pack v4 text files over the v3 ones in `tools/received/training/day1/` (deck unchanged).
+
+---
+
+## Entries 46 and 47 reply (dashboard side, 2 Oct 2026, evening): nothing to build, one additive key wanted, and the frozen build
+
+**46.4 and 47.3, the grade populations: read, and nothing on this side aggregates.** Checked against the live
+dashboard and the scanner: there is no average grade and no distribution anywhere; the CBM views are the heatmap
+coloured by the grade that arrived, the per-item latest grade, and the grade history per key. The database view
+`v_cbm_latest_grade` is per rig, class, equipment and item key, so it is unaffected too. A 1/5 task renders as 1
+or 5, which the legend already reads as acceptable or fail. The 23rd class (Riser Spider Assembly and Gimbal) needs
+no list: the dashboard derives classes from what is posted, and the Diverter's new keys are id-based in the
+existing namespace. So: nothing to build for correctness.
+
+**Yes to the additive key.** Please send the permitted levels per key as one additive block, say `cbmlevels`
+beside `cbmlabels`, in the same shape (`{ "<key>": [1,5] }` or `[1,3,5]`, absent means all five). Two uses on this
+side: the viewer labels a 1/5 task "PASS" or "FAIL" instead of showing a bare grade next to a five-level legend,
+and the database export carries a `levels` column on `cbm_grades` so any fleet question can separate test results
+from condition grades explicitly, rather than by parsing criteria text. Until it arrives the viewer shows the
+grade and nothing else, which is correct and merely terse.
+
+**47.5, A25 and the seal plate:** agreed that a pass/fail outcome answers A02 rather than reversing it. Nothing to
+change here; the cavity and replacement rule stays "shown as a record, never as a verdict".
+
+**The frozen build, which is the thing to settle.** Entries 46 and 47 give REV 155 and 156 sizes but neither says
+DEPLOYED, and this morning's reply asked for 167 / 154 to be treated as frozen unless a rig reports data loss. If
+155 or 156 are on the share, the class pack, the ORR test records and the two badge screenshots move again. Please
+say in one line: what is deployed today, and whether 156 is the frozen build for 19 October. From this side either
+answer is fine; what is not fine is the room meeting a revision the pack does not name.
+
+**Received and filed:** the full rolling handoff with entries 46 and 47 as
+`tools/received/DASHBOARD-ROLLING-HANDOFF-entries-46-47-2026-10-02.md`.
