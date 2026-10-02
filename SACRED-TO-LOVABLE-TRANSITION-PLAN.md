@@ -75,6 +75,26 @@ by Dan against the live page. Dan's time: about one day per tab, eight days.
 | Freshness alert | the platform's own monitoring replaces the hourly Digests check | 0.5 day |
 | Maximo item export | the daily 06:00 file loads into the new store once the landing folder is known (same open item as today) | 0.5 day |
 
+## The AI agent: Claude integration as the main candidate, pending Viren's confirmation
+
+Ask SACRED AI today is a Copilot Studio agent over per-report digests in SharePoint, with a Teams app approval
+outstanding since 16 September. On Lovable it becomes an assistant inside the app, and **the main candidate is a Claude
+integration**: the app calls the Claude model through the Anthropic API from a server-side function, with the SACRED
+database as its source. Copilot Studio is retired at cutover and the Teams approval is no longer needed.
+
+What it gives: fleet questions answered from one query of the database rather than from a digest per report (latest
+grade 4 and 5 per component, overdue AAB actions, precharge requests open); answers grounded on the posting contract
+and the grading rules so the assistant explains what a grade means rather than guessing; the same button on every page.
+
+What it needs: the API key held as a platform secret on the server side, never in the page; the security review to
+cover report text and names leaving the tenancy for the model call (photographs are not sent unless a question is about
+them); the SACRED display rule, an answer is an answer and is never shown as a recorded fact; the user signed in before
+asking; a small cost line per query.
+
+**Pending from Viren:** whether Lovable's own model gateway offers Claude, or the app calls the Anthropic API directly
+with Seadrill's own key. Either works; the direct call keeps the key and the data path under Seadrill's control.
+Confirmed in phase 0 with the other licence questions; built in phase 3.
+
 ## Phase 4: the parity run (two clean weeks)
 
 Both systems live. Rigs post to the trigger, which writes to both. Every day Dan compares the counts and the

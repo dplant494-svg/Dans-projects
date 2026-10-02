@@ -57,7 +57,7 @@
 <header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
 <h1>SACRED to Lovable — transition chart (Plan 2)</h1>
 <p>For Lee Arnold and Arnaud · draft 1, 2 October 2026 · Dan Plant as the named resource, five days a week from 26 October · purchase order cut, go-ahead not yet official · the SACRED to Production plan (chart draft 5) carries on beside this; the rigs keep using SACRED throughout</p></div>
-<div class="right">Critical path in red: go-ahead, foundations, page parity, parity run, cutover in the <b style="color:#fff">first week of January 2027</b><br>Gates that no amount of Dan's time moves: the Entra app registration (SSO), the security review of the hosted store, two clean parity weeks<br>Two days a week instead: the same phases, cutover February 2027</div></header>
+<div class="right">Critical path in red: go-ahead, foundations, page parity, parity run, cutover in the <b style="color:#fff">first week of January 2027</b><br>Gates that no amount of Dan's time moves: the Entra app registration (SSO), the security review of the hosted store, two clean parity weeks<br>AI agent: Claude integration as the main candidate, pending Viren's confirmation<br>Two days a week instead: the same phases, cutover February 2027</div></header>
 <div id="chart"></div>
 <div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on ISIT / Viren</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 2 Oct</span></div>
 <footer>Source: <code>SACRED-TO-LOVABLE-TRANSITION-PLAN.md</code> (draft 1, the phases, acceptance tests, the five-day timeline and its three conditions) and <code>LOVABLE-REBUILD-NOTES.md</code> (what carries over, what is rebuilt, what the platform cannot do alone). Dates are estimates until the go-ahead is official and Viren has confirmed SSO, data region, self-hosting and file limits on the licence. Questions: Dan Plant, Technical Superintendent, Well Control Engineering.</footer>
@@ -100,6 +100,7 @@ const rows = [
  ['bar','Bulletin Board; Precharge (calculator ported from Rev 87, re-verified); Help Centre; Errors', [['plan crit',D(11,23),D(11,27),'']]],
  ['sec','Phase 3 — the loops'],
  ['bar','Intake dual-write (one trigger action); flow links (13 cards); receipts; agent; monitoring', [['plan crit',D(11,30),D(12,4),'the tools do not change']]],
+ ['bar','<b>AI agent: Claude integration</b> as the main candidate, in-app, on the database; Copilot Studio retired at cutover', [['wait',D(10,5),D(10,16),'Viren confirms: gateway or direct API'],['plan',D(11,30),D(12,4),'built with the loops']]],
  ['ms','Security submission for the hosted store (the larger review); ORR workbook v3 started', [['',D(12,4),'4 Dec']]],
  ['sec','Phase 4 — the parity run: two clean weeks, both systems live'],
  ['bar','Rigs post to the trigger, which writes to both; daily counts; DR rebuild and restore proven', [['plan crit',D(12,7),D(12,18),'two clean weeks before the Christmas crewing changes']]],
