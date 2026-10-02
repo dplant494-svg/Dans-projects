@@ -1,0 +1,138 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>SACRED to Lovable — transition chart, 2 October 2026 (draft 1)</title>
+<style>
+ @page { size: A4 landscape; margin: 9mm 10mm 9mm 10mm; }
+ * { box-sizing: border-box; }
+ body { font-family: "Segoe UI", Arial, Helvetica, sans-serif; color:#0a1530; margin:0; font-size:8.6pt; }
+ header { background:#002C77; color:#fff; padding:6px 14px 5px; border-bottom:3px solid #EDB71E; display:flex; justify-content:space-between; align-items:flex-end; }
+ header .eyebrow { color:#EDB71E; font-size:7.5pt; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+ header h1 { margin:2px 0 1px; font-size:14pt; font-weight:600; }
+ header p { margin:0; color:#C9D4EA; font-size:8pt; }
+ header .right { text-align:right; color:#C9D4EA; font-size:8pt; }
+ .page { page-break-after: always; }
+ .page:last-child { page-break-after: auto; }
+ #chart { position:relative; margin-top:6px; }
+ .grid { position:absolute; top:0; bottom:0; border-left:1px solid #e3e8f1; }
+ .grid.month { border-left:1px solid #b9c4d8; }
+ .months { position:relative; height:16px; margin-left:var(--lab); }
+ .months div { position:absolute; top:0; height:16px; font-size:7.5pt; font-weight:700; color:#002C77; padding-left:3px; border-left:1px solid #b9c4d8; }
+ .weeks { position:relative; height:10px; margin-left:var(--lab); border-bottom:1px solid #b9c4d8; }
+ .weeks div { position:absolute; top:0; font-size:5.8pt; color:#7a879c; padding-left:2px; }
+ .row { position:relative; height:var(--rh); border-bottom:1px solid #eef1f6; }
+ .row.sec { height:14px; background:#eef2f9; border-bottom:1px solid #b9c4d8; }
+ .row.sec .lab { font-weight:700; color:#002C77; font-size:8.6pt; width:auto; }
+ .lab { position:absolute; left:0; top:0; width:var(--lab); height:100%; padding:0 6px 0 4px; display:flex; align-items:center; line-height:1.08; font-size:6.6pt; white-space:nowrap; overflow:hidden; border-right:1px solid #b9c4d8; }
+ .lab b { color:#002C77; }
+ .area { position:absolute; left:var(--lab); right:0; top:0; height:100%; }
+ .bar { position:absolute; top:3px; height:calc(var(--rh) - 6px); border-radius:2px; font-size:6.6pt; line-height:calc(var(--rh) - 6px); padding:0 4px; white-space:nowrap; overflow:visible; color:#fff; }
+ .bar.done { background:#2e8b57; }
+ .bar.plan { background:#2f5fb3; }
+ .bar.est  { background:#8fb0e8; color:#0a1530; border:1px dashed #2f5fb3; }
+ .bar.wait { background:#e3e7ee; color:#3a4660; border:1px dashed #7a879c; }
+ .bar.crit { box-shadow: 0 0 0 1.6px #c8102e; }
+ .bar .t { position:absolute; left:100%; margin-left:4px; color:#0a1530; }
+ .bar .ti { color:#fff; }
+ .ms { position:absolute; top:50%; width:9px; height:9px; margin:-4.5px 0 0 -4.5px; transform:rotate(45deg); background:#EDB71E; border:1.4px solid #002C77; }
+ .ms.done { background:#2e8b57; }
+ .ms.crit { border-color:#c8102e; border-width:2px; }
+ .mst { position:absolute; top:50%; transform:translateY(-50%); margin-left:8px; font-size:6.6pt; white-space:nowrap; }
+ .today { position:absolute; top:0; bottom:0; border-left:2px solid #EDB71E; z-index:5; }
+ .todayt { position:absolute; top:-1px; font-size:6.4pt; color:#8a6a00; font-weight:700; margin-left:3px; }
+ .legend { display:flex; gap:14px; font-size:7.4pt; margin-top:5px; align-items:center; color:#3a4660; flex-wrap:wrap; }
+ .legend i { display:inline-block; width:18px; height:9px; border-radius:2px; vertical-align:middle; margin-right:4px; }
+ .legend .d { position:relative; display:inline-block; width:9px; height:9px; transform:rotate(45deg); background:#EDB71E; border:1.4px solid #002C77; margin:0 8px 0 3px; }
+ footer { margin-top:5px; font-size:7pt; color:#5a6880; border-top:1px solid #d0d8e8; padding-top:3px; }
+ /* page 2 */
+ h2 { color:#002C77; font-size:11pt; border-bottom:2px solid #EDB71E; padding-bottom:2px; margin:10px 0 5px; }
+ table { border-collapse:collapse; width:100%; font-size:8pt; }
+ th, td { border:1px solid #d0d8e8; padding:3px 6px; vertical-align:top; text-align:left; }
+ th { background:#002C77; color:#fff; font-weight:600; }
+ td.n { white-space:nowrap; font-weight:700; color:#002C77; width:40px; }
+ td.d { white-space:nowrap; width:120px; }
+ .two { display:flex; gap:16px; }
+ .two > div { flex:1; }
+ ul { margin:3px 0 0 16px; padding:0; line-height:1.35; }
+ li { margin-bottom:2px; }
+</style></head><body>
+<div class="page">
+<header><div><div class="eyebrow">Well Control Equipment — Technical Services</div>
+<h1>SACRED to Lovable — transition chart (Plan 2)</h1>
+<p>For Lee Arnold and Arnaud · draft 1, 2 October 2026 · Dan Plant as the named resource, five days a week from 26 October · purchase order cut, go-ahead not yet official · the SACRED to Production plan (chart draft 5) carries on beside this; the rigs keep using SACRED throughout</p></div>
+<div class="right">Critical path in red: go-ahead, foundations, page parity, parity run, cutover in the <b style="color:#fff">first week of January 2027</b><br>Gates that no amount of Dan's time moves: the Entra app registration (SSO), the security review of the hosted store, two clean parity weeks<br>Two days a week instead: the same phases, cutover February 2027</div></header>
+<div id="chart"></div>
+<div class="legend"><span><i style="background:#2e8b57"></i>done, dated</span><span><i style="background:#2f5fb3"></i>planned, dated</span><span><i style="background:#8fb0e8;border:1px dashed #2f5fb3"></i>estimate</span><span><i style="background:#e3e7ee;border:1px dashed #7a879c"></i>waiting on ISIT / Viren</span><span><i style="background:#2f5fb3;box-shadow:0 0 0 1.6px #c8102e"></i>critical path</span><span><span class="d"></span>milestone (green when done)</span><span><i style="width:2px;background:#EDB71E;height:12px"></i>today, 2 Oct</span></div>
+<footer>Source: <code>SACRED-TO-LOVABLE-TRANSITION-PLAN.md</code> (draft 1, the phases, acceptance tests, the five-day timeline and its three conditions) and <code>LOVABLE-REBUILD-NOTES.md</code> (what carries over, what is rebuilt, what the platform cannot do alone). Dates are estimates until the go-ahead is official and Viren has confirmed SSO, data region, self-hosting and file limits on the licence. Questions: Dan Plant, Technical Superintendent, Well Control Engineering.</footer>
+</div>
+<script>
+const LAB = 400, RH = 16.5;
+document.documentElement.style.setProperty('--lab', LAB+'px');
+document.documentElement.style.setProperty('--rh', RH+'px');
+const D = (m,d,y=2026)=>new Date(Date.UTC(y,m-1,d));
+const T0 = D(9,28), T1 = D(3,1,2027);
+const chart = document.getElementById('chart');
+const W = chart.clientWidth - LAB;
+const x = d => ((d - T0)/(T1 - T0))*W;
+const months = [[D(10,1),'Oct 2026'],[D(11,1),'Nov'],[D(12,1),'Dec'],[D(1,1,2027),'Jan 2027'],[D(2,1,2027),'Feb']];
+let h = '<div class="months">'+months.map(([d,n])=>`<div style="left:${x(d)}px">${n}</div>`).join('')+'</div>';
+let wk = '<div class="weeks">';
+for (let d = new Date(T0); d < T1; d = new Date(d.getTime()+7*864e5)) wk += `<div style="left:${x(d)}px">${d.getUTCDate()}</div>`;
+h += wk + '</div>';
+const rows = [
+ ['sec','Phase 0 — before it is official: decisions and the asks with lead times'],
+ ['ms','One-page to Viren, Adam and Saroj; ISIT meeting notes and the ORR to IT', [['done',D(10,2),'2 Oct, done']]],
+ ['bar','Half-day render test: Reports and Rig Monitoring from the data file and the export', [['wait',D(10,5),D(10,16),'Viren with Dan; pass = the same counts as the live page']]],
+ ['bar','Three decisions on paper: hosting; sign-in (Entra SSO); system of record (Supabase or Fabric)', [['wait',D(10,5),D(10,16),'Luis, Viren, Dan, Lee']]],
+ ['ms','Go-ahead official; application owner named on the RACI (Dan today)', [['crit',D(10,14),'mid-Oct, estimate']]],
+ ['bar','<b>Entra app registration for SSO and Graph</b>: raised the day it is official, chased weekly', [['wait crit',D(10,14),D(11,6),'ISIT; no SSO, no production on any platform']]],
+ ['bar','Rig network provisioning for the Lovable URL; data region; security review route', [['wait',D(10,14),D(11,13),'ISIT (Adam, Luis)']]],
+ ['bar','Viren confirms SSO, data region, self-hosting and file limits on the licence', [['wait',D(10,5),D(10,16),'']]],
+ ['sec','The production plan carries on (chart draft 5): Dan\'s remaining items close first'],
+ ['bar','Posted-data audit; Dataflow Gen2 load into SACRED DATA; Help flow; freshness alert', [['plan',D(10,2),D(10,16),'about a week of Dan\'s time']]],
+ ['bar','WCE SME workshop and the class, Houston; scanner transfer to the UAT / sacred server', [['plan',D(10,19),D(10,23),'Dan in Houston; Plan 2 starts the week after']]],
+ ['bar','UAT server, dual run, ISIT shadow-run (ISIT\'s work, unchanged by Plan 2)', [['est',D(10,26),D(1,8,2027),'']]],
+ ['sec','Phase 1 — foundations (Dan building in Lovable, five days a week)'],
+ ['bar','Lovable project; Supabase schema from the DDL (22 tables); history from the 21 CSVs', [['plan crit',D(10,26),D(11,6),'proof: the five counts match the manifest']]],
+ ['bar','Upload endpoint accepting the posting contract as it is; size ceilings; test mode; storage limits', [['plan crit',D(10,28),D(11,6),'sample reports load; nothing posted from a test']]],
+ ['bar','Sign-in with Seadrill accounts (depends on the app registration)', [['est',D(11,2),D(11,13),'first thing built once the registration lands']]],
+ ['ms','Reassess on 6 Nov against the two conditions that are not Dan\'s', [['',D(11,6),'6 Nov']]],
+ ['sec','Phase 2 — page parity, one tab at a time, each accepted against the live dashboard'],
+ ['bar','Reports list and viewer; Rig Monitoring', [['plan crit',D(11,9),D(11,13),'']]],
+ ['bar','CBM (grades, cbmlabels, cavity record, OEM copies); Compliance', [['plan crit',D(11,16),D(11,20),'']]],
+ ['bar','Bulletin Board; Precharge (calculator ported from Rev 87, re-verified); Help Centre; Errors', [['plan crit',D(11,23),D(11,27),'']]],
+ ['sec','Phase 3 — the loops'],
+ ['bar','Intake dual-write (one trigger action); flow links (13 cards); receipts; agent; monitoring', [['plan crit',D(11,30),D(12,4),'the tools do not change']]],
+ ['ms','Security submission for the hosted store (the larger review); ORR workbook v3 started', [['',D(12,4),'4 Dec']]],
+ ['sec','Phase 4 — the parity run: two clean weeks, both systems live'],
+ ['bar','Rigs post to the trigger, which writes to both; daily counts; DR rebuild and restore proven', [['plan crit',D(12,7),D(12,18),'two clean weeks before the Christmas crewing changes']]],
+ ['bar','Christmas hold', [['wait',D(12,21),D(1,1,2027),'']]],
+ ['sec','Phase 5 — cutover and the month of watching'],
+ ['ms','<b>Cutover</b>: links to Lovable; sacred pages redirect; scanner disabled; tools one link revision', [['crit',D(1,4,2027),'first full week of January 2027']]],
+ ['bar','Training delta (two pages), HAZID and MOC revised the same week; Fabric dropped or mirrored', [['plan',D(1,4,2027),D(1,8,2027),'']]],
+ ['bar','A clean month; then the scanner, the share and the server rows on the ORR close', [['plan',D(1,11,2027),D(2,5,2027),'']], [['',D(2,12,2027),'12 Feb: production on Lovable (M11)']]],
+ ['sec','The alternative: Dan two days a week'],
+ ['bar','Same phases: foundations early Nov, parity to mid-Dec, parity run Jan, cutover Feb', [['est',D(10,26),D(2,26,2027),'about five weeks later; the gates are the same']]],
+ ['sec','Not in this plan (phase 6, later)'],
+ ['bar','Rig tools as hosted forms with offline auto-save; Power BI on the new store; photo-grading model', [['est',D(2,15,2027),D(2,26,2027),'after cutover, if wanted']]],
+];
+for (const r of rows) {
+  if (r[0]==='sec') { h += `<div class="row sec"><div class="lab">${r[1]}</div></div>`; continue; }
+  let inner = '';
+  if (r[0]==='bar') {
+    for (const [cls,s,e,t] of r[2]) {
+      const l = x(s), w = Math.max(x(e)-l, 4);
+      inner += `<div class="bar ${cls}" style="left:${l}px;width:${w}px"><span class="t">${t}</span></div>`;
+    }
+    if (r[3]) for (const [cls,d,t] of r[3]) inner += `<div class="ms ${cls}" style="left:${x(d)}px"></div>` + (t?`<div class="mst" style="left:${x(d)}px">${t}</div>`:'');
+  } else {
+    for (const [cls,d,t] of r[2]) inner += `<div class="ms ${cls}" style="left:${x(d)}px"></div>` + (t?`<div class="mst" style="left:${x(d)}px">${t}</div>`:'');
+  }
+  if (r[4]) for (const [cls,d,t] of r[4]) inner += `<div class="ms ${cls}" style="left:${x(d)}px;background:#fff"></div><div class="mst" style="left:${x(d)}px">${t}</div>`;
+  h += `<div class="row"><div class="lab">${r[1]}</div><div class="area">${inner}</div></div>`;
+}
+chart.innerHTML = h;
+// grid lines and today
+const gridHost = document.createElement('div'); gridHost.style.cssText='position:absolute;left:'+LAB+'px;right:0;top:26px;bottom:0;pointer-events:none;';
+for (const [d] of months) { const g=document.createElement('div'); g.className='grid month'; g.style.left=x(d)+'px'; gridHost.appendChild(g); }
+const today = D(10,2); const t=document.createElement('div'); t.className='today'; t.style.left=x(today)+'px'; t.innerHTML='<span class="todayt">today</span>'; gridHost.appendChild(t);
+chart.appendChild(gridHost);
+</script>
+</body></html>
