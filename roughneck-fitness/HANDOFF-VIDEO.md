@@ -1,5 +1,10 @@
 # Handoff: Roughneck Fitness video pass
 
+**Superseded 2 Oct 2026.** The Drive connector cannot deliver video (it returns file contents as text). The route that works is a GitHub release: Dan uploads clips as release assets, the session downloads them with curl via the API. First pass done from release `videos-sept-2026`; see `assets/from-video/INDEX.md`. The original brief is kept below for the next batch.
+
+---
+
+
 For a fresh Claude Code session on this repo (`dplant494-svg/Dans-projects`, branch `claude/new-business-venture-7pxnxz`). The main session built everything here; it cannot reach Google Drive with the right permission and cannot fetch Drive links through the network proxy. This session can, if Drive is connected with full access. Your job is to get the video material out of Drive, turn it into small files, and push them to the branch so the main session can use them.
 
 ## Context in one paragraph

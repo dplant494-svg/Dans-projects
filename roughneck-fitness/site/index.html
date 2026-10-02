@@ -82,7 +82,8 @@
   .counter .v small{font-size:.9rem;font-weight:600;letter-spacing:.1em;color:var(--chalk);margin-left:.4rem}
   .ba{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
   .ba figure{position:relative;aspect-ratio:3/4.4;overflow:hidden;background:var(--iron);border:1px solid var(--line)}
-  .ba img{width:100%;height:100%;object-fit:cover}
+  .ba img,.ba video{width:100%;height:100%;object-fit:cover;display:block}
+  @media (prefers-reduced-motion:reduce){.ba video{display:none}.ba figure.after{background:url(img/after-gym-front.jpg) center/cover}}
   .ba figcaption{position:absolute;left:0;bottom:0;background:var(--steel);color:var(--chalk);font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:.5rem .8rem;border-top:2px solid var(--orange);border-right:2px solid var(--orange)}
   .ba figure.after figcaption{background:var(--orange);color:var(--steel);border-color:var(--steel)}
 
@@ -206,7 +207,7 @@
     </div>
     <div class="ba" aria-label="Before and after">
       <figure><img src="img/before-2024-bar.jpg" alt="Before, 2024: at a pool bar on holiday, overweight, drink in hand" loading="eager"><figcaption>Before · 2024</figcaption></figure>
-      <figure class="after"><img src="img/after-gym-front.jpg" alt="After: lean and muscular in a gym mirror, September 2026" loading="eager"><figcaption>Now · Sep 2026</figcaption></figure>
+      <figure class="after"><video src="img/hero-now.mp4" poster="img/after-gym-front.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Now, September 2026: cable crossover in the gym"></video><figcaption>Now · Sep 2026</figcaption></figure>
     </div>
   </div>
 </header>
