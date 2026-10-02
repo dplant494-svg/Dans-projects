@@ -13,34 +13,4 @@ SACRED is five parts. They are joined by files, not by code calling code, which 
 | 4 | **The database** | Microsoft Fabric SQL database `SACRED DATA` (22 tables, 6 views), loaded from the scanner's normalised export on every run. No server, no secret. | Dan's Fabric workspace; capacity on Lee's cost centre from mid-November | Dan / Lee | **Already hosted** in the tenancy. A platform with its own database would be a second copy of the same data outside the tenancy, with its own security review. |
 | 5 | **Ask SACRED AI** | A Copilot Studio agent that answers questions from the per-report digests in SharePoint. | Seadrill Apps PROD; Teams app approval pending since 16 September | Dan, Lee | **Already hosted.** Reads SharePoint; unaffected by where the pages live. |
 
-## What a migration of part 3 would and would not do
-
-**Would remove:** the IIS server, the share, the scheduled task and the service account for it, the server backup and
-the DNS and hosting rows on ISIT's gap list. That is the hosting burden, and it is real.
-
-**Would not remove:** the posting contract (part 1 posts a file; something has to receive and index it), the
-notification flows (part 2 stays and needs the new page links), the data model (the scanner's export is the schema;
-it would feed the platform's store instead of, or as well as, Fabric), the authenticated path for rig users (needed
-either way; the sandbox has none), the heavy-window load (7 to 10 day periods where a rig posts many large files),
-the rig access problem (the rigs that cannot reach the sacred server today are blocked by corporate network
-provisioning, not by their Starlink link; a hosted platform has to be provisioned for the rig networks the same way), the security review (a hosted platform
-holding rig reports with names and photographs is a larger review than static files on an internal server, not a
-smaller one), or the training and the people side.
-
-**Would add:** a build of the dashboard views on the platform (the current dashboard is about 5,000 lines of
-rendering logic for reports, CBM grades, compliance, AAB, precharge and Help, written against the data file's
-shape), a second data store, a dependency on a vendor platform that is new to Seadrill, and a licence line.
-
-## The honest position
-
-SACRED's hosting footprint is already small: one static web folder and one ten-minute script. The parts ISIT find
-hard to support are the ones with no platform answer: the file-based rig tools, the posting contract, the flows
-and the people process. A migration is worth doing if ISIT would rather support a hosted app than a Windows server and
-a scheduled task, and if the platform is provisioned for the rig networks and passes the same security review. It is not a
-shortcut past the integration work, because the integration work is in parts 1, 2 and 4, which stay where they are.
-
-The useful first step for Viren is a half-day with the data file and the normalised export, to see whether the
-platform can render the Reports and Rig Monitoring views from them. If it can, the migration question is real and
-can be planned for after February. If it cannot, it is answered.
-
 Questions: Dan Plant, Technical Superintendent, Well Control Engineering.
