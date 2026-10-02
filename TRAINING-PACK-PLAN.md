@@ -54,3 +54,37 @@ built as the handoffs come in; the server move in the week of 19 October changes
 
 **2 Oct:** frozen builds are now **WCGRRT REV 167 and SSORT REV 154** (rolling handoff entry 45; pack v4 filed). Screenshots 1 and 17
 are retaken from the deployed files when Dan uploads them; all other pack content stands.
+
+## Status, 2 October evening: what is in hand and what is outstanding before the pack is final (12 October)
+
+**In hand.** Agenda draft 9. Day 1 pack v5 from the tools session (four walkthrough scripts, twelve questions with
+answers, the exercise sheet with per-trainee dates, four sample files proven on the scanner, screenshot list, 19-slide
+deck). Twenty-four Day 1 screenshots taken here on 166 / 153. Day 2 deck, 29 slides. Precharge pack (three modules,
+nine questions, three exercise files with the answer key, 32 screenshots, the issued PDF). AAB module in full. CoC
+tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop module.
+
+**Outstanding, dashboard session, needs nothing from anyone:**
+1. Day 2 walkthrough scripts in the Day 1 format: Rig Visit Dashboard tab by tab; BOP Fleet Planning and SSCE
+   Requests; the loop with the Help Centre hands-on; "What is coming" rewritten for the UAT server and the Lovable
+   transition; the feedback capture sheet.
+2. Day 2 screenshots for those modules, taken here from the deployed dashboard files and the test set.
+3. The trainee workbook, one document for both days: agenda, exercise sheets, the questions with blank lines, the
+   "why did it stop me" table, screenshots bound in.
+4. The trainer's pack, one document: every script with the answers and the screenshots, both days.
+5. The UAT sign-off form for 20 October (ORR item 9).
+
+**Outstanding, needs Dan:**
+- The deployed WCGRRT 167 and SSORT 156 files, to retake shots 1, 17, 18 and 19.
+- The freeze decision: 12 October, nothing ships after it unless a rig is losing work. Tell the tools session.
+- The trainee list (names, rigs, how many), for the date allocation and the workbook covers. Ten assumed.
+- Which CoC tracker file the class sees on 20 October: the ported one if item 44 lands by 9 October.
+- After the class: delete the forty posts from PostedReports (and any OEM copies).
+
+**Outstanding, needs others:**
+- Tools session: the Day 1 deck edits promised for 5 October (slides 3, 16, 17, 18); the deck in v5 is still the
+  30 September file.
+- Lee's SPARC maintainer: the five-minute SPARC slide for "What is coming" (`TRAINING-HANDOFF-SPARC.md` §2).
+- Manpreet: the two fields carried through his refresh (item 44), and whether he attends for the CoC ten minutes.
+- Lee: the opening content for 08:00 on day 1 (safety minute, roles, expectations); the slide is in the deck for him.
+- Logistics (Houston office): one laptop per trainee with Edge, the two tools opened from the share, the dashboard,
+  the projector, printed workbooks. The office reaches the sacred server; nothing in the class needs a rig network.
