@@ -1,8 +1,14 @@
-# Screenshots — status, 30 September 2026, evening
+# Screenshots — status, 1 October 2026
 
 **Capture worked.** Your question in the pack v2 reply, answered: it started working late on
-30 September and **19 of the 24 shots were taken on the deployed builds** — WCGRRT REV 166 and
-SSORT REV 153, light mode, asset `SSCE Equipment` throughout, and nothing posted.
+30 September and **19 of the 24 shots were taken**, light mode, asset `SSCE Equipment` throughout,
+and nothing posted.
+
+**They were taken on WCGRRT REV 166 and SSORT REV 153.** Both tools moved to **REV 167** and
+**REV 154** on 1 October to fix the EHBS timer delay a rig reported, and a data-loss defect found
+underneath it (rolling handoff entry 45). **Two shots must be retaken: 1 and 17, the revision
+badges**, which now read the wrong number. Every other shot is unaffected — nothing visible in them
+changed between those builds.
 
 This file replaces `07-SCREENSHOTS-NOT-YET-CAPTURED.txt`, which said capture was failing and is no
 longer true.
@@ -11,8 +17,8 @@ longer true.
 
 | Tool | Shots |
 |---|---|
-| WCGRRT REV 166 | **1** badge · **2** Visit Information populated (also serves **7**, Report Date) · **4** Daily Report Entry selected · **5** equipment entry · **6** captioned photographs · **9** restore bar · **10** BOP function test · **11** EDS Sequence 2 on West Polaris · **12** acoustic no-system on West Vela · **13** EHBS, sequenced class |
-| SSORT REV 153 | **17** badge · **18** Riser Adapter 1.1 · **19** grade 3 with the finding written · **20** the five-level scale · **21** attachments empty · **22** two files with task numbers and the running total · **23** packer attestation and the 42-slot requirement · **24** the Post to OEM button in context |
+| WCGRRT (taken on REV 166) | **1** badge — **RETAKE** · **2** Visit Information populated (also serves **7**, Report Date) · **4** Daily Report Entry selected · **5** equipment entry · **6** captioned photographs · **9** restore bar · **10** BOP function test · **11** EDS Sequence 2 on West Polaris · **12** acoustic no-system on West Vela · **13** EHBS, sequenced class |
+| SSORT (taken on REV 153) | **17** badge — **RETAKE** · **18** Riser Adapter 1.1 · **19** grade 3 with the finding written · **20** the five-level scale · **21** attachments empty · **22** two files with task numbers and the running total · **23** packer attestation and the 42-slot requirement · **24** the Post to OEM button in context |
 
 ## Why no PNGs are in this zip
 

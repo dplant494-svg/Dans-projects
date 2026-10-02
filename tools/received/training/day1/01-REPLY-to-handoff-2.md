@@ -40,10 +40,10 @@ then clear the workspace and start the next.** I will write it that way.
 
 | Report type | Tool | Pattern | Type string from | Date from |
 |---|---|---|---|---|
-| Daily report | WCGRRT 166 | `seadrill-report_<rig>_<date>_daily-report.json` | tile titles; `daily-report` is the fallback when no other title matches | **`meta-report-date`**, else newest tile date, else visit date |
-| Surface test | SSORT 153 | `seadrill-report_<rig>_<date>_surface-bop-testing.json` | `.sbop-tile` present | **`meta-date`** |
-| CBM inspection | SSORT 153 | `seadrill-report_<rig>_<date>_cbm-inspection.json` | `.cbm-tile` present | **`meta-date`** |
-| Pre-deployment checklist | SSORT 153 | `seadrill-report_<rig>_<date>_pre-deployment-checklist.json` | `.pdc-tile` present | **`meta-date`** |
+| Daily report | WCGRRT 167 | `seadrill-report_<rig>_<date>_daily-report.json` | tile titles; `daily-report` is the fallback when no other title matches | **`meta-report-date`**, else newest tile date, else visit date |
+| Surface test | SSORT 154 | `seadrill-report_<rig>_<date>_surface-bop-testing.json` | `.sbop-tile` present | **`meta-date`** |
+| CBM inspection | SSORT 154 | `seadrill-report_<rig>_<date>_cbm-inspection.json` | `.cbm-tile` present | **`meta-date`** |
+| Pre-deployment checklist | SSORT 154 | `seadrill-report_<rig>_<date>_pre-deployment-checklist.json` | `.pdc-tile` present | **`meta-date`** |
 
 `<rig>` is `meta-asset` with every non-alphanumeric character replaced by `-`, so
 **`SSCE Equipment` → `SSCE-Equipment`**. `<date>` is `YYYY-MM-DD`.
@@ -89,7 +89,7 @@ without pressing it; that is a script change, not a tool change.
 
 This is the one where a single workbook row would be wrong. Slide 18 needs to become two rows.
 
-**WCGRRT 166 — tells you, clearly.** `sdPostReport` toasts on failure, and the receipt on success
+**WCGRRT 167 — tells you, clearly.** `sdPostReport` toasts on failure, and the receipt on success
 is the thing the agenda calls "the receipt":
 
 | | What the user sees |
@@ -98,7 +98,7 @@ is the thing the agenda calls "the receipt":
 | Post fails (HTTP error) | `⚠ Dashboard post failed (HTTP 500) — file still saved locally.` then it falls back to the TSC REPORTS folder, then Save As |
 | Post fails (network) | `⚠ Dashboard post failed — file still saved locally.` |
 
-**SSORT 153 — does NOT tell you.** `sdPostReport` returns `false` silently: no toast, no receipt,
+**SSORT 154 — does NOT tell you.** `sdPostReport` returns `false` silently: no toast, no receipt,
 no `sdPostReceipt` anywhere in the file. `postReport` then falls through the same ladder:
 
 | | What the user sees |
@@ -119,24 +119,24 @@ a later revision, on your side of the fence too: giving SSORT the WCGRRT receipt
 
 ## 3. §3b — the guards before Post, as of the frozen build
 
-**WCGRRT 166**, in order: report date valid (`sdReportDateOk`) → **rig identity, fail closed** (names
+**WCGRRT 167**, in order: report date valid (`sdReportDateOk`) → **rig identity, fail closed** (names
 `SSCE Equipment` in the message as the not-rig-specific choice) → "only post a finished report"
 confirm → `sdSizeOk` 10 MB warning.
 
-**SSORT 153**, in order: **rig identity, fail closed** (`sdRequireRig`) → pre-deployment checklist
+**SSORT 154**, in order: **rig identity, fail closed** (`sdRequireRig`) → pre-deployment checklist
 completeness (`sdPdcComplete`) → same confirm → `sdSizeOk`, **40 MB** for a report containing
 `cbmData` or `pdcData`, 10 MB otherwise.
 
-**New since the 29 September deck**, all in SSORT 153, all at the moment a file is attached rather
+**New since the 29 September deck**, all in SSORT 154, all at the moment a file is attached rather
 than at Post: file type whitelist (PDF, image, CSV, text, Office — nothing executable); a single
 file above 20 MB embedded is **refused**; above 8 MB it warns; the running total passing 15 MB
 warns. Slide 17 gains these four.
 
 ## 4. §3c — the revisions to freeze
 
-**WCGRRT REV 166** and **SSORT REV 153**.
+**WCGRRT REV 167** and **SSORT REV 154**.
 
-SSORT 153 was deployed today, 30 September, to `\\sdrlazneuiis01d.corp.local\SSORT\index.html`,
+SSORT 154 was deployed today, 30 September, to `\\sdrlazneuiis01d.corp.local\SSORT\index.html`,
 sha256 `05133b2283aec4cff5cf38c8a46e16733c737d8641a1ca0a64221335bc72c334`, 6,799,847 bytes,
 hash-verified and smoke-tested through IIS. Slide 3 gets both.
 
@@ -144,7 +144,7 @@ hash-verified and smoke-tested through IIS. Slide 3 gets both.
 
 ## 5. §4 — the four new asks
 
-**4.1 — SSORT 153 is deployed, so it is in.** Module 3 gains the step and the exercise's CBM report
+**4.1 — SSORT 154 is deployed, so it is in.** Module 3 gains the step and the exercise's CBM report
 carries one attached PDF.
 
 One correction to how you worded it. You wrote *"attach the pressure test chart to 6.1.2, note the
@@ -158,7 +158,7 @@ proven in test mode, so a Post to OEM lists the test records for NOV and does no
 tool says so at the point of sending, and the script will say the same.
 
 **4.2 — the assistance request button is NOT in the frozen build.** Zero matches for a Help Centre,
-assistance-request or TSC-help control in either WCGRRT 166 or SSORT 153. The failure/assistance
+assistance-request or TSC-help control in either WCGRRT 167 or SSORT 154. The failure/assistance
 form is still at the planning stage on this side and has no Post button by design. **So that first
 step is yours**: Dan drops the sample file in.
 

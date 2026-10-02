@@ -1,7 +1,7 @@
 # ORR 22 — Components and dependencies
 
 **Owner:** Dan Plant, Technical Services — Subsea · **Date:** 30 September 2026
-Figures verified against the live files on 30 September 2026.
+Figures verified against the live files on 1 October 2026.
 
 ---
 
@@ -11,8 +11,8 @@ Two files. That is the whole of what is deployed.
 
 | Component | Share path | Served URL | Bytes | SHA-256 (12) |
 |---|---|---|---|---|
-| **SSORT** — Subsea Onboard Reporting Tool, REV 153 | `\\sdrlazneuiis01d.corp.local\SSORT\index.html` | `http://sdrlazneuiis01d.corp.local:8080/SSORT/index.html` | 6,800,443 | `44cb4db89d2c` |
-| **WCGRRT** — rig visit reporting (in-app title "TSC Rig Reporting Tool"), REV 166 | `\\sdrlazneuiis01d.corp.local\sacred\WCE Rig Vist Reporting Tool V0.html` | `http://sdrlazneuiis01d.corp.local:8080/sacred/WCE Rig Vist Reporting Tool V0.html` | 3,340,404 | `83929b1a6749` |
+| **SSORT** — Subsea Onboard Reporting Tool, REV 154 | `\\sdrlazneuiis01d.corp.local\SSORT\index.html` | `http://sdrlazneuiis01d.corp.local:8080/SSORT/index.html` | 6,804,809 | `f70d21f678b0` |
+| **WCGRRT** — rig visit reporting (in-app title "TSC Rig Reporting Tool"), REV 167 | `\\sdrlazneuiis01d.corp.local\sacred\WCE Rig Vist Reporting Tool V0.html` | `http://sdrlazneuiis01d.corp.local:8080/sacred/WCE Rig Vist Reporting Tool V0.html` | 3,342,479 | `c916a062d457` |
 
 Each is a **single self-contained HTML file**: markup, CSS, JavaScript, the Seadrill logos, NOV's
 inspection schedules and every rig-specific test sheet, all inside the one file. No external
@@ -61,7 +61,7 @@ Used only by SSORT's **Post to OEM + Dashboard** button on a CBM inspection.
 |---|---|
 | Transport | the same intake URL and the same request shape |
 | Filename | `seadrill-oem_<rig>_<date>_<equipment>_<timestamp>_cbm.json` — the timestamp means every press makes a new file and no two collide |
-| Payload | `meta.kind = "oem-copy"`, `oem`, `subject`, `sourceFormat: "html"`, `pdfName`, `htmlName`, `html` (base64 of a standalone HTML report), and from REV 153 **`files[]`** — the crew's attached test records as `{name, type, data}` |
+| Payload | `meta.kind = "oem-copy"`, `oem`, `subject`, `sourceFormat: "html"`, `pdfName`, `htmlName`, `html` (base64 of a standalone HTML report), and from REV 154 **`files[]`** — the crew's attached test records as `{name, type, data}` |
 | What the flow does | attaches the HTML report **as it is** and, from Part D3, the `files[]` entries as real attachments, and emails NOV's distribution list copied to the office. **It does not convert the HTML to PDF** — the tenant's converter refused it |
 | Size limits | 20 MB warns, 30 MB refuses, measured on the HTML plus the attachments |
 | Owner of the flow | the dashboard side (Dan builds the flow cards); `CBM-OEM-NOTIFICATION-FLOW-GUIDE.md` |

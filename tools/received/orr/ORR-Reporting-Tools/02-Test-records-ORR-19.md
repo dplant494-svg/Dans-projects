@@ -1,7 +1,7 @@
 # ORR 19 — Test records by revision
 
-**Tools:** WCGRRT REV 160–166, SSORT REV 144–153 · **Owner:** Dan Plant
-**Date compiled:** 30 September 2026
+**Tools:** WCGRRT REV 160–167, SSORT REV 144–154 · **Owner:** Dan Plant
+**Date compiled:** 1 October 2026
 
 ## Read this first — what is a record and what is a reconstruction
 
@@ -39,8 +39,10 @@ reproducible with `Get-FileHash -Algorithm SHA256`.
 | 152 | 30 Sep 2026 | 6,799,847 | `05133b2283ae` | ✔ RECORD — CBM test-record attachments (`cbmatt`); Post to OEM also posts to the dashboard. 15 anchored edits each matching exactly once; both script blocks parse; extraction reconciles to 97.1%; zero duplicate declarations; posting path byte-identical; 0.82 unchanged; `CBM_SCHED` unchanged; precharge untouched. Browser: attach, `.exe` refused, 20 MB refused, notes, running total, removal, **crash recovery** (restored report returns both files with notes, bytes and data). Dual post proven with `fetch` disabled and the transport stubbed — dashboard first, then OEM, nothing sent | pass |
 | 153 | 30 Sep 2026 | 6,800,443 | `44cb4db89d2c` | ✔ RECORD — `OEM_SEND_FILES` switched on so test records reach NOV as email attachments. Function list asserted identical to 152 (flag and wording only); 30 MB OEM refusal and the 20/8/15 MB attachment figures asserted intact; posting path byte-identical. Browser: `files[]` carries exactly `name`/`type`/`data`, dashboard post still first, `cbmatt` unchanged on the dashboard copy, zero console errors — all with the transport stubbed. Re-verified through IIS after deploy, cancelling at the confirm | pass |
 
-**SSORT REV 153 is what is deployed.** Live file verified 30 September: 6,800,443 bytes,
-`44cb4db89d2c`, identical to the `SSORT REV 153` folder.
+| 154 | 1 Oct 2026 | 6,804,809 | `f70d21f678b0` | ✔ RECORD — two defects: the EHBS timer delay never recomputed as a crew typed (reported from a rig), and **restoring a Surface BOP test destroyed the record** — five of seven forms are rig-keyed and `loadState` built the tiles before restoring the rig, so the next autosave overwrote the saved readings with nothing. Both reproduced on the deployed build first. Fix verified end to end: a restored EHBS record returns all 33 fields with its readings and survives the re-save; Acoustic (80 fields) and Surface Drawdown (54) likewise. Shared renderer asserted to cover all seven live types; `collectSbop` and the posting path byte-identical | pass |
+
+**SSORT REV 154 is what is deployed.** Live file verified 1 October: 6,804,809 bytes,
+`f70d21f678b0`, identical to the `SSORT REV 154` folder.
 
 ## WCGRRT
 
@@ -54,8 +56,10 @@ reproducible with `Get-FileHash -Algorithm SHA256`.
 | 165 | 23 Sep 2026 | 4,497,595 | `b83914df1caf` | ~ RECONSTRUCTED — acoustic form rebuilt native, the duplicate-declaration defect removed, `Sevan Louisiana` added to the no-system list. Size falls 598 KB with the blob | shipped |
 | 166 | 26 Sep 2026 | 3,340,404 | `83929b1a6749` | ✔ RECORD — EHBS and drawdown native (last iframe gone), inline narrative references, printed page breaks. Script blocks parse; no duplicate declarations; browser-tested on two rigs; acoustic and EHBS exercised on a restore path as well as a fresh form. Size falls a further 1.16 MB | pass |
 
-**WCGRRT REV 166 is what is deployed.** Live file verified 30 September: 3,340,404 bytes,
-`83929b1a6749`, identical to the `WCGRRT REV 166` folder.
+| 167 | 1 Oct 2026 | 3,342,479 | `c916a062d457` | ✔ RECORD — the EHBS timer delay now recomputes as the crew types. Verified: A alone “—”, A and B 11, B corrected to 30 gives 9, B cleared returns to “—” with no stale value. Posting path byte-identical; no new key | pass |
+
+**WCGRRT REV 167 is what is deployed.** Live file verified 1 October: 3,342,479 bytes,
+`c916a062d457`, identical to the `WCGRRT REV 167` folder.
 
 ---
 

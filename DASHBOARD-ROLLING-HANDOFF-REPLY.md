@@ -1193,3 +1193,56 @@ photos with part trace and additional evidence photos are not showing on the ema
 `…_cbm-inspection.json` and the list lost the equipment; the row now prints
 `CBM Inspection · Riser Adapter (NOV PN: 20035633)` from `cbmData.equip` and `rcpt_model`. Nothing
 for you.
+
+---
+
+## Entries 44 and 45 reply (dashboard side, 2 Oct 2026): the posted-data audit is built for Dan to run; nothing else owed; two things for you
+
+**44, `OEM_SEND_FILES` on in SSORT 153: FYI accepted.** Part D3 was proven here the same afternoon
+and NOV got test records as real attachments from the first live post. 44.3's comment correction
+is right. 44.4 noted: the 30 MB refusal now counts the attachments, so a report that went to NOV at
+24 MB plus 8 MB of records is refused today; the message tells the crew what to do, and the NOT SENT
+branch is ours to watch for the first week. Nothing to build.
+
+**45.1, the EHBS timer delay: nothing to build, one display rule.** `ehbs_tim_delay` already
+rendered; it now carries a value from 167 / 154. For reports posted before 1 October where both
+times are present and the delay is empty, the viewer will show the derived value labelled
+"derived (B − A)" rather than leave the cell blank, in the next scanner release. That is the
+arithmetic your own form performs, shown as derived, not recorded, so it does not cross the rule
+that a computed judgement is never displayed as a recorded fact.
+
+**45.2, the SSORT restore defect: read, understood, and the ORR carries it.** RT KE-12 (HIGH, data
+loss, closed 1 Oct) and RT KE-11 are on the ORR workbook's Known error log, and the test record
+rows and component hashes now read 167 / 154. ISIT see the whole thing, which is right.
+
+**45.3, the audit you asked for: built, Dan runs it.** The posted reports are on Dan's PC and the
+server, not here, so the dashboard session wrote `scripts/Audit-SurfaceTestRecords.ps1` (Windows
+PowerShell 5.1, no modules, reads only, nothing posted). It walks every posted JSON in the three
+synced libraries and reports:
+
+- **A.** every `sbopData` with a `testType` set and an empty or near-empty `soak` (fewer than three
+  filled values): your restore-and-re-save signature, with rig, date, test type and file name, so
+  item 3 of 45.3 can go straight back to the crew for their saved `.json`;
+- **B.** every EHBS test (either tool) with `ehbs_tim_csrStops` and `ehbs_tim_shearStarts` filled
+  and `ehbs_tim_delay` empty, with the derived delay in the CSV.
+
+Proven on synthetic damaged records (one of each) and on the training samples (clean). Dan runs
+it with one line and sends you the summary and the CSV. Expected the same day he runs it; the
+counts go on the ORR open action dated 9 Oct.
+
+**Two things for you.**
+
+1. **45.4, the cache.** The same finding is on the Riser Tally handoff and the class script: Ctrl+F5
+   once after every revision. For 167 / 154 specifically, Jacob's rig should be told to hard-refresh,
+   because the fix he is waiting for is otherwise invisible to him.
+2. **The frozen build moved twice in two days** (152 → 153 → 154 for SSORT; 166 → 167 for WCGRRT).
+   Both moves were right. But the Day 1 pack's 24 screenshots were taken here on 166 / 153, and the
+   two revision-badge shots (1 and 17) are now wrong. We retake them from the deployed files when Dan
+   drops `WCE Rig Vist Reporting Tool V0.html` and `index.html` (154) into this session; everything
+   else in the pack is unaffected, as your 07-SCREENSHOTS-STATUS says. From here to the class,
+   please treat 167 / 154 as frozen unless a rig reports data loss.
+
+**Received and filed:** the full rolling handoff (entries 1 to 45) as
+`tools/received/DASHBOARD-ROLLING-HANDOFF-entries-44-45-2026-10-01.md`; the ORR return v2 (REV 167 /
+154, KE-11 and KE-12) over the 30 Sep files in `tools/received/orr/ORR-Reporting-Tools/`; the Day 1
+pack v4 text files over the v3 ones in `tools/received/training/day1/` (deck unchanged).

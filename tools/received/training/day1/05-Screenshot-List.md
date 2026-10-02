@@ -19,7 +19,7 @@ points at it (shots 1 and 17 especially).
 
 | # | File | What must be on screen |
 |---|---|---|
-| 1 | `01-wcgrrt-rev-badge.png` | WCGRRT top bar with the **REV 166** badge legible, and the toolbar buttons visible |
+| 1 | `01-wcgrrt-rev-badge.png` | WCGRRT top bar with the **REV 167** badge legible, and the toolbar buttons visible |
 | 2 | `02-visit-information.png` | Visit Information block, Rig / Asset showing `SSCE Equipment`, discipline and both visit dates filled |
 | 3 | `03-no-rig-guard.png` | The fail-closed dialog: *"Cannot post: no Rig / Asset selected…"* — full text readable |
 | 4 | `04-add-daily-entry.png` | The section dropdown open, **📋 Daily Report Entry** highlighted |
@@ -37,7 +37,7 @@ points at it (shots 1 and 17 especially).
 | 11 | `11-eds-sequences.png` | The EDS form showing a rig's own sequences — pick a rig with a full sequence list, not `SSCE Equipment`, for this one shot |
 | 12 | `12-acoustic-no-system.png` | The acoustic form on **West Vela**, showing the no-system message — this is the trap in the script |
 | 13 | `13-ehbs-drawdown.png` | EHBS and drawdown forms, either together or side by side |
-| 14 | ~~`14-reference-attachment.png`~~ | **CANNOT EXIST — dropped.** WCGRRT REV 166 has no attach-a-document control on a Well Control daily report: the schedule attach lives inside `#planning-meta-block` (`display:none` unless the discipline is Planning) and the reference document belongs to the Vendor Surveillance report. Module 2 now *says* this instead. The attachment shots are 21 and 22, in SSORT. |
+| 14 | ~~`14-reference-attachment.png`~~ | **CANNOT EXIST — dropped.** WCGRRT REV 167 has no attach-a-document control on a Well Control daily report: the schedule attach lives inside `#planning-meta-block` (`display:none` unless the discipline is Planning) and the reference document belongs to the Vendor Surveillance report. Module 2 now *says* this instead. The attachment shots are 21 and 22, in SSORT. |
 | 15 | `15-post-receipt.png` | The receipt line under Post: `n entries · n photographs · n attachments · n.n MB` and the time |
 | 16 | `16-dashboard-row.png` | The dashboard filtered to SSCE Equipment with the posted report visible |
 
@@ -45,7 +45,7 @@ points at it (shots 1 and 17 especially).
 
 | # | File | What must be on screen |
 |---|---|---|
-| 17 | `17-ssort-rev-badge.png` | SSORT top bar with the **REV 153** badge legible, and the section dropdown showing the six SSORT types |
+| 17 | `17-ssort-rev-badge.png` | SSORT top bar with the **REV 154** badge legible, and the section dropdown showing the six SSORT types |
 | 18 | `18-cbm-riser-adapter.png` | CBM tile with **Riser Adapter** selected and section 1.1 open |
 | 19 | `19-grade-buttons.png` | Task **1.1.1** with grade **3** selected — buttons 1–5, N/A and the ⓘ scale all visible |
 | 20 | `20-grade-scale.png` | The GRADE LEVEL EVALUATION GUIDE panel open, all five levels readable |
@@ -77,5 +77,5 @@ Stated here rather than left as gaps in a zip.
 | **15** `15-post-receipt.png` | The receipt only appears after a **successful post**, and nothing is posted from a build session — that is Dan's rule and it is the right one. Capture this one live: it will be on screen the first time anyone posts in module 2 or the exercise. |
 | **16** `16-dashboard-row.png` | Needs a posted report on the dashboard, so the same applies. Take it from any real SSCE Equipment row, or during the class. |
 
-Everything else in the table above was captured on the deployed builds (WCGRRT REV 166, SSORT
-REV 153) on 30 September.
+Everything else in the table above was captured on the deployed builds (WCGRRT REV 167, SSORT
+REV 154) on 30 September.

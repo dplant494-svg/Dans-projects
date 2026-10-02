@@ -1,0 +1,70 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Email: SACRED meeting notes, 1 October 2026</title>
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1b2733;line-height:1.35}h2{font-size:12pt;color:#002C77;margin:14pt 0 4pt}table{border-collapse:collapse}td,th{border:1px solid #c9d4ea;padding:3pt 6pt;vertical-align:top;font-size:10.5pt}th{background:#eef2f9;text-align:left}p{margin:0 0 8pt}ul{margin:0 0 8pt 18pt}li{margin-bottom:3pt}</style></head><body>
+<p><b>To:</b> Luis; Adam Snyder; Jason; Viren; Saroj<br><b>Cc:</b> Lee Arnold<br><b>Subject:</b> SACRED: notes from the 1 October meeting, actions and the updated documents<br><b>Attach:</b> Operation_Readiness_Review_ORR_Checklist_SACRED_v2.xlsx; SACRED-to-Production-Programme-Chart-2026-10-01.pdf (draft 5); SACRED-What-It-Is-Made-Of.pdf</p>
+<hr>
+<p>All,</p>
+<p>Thank you for yesterday. Below are the notes as circulated, with the actions and the three updated documents attached: the Operational Readiness checklist (v2, updated this morning), the programme chart (draft 5, with yesterday's outcomes added), and a one-page description of what SACRED is made of, for the UAT and migration work.</p>
+
+<h2>SACRED support status</h2>
+<ul>
+<li>SACRED is currently running in a sandbox, not production.</li>
+<li>No formal support capability; current support is "best effort".</li>
+<li>Operational Readiness Review and project plan completed and shared.</li>
+<li>Multiple rigs have intermittent access due to selective test provisioning.</li>
+</ul>
+
+<h2>Production readiness and timeline</h2>
+<ul>
+<li>Target production go-live planned for February 2027.</li>
+<li>Full ISIT support expected once in production (budget release January 2027).</li>
+<li>Production readiness gaps identified: infrastructure, hosting, backups, DNS and ServiceNow support queues; monitoring, observability, logging, auditing, SAML and integrations; application supportability, database management and SDLC controls.</li>
+<li>Significant development and security work required before formal handover.</li>
+</ul>
+
+<h2>Lovable migration option</h2>
+<ul>
+<li>Migration to the Lovable platform proposed to reduce infrastructure and integration work.</li>
+<li>Lovable licences have been procured; Viren is the owner of that platform.</li>
+<li>Migration expected to reduce support and documentation overhead in production.</li>
+</ul>
+
+<h2>UAT and testing environment</h2>
+<ul>
+<li>A UAT environment is agreed as the immediate next step for wider testing.</li>
+<li>UAT will be supported on a best-effort basis until formal production handover.</li>
+<li>Wider vessel testing is intended to produce clearer support and resource requirements.</li>
+<li>Heavy reporting load is expected during specific operational windows (7 to 10 day periods).</li>
+</ul>
+
+<h2>Next steps</h2>
+<table>
+<tr><th>Who</th><th>Action</th><th>When</th></tr>
+<tr><td>Adam</td><td>Estimated effort and requirements to build the UAT environment</td><td>next week</td></tr>
+<tr><td>Adam, Daniel</td><td>Meet in Houston to define UAT requirements and testers</td><td>next week</td></tr>
+<tr><td>Jason</td><td>Schedule a 30-minute follow-up to review progress</td><td>next week</td></tr>
+<tr><td>Viren</td><td>Confirm feasibility and a high-level plan for migrating SACRED to Lovable</td><td>October</td></tr>
+<tr><td>Saroj / Infosys</td><td>Refined supportability gaps and effort estimates for production readiness</td><td>October</td></tr>
+<tr><td>Daniel</td><td>Keep the ORR, project plan and failure logs current and accessible to IT</td><td>ongoing; see below</td></tr>
+<tr><td>Luis</td><td>Timing and funding options with Arnold and Torsten for earlier support</td><td>October</td></tr>
+</table>
+
+<h2>From our side, so the documents and the meeting line up</h2>
+<ul>
+<li><b>Where the documents live.</b> The three attachments are the current versions. From now on I will keep them in one SharePoint folder that IT can open, refreshed whenever anything changes, and send the link rather than new copies. The failure logs are the "Known error log" sheet in the ORR workbook.</li>
+<li><b>The transfer.</b> The scanner moves from my PC to the sacred server in the week of 19 October, when Adam and I are both in Houston. If the UAT environment is ready by then, it should land there directly rather than on the sandbox and then move again.</li>
+<li><b>The database.</b> It is built, on Microsoft Fabric, loaded from the scanner's own export. It needs no ISIT resource; the only cost item is Fabric capacity from mid-November, which is a licence line.</li>
+<li><b>Sending identity.</b> Every notification email currently goes out under my account. We need a shared mailbox now and a service account at handover; neither needs the flows rebuilt. Both are on the Open actions sheet.</li>
+<li><b>The chart.</b> Draft 5 adds a section for yesterday's outcomes (UAT, the funding date, the Lovable feasibility) and dates the production go-live in February 2027 as agreed. Dates marked "estimate" are not commitments.</li>
+</ul>
+
+<h2>Four questions for the follow-up</h2>
+<ol>
+<li>Is the UAT server the existing sandbox renamed, or a second server? If a second, can the week-of-19-October transfer go to UAT directly?</li>
+<li>For the Lovable feasibility, which of SACRED's five parts is in scope? The one-page sets them out. The rig-side tools run offline on rig laptops and the flows and SharePoint stay in the tenancy, so the proposal is presumably the dashboard pages.</li>
+<li>Which rigs are affected by the selective test provisioning, and when is it lifted? Wider vessel testing on UAT needs those rigs to reach the server.</li>
+<li>Does the January budget cover the service account, the shared mailbox, the UAT server and the production home, or do those need funding now?</li>
+</ol>
+
+<p>Kind regards,</p>
+<p>Dan Plant<br>Technical Superintendent, Well Control Engineering</p>
+</body></html>

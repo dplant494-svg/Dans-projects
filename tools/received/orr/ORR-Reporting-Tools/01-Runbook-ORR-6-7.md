@@ -1,7 +1,7 @@
 # ORR 6, 7 — Runbook: building, verifying and publishing a tool revision
 
 **Tools:** WCGRRT (rig visit reporting) and SSORT (subsea onboard reporting)
-**Current:** WCGRRT **REV 166**, SSORT **REV 153** · **Owner:** Dan Plant, Technical Services — Subsea
+**Current:** WCGRRT **REV 167**, SSORT **REV 154** · **Owner:** Dan Plant, Technical Services — Subsea
 **Date:** 30 September 2026
 
 Both tools are **single self-contained HTML files**. There is no build system, no package manager, no

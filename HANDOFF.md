@@ -475,3 +475,14 @@ paths with credentials, but this shape is fine to document)
 5. Only run `Deploy-Dashboard.ps1` if you changed HTML — then re-check both
    dashboards live (private/incognito window) and grep the server files by
    `<title>` before declaring victory.
+
+## Audit-SurfaceTestRecords.ps1 (2 Oct 2026, one-off, rolling handoff entry 45)
+
+Read-only audit of every posted JSON for two tool defects fixed in WCGRRT 167 / SSORT 154: a surface-test
+tile (`sbopData`) with a `testType` but an empty `soak` (a SSORT record destroyed by restore-and-re-save,
+RT KE-12), and an EHBS test with both times but no `ehbs_tim_delay` (RT KE-11, recoverable as B − A).
+Reads the report folders from `config.json`, writes `scripts\surface-test-audit_<stamp>.csv`, prints the
+counts and the rig/date list for finding A. Windows PowerShell 5.1 (JavaScriptSerializer for big files) and
+PowerShell 7 (`ConvertFrom-Json -AsHashtable`). Run:
+`powershell -ExecutionPolicy Bypass -File C:\TSC-Dashboard\scripts\Audit-SurfaceTestRecords.ps1`.
+Send the summary and the CSV to the reporting-tools session.

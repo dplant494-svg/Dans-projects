@@ -1,6 +1,6 @@
 # Day 1 walkthrough scripts — the reporting tools
 
-**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 166**, SSORT **REV 153**
+**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 167**, SSORT **REV 154**
 **Led by:** Dan (all four modules; Brad Waldron is not attending and nothing below depends on him)
 **Asset:** `SSCE Equipment` throughout. Nothing is posted on a real rig name.
 
@@ -10,7 +10,7 @@ a screenshot for the workbook; the numbering runs continuously 1–24 across all
 matches `TRAINING-Day1-Screenshot-List.md`. `TRAP:` is something the room will get wrong if it is not
 said out loud.
 
-**Before the room arrives:** open WCGRRT REV 166 and SSORT REV 153 in two browser tabs from
+**Before the room arrives:** open WCGRRT REV 167 and SSORT REV 154 in two browser tabs from
 `\\sdrlazneuiis01d.corp.local\sacred\` and `…\SSORT\`. In both tabs press **⊘ New Trip** so there is
 no leftover state from setting up. Have the dashboard open in a third tab on the SSCE Equipment
 filter. Confirm both tools show the frozen revision in the badge before you start — if either does
@@ -28,7 +28,7 @@ sit inside Lee's WCE SME workshop (19 to 22 October), so he opens it. Nothing be
 ---
 
 # Module 1 — WCGRRT: rig visit and daily reports
-**08:30 – 10:00 · WCGRRT REV 166**
+**08:30 – 10:00 · WCGRRT REV 167**
 
 ### What they should be able to do by 10:00
 Start a trip, set the rig identity, add a daily report entry with equipment entries and captioned
@@ -120,10 +120,10 @@ This is the heart of the module. Do not rush it.
 ---
 
 # Module 2 — WCGRRT: the surface test forms, attachments and Post
-**10:15 – 12:00 · WCGRRT REV 166**
+**10:15 – 12:00 · WCGRRT REV 167**
 
 > **Agenda correction.** The agenda line for this module lists *"Load latest posted"*. **That feature
-> is not in REV 166** — the only Load controls are `↑ Browser Load` and `📂 Load from File`. It is
+> is not in REV 167** — the only Load controls are `↑ Browser Load` and `📂 Load from File`. It is
 > correctly listed on Day 2 under "What is coming". Take it out of this module.
 
 ### What they should be able to do by 12:00
@@ -132,10 +132,30 @@ failed post looks like.
 
 ### 1. The rig-specific forms (45 min)
 
-27. **SAY:** "These five forms know your rig. Pick the vessel first or they will not load — you will
-    see a line telling you so instead of a form."
+> **BEFORE THIS MODULE — the one setup step that will catch you out.** Four of the seven test
+> records are keyed to the rig and **`SSCE Equipment` holds none of them.** Verified on the frozen
+> build, 30 September: on `SSCE Equipment` the ROV, acoustic, EDS and EHBS forms all render a single
+> line instead of a form —
+>
+> - *"No ROV function sheet on file for SSCE Equipment."*
+> - *"No acoustic function table held for SSCE Equipment. Tell the office and it will be added."*
+> - *"No EDS verification sheet on file for SSCE Equipment."*
+> - *"No EHBS test held for SSCE Equipment. Tell the office and it will be added."*
+>
+> **So switch Rig / Asset to a real rig for this module** — West Polaris for EDS, West Vela for the
+> acoustic point in step 32 — and **switch it back to `SSCE Equipment` before anybody posts
+> anything.** The three that do work on `SSCE Equipment` are the BOP Function Test, the Soak Test
+> and the Surface Drawdown Test.
+
+27. **SAY:** "These forms know your rig. Pick the vessel first or they will not load — you get one
+    line telling you so instead of a form. And note the difference between the two lines you might
+    see: *no sheet on file for this asset* means nobody has loaded it yet, so tell the office.
+    *No system fitted* means your rig genuinely does not have one, and there is nothing to record."
 28. Add the BOP function test entry; show the form. `[SHOT 10]`
-29. Add the **EDS** form and show that the sequences are this rig's own. `[SHOT 11]`
+29. **Switch Rig / Asset to West Polaris.** Add the **EDS** form, pick a sequence, and show that the
+    steps are this rig's own. `[SHOT 11]`
+    **TRAP:** the sequence dropdown must be used — pick nothing and the steps table never renders,
+    which reads as a broken form.
 30. **SAY:** "EDS sequences come from the rig's own NOV verification sheet. If a step looks wrong for
     your stack, that is worth a phone call — one rig was found stamped Rev H while carrying Rev G
     content, and it was rebuilt from the NOV document."
@@ -165,6 +185,9 @@ failed post looks like.
 
 ### 3. Post, and the receipt (30 min)
 
+36a. **Switch Rig / Asset back to `SSCE Equipment` now.** Nothing may be posted on a real rig name
+     from this room. Check it before step 37 and check it again before the exercise.
+
 37. Press **📤 Post Report**. Read the confirm out loud. Accept it.
 38. Show the **receipt** line under the button. `[SHOT 15]`
 
@@ -188,7 +211,7 @@ failed post looks like.
 ---
 
 # Module 3 — SSORT: CBM, the grade scale, pre-deployment, Post to OEM
-**13:00 – 14:30 · SSORT REV 153**
+**13:00 – 14:30 · SSORT REV 154**
 
 ### What they should be able to do by 14:30
 Complete a CBM inspection with grades, photographs and an attached test record; complete a
@@ -196,7 +219,7 @@ pre-deployment checklist; and send a CBM report to NOV.
 
 ### 1. SSORT is a different tool (5 min)
 
-45. Open SSORT. Point at the badge: **REV 153**. `[SHOT 17]`
+45. Open SSORT. Point at the badge: **REV 154**. `[SHOT 17]`
 46. **SAY:** "Different tool, different job, and the section list is different: CBM Inspection,
     Surface BOP Testing, Calculators, Pre-Deployment Checklist, Conditional Assessment, R53 Report.
     Vessel Information here, Visit Information over there."
@@ -242,7 +265,12 @@ pre-deployment checklist; and send a CBM report to NOV.
 ### 4. Pre-deployment checklist (15 min)
 
 63. Add **🚀 Pre-Deployment Checklist**. `[SHOT 23]`
-64. Show the twenty questions, the packer attestation and the cavity photographs.
+64. **TRAP, and set it up before you demonstrate:** the cavity photograph slots do not exist until
+    the checklist's **own** BOP designation is set to Single or Dual **and** its cavity count is
+    chosen. Until then there are no slots at all, which a trainee reads as "no photographs wanted".
+    Set both, then show that a 7-cavity stack asks for **42 named slots** — 14 in each of the three
+    sections, every box labelled for the position it belongs to (UBSR — FWD, UBSR — AFT, and so on).
+65. Show the twenty questions, the packer attestation and the cavity photographs.
 65. **SAY:** "The cavity photographs and the packer attestation are mandatory before posting. The
     tool will stop you. That is not bureaucracy — it is the evidence that the stack was fit to run,
     and it is the first thing anyone asks for afterwards."

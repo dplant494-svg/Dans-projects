@@ -24,7 +24,7 @@ touches it.
 
 ## The frozen builds
 
-**WCGRRT REV 166** and **SSORT REV 153**. SSORT 153 was deployed on 30 September;
+**WCGRRT REV 167** and **SSORT REV 154**. SSORT 154 was deployed on 30 September;
 sha256 `44cb4db89d2c2910086ff6c6a1c23a80034b6f53b0b44b0b326e0c31d2b161a1`, 6,800,443 bytes.
 Everything in this pack is written against those two and nothing else.
 
@@ -34,6 +34,27 @@ attachments, where on 152 they were listed for NOV but not attached. That went l
 30 September once the dashboard side proved Part D3 of the OEM flow. Module 3's script, the
 exercise sheet and question 3.3 all say so; if you find anything in this pack still claiming
 NOV does not receive them, it is stale and wrong.
+
+## One more finding, v4 (30 September, late)
+
+Chasing your TRAP line about shot 11 turned up something worth having before the class rather than
+during it. **Four of the seven WCGRRT test records are keyed to the rig, and `SSCE Equipment` holds
+none of them.** Verified on the frozen build: the ROV, acoustic, EDS and EHBS forms each render one
+line on that asset instead of a form ("No EDS verification sheet on file for SSCE Equipment", and so
+on). Only the BOP Function Test, the Soak Test and the Surface Drawdown Test work on it.
+
+So **module 2 is taught on a real rig** and the script now says so at the top of that module, names
+which rig for which form, and adds a step to switch the asset back to `SSCE Equipment` before
+anybody posts. The exercise is unaffected — its surface test is SSORT's tile, not WCGRRT's.
+
+The script also now distinguishes the two messages a crew can meet, which are easy to conflate:
+*no sheet on file for this asset* means nobody has loaded it yet, so tell the office; *no system
+fitted* means the rig genuinely does not have one. And shot 23's cavity trap is in module 3 as a
+TRAP line, as you asked.
+
+While checking, one thing I nearly reported as a defect was not one: selecting ROV Function Testing
+appeared to show the EHBS message, but that was stale DOM from the previous selection in my own test
+loop. On a clean selection it says the right thing.
 
 ## Lee's two edits, done
 

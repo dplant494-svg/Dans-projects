@@ -1,6 +1,6 @@
-# ORR 11 — Known error log: WCGRRT REV 166 and SSORT REV 153
+# ORR 11 — Known error log: WCGRRT REV 167 and SSORT REV 154
 
-**Owner:** Dan Plant, Technical Services — Subsea · **Date:** 30 September 2026
+**Owner:** Dan Plant, Technical Services — Subsea · **Date:** 1 October 2026
 Shape as the workbook's Known error log: issue · effect · workaround · fix planned.
 
 ---
@@ -202,6 +202,70 @@ dashboard side can see what arrives.
 **Fix planned.** None proposed from this side — this is raised for ISIT rather than answered,
 because the trigger, its rotation and any gateway in front of it are theirs. The token is
 deliberately not reproduced in this pack.
+
+---
+
+### KE-11 · EHBS timer delay never computed while the form was being filled in
+
+**Tool:** both, fixed in WCGRRT 167 / SSORT 154 · **Severity:** medium · **Status:** CLOSED 1 Oct 2026
+
+**Issue.** The sequence timing delay is derived (B − A) rather than typed, but it was only computed
+when the form was drawn from saved data. Nothing recomputed it as the crew typed, so the cell showed
+"—" and `ehbs_tim_delay` posted empty.
+
+**Effect.** Reported from a rig on 30 September. Every EHBS test posted from either tool carries an
+empty timer delay unless the crew happened to save, reload and restore with both times already
+entered. The delay is the measured gap between CSR closure stopping and UBSR closure starting.
+
+**Workaround (historical).** It is recoverable from the posted data: the delay is simply
+`ehbs_tim_shearStarts` − `ehbs_tim_csrStops`, both of which did post.
+
+**Fix.** Recomputes on input, on a delegated listener so it survives the form being re-rendered.
+Deployed 1 October.
+
+---
+
+### KE-12 · Restoring a SSORT surface test destroyed the record
+
+**Tool:** SSORT, fixed in 154 · **Severity:** HIGH, data loss · **Status:** CLOSED 1 Oct 2026
+
+**Issue.** Five of the seven surface-test forms are rig-keyed and return a "Select the vessel"
+placeholder without `#meta-asset`. `loadState()` created the tiles before restoring the rig, so on a
+restore the form rendered the placeholder and the saved readings were dropped. `collectSbop` reads
+the DOM, so the next autosave collected an empty form and **overwrote the saved record with
+nothing**. A second fault compounded it: the restore path's type mapping covered only four of the
+seven forms, missing Acoustic, EHBS and Surface Drawdown entirely.
+
+**Effect.** A crew that saved a surface test, closed the tool and restored it lost the whole test
+record silently. Same class as the Ram Cavity defect closed in REV 148. WCGRRT was never affected.
+
+**Workaround (historical).** Do not restore a report containing a surface test; rebuild it. Crews
+who kept their own `.json` saves can recover from those.
+
+**Fix.** One shared renderer for both the first render and the rebuild so the mappings cannot drift
+apart again; the tile keeps its own saved soak data; both restore paths rebuild the forms after the
+rig is back, replacing a placeholder only. Deployed 1 October.
+
+**Open question with the dashboard side** (rolling handoff 45.3): how many already-posted reports
+lost their `soak` block. Not visible from the tool side.
+
+---
+
+### KE-13 · A deployed revision can keep being served from browser cache
+
+**Tool:** both · **Severity:** low, operational · **Status:** open
+
+**Issue.** After a correct, hash-verified copy to the share, the browser continued serving the
+previous revision until the URL was cache-busted.
+
+**Effect.** A rig may keep running the old build after a fix has shipped, including a fix they are
+waiting on.
+
+**Workaround.** Hard-refresh (Ctrl-F5) or close and reopen the tool. Check the revision badge
+against what was announced.
+
+**Fix planned.** None at the tool. Worth raising with ISIT as a cache-header question on the IIS
+site.
 
 ---
 
