@@ -64,14 +64,15 @@ nine questions, three exercise files with the answer key, 32 screenshots, the is
 tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop module.
 
 **Outstanding, dashboard session, needs nothing from anyone:**
-1. Day 2 walkthrough scripts in the Day 1 format: Rig Visit Dashboard tab by tab; BOP Fleet Planning and SSCE
-   Requests; the loop with the Help Centre hands-on; "What is coming" rewritten for the UAT server and the Lovable
-   transition; the feedback capture sheet.
-2. Day 2 screenshots for those modules, taken here from the deployed dashboard files and the test set.
+1. ~~Day 2 walkthrough scripts~~ **done 2 Oct, draft 1:** `TRAINING-Day2-Walkthrough-Scripts.md` (modules 5 to 10, 69
+   steps, shots 25 to 53), `TRAINING-Day2-Questions.md` (three per module with answers), `TRAINING-Day2-Feedback-Sheet.md`,
+   `TRAINING-UAT-Sign-off-Form.md` (ORR item 9, six statements, trainer and witness lines).
+2. Day 2 screenshots, 29 shots, list final (`TRAINING-Day2-Screenshot-List.md`); captured here after the Day 1 retakes,
+   on the pages as frozen on 12 October.
 3. The trainee workbook, one document for both days: agenda, exercise sheets, the questions with blank lines, the
    "why did it stop me" table, screenshots bound in.
 4. The trainer's pack, one document: every script with the answers and the screenshots, both days.
-5. The UAT sign-off form for 20 October (ORR item 9).
+5. ~~The UAT sign-off form~~ done, see 1.
 
 **Outstanding, needs Dan:**
 - The deployed WCGRRT 167 and SSORT 156 files, to retake shots 1, 17, 18 and 19.
