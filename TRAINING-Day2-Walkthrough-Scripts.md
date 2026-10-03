@@ -14,7 +14,7 @@ say more or less as written. `[SHOT n]` marks a screenshot for the workbook; the
 
 **Before the room arrives.** Everyone brought their own laptop on Monday; they bring it again. On the trainer's laptop,
 open in tabs: the Rig Visit Dashboard filtered to SSCE Equipment (it will show Monday's forty rows, which is the whole
-point), the BOP Fleet Planning Dashboard, the SSCE Requests Dashboard, the CoC tracker (a **local copy**, not the share),
+point), the BOP Fleet Planning Dashboard, the SSCE Requests Dashboard, the rebuilt CoC tracker (a **local copy**, not the share), the existing COC Dashboard on the SSORT share (the SSCE request front door),
 the Seadrill Bulletin Board, the TSC Help Centre, and the precharge calculator signed in. Press Ctrl+F5 on each once.
 Confirm the dashboard's "last scan" stamp is within the last ten minutes; if it is not, the scanner is not running and
 nothing posted today will appear, so stop and ring the office before you start.
@@ -148,14 +148,15 @@ question about their own post.
 
 ### 6. Ask SACRED AI (10 min)
 
-29. Press **Ask SACRED AI**. `[SHOT 37]` **SAY:** "This is a Copilot agent that reads a digest of every posted report.
+29. **Trainer's laptop only:** Ask SACRED AI opens for Dan and Lee today, nobody else. Demonstrate it on the projector.
+    Press **Ask SACRED AI**. `[SHOT 37]` **SAY:** "This is a Copilot agent that reads a digest of every posted report.
     It answers from the reports, not from the internet, and it says which report it read."
 30. Ask it about the room's own posts: "Which SSCE Equipment reports were posted on [date] and what did the Riser
     Adapter inspection grade?" Read the answer and the sources.
 31. **SAY:** "It is an answer, not a record. It can be wrong, it tells you where it looked, and the report is the
     record. Use it to find, not to decide."
-32. **TRAP:** today it opens for Dan and Lee only, until IT approve the Teams app. Say so; do not let the room try it on
-    their own laptops and conclude it is broken. From the Lovable move it becomes a button that works for everyone
+32. **TRAP:** it opens for Dan and Lee only until IT approve the Teams app, which is not expected before the class.
+    Say so before anyone tries it on their own laptop and concludes it is broken. From the Lovable move it becomes a button that works for everyone
     signed in.
 
 ### 7. Close (5 min)
@@ -187,12 +188,13 @@ follow an SSCE request; create, acknowledge and close an advisory on the Bulleti
 38. Run `TRAINING-COC-TRACKER-MODULE.md` as written: the fleet dashboard, the tiers, one row per asset, a vessel page,
     search and a shareable address, annotations in the browser, refresh from Maximo, exports, the Shared Capital
     register. `[SHOT 41]` the fleet dashboard; `[SHOT 42]` a vessel page with the detail panel open.
-39. **SAY whichever is true on the day** about where an SSCE request is raised: from the rebuilt tracker, or from the
-    older COC Dashboard on the SSORT share until the port lands. The decision was due 10 October.
+39. **SAY:** "The rebuilt tracker is for certificate status. SSCE requests are still raised from the COC Dashboard on
+    the SSORT share, the one you have used before. The Request button moves into the rebuilt tracker after this class;
+    until then, two files, two jobs, and the request one has not changed." 
 
 ### 3. SSCE Requests (15 min)
 
-40. From the Shared Capital register, open the request form on one item. Fill it on `SSCE Equipment` as the site unit,
+40. Switch to the **COC Dashboard on the SSORT share**. From its SSCE Equipment register, open the request form on one item. Fill it on `SSCE Equipment` as the site unit,
     priority 3, planning, with a justification that says TRAINING. **Submit.** `[SHOT 43]` the form; `[SHOT 44]` the
     confirmation.
 41. **SAY:** "The form posts straight to the same place the reports go. If the post fails, it downloads the file and

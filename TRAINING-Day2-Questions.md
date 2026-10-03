@@ -48,7 +48,7 @@ tracker do with those rows in the meantime?**
 > date from loose text. Until they are entered, those rows are "no date on file", which is counted separately from
 > expired and from valid, and they appear on the next refresh of the tracker from the extract.
 
-**7.3 — You submit an SSCE request from the Shared Capital register and the page says the file was downloaded and
+**7.3 — You submit an SSCE request from the COC Dashboard's SSCE Equipment register and the page says the file was downloaded and
 tells you where to put it. Did the request fail?**
 
 > No. The form posts straight to the intake; if the post cannot be made (the flow down, offline, a policy change) it

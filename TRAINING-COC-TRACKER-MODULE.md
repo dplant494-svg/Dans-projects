@@ -28,10 +28,9 @@
 8. **Refreshing the data (4 min).** Update from Excel, pick the extract, read the counts, Save copy, distribute the
    copy. Nobody edits the HTML. Mention the auto-refresh link and why it often does nothing on SharePoint.
 9. **Exports (2 min).** CSV per view, Excel per vessel, print to PDF; both exports carry the superseded-certificate count.
-10. **Shared Capital and the SSCE request (4 min).** The 0960 register; stock tiles; then the Request path. SAY
-    whichever is true on the day: either "the Request button is on the rebuilt tracker" or "for now requests are
-    raised from the older COC Dashboard on the SSORT share; the rebuilt tracker is for status". The decision is due
-    10 October (`COC-TRACKER-SACRED-HANDOFF.md`).
+10. **Shared Capital, and where a request is raised (4 min).** The 0960 register; stock tiles. Then SAY: "Requests are
+    still raised from the COC Dashboard on the SSORT share, not from this file. The Request button moves in here after
+    the class. Two files, two jobs, for now." The request itself is demonstrated in module 7 part 3.
 
 ## Questions the room will ask, with the answers
 
@@ -39,8 +38,8 @@
   rows. The fix is in Maximo, by the rig and the CoC owner; the tracker will show it the next refresh.
 - "Can I change a wrong date here?" No. The tracker never edits the record. Fix it in Maximo.
 - "Who owns the tracker?" Manpreet Singh. Questions on the data go to him; questions on SACRED's use of it go to Dan.
-- "Is this in SACRED?" Linked from it today; the SSCE request loop runs through it; the rebuilt file's place in
-  SACRED is being settled this month.
+- "Is this in SACRED?" Linked from it today. The SSCE request loop runs through the older COC Dashboard until the
+  Request button is ported into this file, after the class.
 
 ## Trainer's notes
 

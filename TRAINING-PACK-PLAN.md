@@ -78,7 +78,9 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 - The deployed WCGRRT 167 and SSORT 156 files, to retake shots 1, 17, 18 and 19.
 - ~~The freeze decision~~ **Set by Dan 2 Oct: 12 October** (rolling handoff entry 48, runbook §8, pack v6).
 - The trainee list (names, rigs, how many), for the date allocation and the workbook covers. Ten assumed.
-- Which CoC tracker file the class sees on 20 October: the ported one if item 44 lands by 9 October.
+- ~~Which CoC tracker file~~ **Settled 3 Oct:** both. The rebuilt tracker for status (local copy), the existing COC
+  Dashboard on the SSORT share for SSCE requests; the port waits until after the class.
+- ~~Ask SACRED AI~~ **Confirmed 3 Oct:** opens for Dan and Lee only on the day; demonstrated from the trainer's laptop.
 - After the class: delete the forty posts from PostedReports (and any OEM copies).
 
 **Outstanding, needs others:**
