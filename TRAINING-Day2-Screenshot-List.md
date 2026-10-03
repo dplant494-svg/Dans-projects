@@ -24,9 +24,9 @@ set; delivered in the same zip as the Day 1 set, files named `25-issued-email.pn
 | 38 | `38-bop-planning-tiles.png` | 7 | BOP Fleet Planning Status, tile view |
 | 39 | `39-bop-schedule.png` | 7 | One rig's schedule open |
 | 40 | `40-break-in-work.png` | 7 | The Break-in Work list open |
-| 41 | `41-coc-fleet.png` | 7 | The **rebuilt** CoC tracker fleet dashboard (local copy; no rig-specific personal data) |
+| 41 | `41-coc-fleet.png` | 7 | The CoC tracker fleet dashboard (local copy; no rig-specific personal data) |
 | 42 | `42-coc-vessel-detail.png` | 7 | A vessel page with the detail panel open, certificate history visible |
-| 43 | `43-ssce-request-form.png` | 7 | The SSCE request form on the **COC Dashboard (SSORT share)**, filled on `SSCE Equipment`, justification reading TRAINING |
+| 43 | `43-ssce-request-form.png` | 7 | The SSCE request form filled on `SSCE Equipment`, justification reading TRAINING |
 | 44 | `44-ssce-request-posted.png` | 7 | The confirmation after Submit (or the download fallback message, whichever the room gets) |
 | 45 | `45-ssce-requests-dashboard.png` | 7 | The SSCE Requests Dashboard with the request Pending |
 | 46 | `46-aab-create.png` | 7 | The Bulletin Board create page filled for a Priority 3 training advisory on `SSCE Equipment` |
