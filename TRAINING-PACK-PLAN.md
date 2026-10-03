@@ -79,7 +79,7 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 - ~~The freeze decision~~ **Set by Dan 2 Oct: 12 October** (rolling handoff entry 48, runbook §8, pack v6).
 - The trainee list (names, rigs, how many), for the date allocation and the workbook covers. Ten assumed.
 - Which CoC tracker file the class sees on 20 October: the ported one if item 44 lands by 9 October.
-- ~~Ask SACRED AI~~ **Settled 3 Oct:** not available in the class, coming. Script shows the button and the rule; no demo.
+- ~~Ask SACRED AI~~ **Settled 3 Oct:** Dan demonstrates it from his laptop; the room cannot open it yet; coming for everyone.
 - After the class: delete the forty posts from PostedReports (and any OEM copies).
 
 **Outstanding, needs others:**
