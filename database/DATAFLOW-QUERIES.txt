@@ -1,0 +1,341 @@
+SACRED DATA - the twenty-one remaining Dataflow queries, one per table
+Written 3 October 2026 by the dashboard session. The reports table is already loaded (329 rows, 3 Oct 08:59).
+
+HOW TO ADD EACH ONE (about two minutes each), in the SACRED export load dataflow:
+  1. Home tab, Get data, Blank query.
+  2. Delete what is in the box, paste ONE block below (from "let" down to "in Loaded"), click Next / OK.
+  3. On the right, Properties, Name: type the table name shown above the block (e.g. cbm_grades).
+  4. Bottom right, Data destination +, SQL database, Next, Existing table, dbo, the same table name, Next.
+  5. Use automatic settings OFF, Update method Replace, check no row is red, Save settings.
+  6. Next block. When you have done as many as you want for now: Save & run.
+Check afterwards in SACRED DATA:  SELECT COUNT(*) FROM dbo.<table name>;
+Every block reads the newest export file, types the number columns, turns blanks in them into nulls,
+adds loaded_at, and copes with an empty export file (a table with no rows yet loads as empty, not an error).
+The first block connects to SharePoint with the sign-in you already gave; it will not ask again.
+
+Start with the first six; they are the ones the fleet questions use. The rest can follow any time.
+
+====================================================================================================
+TABLE: cbm_grades      (paste below, Name the query: cbm_grades)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_cbm_grades.csv"){0}[Content],
+    Cols = {"rig", "class", "equip", "itemKey", "itemLabel", "itemShape", "sortKey", "task", "grade", "comment", "photos", "date", "file", "rev", "era", "postedKey"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"photos"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"rig", type text}, {"class", type text}, {"equip", type text}, {"itemKey", type text}, {"itemLabel", type text}, {"itemShape", type text}, {"sortKey", type text}, {"task", type text}, {"grade", type text}, {"comment", type text}, {"photos", Int64.Type}, {"date", type text}, {"file", type text}, {"rev", type text}, {"era", type text}, {"postedKey", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: rig_checks      (paste below, Name the query: rig_checks)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_rig_checks.csv"){0}[Content],
+    Cols = {"rig", "kind", "date", "shift", "by", "supervisor", "system", "item", "itemKey", "value", "unit", "pass", "comment", "psi", "tp", "dp", "photos", "file"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"photos"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"rig", type text}, {"kind", type text}, {"date", type text}, {"shift", type text}, {"by", type text}, {"supervisor", type text}, {"system", type text}, {"item", type text}, {"itemKey", type text}, {"value", type text}, {"unit", type text}, {"pass", type text}, {"comment", type text}, {"psi", type text}, {"tp", type text}, {"dp", type text}, {"photos", Int64.Type}, {"file", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: oem_copies      (paste below, Name the query: oem_copies)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_oem_copies.csv"){0}[Content],
+    Cols = {"file", "rig", "date", "reporttype", "equipment", "sourceFile", "oem", "pdfName", "pdfBytes", "sourceFormat", "htmlName", "htmlBytes", "fileCount", "fileNames", "sent", "modified"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"pdfBytes", "htmlBytes", "fileCount"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"file", type text}, {"rig", type text}, {"date", type text}, {"reporttype", type text}, {"equipment", type text}, {"sourceFile", type text}, {"oem", type text}, {"pdfName", type text}, {"pdfBytes", Int64.Type}, {"sourceFormat", type text}, {"htmlName", type text}, {"htmlBytes", Int64.Type}, {"fileCount", Int64.Type}, {"fileNames", type text}, {"sent", type text}, {"modified", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: aab_records      (paste below, Name the query: aab_records)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_aab_records.csv"){0}[Content],
+    Cols = {"file", "modified", "aabNumber", "revision", "recordId", "schemaVersion", "toolVersion", "rev", "title", "priority", "corporateMandatory", "edocsRef", "maximoParent", "actionRequested", "category", "sfi_group", "sfi_code", "sfi_name", "issueDate", "dueDate", "requiresReacknowledgement", "originatorName", "originatorEmail", "whatHappened", "whyItMatters", "requiredAction", "referenceDocuments", "attachments_name", "attachments_type", "attachments_bytes", "attachments_primary", "photoCount", "photoCaptions", "rigsApplicable", "rigNames_vela", "rigNames_capella", "expectedAcknowledgerRole", "status", "postedAt", "postedBy", "pdfName", "hasPdf", "current"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"revision", "photoCount"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"file", type text}, {"modified", type text}, {"aabNumber", type text}, {"revision", Int64.Type}, {"recordId", type text}, {"schemaVersion", type text}, {"toolVersion", type text}, {"rev", type text}, {"title", type text}, {"priority", type text}, {"corporateMandatory", type text}, {"edocsRef", type text}, {"maximoParent", type text}, {"actionRequested", type text}, {"category", type text}, {"sfi_group", type text}, {"sfi_code", type text}, {"sfi_name", type text}, {"issueDate", type text}, {"dueDate", type text}, {"requiresReacknowledgement", type text}, {"originatorName", type text}, {"originatorEmail", type text}, {"whatHappened", type text}, {"whyItMatters", type text}, {"requiredAction", type text}, {"referenceDocuments", type text}, {"attachments_name", type text}, {"attachments_type", type text}, {"attachments_bytes", type text}, {"attachments_primary", type text}, {"photoCount", Int64.Type}, {"photoCaptions", type text}, {"rigsApplicable", type text}, {"rigNames_vela", type text}, {"rigNames_capella", type text}, {"expectedAcknowledgerRole", type text}, {"status", type text}, {"postedAt", type text}, {"postedBy", type text}, {"pdfName", type text}, {"hasPdf", type text}, {"current", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: aab_status      (paste below, Name the query: aab_status)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_aab_status.csv"){0}[Content],
+    Cols = {"aabNumber", "revision", "title", "rigKey", "rig", "issueDate", "dueDate", "actionRequested", "state", "overdue", "status", "daysOverdue", "ackCrews", "acknowledgedAt", "acknowledgedBy", "evidenceCount", "evidenceMissing", "closedAt", "closedBy", "historyCount", "ackList_action", "ackList_crew", "ackList_at", "ackList_by", "ackList_role", "ackList_photos", "ackList_documents", "ackList_comment"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"revision", "daysOverdue", "evidenceCount", "historyCount"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"aabNumber", type text}, {"revision", Int64.Type}, {"title", type text}, {"rigKey", type text}, {"rig", type text}, {"issueDate", type text}, {"dueDate", type text}, {"actionRequested", type text}, {"state", type text}, {"overdue", type text}, {"status", type text}, {"daysOverdue", Int64.Type}, {"ackCrews", type text}, {"acknowledgedAt", type text}, {"acknowledgedBy", type text}, {"evidenceCount", Int64.Type}, {"evidenceMissing", type text}, {"closedAt", type text}, {"closedBy", type text}, {"historyCount", Int64.Type}, {"ackList_action", type text}, {"ackList_crew", type text}, {"ackList_at", type text}, {"ackList_by", type text}, {"ackList_role", type text}, {"ackList_photos", type text}, {"ackList_documents", type text}, {"ackList_comment", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: aab_acks      (paste below, Name the query: aab_acks)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_aab_acks.csv"){0}[Content],
+    Cols = {"file", "modified", "aabNumber", "revision", "rigKey", "rig", "action", "by", "role", "crew", "at", "comment", "photoCount", "attachmentCount", "attachmentNames", "saved", "rev"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"revision", "photoCount", "attachmentCount"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"file", type text}, {"modified", type text}, {"aabNumber", type text}, {"revision", Int64.Type}, {"rigKey", type text}, {"rig", type text}, {"action", type text}, {"by", type text}, {"role", type text}, {"crew", type text}, {"at", type text}, {"comment", type text}, {"photoCount", Int64.Type}, {"attachmentCount", Int64.Type}, {"attachmentNames", type text}, {"saved", type text}, {"rev", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: aab_status__ackList      (paste below, Name the query: aab_status__ackList)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_aab_status__ackList.csv"){0}[Content],
+    Cols = {"aabNumber", "revision", "rigKey", "action", "crew", "at", "by", "role", "photos", "documents", "comment"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"revision", "photos"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"aabNumber", type text}, {"revision", Int64.Type}, {"rigKey", type text}, {"action", type text}, {"crew", type text}, {"at", type text}, {"by", type text}, {"role", type text}, {"photos", Int64.Type}, {"documents", type text}, {"comment", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: help_requests      (paste below, Name the query: help_requests)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_help_requests.csv"){0}[Content],
+    Cols = {"requestId", "rigKey", "rig", "subject", "notifyKind", "rigDown", "hoursDown", "occurredAt", "hoursSince", "synergiCase", "state", "postedAt", "by", "rev", "dryRun", "ackCount", "lastAction", "lastBy", "lastAt", "receiptState", "receipt", "directiveChat", "attachmentCount", "file"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"hoursDown", "ackCount", "attachmentCount"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"requestId", type text}, {"rigKey", type text}, {"rig", type text}, {"subject", type text}, {"notifyKind", type text}, {"rigDown", type text}, {"hoursDown", Int64.Type}, {"occurredAt", type text}, {"hoursSince", type text}, {"synergiCase", type text}, {"state", type text}, {"postedAt", type text}, {"by", type text}, {"rev", type text}, {"dryRun", type text}, {"ackCount", Int64.Type}, {"lastAction", type text}, {"lastBy", type text}, {"lastAt", type text}, {"receiptState", type text}, {"receipt", type text}, {"directiveChat", type text}, {"attachmentCount", Int64.Type}, {"file", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: help_acks      (paste below, Name the query: help_acks)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_help_acks.csv"){0}[Content],
+    Cols = {"file", "modified", "requestId", "action", "by", "role", "at", "comment", "saved", "attachments"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"file", type text}, {"modified", type text}, {"requestId", type text}, {"action", type text}, {"by", type text}, {"role", type text}, {"at", type text}, {"comment", type text}, {"saved", type text}, {"attachments", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: precharge_requests      (paste below, Name the query: precharge_requests)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_precharge_requests.csv"){0}[Content],
+    Cols = {"id", "rig", "rigKey", "well", "bop", "raisedBy", "email", "workOrder", "saved", "received", "shearReq", "mawhp", "waterDepth", "hops", "status", "resubmitted", "file"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"id", type text}, {"rig", type text}, {"rigKey", type text}, {"well", type text}, {"bop", type text}, {"raisedBy", type text}, {"email", type text}, {"workOrder", type text}, {"saved", type text}, {"received", type text}, {"shearReq", type text}, {"mawhp", type text}, {"waterDepth", type text}, {"hops", type text}, {"status", type text}, {"resubmitted", type text}, {"file", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: precharge_issued      (paste below, Name the query: precharge_issued)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_precharge_issued.csv"){0}[Content],
+    Cols = {"matchKey", "bop", "saved"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"matchKey", type text}, {"bop", type text}, {"saved", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: ssce_requests      (paste below, Name the query: ssce_requests)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_ssce_requests.csv"){0}[Content],
+    Cols = {"requestId", "submittedAt", "file", "sourceItem_rig", "sourceItem_bop", "sourceItem_cat", "sourceItem_asset", "sourceItem_oem", "sourceItem_serial", "sourceItem_desc", "ssceItem_asset", "ssceItem_oem", "ssceItem_serial", "ssceItem_desc", "ssceItem_status", "applicant_requestOriginatorEmail", "applicant_priorityLevel", "applicant_siteUnit", "applicant_rigManagerContact", "applicant_rigOnDowntime", "applicant_planningOrExecuting", "requestedEquipment_dateRequired", "requestedEquipment_description", "requestedEquipment_partNumber", "requestedEquipment_serialNumber", "returningEquipment_date", "returningEquipment_description", "returningEquipment_partNumber", "returningEquipment_serialNumber", "afePo_afeNumber", "afePo_poNumber", "justification", "termsAcknowledged", "decision", "comment", "decidedBy", "decidedAt", "decisionFile"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"requestId", type text}, {"submittedAt", type text}, {"file", type text}, {"sourceItem_rig", type text}, {"sourceItem_bop", type text}, {"sourceItem_cat", type text}, {"sourceItem_asset", type text}, {"sourceItem_oem", type text}, {"sourceItem_serial", type text}, {"sourceItem_desc", type text}, {"ssceItem_asset", type text}, {"ssceItem_oem", type text}, {"ssceItem_serial", type text}, {"ssceItem_desc", type text}, {"ssceItem_status", type text}, {"applicant_requestOriginatorEmail", type text}, {"applicant_priorityLevel", type text}, {"applicant_siteUnit", type text}, {"applicant_rigManagerContact", type text}, {"applicant_rigOnDowntime", type text}, {"applicant_planningOrExecuting", type text}, {"requestedEquipment_dateRequired", type text}, {"requestedEquipment_description", type text}, {"requestedEquipment_partNumber", type text}, {"requestedEquipment_serialNumber", type text}, {"returningEquipment_date", type text}, {"returningEquipment_description", type text}, {"returningEquipment_partNumber", type text}, {"returningEquipment_serialNumber", type text}, {"afePo_afeNumber", type text}, {"afePo_poNumber", type text}, {"justification", type text}, {"termsAcknowledged", type text}, {"decision", type text}, {"comment", type text}, {"decidedBy", type text}, {"decidedAt", type text}, {"decisionFile", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: reports__actionItems      (paste below, Name the query: reports__actionItems)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_reports__actionItems.csv"){0}[Content],
+    Cols = {"file", "desc", "sys", "resp", "target", "deadline", "leftWithRig", "hasPhoto"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"file", type text}, {"desc", type text}, {"sys", type text}, {"resp", type text}, {"target", type text}, {"deadline", type text}, {"leftWithRig", type text}, {"hasPhoto", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: reports__criticalItems      (paste below, Name the query: reports__criticalItems)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_reports__criticalItems.csv"){0}[Content],
+    Cols = {"file", "done", "equip", "sfi", "date", "issue", "mit"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"file", type text}, {"done", type text}, {"equip", type text}, {"sfi", type text}, {"date", type text}, {"issue", type text}, {"mit", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: daily_log_entries      (paste below, Name the query: daily_log_entries)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_daily_log_entries.csv"){0}[Content],
+    Cols = {"rig", "month", "date", "shift", "personnel", "equip", "failure", "lesson", "note", "photos", "file"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"photos"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"rig", type text}, {"month", type text}, {"date", type text}, {"shift", type text}, {"personnel", type text}, {"equip", type text}, {"failure", type text}, {"lesson", type text}, {"note", type text}, {"photos", Int64.Type}, {"file", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: r53_events      (paste below, Name the query: r53_events)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_r53_events.csv"){0}[Content],
+    Cols = {"rig", "date", "equip", "item", "mfr", "model", "obsfailure", "malfunction", "rootcause", "findings", "lessons", "source", "file"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"rig", type text}, {"date", type text}, {"equip", type text}, {"item", type text}, {"mfr", type text}, {"model", type text}, {"obsfailure", type text}, {"malfunction", type text}, {"rootcause", type text}, {"findings", type text}, {"lessons", type text}, {"source", type text}, {"file", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: problems      (paste below, Name the query: problems)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_problems.csv"){0}[Content],
+    Cols = {"file", "bytes", "why", "modified", "kind"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"bytes"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"file", type text}, {"bytes", Int64.Type}, {"why", type text}, {"modified", type text}, {"kind", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: bwm_snapshots      (paste below, Name the query: bwm_snapshots)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_bwm_snapshots.csv"){0}[Content],
+    Cols = {"week", "bwm_week", "bwm_compiledBy", "bwm_reportDate", "bwm_rows", "reportDate", "file"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"week", type text}, {"bwm_week", type text}, {"bwm_compiledBy", type text}, {"bwm_reportDate", type text}, {"bwm_rows", type text}, {"reportDate", type text}, {"file", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: compliance_checklists      (paste below, Name the query: compliance_checklists)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_compliance_checklists.csv"){0}[Content],
+    Cols = {"rig", "date", "file", "section", "item", "status", "comment"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"rig", type text}, {"date", type text}, {"file", type text}, {"section", type text}, {"item", type text}, {"status", type text}, {"comment", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: marine_scores      (paste below, Name the query: marine_scores)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_marine_scores.csv"){0}[Content],
+    Cols = {"rig", "date", "file", "item", "score", "comment"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"rig", type text}, {"date", type text}, {"file", type text}, {"item", type text}, {"score", type text}, {"comment", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: topset_investigations      (paste below, Name the query: topset_investigations)
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_topset_investigations.csv"){0}[Content],
+    Cols = {"rig", "date", "file", "title", "status", "equipment"},
+    Raw = Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Typed = Table.TransformColumnTypes(Selected, {{"rig", type text}, {"date", type text}, {"file", type text}, {"title", type text}, {"status", type text}, {"equipment", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
