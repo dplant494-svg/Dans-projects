@@ -86,3 +86,8 @@ Those rows are on the ORR workbook v2 as of today, with one new open action: **d
 or 3) by 10 October**, so the class on 20 October teaches one file.
 
 Questions through Dan. The contract and the scanner block are in the SACRED repository; Dan can send both.
+
+
+**Correction, 3 October:** the rebuilt tracker's component rows already carry `avail` and `assignedTo` (fields 21 and 22 of
+`cFields` in `coc-data`). So the port in option 1 needs only the Request button and form, and the scanner's write-back
+re-pointed at those two fields; no new data fields. Smaller than §3 says.
