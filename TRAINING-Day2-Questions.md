@@ -92,7 +92,7 @@ that does not.**
 **9.2 — When the pages move to Lovable in January, what happens to the tool on your laptop on day one?**
 
 > Nothing. It posts the same file to the same place. The dashboard changes: it looks different, you sign in with your
-> Seadrill account instead of a password, and Ask SACRED AI works for everyone signed in. A two-page "what moved"
+> Seadrill account instead of a password, and Ask SACRED AI, not available in the class, comes with it and works for everyone signed in. A two-page "what moved"
 > comes before the cutover.
 
 **9.3 — The photo-grading model suggests a grade 4 from your photograph. What is recorded?**

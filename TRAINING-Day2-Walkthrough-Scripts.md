@@ -64,8 +64,8 @@ raises it from SSORT and again from the share has raised it twice; the dashboard
 
 ### What they should be able to do by 12:00
 Find their own report from Monday, open it, read the CBM heatmap and the grade history, see what "needs attention" means
-and where it is counted, read a rig's daily checks, use the Errors button, print a report, and ask Ask SACRED AI one
-question about their own post.
+and where it is counted, read a rig's daily checks, use the Errors button, print a report, and say what Ask SACRED AI
+will do when it is switched on.
 
 ### 1. Orientation and the first find (15 min)
 
@@ -146,17 +146,19 @@ question about their own post.
     **SAY:** "Each of these is a report type or a block in a report. Nothing here was typed into the dashboard."
 28. **AABs:** the tab is the Bulletin Board's register; module 7 covers the loop.
 
-### 6. Ask SACRED AI (10 min)
+### 6. Ask SACRED AI — coming, not available today (5 min)
 
-29. Press **Ask SACRED AI**. `[SHOT 37]` **SAY:** "This is a Copilot agent that reads a digest of every posted report.
-    It answers from the reports, not from the internet, and it says which report it read."
-30. Ask it about the room's own posts: "Which SSCE Equipment reports were posted on [date] and what did the Riser
-    Adapter inspection grade?" Read the answer and the sources.
-31. **SAY:** "It is an answer, not a record. It can be wrong, it tells you where it looked, and the report is the
-    record. Use it to find, not to decide."
-32. **TRAP:** today it opens for Dan and Lee only, until IT approve the Teams app. Say so; do not let the room try it on
-    their own laptops and conclude it is broken. From the Lovable move it becomes a button that works for everyone
-    signed in.
+29. Point at the **Ask SACRED AI** button on the banner. **Do not press it.** **SAY:** "This button will not open for you
+    today. It is an assistant that answers questions from every posted report, and it is coming. It is not switched on
+    for the fleet yet."
+30. **SAY what it will do:** "You will ask it things like 'which rigs graded the riser adapter a four or five this
+    quarter' or 'what did West Capella's last CBM inspection find', and it answers from the reports, says which report
+    it read, and never from the internet. When the pages move to the new platform it becomes a button that works for
+    everyone signed in."
+31. **SAY the rule now, so it is there when the button works:** "It will be an answer, not a record. It can be wrong,
+    it tells you where it looked, and the report is the record. Use it to find, not to decide."
+32. **TRAP:** someone will press it anyway on their own laptop and conclude the dashboard is broken. Tell them before
+    they do.
 
 ### 7. Close (5 min)
 
@@ -278,7 +280,7 @@ Say what changes for the rig in the next six months and what does not.
 62. **Lovable, the rebuild of the pages (10 min).** **SAY:** "SACRED's pages are being rebuilt on a hosted platform
     called Lovable over the winter. For you: the tools on your laptop do not change on day one; they post to the same
     place. The dashboard will look different and will have a sign-in with your Seadrill account instead of a password.
-    Ask SACRED AI becomes a button inside it that works for everyone. Cutover is planned for January; you will get a
+    Ask SACRED AI, the button you could not press on Tuesday, comes with it and works for everyone. Cutover is planned for January; you will get a
     two-page 'what moved' before it." `[SHOT 53]` the transition chart.
 63. **The things on the list, one line each (15 min):**
     - **Load latest posted** in WCGRRT: pull the last posted report back into the tool to carry on from it.
@@ -287,6 +289,7 @@ Say what changes for the rig in the next six months and what does not.
     - **The failure notification:** a BOP equipment failure or downtime raised from the rig, emailed by directive.
     - **The riser tally** on SACRED (Rohit's tool) and, later, per rig.
     - **Photo grading:** a model that suggests the CBM grade from the photograph; a suggestion, never a grade.
+    - **Ask SACRED AI** for everyone: the assistant on the dashboard, answering from the reports.
     - **The pass/fail wording** on test grades, from the next release.
     - **SPARC and Maximo** (five minutes from Lee's SPARC maintainer, `TRAINING-HANDOFF-SPARC.md` §2): the parts
       catalogue inside SSORT, the daily item export, where it lands.

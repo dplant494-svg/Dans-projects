@@ -20,7 +20,7 @@ set; delivered in the same zip as the Day 1 set, files named `25-issued-email.pn
 | 34 | `34-grade-history.png` | 6 | A component's grade history panel: dates, grades, photographs |
 | 35 | `35-pass-fail-grades.png` | 6 | The Riser Adapter from the class's CBM sample showing the condition grades and the two tests at **1 and 5** |
 | 36 | `36-compliance.png` | 6 | The Compliance tab: latest checklist per rig, the actions-raised table with an overdue flag, the expiry watch |
-| 37 | `37-ask-sacred-ai.png` | 6 | Ask SACRED AI open with a question about an SSCE Equipment post and its sourced answer |
+| 37 | `37-ask-sacred-ai-button.png` | 6 | The banner with the **Ask SACRED AI** button ringed: not available in the class, coming. No answer panel |
 | 38 | `38-bop-planning-tiles.png` | 7 | BOP Fleet Planning Status, tile view |
 | 39 | `39-bop-schedule.png` | 7 | One rig's schedule open |
 | 40 | `40-break-in-work.png` | 7 | The Break-in Work list open |
@@ -42,7 +42,8 @@ set; delivered in the same zip as the Day 1 set, files named `25-issued-email.pn
 
 - **Shots 27 and 35 need Monday's posts** on the dashboard. They are captured on the test set here with the class's
   four sample files, which produce the same rows; on the day the real rows look the same with more dates.
-- **Shots 37 and 51** are behind a sign-in or a password; capture on the trainer's laptop, nothing personal visible.
+- **Shot 51** is behind the Help Centre password; capture on the trainer's laptop, nothing personal visible. Shot 37 is
+  the button only; Ask SACRED AI is not available in the class.
 - **Shots 43 to 48 and 50 to 52** are the only ones that post anything, and they post on `SSCE Equipment` in test mode.
   Captured here with the post stubbed, so nothing left this session.
 - **Shot 53** is rebuilt from the chart file on the freeze date, so the dates on it are the ones the room will hear.
