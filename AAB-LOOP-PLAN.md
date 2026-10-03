@@ -230,6 +230,21 @@ Notifications flow (issued email with the bulletin; acknowledgement emails to th
 the rig's four with the evidence attached; closure email). Still open: the daily overdue chase
 (Part D of the flow guide), the SharePoint toolbox button, Eric's PDF, the SFI names.
 
+**3 October 2026: create page Rev 11, built here at Dan's ask.** Two changes, no payload key changed:
+- **+ New AAB** in the Actions panel, and **Start a new AAB** inside the green message after a successful post. Both clear
+  the form back to the state the page opens in (issue date today, due date the default, revision 0, re-acknowledgement
+  ticked) and keep the originator name and email. Unposted work is never cleared without a confirm; straight after a good
+  post there is no confirm.
+- **The SFI names, closed.** Ten groups from Dan: 302 crown block with drill string motion compensator, 314 tensioning
+  systems, 315 HP air system for tensioners and compensators, 331 BOP stack, 332 BOP control system, 334 diverter with
+  control system, 335 riser system incl. choke and kill lines, 336 choke and kill system incl. mud/gas separator, 337
+  miscellaneous well control related equipment, 339 MPD equipment. 333 (a placeholder, not a WCE group) is gone from the
+  list; a loaded record carrying it, or any code not listed, keeps it on re-post.
+Proven headless on the ungated build with the post stubbed (nothing left this session): dismiss keeps the form, accept
+clears it, Start a new AAB after a 202 clears with no confirm, the originator stays, unknown SFI codes survive a load.
+Gated copy rebuilt with Eric's `build_gate.py` (all four assertions passed; `set-password.html` byte-identical, so the
+password is unchanged). Deploy: save `aab/seadrill-bulletin-board.html` over the one in `sacred\aab`, Ctrl+F5.
+
 | Step | Owner | Needs first | Deliverable |
 |---|---|---|---|
 | 1 ✅ Rev 8 + schema 2.0 handoff received 24 Sep | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack), the logo, `sample-reports/aab/` | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, `pdf`/`pdfName`, Load AAB file proven on the two test records, one saved test record on `West Vela` only, **not posted** |
