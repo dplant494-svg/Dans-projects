@@ -6,6 +6,8 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 
 ## Rolling plan (kept current; last updated 27 Sept 2026)
 
+**Existing-site takeovers**: written procedure in `templates/site-takeover.md` (find out where domain, hosting and email live; protect email first; switch DNS, don't rush the domain transfer; keep old hosting 30 days). Client questions and the old-developer message are in it, EN/ES.
+
 **Decided 30 Sept**: prices stay public (the differentiator against the eight Marbella agencies); hero buttons now "Free consultation" and "See prices"; new "No job too small" small-jobs offer from €90 with a "Get a quote" button; contact heading "Free consultation. Fixed-price proposal within two days." WhatsApp quick reply `/fix` added.
 
 **Live**: plantworksstudio.com on Netlify, HTTPS, both languages, demos hidden from search. Mailbox info@ on Namecheap Private Email, working on the Samsung phone over IMAP. Contact form posts to Netlify Forms and emails info@. Search Console verified, sitemap accepted with two pages. Templates for invoices (EN, ES) and proposals in `templates/`.
@@ -41,7 +43,7 @@ plantworks-studio/
 │       ├── README.md         ← what's invented, how to reuse for a real client
 │       ├── brasa-y-sal/      ← beach restaurant, Marbella. ES at /, EN at /en/
 │       └── pinar-property/   ← property management, Estepona. EN at /, ES at /es/
-├── templates/                ← invoice (EN, ES) and proposal Word templates, WhatsApp texts (EN/ES), and the script that builds the docx files
+├── templates/                ← invoice (EN, ES) and proposal Word templates, WhatsApp texts (EN/ES), site-takeover procedure, and the script that builds the docx files
 ├── social/instagram/         ← launch pack: nine post images, bio, captions EN/ES, hashtags, set-up steps
 └── clients/
     ├── the-fifth-quarter/    ← client site. Deploy this folder as-is.
@@ -76,7 +78,7 @@ Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect
 | One-page site, bilingual | €800 | Same page with Spanish alongside, hreflang done |
 | Multi-page bilingual site | €1,500 | Up to 8 pages in both languages, hreflang + structured data + sitemap, booking/enquiry flow, native-speaker proofread of ES copy. Beyond 8 pages: quoted |
 | Care | €40/month | Hosting, domain, HTTPS managed; content changes within 2 working days; monthly speed/links/search check; small tweaks; cancel any month |
-| Small jobs ("no job too small") | Fix, update or rescue an existing site: forms, pages, menus, speed, Google, taking a site back from an old developer | from €90 (€45/hour, two-hour minimum), quoted before starting; bigger rescues quoted after a free look |
+| Small jobs ("no job too small") | Fix, update or rescue an existing site: forms, pages, menus, speed, Google, taking a site back from an old developer | from €90 (€45/hour, two-hour minimum), quoted before starting; bigger rescues quoted after a free look. Procedure for any existing site: `templates/site-takeover.md` |
 | Care Plus | €75/month | Care plus Google Business Profile managed (posts, photos, hours, review replies) and a review request after every job |
 | Take payments online | €150 setup | Stripe Payment Link or Buy Button on the client's own Stripe account for deposits, vouchers, single products; booking deposits via their booking system. Full shop quoted separately. Client money never passes through the studio |
 | Extra work | €45/hour | Anything outside a package, quoted before it starts |
