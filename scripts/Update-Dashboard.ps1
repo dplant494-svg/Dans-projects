@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.76'
+$ScriptVersion = '2.77'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -3942,6 +3942,22 @@ function ConvertTo-ExportArray { param($Value)   # a plain object[] from any arr
     return $out.ToArray()
 }
 function Test-ExportObject { param($Value) return ($null -ne $Value -and -not ($Value -is [string]) -and -not ($Value -is [ValueType]) -and (($Value -is [System.Collections.IDictionary]) -or ($Value -is [System.Management.Automation.PSObject]) -or ($Value -is [System.Management.Automation.PSCustomObject])) -and -not ($Value -is [System.Array])) }
+# v2.77: read a property WITHOUT PowerShell unrolling a one-item array into its single element.
+# Get-Prop ends in 'return $prop.Value', and a function's output is unrolled, so a list holding one
+# critical item or one action came back as a lone object: the export flattened it into extra columns
+# on the parent row instead of a child-table row (found 4 Oct: one production report with one critical
+# item, reports__criticalItems empty in SACRED DATA). The comma keeps the value whole through the return.
+function Get-ExportValue {
+    param($Object, [string]$Name)
+    if ($null -eq $Object) { return $null }
+    if ($Object -is [System.Collections.IDictionary]) {
+        foreach ($k in $Object.Keys) { if ([string]$k -eq $Name) { return ,($Object[$k]) } }
+        return $null
+    }
+    $p = $Object.PSObject.Properties[$Name]
+    if ($null -eq $p) { return $null }
+    return ,($p.Value)
+}
 function Export-DatabaseTable {
     param([string]$Name, $Rows, [string[]]$KeyCols, [hashtable]$Tables)
     $flat = New-Object System.Collections.Generic.List[object]
@@ -3950,7 +3966,7 @@ function Export-DatabaseTable {
         if ($null -eq $row) { continue }
         $o = [ordered]@{}
         foreach ($k in (Get-KeyNames $row)) {
-            $ks = [string]$k; $v = Get-Prop $row $ks
+            $ks = [string]$k; $v = Get-ExportValue $row $ks
             if ($v -is [System.Array] -or ($v -is [System.Collections.IList] -and -not ($v -is [string]))) {
                 $items = ConvertTo-ExportArray $v
                 if ($items.Count -gt 0 -and (Test-ExportObject $items[0])) {
@@ -3958,13 +3974,13 @@ function Export-DatabaseTable {
                     foreach ($it in $items) {
                         $c = [ordered]@{}
                         foreach ($kc in $KeyCols) { $c[$kc] = ConvertTo-ExportScalar (Get-Prop $row $kc) }
-                        foreach ($ck in (Get-KeyNames $it)) { $cv = Get-Prop $it ([string]$ck); if ($cv -is [System.Array] -or ($cv -is [System.Collections.IList] -and -not ($cv -is [string]))) { $c[[string]$ck] = ((ConvertTo-ExportArray $cv | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') } elseif (Test-ExportObject $cv) { $c[[string]$ck] = ($cv | ConvertTo-Json -Compress -Depth 6) } else { $c[[string]$ck] = ConvertTo-ExportScalar $cv } }
+                        foreach ($ck in (Get-KeyNames $it)) { $cv = Get-ExportValue $it ([string]$ck); if ($cv -is [System.Array] -or ($cv -is [System.Collections.IList] -and -not ($cv -is [string]))) { $c[[string]$ck] = ((ConvertTo-ExportArray $cv | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') } elseif (Test-ExportObject $cv) { $c[[string]$ck] = ($cv | ConvertTo-Json -Compress -Depth 6) } else { $c[[string]$ck] = ConvertTo-ExportScalar $cv } }
                         $children[$ks].Add([pscustomobject]$c) | Out-Null
                     }
-                    $o[$ks + '_count'] = $items.Count
+                    $o[$ks] = ''   # v2.77: the rows are in the child table; the column stays, empty, so every row has the same columns in the same place
                 } else { $o[$ks] = (($items | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') }
             }
-            elseif (Test-ExportObject $v) { foreach ($nk in (Get-KeyNames $v)) { $nv = Get-Prop $v ([string]$nk); if ($nv -is [System.Array] -or ($nv -is [System.Collections.IList] -and -not ($nv -is [string]))) { $o[$ks + '_' + $nk] = ((ConvertTo-ExportArray $nv | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') } elseif (Test-ExportObject $nv) { $o[$ks + '_' + $nk] = ($nv | ConvertTo-Json -Compress -Depth 6) } else { $o[$ks + '_' + $nk] = ConvertTo-ExportScalar $nv } } }
+            elseif (Test-ExportObject $v) { foreach ($nk in (Get-KeyNames $v)) { $nv = Get-ExportValue $v ([string]$nk); if ($nv -is [System.Array] -or ($nv -is [System.Collections.IList] -and -not ($nv -is [string]))) { $o[$ks + '_' + $nk] = ((ConvertTo-ExportArray $nv | ForEach-Object { ConvertTo-ExportScalar $_ }) -join '; ') } elseif (Test-ExportObject $nv) { $o[$ks + '_' + $nk] = ($nv | ConvertTo-Json -Compress -Depth 6) } else { $o[$ks + '_' + $nk] = ConvertTo-ExportScalar $nv } } }
             else { $o[$ks] = ConvertTo-ExportScalar $v }
         }
         $flat.Add([pscustomobject]$o) | Out-Null
@@ -4002,8 +4018,13 @@ if ($databaseExportPath) {
         $exportRows = 0
         foreach ($tn in ($exportTables.Keys | Sort-Object)) {
             $rows = $exportTables[$tn].ToArray(); $fn = "export_$tn.csv"; $fp = Join-Path $databaseExportPath $fn
-            if ($rows.Count -gt 0) { $rows | Export-Csv -Path $fp -NoTypeInformation -Encoding UTF8 } else { Set-Content -Path $fp -Value '' -Encoding UTF8 }
-            $cols = New-Object System.Collections.ArrayList; if ($rows.Count) { foreach ($pn in $rows[0].PSObject.Properties.Name) { [void]$cols.Add([string]$pn) } }
+            # v2.77: the header is the union of every row's columns, in first-seen order. Export-Csv takes its
+            # header from the first row only, so a column that first appears on a later row (a report's
+            # criticalItems_count, a rig name under rigNames_) was dropped, or its values ran past the header.
+            $cols = New-Object System.Collections.ArrayList
+            $seenCols = @{}
+            foreach ($r in $rows) { foreach ($pn in $r.PSObject.Properties.Name) { if (-not $seenCols.ContainsKey([string]$pn)) { $seenCols[[string]$pn] = $true; [void]$cols.Add([string]$pn) } } }
+            if ($rows.Count -gt 0) { $rows | Select-Object -Property $cols.ToArray() | Export-Csv -Path $fp -NoTypeInformation -Encoding UTF8 } else { Set-Content -Path $fp -Value '' -Encoding UTF8 }
             $manifestTables.Add([pscustomobject]@{ table = $tn; file = $fn; rows = $rows.Count; columns = $cols.ToArray() }) | Out-Null
             $exportRows += $rows.Count
         }
