@@ -275,7 +275,8 @@ TABLE: r53_events      (paste below, Name the query: r53_events)
 ====================================================================================================
 let
     Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
-    File = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_r53_events.csv"){0}[Content],
+    Matches = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_r53_events.csv"),
+    File = if Table.IsEmpty(Matches) then null else Matches{0}[Content],
     Cols = {"rig", "date", "equip", "item", "mfr", "model", "obsfailure", "malfunction", "rootcause", "findings", "lessons", "source", "file"},
     Raw = if File = null then #table({}, {}) else Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
     Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
