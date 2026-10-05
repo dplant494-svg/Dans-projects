@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.77'
+$ScriptVersion = '2.78'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -3968,7 +3968,7 @@ function Export-DatabaseTable {
         foreach ($k in (Get-KeyNames $row)) {
             $ks = [string]$k; $v = Get-ExportValue $row $ks
             if ($v -is [System.Array] -or ($v -is [System.Collections.IList] -and -not ($v -is [string]))) {
-                $items = ConvertTo-ExportArray $v
+                $items = @(ConvertTo-ExportArray $v)   # v2.78: @() so a one-item list is an array on Windows PowerShell 5.1 too, where a lone [pscustomobject] has no .Count (PS 6.1+ gives it 1) and the item was written as '@{...}' text
                 if ($items.Count -gt 0 -and (Test-ExportObject $items[0])) {
                     if (-not $children.ContainsKey($ks)) { $children[$ks] = New-Object System.Collections.Generic.List[object] }
                     foreach ($it in $items) {

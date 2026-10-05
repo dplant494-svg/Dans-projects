@@ -366,3 +366,38 @@ let
     Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
 in
     Loaded
+
+====================================================================================================
+TABLE: aab_records__attachments      (paste below, Name the query: aab_records__attachments)   [added 5 Oct, scanner v2.78; run ddl-v4-aab-children.sql first]
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    Matches = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_aab_records__attachments.csv"),
+    File = if Table.IsEmpty(Matches) then null else Matches{0}[Content],
+    Cols = {"aabNumber", "revision", "name", "type", "bytes", "primary"},
+    Raw = if File = null then #table({}, {}) else Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"revision", "bytes"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"aabNumber", type text}, {"revision", Int64.Type}, {"name", type text}, {"type", type text}, {"bytes", Int64.Type}, {"primary", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
+TABLE: aab_records__sfi      (paste below, Name the query: aab_records__sfi)   [added 5 Oct, scanner v2.78; run ddl-v4-aab-children.sql first]
+====================================================================================================
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    Matches = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_aab_records__sfi.csv"),
+    File = if Table.IsEmpty(Matches) then null else Matches{0}[Content],
+    Cols = {"aabNumber", "revision", "group", "code", "name"},
+    Raw = if File = null then #table({}, {}) else Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"revision"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"aabNumber", type text}, {"revision", Int64.Type}, {"group", type text}, {"code", type text}, {"name", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
