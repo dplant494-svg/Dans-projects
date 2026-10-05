@@ -1313,3 +1313,16 @@ PowerShell 5.1). The dashboard pages and the payload contract are unchanged.
 
 **Frozen build:** SSORT 157 deployed 5 Oct, before the 12 Oct freeze, so 157 is what the class sees; ORR workbook, known
 error log (RT KE-14) and test records follow your return v4. Badge screenshot 17 is retaken on 157.
+
+**49.4 answered, 5 Oct, from SACRED DATA** (Dan ran the query; readings keyed by system, the two sheets share no system
+names):
+
+| Rig | Rounds on record | Rounds taken on Capella's sheet | Dates |
+|---|---|---|---|
+| West Auriga | 72 | **2** | 28 Aug 2026 and 4 Oct 2026 |
+| West Saturn | 74 | **1** | 18 Aug 2026 |
+
+So three rounds in total, not a pattern: the latch only bit when a crew opened Daily Checks before picking the rig. Saturn
+is included because its sheet (DAILY_CHECKS) differs from Capella's too and the same latch applied. Sevan Louisiana has no
+daily-check rounds on record. Those three rounds are what to take back to the rigs; the readings in them are real, taken
+against Capella's list of items. Nothing to change on the dashboard: each round shows the readings it carries.
