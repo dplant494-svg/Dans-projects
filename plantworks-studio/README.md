@@ -8,6 +8,8 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 
 **Existing-site takeovers**: written procedure in `templates/site-takeover.md` (find out where domain, hosting and email live; protect email first; switch DNS, don't rush the domain transfer; keep old hosting 30 days). Client questions and the old-developer message are in it, EN/ES.
 
+**Where Dan works (5 Oct)**: onshore and home-based for the foreseeable, currently heading to Houston. Plantworks stays location-neutral: no travel or personal posts on the studio site or its socials, homes stay "UK & Costa del Sol", "remote everywhere" covers the rest. Booking availability set in Houston time on mornings (8am–noon Houston = 3–7pm Spain, 2–6pm UK). Check with the accountant before anything public says where the work is done.
+
 **Decided 30 Sept**: prices stay public (the differentiator against the eight Marbella agencies); hero buttons now "Free consultation" and "See prices"; new "No job too small" small-jobs offer from €90 with a "Get a quote" button; contact heading "Free consultation. Fixed-price proposal within two days." WhatsApp quick reply `/fix` added.
 
 **Live**: plantworksstudio.com on Netlify, Git-linked (every push to the branch publishes), HTTPS, both languages, demos hidden from search. Mailbox info@ on Namecheap Private Email, working on the Samsung phone over IMAP. Contact form posts to Netlify Forms and emails info@. Search Console verified, sitemap accepted with two pages. Templates for invoices (EN, ES) and proposals in `templates/`.
@@ -28,8 +30,8 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
 8. **Online booking for the free consultation** (Cal.com, free plan):
    - Sign up with info@plantworksstudio.com and connect the Google Calendar, so existing appointments block slots.
    - Call type "Free consultation · 20 minutes", Google Meet, description says calls are in English. Booking questions: business name, current website, what they need.
-   - Availability in Spain time, 15-minute buffer, at least 24 hours' notice.
-   - **Before every rotation, block the whole trip with date overrides.** Clients see slots in their own time zone automatically.
+   - 15-minute buffer, at least 24 hours' notice.
+   - Availability in the time zone Dan is actually in (Houston for now). Block any trip or offshore stint with date overrides. Clients see slots in their own time zone automatically.
    - Send the booking link to the session: it becomes a "Book a free call" button in the contact section of both pages (form and WhatsApp stay), and goes into the WhatsApp away message.
    - The same Cal.com account carries the Roughneck intro call later (second call type); one login, one calendar.
    - Sell it too: online booking is already an add-on on the site. Cal.com for trades, clinics and trainers; for restaurants, link to their own system (TheFork, OpenTable, CoverManager).
