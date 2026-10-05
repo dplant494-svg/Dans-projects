@@ -4,7 +4,7 @@ Online fitness coaching and training plans. Personal brand built on a documented
 
 Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a client (portfolio piece); nothing personal crosses over to the studio site.
 
-## Rolling plan (last updated 3 Oct 2026)
+## Rolling plan (last updated 5 Oct 2026)
 
 **Done**: site in `site/` (noindex): story in Dan's words (message only, programme unnamed, Shaun credited with his OK), Coach Dan Plant, domain roughneck-fitness.com, 2024 before photo, dated story grid with day one 2 July 2025, NABBA prep paragraph, hero "Now" panel as a looping training clip, live sobriety counter, three plans (drafts) and one-to-one, apply form, Drinkline pointer, disclaimer. Placeholders in `site/NOTES.md`.
 
@@ -19,6 +19,7 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 8. **More video**: upload the September DJI clips you rate to the GitHub release `videos-sept-2026` (Releases → edit → attach). They get cut into Instagram clips the same way.
 9. **Prices**: confirm £39 / £89 / £199 or change them.
 10. **Level 3 PT**: course provider and expected finish date, so the one-to-one tier can show an opening month.
+11. **Online booking for intro calls**: a second call type on the same Cal.com account as Plantworks (one login, one calendar, so a Plantworks call and a Roughneck call can't clash). "Intro call · 20 minutes", Google Meet, booking questions: where you train, goal, current training days. Same rotation rule: block trips with date overrides. Turn it on only when one-to-one opens after qualification; until then the apply form stays the way in. Send the link and it becomes a "Book an intro call" button beside the apply form.
 
 **How video gets here**: Drive can list files but can't deliver video into a session. Upload clips as assets on a GitHub release in this repo; the session downloads them via the API, cuts them with ffmpeg (`pip install imageio-ffmpeg`), and only small web cuts go into git. Inventory in `assets/from-video/INDEX.md`.
 
