@@ -95,3 +95,5 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 
 **2 Oct, late: pack v6** (freeze section added to the README, status and scripts; the README carries it three times, a paste slip to
 tell them). ORR return v3: runbook §8 records the freeze. Rolling handoff entry 48 is the freeze note; nothing shipped.
+
+**5 Oct:** SSORT **157** deployed before the freeze (rolling handoff entry 49, the West Auriga daily checks panel). Frozen builds: WCGRRT 167, SSORT 157. Screenshot 17 (badge) retaken on 157 with 1, 18 and 19.

@@ -1,6 +1,6 @@
-# ORR 11 — Known error log: WCGRRT REV 167 and SSORT REV 154
+# ORR 11 — Known error log: WCGRRT REV 167 and SSORT REV 157
 
-**Owner:** Dan Plant, Technical Services — Subsea · **Date:** 1 October 2026
+**Owner:** Dan Plant, Technical Services — Subsea · **Date:** 5 October 2026
 Shape as the workbook's Known error log: issue · effect · workaround · fix planned.
 
 ---
@@ -266,6 +266,34 @@ against what was announced.
 
 **Fix planned.** None at the tool. Worth raising with ISIT as a cache-header question on the IIS
 site.
+
+---
+
+### KE-14 · A rig-specific panel built before the rig is known stays wrong for the session
+
+**Tool:** SSORT, fixed in 157 · **Severity:** medium · **Status:** CLOSED 5 Oct 2026
+
+**Issue.** The Daily Checks panel was built the first time the tab was opened, behind a
+`dataset.built` latch, using whatever rig was set at that moment, and was never rebuilt. The rig
+selector is on a different tab, so opening Daily Checks first — the normal order — produced the
+default Capella sheet for the whole session, whatever rig was picked afterwards.
+
+**Effect.** Reported by West Auriga on 5 October as their template having "disappeared". It had
+not: the sheet was intact and the selector correct, the panel was stale. Only West Auriga, West
+Saturn and Sevan Louisiana could ever see it, because the other ten rigs legitimately use the
+Capella sheet and a stale panel looked right. Rounds posted in that state carry the wrong sheet's
+keys.
+
+**Workaround (historical).** Select the rig first, then open Daily Checks; or reload after
+selecting the rig.
+
+**Fix.** The panel rebuilds on rig change, carrying readings across and telling the crew how many
+transferred. Deployed 5 October.
+
+**Pattern worth naming for ISIT:** this is the third defect of one shape — a rig-keyed block
+rendered before the rig is known and never rebuilt. The others were the Ram Cavity record (REV 148)
+and the surface-test restore (KE-12, REV 154). Any new rig-dependent panel needs a rebuild hook on
+`onAssetChange` as a matter of course.
 
 ---
 

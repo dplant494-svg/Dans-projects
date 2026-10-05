@@ -1,7 +1,7 @@
 # ORR 22 — Components and dependencies
 
 **Owner:** Dan Plant, Technical Services — Subsea · **Date:** 30 September 2026
-Figures verified against the live files on 1 October 2026.
+Figures verified against the live files on 5 October 2026.
 
 ---
 
@@ -11,7 +11,7 @@ Two files. That is the whole of what is deployed.
 
 | Component | Share path | Served URL | Bytes | SHA-256 (12) |
 |---|---|---|---|---|
-| **SSORT** — Subsea Onboard Reporting Tool, REV 154 | `\\sdrlazneuiis01d.corp.local\SSORT\index.html` | `http://sdrlazneuiis01d.corp.local:8080/SSORT/index.html` | 6,804,809 | `f70d21f678b0` |
+| **SSORT** — Subsea Onboard Reporting Tool, REV 157 | `\\sdrlazneuiis01d.corp.local\SSORT\index.html` | `http://sdrlazneuiis01d.corp.local:8080/SSORT/index.html` | 6,895,584 | `ba2ddd573e99` |
 | **WCGRRT** — rig visit reporting (in-app title "TSC Rig Reporting Tool"), REV 167 | `\\sdrlazneuiis01d.corp.local\sacred\WCE Rig Vist Reporting Tool V0.html` | `http://sdrlazneuiis01d.corp.local:8080/sacred/WCE Rig Vist Reporting Tool V0.html` | 3,342,479 | `c916a062d457` |
 
 Each is a **single self-contained HTML file**: markup, CSS, JavaScript, the Seadrill logos, NOV's

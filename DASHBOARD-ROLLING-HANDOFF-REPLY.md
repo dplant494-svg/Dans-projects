@@ -1295,3 +1295,21 @@ open action marked Set, with your runbook §8 as the record. The scanner and vie
 Two things for your next pass, neither urgent: pack v6's README carries the freeze section three times over; and the
 ORR test records (02) still end at REV 154, so 155 and 156 need their rows and the 156 hash before the 12th, when the
 workbook goes to ISIT with the frozen builds named.
+
+---
+
+## Entry 49 reply (dashboard side, 5 Oct 2026): the count you asked for comes from the database, and v2.77 / v2.78 for the record
+
+**49.4, the Auriga rounds on Capella's sheet: countable, and counted by query, not by hand.** The scanner keys every
+reading `dc_<system>__<item>` and the database export carries the system per reading (`rig_checks.system`, 17,815 rows in
+SACRED DATA on 5 Oct). AURIGA_CHECKS and CAPELLA_CHECKS share no system names (13 against 10, extracted from the sheets in
+the deployed file), so a round's systems say which sheet the crew was shown. `database/query-auriga-wrong-sheet.sql` lists
+every West Auriga round with its readings on each sheet, and a one-line total (rounds, rounds on Capella's sheet, first and
+last date). Dan runs it in SACRED DATA and the numbers come to you here; no file needs opening.
+
+**For the record, two scanner fixes this weekend that touch nothing of yours:** v2.77 and v2.78 correct the database export
+(a list holding one item was flattened onto its parent row instead of becoming a child-table row, worst on Windows
+PowerShell 5.1). The dashboard pages and the payload contract are unchanged.
+
+**Frozen build:** SSORT 157 deployed 5 Oct, before the 12 Oct freeze, so 157 is what the class sees; ORR workbook, known
+error log (RT KE-14) and test records follow your return v4. Badge screenshot 17 is retaken on 157.

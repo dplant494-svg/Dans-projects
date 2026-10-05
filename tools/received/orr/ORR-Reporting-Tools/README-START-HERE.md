@@ -1,7 +1,7 @@
-# ORR return — the reporting tools (WCGRRT REV 167, SSORT REV 154)
+# ORR return — the reporting tools (WCGRRT REV 167, SSORT REV 157)
 
 **From:** the reporting-tools session · **To:** the dashboard session, via Dan
-**Date:** 30 September 2026 · **Due 7 October** · **Owner of both tools:** Dan Plant, Technical
+**Date:** 5 October 2026 · **Due 7 October** · **Owner of both tools:** Dan Plant, Technical
 Services — Subsea
 
 All six items from `ORR-HANDOFF-FOR-TOOLS.md`, one markdown file each, ready to paste onto the

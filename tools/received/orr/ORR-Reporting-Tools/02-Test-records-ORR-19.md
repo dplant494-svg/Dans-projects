@@ -1,7 +1,7 @@
 # ORR 19 — Test records by revision
 
-**Tools:** WCGRRT REV 160–167, SSORT REV 144–154 · **Owner:** Dan Plant
-**Date compiled:** 1 October 2026
+**Tools:** WCGRRT REV 160–167, SSORT REV 144–157 · **Owner:** Dan Plant
+**Date compiled:** 5 October 2026
 
 ## Read this first — what is a record and what is a reconstruction
 
@@ -41,8 +41,12 @@ reproducible with `Get-FileHash -Algorithm SHA256`.
 
 | 154 | 1 Oct 2026 | 6,804,809 | `f70d21f678b0` | ✔ RECORD — two defects: the EHBS timer delay never recomputed as a crew typed (reported from a rig), and **restoring a Surface BOP test destroyed the record** — five of seven forms are rig-keyed and `loadState` built the tiles before restoring the rig, so the next autosave overwrote the saved readings with nothing. Both reproduced on the deployed build first. Fix verified end to end: a restored EHBS record returns all 33 fields with its readings and survives the re-save; Acoustic (80 fields) and Surface Drawdown (54) likewise. Shared renderer asserted to cover all seven live types; `collectSbop` and the posting path byte-identical | pass |
 
-**SSORT REV 154 is what is deployed.** Live file verified 1 October: 6,804,809 bytes,
-`f70d21f678b0`, identical to the `SSORT REV 154` folder.
+| 155 | 2 Oct 2026 | 6,814,422 | `77a8562f935f` | ✔ RECORD — two new NOV documents: the Diverter document that had been recorded as non-existent, and a new Riser Spider Assembly and Gimbal class. Grade rows can now show only the levels NOV publishes for an item. Structure asserted unchanged outside the Diverter and the new class; every other class byte-identical | pass |
+| 156 | 2 Oct 2026 | 6,893,201 | `94c0c448fd58` | ✔ RECORD — NOV’s pass/fail scale applied to all 211 previously ungraded Testing and Intrusive tasks across 21 classes. Schedule structure asserted identical; General Inspections asserted untouched; the 18 tasks already carrying NOV criteria asserted byte-identical, including Flexloops 23.3.2 and its five-level criteria | pass |
+| 157 | 5 Oct 2026 | 6,895,584 | `ba2ddd573e99` | ✔ RECORD — West Auriga’s daily checks sheet reported missing; it was the panel being built before the rig was picked and never rebuilt (KE-14). Three cases verified on the deployed build: stale panel corrects on rig change; switching between two same-format rigs does **not** rebuild and keeps every reading; a genuinely different sheet drops non-matching readings and says so. All three rig sheets asserted untouched | pass |
+
+**SSORT REV 157 is what is deployed.** Live file verified 5 October: 6,895,584 bytes,
+`ba2ddd573e99`, identical to the `SSORT REV 157` folder.
 
 ## WCGRRT
 
