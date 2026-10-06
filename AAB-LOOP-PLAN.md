@@ -245,6 +245,11 @@ clears it, Start a new AAB after a 202 clears with no confirm, the originator st
 Gated copy rebuilt with Eric's `build_gate.py` (all four assertions passed; `set-password.html` byte-identical, so the
 password is unchanged). Deploy: save `aab/seadrill-bulletin-board.html` over the one in `sacred\aab`, Ctrl+F5.
 
+**6 October 2026: the create page handed back to Eric for HTML edits.** `AAB-REV11-HANDOFF-FOR-ERIC.md` with the Rev 11
+ungated source, his `build_gate.py`, fragment and template (zip `AAB-Rev11-for-Eric.zip`, sent through Dan). Rebuilt from
+the pack: byte-identical to the gated copy on the share. Eric works from Rev 11, returns Rev 12 (ungated, gated, note);
+lands before 12 Oct or after 20 Oct (freeze). No `gate-config.js` or `aab-data.js` in the pack.
+
 | Step | Owner | Needs first | Deliverable |
 |---|---|---|---|
 | 1 ✅ Rev 8 + schema 2.0 handoff received 24 Sep | Eric's Claude session | `AAB-REV5-HANDOFF-FOR-ERIC.md` (this pack), the logo, `sample-reports/aab/` | Bulletin Board **Rev 5**, an updated dashboard handoff with the `meta` block, `sfi`, `attachments[]`, `photos[]`, `pdf`/`pdfName`, Load AAB file proven on the two test records, one saved test record on `West Vela` only, **not posted** |
