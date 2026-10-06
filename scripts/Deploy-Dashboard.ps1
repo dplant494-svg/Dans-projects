@@ -200,6 +200,28 @@ if (Test-Path -Path $helpSrcDir) {
     }
 }
 
+# v2.79: SACRED Status (status\): the passworded status board, its set-password page, gate-config.js
+# (Dan's, never committed) and the scanner's status-data.js. Not linked from the dashboard.
+# 'statusDeployPath' names the folder (default: status\ beside the dashboard folder).
+$statusSrcDir = Join-Path $repoRoot 'status'
+if (Test-Path -Path $statusSrcDir) {
+    $statusDeployDir = Join-Path (Split-Path -Parent $DeployPath) 'status'
+    if ($config -and $config.PSObject.Properties['statusDeployPath'] -and $config.statusDeployPath) {
+        $statusDeployDir = [Environment]::ExpandEnvironmentVariables($config.statusDeployPath)
+    }
+    if (-not (Test-Path -Path $statusDeployDir)) { New-Item -ItemType Directory -Path $statusDeployDir -Force | Out-Null }
+    foreach ($name in @('status.html', 'set-password.html', 'gate-config.js', 'status-data.js')) {
+        $src = Join-Path $statusSrcDir $name
+        if (Test-Path -Path $src) {
+            Copy-Item -Path $src -Destination (Join-Path $statusDeployDir $name) -Force
+            Write-Host "Published status\$name to $statusDeployDir" -ForegroundColor Green
+        }
+        elseif ($name -eq 'gate-config.js') {
+            Write-Warning "No status\gate-config.js yet - the SACRED Status page will refuse entry until you create one with status\set-password.html and save it in the status folder"
+        }
+    }
+}
+
 # SSCE Requests Dashboard: page + current data file. Source file is named
 # requests-dashboard.html (not dashboard.html - this project already had
 # two identically-named dashboard.html files in different folders, which

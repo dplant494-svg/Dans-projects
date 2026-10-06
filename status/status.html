@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SACRED Status</title>
+<!--
+  SACRED Status (scanner v2.79, 6 Oct 2026). Every loop in SACRED on one page: a dial per loop, the rig
+  table, the posting matrix, from status-data.js written by the scanner at the end of every scan. Behind
+  the same gate pattern as the Help Centre and the AAB pages (Eric's fragment inlined verbatim, its own
+  SALT and its own gate-config.js, made with status/set-password.html). Not linked from the dashboard:
+  Dan's decision, 6 Oct 2026, "i dont want everyone to see this sacred status, i want it passworded".
+-->
+<style>
+  :root { --sd-blue:#002C77; --sd-yellow:#EDB71E; --sd-text-light:#5a6880; --sd-border:#d0d8e8; --sd-bg:#f4f6fa; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--sd-bg); color: #0a1530; font: 14px/1.45 "Segoe UI", Arial, Helvetica, sans-serif; }
+  header { background: var(--sd-blue); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 4px solid var(--sd-yellow); flex-wrap: wrap; }
+  header img { height: 44px; width: auto; background: #fff; border-radius: 4px; padding: 2px; }
+  header h1 { font-size: 18px; margin: 0; }
+  header .sub { font-size: 12px; color: rgba(255,255,255,.8); }
+  header .actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+  a.btn { display: inline-block; background: var(--sd-yellow); color: #002C77; font-weight: 700; padding: 9px 16px; border-radius: 5px; text-decoration: none; }
+  a.btn.ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.6); font-weight: 600; }
+  main { max-width: 1200px; margin: 0 auto; padding: 18px 16px 60px; }
+  .banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-size: 13px; background: #fff4e0; color: #7a4a00; border: 1px solid #f4c98a; }
+  .card { background: #fff; border: 1px solid var(--sd-border); border-radius: 8px; padding: 14px 16px; }
+  .card h2 { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--sd-blue); margin: 0 0 10px; }
+  .note { font-size: 12px; color: var(--sd-text-light); margin: 0 0 12px; }
+  footer { text-align: center; font-size: 11px; color: var(--sd-text-light); padding: 20px; }
+  :root { --sd-white:#ffffff; --sd-orange:#E25303; --sd-light-blue:#0082C0; --sd-grid:#e4e9f2; --sd-text:#0a1530; }
+  .source-line { font-size: 12px; color: var(--sd-text-light); margin: 0 0 12px; }
+  .rig-mon-empty { color: var(--sd-text-light); padding: 24px 0; text-align: center; }
+  .table-scroll { overflow-x: auto; }
+  .aab-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  .aab-table th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--sd-text-light); padding: 6px 8px; border-bottom: 1px solid var(--sd-border); white-space: nowrap; }
+  .aab-table td { padding: 7px 8px; border-bottom: 1px solid var(--sd-grid); vertical-align: top; }
+  /* ── Status board (v2.79): one dial per loop, counted by the scanner into status-data.js ── */
+  .st-dials { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin: 6px 0 18px; }
+  .st-dial { border: 1px solid var(--sd-border); border-radius: 8px; padding: 12px 12px 10px; background: var(--sd-white); text-align: center; }
+  .st-dial svg { width: 100%; max-width: 180px; height: auto; display: block; margin: 0 auto; }
+  .st-dial .st-name { font-size: 12px; font-weight: 700; color: var(--sd-blue); margin-top: 4px; }
+  .st-dial .st-frac { font-size: 12px; color: var(--sd-text); margin-top: 2px; }
+  .st-dial .st-note { font-size: 11px; color: var(--sd-text-light); margin-top: 4px; line-height: 1.35; }
+  .st-dial .st-last { font-size: 10.5px; color: var(--sd-text-light); margin-top: 4px; }
+  .st-dial.st-count .st-big { font-size: 38px; font-weight: 800; color: var(--sd-blue); line-height: 1.1; margin: 14px 0 6px; }
+  .st-dial.st-count.st-warn .st-big { color: var(--sd-orange); }
+  .st-h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--sd-text-light); margin: 18px 0 8px; }
+  .st-table td.st-num, .st-table th.st-num { text-align: center; }
+  .st-table td:first-child { white-space: nowrap; }
+  .st-table td.st-amber { background: #fdf1d8; color: #7a4b00; font-weight: 700; }
+  .st-table td.st-zero { color: var(--sd-text-light); }
+  .st-table td.st-heat1 { background: #e6edf7; }
+  .st-table td.st-heat2 { background: #b9cbe6; }
+  .st-table td.st-heat3 { background: #002C77; color: #fff; font-weight: 700; }
+  .st-tag { display: inline-block; font-size: 10px; font-weight: 700; background: var(--sd-yellow); color: var(--sd-blue); border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+
+</style>
+</head>
+<body>
+<!-- PCGATE:START — a curtain, not a lock. See PASSWORD-GATE-PATTERN-HANDOFF-2026-09-23.md.
+     This overlay hides the page until the right password is entered, but the page's
+     content is already fully present in this file: anyone who views source or fetches
+     this file directly has it all without ever seeing this box. It stops casual/
+     accidental use and wrong-audience access (a stray SharePoint link, a bookmark
+     passed around) — it is not access control and gives no identity or audit trail.
+     If unauthorised access to this tool would be a reportable event, this is the
+     wrong control; ask IT for real authentication instead. -->
+<div id="pcgate" style="position:fixed;inset:0;z-index:100000;background:#001430;display:flex;align-items:center;justify-content:center;font-family:'Segoe UI',Arial,Helvetica,sans-serif;padding:16px;">
+  <div style="background:#fff;border-radius:8px;padding:32px 36px;max-width:360px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.35);">
+    <div style="font-size:11px;font-weight:700;color:#EDB71E;text-transform:uppercase;letter-spacing:1px;">SACRED Status</div>
+    <h2 style="margin:6px 0 16px;font-size:18px;color:#002C77;">Enter password</h2>
+    <form id="pcgateForm" autocomplete="off">
+      <input type="password" id="pcgatePw" autocomplete="current-password" placeholder="Password" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #d0d8e8;border-radius:4px;font-size:14px;">
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px;font-size:13px;color:#0A1530;">
+        <input type="checkbox" id="pcgateRemember" style="width:auto;">
+        <label for="pcgateRemember" style="margin:0;">Remember on this computer</label>
+      </div>
+      <button type="submit" style="margin-top:14px;width:100%;padding:10px;background:#002C77;color:#fff;border:none;border-radius:4px;font-weight:600;font-size:14px;cursor:pointer;">Enter</button>
+      <div id="pcgateErr" style="margin-top:10px;font-size:12.5px;color:#C62828;min-height:1em;"></div>
+      <button type="button" id="pcgateHintBtn" style="display:none;margin-top:8px;background:none;border:none;color:#002C77;font-size:12px;text-decoration:underline;cursor:pointer;padding:0;">Need the password?</button>
+      <div id="pcgateHint" style="display:none;margin-top:6px;font-size:12px;color:#5A6880;"></div>
+    </form>
+  </div>
+</div>
+<script src="gate-config.js"></script>
+<script>
+(function(){
+  var SALT = 'sacred-status-gate|';
+
+  function sha256(str) {
+    function rrot(x, n) { return (x >>> n) | (x << (32 - n)); }
+    var utf8 = unescape(encodeURIComponent(str));
+    var len = utf8.length;
+    var bitLen = len * 8;
+    var withOne = utf8 + String.fromCharCode(0x80);
+    while ((withOne.length % 64) !== 56) withOne += String.fromCharCode(0);
+    var hi = Math.floor(bitLen / 0x100000000);
+    var lo = bitLen >>> 0;
+    var lenBytes = [
+      (hi >>> 24) & 0xff, (hi >>> 16) & 0xff, (hi >>> 8) & 0xff, hi & 0xff,
+      (lo >>> 24) & 0xff, (lo >>> 16) & 0xff, (lo >>> 8) & 0xff, lo & 0xff
+    ];
+    for (var b = 0; b < 8; b++) withOne += String.fromCharCode(lenBytes[b]);
+
+    var K = [
+      0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+      0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+      0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+      0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+      0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+      0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+      0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+      0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2
+    ];
+    var H = [
+      0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,
+      0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19
+    ];
+
+    var w = new Array(64);
+    for (var chunk = 0; chunk < withOne.length; chunk += 64) {
+      for (var i = 0; i < 16; i++) {
+        var off = chunk + i * 4;
+        w[i] = ((withOne.charCodeAt(off) & 0xff) << 24) |
+               ((withOne.charCodeAt(off + 1) & 0xff) << 16) |
+               ((withOne.charCodeAt(off + 2) & 0xff) << 8) |
+               (withOne.charCodeAt(off + 3) & 0xff);
+        w[i] = w[i] >>> 0;
+      }
+      for (var t = 16; t < 64; t++) {
+        var s0 = rrot(w[t-15], 7) ^ rrot(w[t-15], 18) ^ (w[t-15] >>> 3);
+        var s1 = rrot(w[t-2], 17) ^ rrot(w[t-2], 19) ^ (w[t-2] >>> 10);
+        w[t] = (w[t-16] + s0 + w[t-7] + s1) >>> 0;
+      }
+
+      var a=H[0], b2=H[1], c=H[2], d=H[3], e=H[4], f=H[5], g=H[6], h=H[7];
+      for (var t2 = 0; t2 < 64; t2++) {
+        var S1 = rrot(e,6) ^ rrot(e,11) ^ rrot(e,25);
+        var ch = (e & f) ^ (~e & g);
+        var temp1 = (h + S1 + ch + K[t2] + w[t2]) >>> 0;
+        var S0 = rrot(a,2) ^ rrot(a,13) ^ rrot(a,22);
+        var maj = (a & b2) ^ (a & c) ^ (b2 & c);
+        var temp2 = (S0 + maj) >>> 0;
+        h = g; g = f; f = e; e = (d + temp1) >>> 0;
+        d = c; c = b2; b2 = a; a = (temp1 + temp2) >>> 0;
+      }
+      H[0]=(H[0]+a)>>>0; H[1]=(H[1]+b2)>>>0; H[2]=(H[2]+c)>>>0; H[3]=(H[3]+d)>>>0;
+      H[4]=(H[4]+e)>>>0; H[5]=(H[5]+f)>>>0; H[6]=(H[6]+g)>>>0; H[7]=(H[7]+h)>>>0;
+    }
+
+    var hex = '';
+    for (var k = 0; k < 8; k++) hex += ('00000000' + H[k].toString(16)).slice(-8);
+    return hex;
+  }
+
+  var gate = document.getElementById('pcgate');
+  var form = document.getElementById('pcgateForm');
+  var pw = document.getElementById('pcgatePw');
+  var err = document.getElementById('pcgateErr');
+  var rem = document.getElementById('pcgateRemember');
+  var hintBtn = document.getElementById('pcgateHintBtn');
+  var hintBox = document.getElementById('pcgateHint');
+  var cfg = (window.PCGATE || {});
+
+  function key(){ return 'pcgate-unlocked:' + String(cfg.hash || '').slice(0, 12); }
+
+  function unlocked(){
+    try{
+      var v = localStorage.getItem(key());
+      if (!v) return false;
+      var exp = Number(v);
+      return exp === 0 || exp > Date.now();
+    }catch(e){ return false; }
+  }
+
+  function openGate(){
+    gate.style.display = 'none';
+    document.dispatchEvent(new Event('pcgate-unlocked'));
+  }
+
+  if (!cfg.hash) {
+    err.textContent = 'This page has not been set up yet.';
+    hintBox.style.display = 'block';
+    hintBox.textContent = 'Contact Technical Services — Well Control to have the password set.';
+    pw.disabled = true;
+    form.querySelector('button[type=submit]').disabled = true;
+  } else if (unlocked()) {
+    openGate();
+  } else {
+    if (cfg.hint) {
+      hintBtn.style.display = 'inline';
+      hintBtn.onclick = function(){ hintBox.style.display = 'block'; hintBox.textContent = cfg.hint; };
+    }
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var h = sha256(SALT + pw.value);
+      if (h === cfg.hash) {
+        try{ localStorage.setItem(key(), rem.checked ? '0' : String(Date.now() + 12 * 3600 * 1000)); }catch(e){}
+        openGate();
+      } else {
+        err.textContent = 'Incorrect password.';
+        pw.value = '';
+        pw.focus();
+      }
+    });
+  }
+})();
+</script>
+<!-- PCGATE:END -->
+<header>
+  <div>
+    <h1>SACRED Status</h1>
+    <div class="sub">Every loop in SACRED on one page. Technical Services only; not linked from the dashboard.</div>
+  </div>
+  <div class="actions">
+    <a class="btn ghost" href="../dashboard/dashboard.html">&larr; Rig Visit Dashboard</a>
+  </div>
+</header>
+<main>
+  <section class="card">
+    <h2>SACRED status</h2>
+    <div class="source-line">A dial is the share done of what has been raised; a tile is a plain count. Counted by the scanner at the end of every scan from what was posted and recorded; nothing on this page is a judgement. <span id="status-stamp"></span></div>
+    <div class="rig-mon-empty" id="status-empty" hidden>No status yet. It appears after the first scan with scanner v2.79 or later.</div>
+    <div class="st-dials" id="status-dials"></div>
+    <div class="st-h3" id="status-rigs-h" hidden>By rig</div>
+    <div class="table-scroll"><table class="aab-table st-table" id="status-rigs"></table></div>
+    <div class="st-h3" id="status-types-h" hidden>Reports posted, last 30 days, rig by report type</div>
+    <div class="table-scroll"><table class="aab-table st-table" id="status-types"></table></div>
+  </section>
+</main>
+<footer>SACRED Status · Technical Services, Well Control · refreshes every minute</footer>
+<script>
+(function () {
+  function $(id) { return document.getElementById(id); }
+  function mk(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined && text !== null && text !== '') node.textContent = text;
+    return node;
+  }
+
+  // ---------- Status board (v2.79): reads window.SACRED_STATUS from status-data.js ----------
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVG_NS, tag);
+    for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  // A semicircle gauge: grey track, coloured arc for the share done, the percentage in the middle.
+  function statusDialSvg(pct) {
+    var svg = svgEl('svg', { viewBox: '0 0 200 128', role: 'img' });
+    var cx = 100, cy = 100, r = 80;
+    function pt(f) { var a = Math.PI * (1 - f); return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; }
+    var s0 = pt(0), s1 = pt(1);
+    svg.appendChild(svgEl('path', { d: 'M' + s0[0] + ' ' + s0[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + s1[0] + ' ' + s1[1], fill: 'none', stroke: '#e4e9f2', 'stroke-width': 18, 'stroke-linecap': 'round' }));
+    if (pct !== null && pct !== undefined) {
+      var f = Math.max(0, Math.min(1, pct / 100));
+      var colour = pct >= 90 ? '#002C77' : (pct >= 50 ? '#0082C0' : (pct >= 25 ? '#EDB71E' : '#E25303'));
+      if (f > 0) {
+        var e = pt(f);
+        svg.appendChild(svgEl('path', { d: 'M' + s0[0] + ' ' + s0[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + e[0].toFixed(2) + ' ' + e[1].toFixed(2), fill: 'none', stroke: colour, 'stroke-width': 18, 'stroke-linecap': 'round' }));
+      }
+    }
+    var t = svgEl('text', { x: 100, y: 92, 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 800, fill: '#002C77', 'font-family': 'inherit' });
+    t.textContent = (pct === null || pct === undefined) ? '–' : (pct + '%');
+    svg.appendChild(t);
+    var lo = svgEl('text', { x: 20, y: 126, 'text-anchor': 'middle', 'font-size': 10, fill: '#5a6880' }); lo.textContent = '0';
+    var hi = svgEl('text', { x: 180, y: 126, 'text-anchor': 'middle', 'font-size': 10, fill: '#5a6880' }); hi.textContent = '100';
+    svg.appendChild(lo); svg.appendChild(hi);
+    return svg;
+  }
+
+  function statusLastText(v) {
+    if (!v) return '';
+    return 'latest ' + String(v).substring(0, 10);
+  }
+
+  function renderStatus() {
+    var st = window.SACRED_STATUS;
+    var dials = $('status-dials'), rigsT = $('status-rigs'), typesT = $('status-types');
+    if (!dials) return;
+    dials.innerHTML = ''; rigsT.innerHTML = ''; typesT.innerHTML = '';
+    var has = st && Array.isArray(st.loops);
+    $('status-empty').hidden = !!has;
+    $('status-rigs-h').hidden = !has || !(st.rigs || []).length;
+    $('status-types-h').hidden = !has || !(st.posts30 || []).length;
+    $('status-stamp').textContent = has ? ('Counted ' + String(st.generatedAt || '').replace('T', ' ').substring(0, 16) + ', scanner v' + (st.scanner || '?') + '.') : '';
+    if (!has) return;
+
+    st.loops.forEach(function (l) {
+      var isDial = l.kind === 'dial';
+      var card = mk('div', 'st-dial' + (isDial ? '' : ' st-count') + (!isDial && l.open > 0 ? ' st-warn' : ''));
+      if (isDial) {
+        card.appendChild(statusDialSvg(l.total > 0 ? l.percent : null));
+        card.appendChild(mk('div', 'st-name', l.name));
+        card.appendChild(mk('div', 'st-frac', l.total > 0 ? (l.done + ' of ' + l.total + ' done' + (l.open > 0 ? ', ' + l.open + ' open' : '')) : 'nothing raised yet'));
+      } else {
+        card.appendChild(mk('div', 'st-big', String(l.key === 'cbm-high' ? l.open : l.total)));
+        card.appendChild(mk('div', 'st-name', l.name));
+      }
+      if (l.note) card.appendChild(mk('div', 'st-note', l.note));
+      if (l.last) card.appendChild(mk('div', 'st-last', statusLastText(l.last)));
+      card.title = l.name + (isDial && l.total > 0 ? ': ' + l.done + ' of ' + l.total : '');
+      dials.appendChild(card);
+    });
+
+    // By rig. Amber where something is open with that rig; the training asset is tagged, not counted as a rig at sea.
+    var cols = [
+      ['rig', 'Rig', 'text'],
+      ['lastRigVisitReport', 'Last rig visit report', 'text'],
+      ['lastDailyChecks', 'Last daily checks', 'text'],
+      ['checkRounds7', 'Check rounds, 7 days', 'checks'],
+      ['cbmInspections30', 'CBM inspections, 30 days', 'num'],
+      ['cbmGrade4or5', 'CBM tasks at 4 or 5', 'open'],
+      ['aabOutstanding', 'AABs to acknowledge', 'open'],
+      ['prechargeOpen', 'Precharge not issued', 'open'],
+      ['helpOpen', 'Help requests open', 'open']
+    ];
+    var thead = mk('thead'), hr = mk('tr');
+    cols.forEach(function (c) { hr.appendChild(mk('th', c[2] === 'text' ? '' : 'st-num', c[1])); });
+    thead.appendChild(hr); rigsT.appendChild(thead);
+    var tb = mk('tbody');
+    (st.rigs || []).forEach(function (r) {
+      var tr = mk('tr');
+      cols.forEach(function (c) {
+        var v = r[c[0]], td;
+        if (c[2] === 'text') {
+          td = mk('td', '', v ? String(v) : '–');
+          if (c[0] === 'rig' && r.training) td.appendChild(mk('span', 'st-tag', 'training'));
+        } else if (c[2] === 'checks') {
+          var exp = r.checksExpected7 || 0;
+          td = mk('td', 'st-num' + (exp && v < exp ? ' st-amber' : (!exp ? ' st-zero' : '')), exp ? (v + ' / ' + exp) : (v ? String(v) : '–'));
+        } else if (c[2] === 'open') {
+          td = mk('td', 'st-num' + (v > 0 ? ' st-amber' : ' st-zero'), String(v || 0));
+        } else {
+          td = mk('td', 'st-num' + (v > 0 ? '' : ' st-zero'), String(v || 0));
+        }
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    rigsT.appendChild(tb);
+
+    // Rig by report type, last 30 days.
+    var types = st.types || [], cells = st.posts30 || [];
+    if (!cells.length) return;
+    var byKey = {}, rigs = {};
+    cells.forEach(function (c) { byKey[c.rig + '|' + c.type] = c.count; rigs[c.rig] = true; });
+    var rigList = Object.keys(rigs).sort();
+    var th2 = mk('thead'), h2 = mk('tr');
+    h2.appendChild(mk('th', '', 'Rig'));
+    types.forEach(function (t) { h2.appendChild(mk('th', 'st-num', t)); });
+    h2.appendChild(mk('th', 'st-num', 'Total'));
+    th2.appendChild(h2); typesT.appendChild(th2);
+    var tb2 = mk('tbody');
+    rigList.forEach(function (rg) {
+      var tr = mk('tr'), sum = 0;
+      tr.appendChild(mk('td', '', rg || 'Unattributed'));
+      types.forEach(function (t) {
+        var n = byKey[rg + '|' + t] || 0; sum += n;
+        tr.appendChild(mk('td', 'st-num ' + (n === 0 ? 'st-zero' : (n >= 10 ? 'st-heat3' : (n >= 4 ? 'st-heat2' : 'st-heat1'))), n ? String(n) : '·'));
+      });
+      tr.appendChild(mk('td', 'st-num', String(sum)));
+      tb2.appendChild(tr);
+    });
+    typesT.appendChild(tb2);
+  }
+
+  function reloadStatus() {
+    var s = document.createElement('script');
+    s.src = 'status-data.js?v=' + Date.now();
+    s.onload = function () { renderStatus(); s.remove(); };
+    s.onerror = function () { renderStatus(); s.remove(); };   // no file yet: the tab says so
+    document.body.appendChild(s);
+  }
+
+  // Nothing is fetched until the gate opens; then every minute, as the dashboard polls reports-data.js.
+  var started = false;
+  function start() {
+    if (started) return;
+    started = true;
+    reloadStatus();
+    setInterval(reloadStatus, 60 * 1000);
+  }
+  document.addEventListener('pcgate-unlocked', start);
+  if ($('pcgate') && $('pcgate').style.display === 'none') start();
+})();
+</script>
+</body>
+</html>

@@ -18,3 +18,6 @@ aab-overdue-state.json
 # TSC Help Centre (scanner v2.71): per-installation, never committed
 help/gate-config.js
 help/help-data.js
+# SACRED Status (scanner v2.79): passworded; per-installation, never committed
+status/gate-config.js
+status/status-data.js

@@ -4035,11 +4035,13 @@ if ($databaseExportPath) {
 }
 
 # ---------------------------------------------------------------------------
-# v2.79: the Status tab. One small file, status-data.js, beside reports-data.js: every loop in SACRED counted at the end
+# v2.79: the SACRED Status page. One small file, status\status-data.js: every loop in SACRED counted at the end
 # of the run (total, done, open, percent done for a dial), one row per rig, and rig by report type for thirty days.
 # Counts only: every number is something posted or recorded; the board judges nothing. The same rules as the SQL views
 # in database/ddl-v5-status-views.sql, so the dashboard and the database agree. Dials read percent done; a daily-checks
 # dial reads rounds received against two a day (Day and Night) for the last seven days, for rigs that post checks.
+# Passworded (Dan, 6 Oct 2026): the file goes to the status\ folder beside the dashboard folder (statusDeployPath), read
+# only by status\status.html behind its own gate; never into the public dashboard folder.
 # ---------------------------------------------------------------------------
 try {
     $stToday = (Get-Date).ToUniversalTime().Date
@@ -4185,16 +4187,26 @@ try {
         types       = @($stTypes.Keys | Sort-Object)
         posts30     = $stCells.ToArray()
     }
-    $statusFile = Join-Path (Split-Path -Parent $outputFile) 'status-data.js'
+    $statusDir = Join-Path $repoRoot 'status'
+    if (-not (Test-Path -Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir -Force | Out-Null }
+    $statusFile = Join-Path $statusDir 'status-data.js'
     [System.IO.File]::WriteAllText($statusFile, ('window.SACRED_STATUS = ' + (ConvertTo-ReportJson $statusOut) + ";`n"), (New-Object System.Text.UTF8Encoding($false)))
+    $oldPublic = Join-Path (Split-Path -Parent $outputFile) 'status-data.js'     # the first v2.79 build wrote it beside reports-data.js
+    if (Test-Path -Path $oldPublic) { Remove-Item -Path $oldPublic -Force }
     $stDeployed = ''
     if ($deployPath -and $stReports.Count -gt 0 -and (Test-Path -Path $deployPath)) {
-        Copy-Item -Path $statusFile -Destination (Join-Path $deployPath 'status-data.js') -Force
-        $stDeployed = ", deployed to $deployPath"
+        $oldDeployed = Join-Path $deployPath 'status-data.js'
+        if (Test-Path -Path $oldDeployed) { Remove-Item -Path $oldDeployed -Force }
+        $statusDeployPath = Join-Path (Split-Path -Parent $deployPath) 'status'
+        if ($config.PSObject.Properties['statusDeployPath'] -and $config.statusDeployPath) { $statusDeployPath = [Environment]::ExpandEnvironmentVariables($config.statusDeployPath) }
+        if (-not (Test-Path -Path $statusDeployPath)) { New-Item -ItemType Directory -Path $statusDeployPath -Force | Out-Null }
+        $statusTarget = Join-Path $statusDeployPath 'status-data.js'
+        if ([System.IO.Path]::GetFullPath($statusTarget) -ne [System.IO.Path]::GetFullPath($statusFile)) { Copy-Item -Path $statusFile -Destination $statusTarget -Force }
+        $stDeployed = ", deployed to $statusDeployPath"
     }
     $dialLine = (@($stLoops | Where-Object { $_.kind -eq 'dial' } | ForEach-Object { '{0} {1}%' -f $_.key, $(if ($null -eq $_.percent) { '-' } else { $_.percent }) }) -join ', ')
-    Write-Host "Status tab: $($stLoops.Count) loop(s), $($stRigs.Count) rig(s) ($dialLine)$stDeployed" -ForegroundColor Cyan
-} catch { Write-Warning "Status tab data not written (scan unaffected): $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
+    Write-Host "Status page: $($stLoops.Count) loop(s), $($stRigs.Count) rig(s) ($dialLine)$stDeployed" -ForegroundColor Cyan
+} catch { Write-Warning "Status page data not written (scan unaffected): $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
 
 if ($scanLockHeld) { try { Remove-Item -Path $scanLockFile -Force } catch { } }
 Write-Host ("Scan finished in {0:N0} s" -f $scanClock.Elapsed.TotalSeconds) -ForegroundColor Green
