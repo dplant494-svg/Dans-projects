@@ -1,7 +1,7 @@
 # ORR 6, 7 — Runbook: building, verifying and publishing a tool revision
 
 **Tools:** WCGRRT (rig visit reporting) and SSORT (subsea onboard reporting)
-**Current:** WCGRRT **REV 167**, SSORT **REV 157** · **Owner:** Dan Plant, Technical Services — Subsea
+**Current:** WCGRRT **REV 168**, SSORT **REV 158** · **Owner:** Dan Plant, Technical Services — Subsea
 **Date:** 30 September 2026
 
 Both tools are **single self-contained HTML files**. There is no build system, no package manager, no
@@ -16,7 +16,7 @@ Each revision lives in its own folder under
 `C:\Users\danplant\Claude\Projects\Subsea Superintendent Reporting Template\`:
 
 ```
-SSORT REV 157\index.html
+SSORT REV 158\index.html
 WCGRRT REV 166\WCE Rig Vist Reporting Tool V0.html
 ```
 
@@ -61,7 +61,7 @@ required on a support machine) and open it:
 ## 4. Publish
 
 ```
-copy "SSORT REV 157\index.html"  "\\sdrlazneuiis01d.corp.local\SSORT\index.html"
+copy "SSORT REV 158\index.html"  "\\sdrlazneuiis01d.corp.local\SSORT\index.html"
 copy "WCGRRT REV 166\WCE Rig Vist Reporting Tool V0.html"  "\\sdrlazneuiis01d.corp.local\sacred\WCE Rig Vist Reporting Tool V0.html"
 ```
 
@@ -120,7 +120,7 @@ A freeze is set when a date depends on the build standing still. The current one
 |---|---|
 | Freeze from | **12 October 2026** |
 | Until | after the training class on 19 and 20 October |
-| Frozen builds | SSORT REV 157, WCGRRT REV 167 — whatever is live on the freeze date |
+| Frozen builds | SSORT REV 158, WCGRRT REV 168 — whatever is live on the freeze date |
 | Ships anyway | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
 | Held | new NOV documents, new equipment classes, features, wording, cosmetics |
 

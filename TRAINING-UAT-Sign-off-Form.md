@@ -1,7 +1,7 @@
 # User acceptance sign-off — WCE reporting tools and SACRED
 
-**Class:** 19 and 20 October 2026, Houston, inside the WCE SME workshop · **Builds under test:** WCGRRT REV 167,
-SSORT REV 156, Precharge Pro Rev 87, scanner v2.76, the dashboard and pages as frozen on 12 October 2026 ·
+**Class:** 19 and 20 October 2026, Houston, inside the WCE SME workshop · **Builds under test:** WCGRRT REV 168,
+SSORT REV 158, Precharge Pro Rev 87, scanner v2.79, the dashboard and pages as frozen on 12 October 2026 ·
 **ORR reference:** item 9 (UAT sign-off) on `Operation_Readiness_Review_ORR_Checklist_SACRED_v2.xlsx` · **Form owner:**
 Dan Plant · **Collected:** 20 October 2026, 16:15, module 10.
 

@@ -1,6 +1,6 @@
-# ORR 11 — Known error log: WCGRRT REV 167 and SSORT REV 157
+# ORR 11 — Known error log: WCGRRT REV 168 and SSORT REV 158
 
-**Owner:** Dan Plant, Technical Services — Subsea · **Date:** 5 October 2026
+**Owner:** Dan Plant, Technical Services — Subsea · **Date:** 6 October 2026
 Shape as the workbook's Known error log: issue · effect · workaround · fix planned.
 
 ---
@@ -294,6 +294,46 @@ transferred. Deployed 5 October.
 rendered before the rig is known and never rebuilt. The others were the Ram Cavity record (REV 148)
 and the surface-test restore (KE-12, REV 154). Any new rig-dependent panel needs a rebuild hook on
 `onAssetChange` as a matter of course.
+
+---
+
+### KE-15 · Two CBM inspections on one rig on one day overwrote each other
+
+**Tool:** SSORT, fixed in 158 · **Severity:** HIGH, data loss · **Status:** CLOSED 6 Oct 2026
+
+**Issue.** A CBM post was named for the rig and the date only. Two different inspections on one day —
+the C&K stabs and the riser adapter, say — shared a file name, SharePoint kept the second, and the flow
+does not fire on an overwrite, so the first vanished from every downstream view. Surface BOP tests had
+the same shape.
+
+**Effect.** Found by the dashboard from scan counts on 6 October: six CBM reports reached NOV between
+two scans while PostedReports kept at most four.
+
+**Workaround (historical).** One CBM inspection per rig per day, or all of them as tiles in one report.
+
+**Fix.** The name carries the equipment, plus the serial number where entered; surface tests carry the
+test type. Deliberately not a timestamp, which would have made every corrected re-post a second row.
+Lost versions are recoverable from PostedReports' own version history; the dashboard side is restoring
+them. Residual: the same class on both stacks of a dual-stack rig on one day with the serial blank.
+
+---
+
+### KE-16 · Save to File in WCGRRT silently posted to the dashboard
+
+**Tool:** WCGRRT, fixed in 168 · **Severity:** HIGH · **Status:** CLOSED 6 Oct 2026
+
+**Issue.** The Save to File button posted the report before opening the Save As dialog, with no rig
+guard, no date guard, no "only post a finished report" confirm and no size check. Present since at least
+REV 155. The tool's own New Trip prompt recommends Save to File at the end of every trip.
+
+**Effect.** Unattributed posts (how a Vendor Surveillance report reached the dashboard as
+`seadrill-report_report_…`); unfinished reports posted without the crew choosing to; and a draft saved
+after the finished report was posted replacing it under the same name, which loses work.
+
+**Workaround (historical).** None a crew would have known to apply.
+
+**Fix.** The post is removed; Save to File saves a file. **Consequence to watch:** a rig that reached
+the dashboard only through Save to File will go quiet until a crew presses Post Report.
 
 ---
 

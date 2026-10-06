@@ -1,6 +1,6 @@
 # Day 1 workbook questions — three per module, with answers
 
-**Frozen builds:** WCGRRT REV 167, SSORT REV 156. Answers are for the trainer's copy; the trainee
+**Frozen builds:** WCGRRT REV 168, SSORT REV 156. Answers are for the trainer's copy; the trainee
 workbook carries the questions and the blank lines only.
 
 ---

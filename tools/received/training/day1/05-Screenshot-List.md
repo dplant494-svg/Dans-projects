@@ -37,7 +37,7 @@ points at it (shots 1 and 17 especially).
 | 11 | `11-eds-sequences.png` | The EDS form showing a rig's own sequences — pick a rig with a full sequence list, not `SSCE Equipment`, for this one shot |
 | 12 | `12-acoustic-no-system.png` | The acoustic form on **West Vela**, showing the no-system message — this is the trap in the script |
 | 13 | `13-ehbs-drawdown.png` | EHBS and drawdown forms, either together or side by side |
-| 14 | ~~`14-reference-attachment.png`~~ | **CANNOT EXIST — dropped.** WCGRRT REV 167 has no attach-a-document control on a Well Control daily report: the schedule attach lives inside `#planning-meta-block` (`display:none` unless the discipline is Planning) and the reference document belongs to the Vendor Surveillance report. Module 2 now *says* this instead. The attachment shots are 21 and 22, in SSORT. |
+| 14 | ~~`14-reference-attachment.png`~~ | **CANNOT EXIST — dropped.** WCGRRT REV 168 has no attach-a-document control on a Well Control daily report: the schedule attach lives inside `#planning-meta-block` (`display:none` unless the discipline is Planning) and the reference document belongs to the Vendor Surveillance report. Module 2 now *says* this instead. The attachment shots are 21 and 22, in SSORT. |
 | 15 | `15-post-receipt.png` | The receipt line under Post: `n entries · n photographs · n attachments · n.n MB` and the time |
 | 16 | `16-dashboard-row.png` | The dashboard filtered to SSCE Equipment with the posted report visible |
 
@@ -77,5 +77,5 @@ Stated here rather than left as gaps in a zip.
 | **15** `15-post-receipt.png` | The receipt only appears after a **successful post**, and nothing is posted from a build session — that is Dan's rule and it is the right one. Capture this one live: it will be on screen the first time anyone posts in module 2 or the exercise. |
 | **16** `16-dashboard-row.png` | Needs a posted report on the dashboard, so the same applies. Take it from any real SSCE Equipment row, or during the class. |
 
-Everything else in the table above was captured on the deployed builds (WCGRRT REV 167, SSORT
+Everything else in the table above was captured on the deployed builds (WCGRRT REV 168, SSORT
 REV 156) on 30 September.

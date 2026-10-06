@@ -24,7 +24,7 @@ touches it.
 
 ## The frozen builds
 
-**WCGRRT REV 167** and **SSORT REV 156**. SSORT 156 was deployed on 30 September;
+**WCGRRT REV 168** and **SSORT REV 156**. SSORT 156 was deployed on 30 September;
 sha256 `44cb4db89d2c2910086ff6c6a1c23a80034b6f53b0b44b0b326e0c31d2b161a1`, 6,800,443 bytes.
 Everything in this pack is written against those two and nothing else.
 
@@ -75,7 +75,7 @@ reply are in this pack:
 |---|---|
 | Freeze date | **12 October 2026** — the same day this pack goes final |
 | Class | 19 and 20 October 2026 |
-| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 167** |
+| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 168** |
 | What still ships during the freeze | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
 | What waits until after the class | new NOV documents, new equipment classes, new features, wording, cosmetics — however good |
 
@@ -92,7 +92,7 @@ the tool underneath it moves.
 |---|---|
 | Freeze date | **12 October 2026** — the same day this pack goes final |
 | Class | 19 and 20 October 2026 |
-| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 167** |
+| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 168** |
 | What still ships during the freeze | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
 | What waits until after the class | new NOV documents, new equipment classes, new features, wording, cosmetics — however good |
 
@@ -109,7 +109,7 @@ the tool underneath it moves.
 |---|---|
 | Freeze date | **12 October 2026** — the same day this pack goes final |
 | Class | 19 and 20 October 2026 |
-| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 167** |
+| Frozen builds | whatever is live on 12 October. Today that is **SSORT REV 156** and **WCGRRT REV 168** |
 | What still ships during the freeze | data loss, a failed or silent post, anything stopping a rig recording or sending a report |
 | What waits until after the class | new NOV documents, new equipment classes, new features, wording, cosmetics — however good |
 

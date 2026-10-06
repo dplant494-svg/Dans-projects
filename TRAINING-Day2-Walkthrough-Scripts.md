@@ -1,6 +1,6 @@
 # Day 2 walkthrough scripts — precharge, the dashboards, the AAB, the loop, what is coming
 
-**Class:** Tuesday 20 October 2026, Houston · **Frozen builds:** WCGRRT **REV 167**, SSORT **REV 156**, Precharge Pro
+**Class:** Tuesday 20 October 2026, Houston · **Frozen builds:** WCGRRT **REV 168**, SSORT **REV 158**, Precharge Pro
 **Rev 87**, scanner **v2.76**, dashboard as deployed on the sacred share (build freeze from 12 October: nothing on the
 pages changes before the class either, unless a rig is losing work)
 **Led by:** Dan (every module; Lee opens Day 1, not Day 2; Eric may take the review minutes in the AAB module; Manpreet
@@ -60,7 +60,7 @@ raises it from SSORT and again from the share has raised it twice; the dashboard
 ---
 
 # Module 6 — the Rig Visit Dashboard, tab by tab
-**10:15 – 12:00 · the dashboard on the sacred share, scanner v2.76**
+**10:15 – 12:00 · the dashboard on the sacred share, scanner v2.79**
 
 ### What they should be able to do by 12:00
 Find their own report from Monday, open it, read the CBM heatmap and the grade history, see what "needs attention" means

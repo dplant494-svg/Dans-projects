@@ -1,6 +1,6 @@
 # Day 2 workbook questions — three per module, with answers
 
-**Frozen builds:** WCGRRT REV 167, SSORT REV 156, Precharge Pro Rev 87, scanner v2.76. Answers are for the trainer's
+**Frozen builds:** WCGRRT REV 168, SSORT REV 158, Precharge Pro Rev 87, scanner v2.79 (as installed 9 Oct). Answers are for the trainer's
 copy; the trainee workbook carries the questions and the blank lines only. Module 5's nine questions are the Precharge
 Pro pack's own and are not repeated here; module 7's AAB questions are in `TRAINING-MODULE-AAB.md`.
 

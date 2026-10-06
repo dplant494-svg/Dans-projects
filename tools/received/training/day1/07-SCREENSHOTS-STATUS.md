@@ -12,10 +12,11 @@ Those two are the only shots where the build number is the subject. The live bui
 
 | Tool | Revision | Deployed |
 |---|---|---|
-| **SSORT** | **REV 156** | 2 October |
-| **WCGRRT** | **REV 167** | 1 October |
+| **SSORT** | **REV 158** | 6 October |
+| **WCGRRT** | **REV 168** | 6 October |
 
-If the shots were taken before 2 October the SSORT badge will read 153, 154 or 155. Any of those is
+If the shots were taken before 6 October the SSORT badge will read anything from 153 to 157, and the
+WCGRRT badge 166 or 167. Any of those is
 wrong for the class and shot 17 needs retaking. Everything else in the set is unaffected — nothing
 visible in the other shots changed between those builds.
 

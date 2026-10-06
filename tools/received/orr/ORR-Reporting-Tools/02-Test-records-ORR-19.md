@@ -1,7 +1,7 @@
 # ORR 19 — Test records by revision
 
-**Tools:** WCGRRT REV 160–167, SSORT REV 144–157 · **Owner:** Dan Plant
-**Date compiled:** 5 October 2026
+**Tools:** WCGRRT REV 160–168, SSORT REV 144–158 · **Owner:** Dan Plant
+**Date compiled:** 6 October 2026
 
 ## Read this first — what is a record and what is a reconstruction
 
@@ -45,8 +45,10 @@ reproducible with `Get-FileHash -Algorithm SHA256`.
 | 156 | 2 Oct 2026 | 6,893,201 | `94c0c448fd58` | ✔ RECORD — NOV’s pass/fail scale applied to all 211 previously ungraded Testing and Intrusive tasks across 21 classes. Schedule structure asserted identical; General Inspections asserted untouched; the 18 tasks already carrying NOV criteria asserted byte-identical, including Flexloops 23.3.2 and its five-level criteria | pass |
 | 157 | 5 Oct 2026 | 6,895,584 | `ba2ddd573e99` | ✔ RECORD — West Auriga’s daily checks sheet reported missing; it was the panel being built before the rig was picked and never rebuilt (KE-14). Three cases verified on the deployed build: stale panel corrects on rig change; switching between two same-format rigs does **not** rebuild and keeps every reading; a genuinely different sheet drops non-matching readings and says so. All three rig sheets asserted untouched | pass |
 
-**SSORT REV 157 is what is deployed.** Live file verified 5 October: 6,895,584 bytes,
-`ba2ddd573e99`, identical to the `SSORT REV 157` folder.
+| 158 | 6 Oct 2026 | 6,897,196 | `6c06a4712ebf` | ✔ RECORD — two CBM inspections on one rig on one day overwrote each other (KE-15). Name now carries the equipment and serial; surface tests the test type. With the transport disabled: the reported collision separates; a corrected re-post replaces; two serials separate; Post to OEM then Post Report produces one file; checklist and plain rig-visit names verified unchanged. OEM `sourceFile`, always empty before, now carries the report name | pass |
+
+**SSORT REV 158 is what is deployed.** Live file verified 6 October: 6,897,196 bytes,
+`6c06a4712ebf`, identical to the `SSORT REV 158` folder.
 
 ## WCGRRT
 
@@ -62,8 +64,10 @@ reproducible with `Get-FileHash -Algorithm SHA256`.
 
 | 167 | 1 Oct 2026 | 3,342,479 | `c916a062d457` | ✔ RECORD — the EHBS timer delay now recomputes as the crew types. Verified: A alone “—”, A and B 11, B corrected to 30 gives 9, B cleared returns to “—” with no stale value. Posting path byte-identical; no new key | pass |
 
-**WCGRRT REV 167 is what is deployed.** Live file verified 1 October: 3,342,479 bytes,
-`c916a062d457`, identical to the `WCGRRT REV 167` folder.
+| 168 | 6 Oct 2026 | 3,342,821 | `a723b6df13b6` | ✔ RECORD — Save to File silently posted, with no rig, date or size guard and no confirm (KE-16). Reproduced on the live 167 before the fix. Verified on 168: Save to File with a blank rig saves and posts nothing; Post Report still refuses a blank rig; with Not rig-specific it posts, attributed. Exactly one of four post call sites removed | pass |
+
+**WCGRRT REV 168 is what is deployed.** Live file verified 6 October: 3,342,821 bytes,
+`a723b6df13b6`, identical to the `WCGRRT REV 168` folder.
 
 ---
 

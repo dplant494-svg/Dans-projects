@@ -2,7 +2,7 @@
 
 **Owner:** Dan Plant, Technical Services — Subsea · **Date:** 30 September 2026
 
-**The acceptance test for WCGRRT REV 167 and SSORT REV 157 is the Day 1 class exercise: every
+**The acceptance test for WCGRRT REV 168 and SSORT REV 158 is the Day 1 class exercise: every
 trainee produces four reports — a daily report, a surface test, a CBM inspection and a
 pre-deployment checklist — on the `SSCE Equipment` asset, posts each one, and confirms it appears on
 the fleet dashboard within ten minutes.** Ten subsea superintendents and technical section leaders,

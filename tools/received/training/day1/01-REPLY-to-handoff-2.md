@@ -40,7 +40,7 @@ then clear the workspace and start the next.** I will write it that way.
 
 | Report type | Tool | Pattern | Type string from | Date from |
 |---|---|---|---|---|
-| Daily report | WCGRRT 167 | `seadrill-report_<rig>_<date>_daily-report.json` | tile titles; `daily-report` is the fallback when no other title matches | **`meta-report-date`**, else newest tile date, else visit date |
+| Daily report | WCGRRT 168 | `seadrill-report_<rig>_<date>_daily-report.json` | tile titles; `daily-report` is the fallback when no other title matches | **`meta-report-date`**, else newest tile date, else visit date |
 | Surface test | SSORT 156 | `seadrill-report_<rig>_<date>_surface-bop-testing.json` | `.sbop-tile` present | **`meta-date`** |
 | CBM inspection | SSORT 156 | `seadrill-report_<rig>_<date>_cbm-inspection.json` | `.cbm-tile` present | **`meta-date`** |
 | Pre-deployment checklist | SSORT 156 | `seadrill-report_<rig>_<date>_pre-deployment-checklist.json` | `.pdc-tile` present | **`meta-date`** |
@@ -89,7 +89,7 @@ without pressing it; that is a script change, not a tool change.
 
 This is the one where a single workbook row would be wrong. Slide 18 needs to become two rows.
 
-**WCGRRT 167 — tells you, clearly.** `sdPostReport` toasts on failure, and the receipt on success
+**WCGRRT 168 — tells you, clearly.** `sdPostReport` toasts on failure, and the receipt on success
 is the thing the agenda calls "the receipt":
 
 | | What the user sees |
@@ -119,7 +119,7 @@ a later revision, on your side of the fence too: giving SSORT the WCGRRT receipt
 
 ## 3. §3b — the guards before Post, as of the frozen build
 
-**WCGRRT 167**, in order: report date valid (`sdReportDateOk`) → **rig identity, fail closed** (names
+**WCGRRT 168**, in order: report date valid (`sdReportDateOk`) → **rig identity, fail closed** (names
 `SSCE Equipment` in the message as the not-rig-specific choice) → "only post a finished report"
 confirm → `sdSizeOk` 10 MB warning.
 
@@ -134,7 +134,7 @@ warns. Slide 17 gains these four.
 
 ## 4. §3c — the revisions to freeze
 
-**WCGRRT REV 167** and **SSORT REV 156**.
+**WCGRRT REV 168** and **SSORT REV 156**.
 
 SSORT 156 was deployed today, 30 September, to `\\sdrlazneuiis01d.corp.local\SSORT\index.html`,
 sha256 `05133b2283aec4cff5cf38c8a46e16733c737d8641a1ca0a64221335bc72c334`, 6,799,847 bytes,
@@ -158,7 +158,7 @@ proven in test mode, so a Post to OEM lists the test records for NOV and does no
 tool says so at the point of sending, and the script will say the same.
 
 **4.2 — the assistance request button is NOT in the frozen build.** Zero matches for a Help Centre,
-assistance-request or TSC-help control in either WCGRRT 167 or SSORT 156. The failure/assistance
+assistance-request or TSC-help control in either WCGRRT 168 or SSORT 156. The failure/assistance
 form is still at the planning stage on this side and has no Post button by design. **So that first
 step is yours**: Dan drops the sample file in.
 

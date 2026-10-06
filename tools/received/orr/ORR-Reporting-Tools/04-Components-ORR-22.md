@@ -1,7 +1,7 @@
 # ORR 22 — Components and dependencies
 
 **Owner:** Dan Plant, Technical Services — Subsea · **Date:** 30 September 2026
-Figures verified against the live files on 5 October 2026.
+Figures verified against the live files on 6 October 2026.
 
 ---
 
@@ -11,8 +11,8 @@ Two files. That is the whole of what is deployed.
 
 | Component | Share path | Served URL | Bytes | SHA-256 (12) |
 |---|---|---|---|---|
-| **SSORT** — Subsea Onboard Reporting Tool, REV 157 | `\\sdrlazneuiis01d.corp.local\SSORT\index.html` | `http://sdrlazneuiis01d.corp.local:8080/SSORT/index.html` | 6,895,584 | `ba2ddd573e99` |
-| **WCGRRT** — rig visit reporting (in-app title "TSC Rig Reporting Tool"), REV 167 | `\\sdrlazneuiis01d.corp.local\sacred\WCE Rig Vist Reporting Tool V0.html` | `http://sdrlazneuiis01d.corp.local:8080/sacred/WCE Rig Vist Reporting Tool V0.html` | 3,342,479 | `c916a062d457` |
+| **SSORT** — Subsea Onboard Reporting Tool, REV 158 | `\\sdrlazneuiis01d.corp.local\SSORT\index.html` | `http://sdrlazneuiis01d.corp.local:8080/SSORT/index.html` | 6,897,196 | `6c06a4712ebf` |
+| **WCGRRT** — rig visit reporting (in-app title "TSC Rig Reporting Tool"), REV 168 | `\\sdrlazneuiis01d.corp.local\sacred\WCE Rig Vist Reporting Tool V0.html` | `http://sdrlazneuiis01d.corp.local:8080/sacred/WCE Rig Vist Reporting Tool V0.html` | 3,342,821 | `a723b6df13b6` |
 
 Each is a **single self-contained HTML file**: markup, CSS, JavaScript, the Seadrill logos, NOV's
 inspection schedules and every rig-specific test sheet, all inside the one file. No external

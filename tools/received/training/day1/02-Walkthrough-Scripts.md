@@ -1,6 +1,6 @@
 # Day 1 walkthrough scripts — the reporting tools
 
-**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 167**, SSORT **REV 156**
+**Class:** Monday 19 October 2026, Houston · **Frozen builds:** WCGRRT **REV 168**, SSORT **REV 156**
 **Led by:** Dan (all four modules; Brad Waldron is not attending and nothing below depends on him)
 **Asset:** `SSCE Equipment` throughout. Nothing is posted on a real rig name.
 **Build freeze: 12 October 2026.** From that date neither tool changes before the class unless a rig
@@ -12,7 +12,7 @@ a screenshot for the workbook; the numbering runs continuously 1–24 across all
 matches `TRAINING-Day1-Screenshot-List.md`. `TRAP:` is something the room will get wrong if it is not
 said out loud.
 
-**Before the room arrives:** open WCGRRT REV 167 and SSORT REV 156 in two browser tabs from
+**Before the room arrives:** open WCGRRT REV 168 and SSORT REV 156 in two browser tabs from
 `\\sdrlazneuiis01d.corp.local\sacred\` and `…\SSORT\`. In both tabs press **⊘ New Trip** so there is
 no leftover state from setting up. Have the dashboard open in a third tab on the SSCE Equipment
 filter. Confirm both tools show the frozen revision in the badge before you start — if either does
@@ -30,7 +30,7 @@ sit inside Lee's WCE SME workshop (19 to 22 October), so he opens it. Nothing be
 ---
 
 # Module 1 — WCGRRT: rig visit and daily reports
-**08:30 – 10:00 · WCGRRT REV 167**
+**08:30 – 10:00 · WCGRRT REV 168**
 
 ### What they should be able to do by 10:00
 Start a trip, set the rig identity, add a daily report entry with equipment entries and captioned
@@ -122,7 +122,7 @@ This is the heart of the module. Do not rush it.
 ---
 
 # Module 2 — WCGRRT: the surface test forms, attachments and Post
-**10:15 – 12:00 · WCGRRT REV 167**
+**10:15 – 12:00 · WCGRRT REV 168**
 
 > **Agenda correction.** The agenda line for this module lists *"Load latest posted"*. **That feature
 > is not in REV 167** — the only Load controls are `↑ Browser Load` and `📂 Load from File`. It is

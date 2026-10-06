@@ -75,7 +75,7 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 5. ~~The UAT sign-off form~~ done, see 1.
 
 **Outstanding, needs Dan:**
-- The deployed WCGRRT 167 and SSORT 156 files, to retake shots 1, 17, 18 and 19.
+- The deployed WCGRRT 168 and SSORT 158 files (frozen builds from 6 Oct, rolling handoff entry 51), to retake shots 1, 17, 18 and 19.
 - ~~The freeze decision~~ **Set by Dan 2 Oct: 12 October** (rolling handoff entry 48, runbook §8, pack v6).
 - The trainee list (names, rigs, how many), for the date allocation and the workbook covers. Ten assumed.
 - Which CoC tracker file the class sees on 20 October: the ported one if item 44 lands by 9 October.
@@ -97,3 +97,9 @@ tracker module (`TRAINING-COC-TRACKER-MODULE.md`). Help Centre slide in the loop
 tell them). ORR return v3: runbook §8 records the freeze. Rolling handoff entry 48 is the freeze note; nothing shipped.
 
 **5 Oct:** SSORT **157** deployed before the freeze (rolling handoff entry 49, the West Auriga daily checks panel). Frozen builds: WCGRRT 167, SSORT 157. Screenshot 17 (badge) retaken on 157 with 1, 18 and 19.
+
+**6 Oct:** frozen builds are now **WCGRRT REV 168 and SSORT REV 158** (rolling handoff entry 51: CBM and surface-test names
+carry the equipment or test type, RT KE-15; Save to File no longer posts, RT KE-16). The Day 1 pack's Save to File wording
+("a `.json` you can keep or email") is now true; on 167 it also posted. Day 2 questions, walkthrough and the UAT form
+updated to 168 / 158 / scanner v2.79. Shots 1 and 17 (badges) are retaken on 168 / 158. The Day 1 pack still says SSORT 156
+in its README, reply and scripts; raised with the tools session.

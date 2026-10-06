@@ -1385,3 +1385,47 @@ a file name.
 **The ask, WCGRRT:** put the Vendor Surveillance (and Vendor Audit) post behind the same rig guard, with the existing
 "Not rig-specific" choice (`meta.asset = "SSCE Equipment"`) for work at a vendor's premises. The report is ingested and
 nothing is lost, so this waits for after the class unless it rides along with another change before the freeze.
+
+---
+
+## Entry 51 reply (dashboard side, 6 Oct 2026, evening): agreed on the name; one gap in it, the slug rule, and the record
+
+Thank you: both fixes found the real cause, and 51.3 explains more than we asked (the Capella-week unfinished posts too).
+
+**52.1 No timestamp: agreed.** Your reasoning is right. A corrected re-post must replace, and OEM then Post Report must
+stay one file. Nothing on this side reads the name (checked: the scanner, the `shrunk` rule and the `_replaced` copies all
+work on whatever name arrives), so the new names need no scanner or dashboard change.
+
+**52.2 The residual is wider than dual-stack, we think. Please check before 12 Oct.** Your 6 Oct example on West Capella
+was five **different** gate valves on one rig on one day. The dashboard labels them from the post itself: `Gate Valves (Upper
+Choke - Dual Failsafe)`, `Gate Valves (M991005890 - Kill Isolation Valve (Single))`. Both instance names come from
+`cbmData.rcpt_model` (the text after the manufacturer segment), not from `rcpt_serial`. If the serial was blank on those
+posts, SSORT 158 names all five `..._cbm-inspection_Gate-Valves.json` and the collision is still there, on a single-stack
+rig, for any class with more than one instance (gate valves certainly; perhaps others). We cannot see the serial from here
+until the versions are recovered. **Asks:** confirm on the deployed 158 with two gate valves, serial blank, different model
+text; if they collide, carry the model instance in the name when the serial is blank (or require the serial on those
+classes). It is losing work, so it is the freeze exception again.
+
+**52.3 The slug rule, exactly, please.** The overwritten West Capella CBMs are recovered from version history and named as
+158 would name them, from each version's own `cbmData.equip` and `rcpt_serial`, so that a later corrected re-post replaces
+the restored file rather than adding a second row. From your examples we read: runs of non-alphanumeric characters become
+`-`, the serial is appended as `-SN<serial>`. Please confirm, with what happens to `&`, commas and brackets
+(`C&K Stabs`, `Flexloops, Spools, Blocks`), any length cap, and leading or trailing `-`.
+
+**52.4 The recovery.** As you say, after 158; it is live, so Dan does it on 9 Oct. Each restored version is checked against
+its NOV copy (rig, date, equipment) before it goes back. If 52.2 holds, two gate valves that would share a name get the
+model instance added, and that is said in the record.
+
+**52.5 51.2, `sourceFile`:** we found the same from SACRED DATA an hour before your entry arrived (all fifteen OEM copies
+empty). From 158 the "Sent to NOV" chip matches on it first; older copies keep the rig-and-date fallback.
+
+**52.6 51.5, rigs going quiet:** watched by Dan to 20 Oct from the new SACRED Status page (by rig: last rig visit report,
+last daily checks). On the ORR as an open action.
+
+**52.7 Day 1 pack:** the WCGRRT number is 168 everywhere, but **SSORT is still 156** in the README (4 places), the reply
+(10), the scripts (2) and the Q&A (1), while `07-SCREENSHOTS-STATUS.md` says 158. Please make them 158. The Save to File
+wording in module 1 and Q&A 1.3 is now true; on 167 it also posted.
+
+**For the record (ORR workbook, 6 Oct):** frozen builds WCGRRT 168 / SSORT 158 (live hashes `a723b6df13b6`, `6c06a4712ebf`);
+known errors RT KE-15 and RT KE-16 added, closed, with the 52.2 residual stated on KE-15; test summary row for both; open
+actions for the recovery, the 52.2 check and the quiet-rig watch; Day 2 questions, walkthrough and the UAT form on 168 / 158.
