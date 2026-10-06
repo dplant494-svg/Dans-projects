@@ -26,8 +26,15 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
    - Site shows only the Spanish number, +34 722 676 631 (WhatsApp Business). The UK number is personal and stays off the site, templates and profiles.
    - Password manager (Bitwarden, free) before the first client hands over a login.
 6. Social: Instagram first. Set up the account per `social/instagram/README.md`, post the nine-image launch pack over three days, pin offer/packages/contact. Then LinkedIn page, Facebook page (linked to Instagram), Costa del Sol expat groups. One post per finished site.
-7. Google Business Profile once there is a verifiable address.
-8. **Online booking for the free consultation** (Cal.com, free plan):
+7. **Google Business Profile: on hold for the accountant.** A Spanish home address works for Google (service-area business, address hidden, postcard or video verification), but it's a public record that the business runs from that address. Before using it, ask the accountant (UK and Spain): "Can the UK Ltd list my Spanish home as its Google Business Profile address, as a hidden service-area business, without creating Spanish tax residency, permanent-establishment or family-visa problems?" A UK registered-office or virtual address won't pass Google's rules. Meanwhile:
+   - **Launch offer wording**: it asks for a Google review, which needs the profile. Until it exists, ask the first five for a named testimonial on the site plus a LinkedIn recommendation or Sortlist review.
+8. **Getting found on Google** (Google ranks pages, not businesses; two pages can't win much):
+   - **Pages** (session builds, EN + ES): one per client type (restaurants, property management, clinics and wellness, trades) and a "no job too small" fixes page; one case-study page per finished client (The Fifth Quarter first, at its launch; then Praetorian, Roughneck); town pages later and only with a real local example each. Lean on Spanish phrases ("diseño web bilingüe Estepona"): far less competition.
+   - **Links** (Dan): Instagram, Facebook, LinkedIn profiles linking to the site; free listings on Sortlist, Clutch, Yell (UK), Páginas Amarillas, Cylex; "Site by Plantworks Studio" footer on every client site (The Fifth Quarter gets one at launch); referral partners (photographers, gestorías, accountants).
+   - **Measure monthly**: Search Console → Performance (which searches, which page) and Pages (what's indexed). If a page isn't indexed, URL Inspection → Request indexing.
+   - **Expect**: indexed within days to two weeks; found by name within weeks; niche phrases in two to three months; competitive phrases six months plus. Referrals and the Facebook groups bring the first clients long before Google does.
+   - **Optional later**: Google Ads test at €5–10/day on Spanish phrases, once there's a case study to land on.
+9. **Online booking for the free consultation** (Cal.com, free plan):
    - Sign up with info@plantworksstudio.com and connect the Google Calendar, so existing appointments block slots.
    - Call type "Free consultation · 20 minutes", Google Meet, description says calls are in English. Booking questions: business name, current website, what they need.
    - 15-minute buffer, at least 24 hours' notice.
