@@ -22,6 +22,28 @@ in the enumeration". The twelve queries already loaded are fine as they are (the
 use these blocks for the nine still to add.
 
 ====================================================================================================
+TABLE: reports      (REPLACES the first query built by hand; 6 Oct 2026. Name the query: reports)
+====================================================================================================
+Why: the hand-built query let Power Query guess the column types, so date, reportDate and the other date
+columns were typed as dates and arrived in SACRED DATA empty (every row NULL, found 6 Oct). Every column here
+is text except the six counts, exactly as the table was made in ddl-v1.sql.
+How: open the dataflow, click the reports query, Home > Advanced editor, select all, paste this, OK. Then
+check its Data destination (bottom right): Existing table reports, Replace, every column mapped. Save, run.
+let
+    Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
+    Matches = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_reports.csv"),
+    File = if Table.IsEmpty(Matches) then null else Matches{0}[Content],
+    Cols = {"file", "rig", "reporttype", "type", "discipline", "wce", "location", "schedule", "date", "reportDate", "dateEnd", "exportedAt", "rev", "modified", "tileCount", "attachments", "cbmEquipment", "criticalTotal", "criticalOpen", "actionsTotal", "actionsLeftWithRig", "criticalItems", "actionItems"},
+    Raw = if File = null then #table({}, {}) else Csv.Document(File, [Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Promoted = if Table.RowCount(Raw) = 0 then #table(Cols, {}) else Table.PromoteHeaders(Raw, [PromoteAllScalars = true]),
+    Selected = Table.SelectColumns(Promoted, Cols, MissingField.UseNull),
+    Blanks = Table.ReplaceValue(Selected, "", null, Replacer.ReplaceValue, {"tileCount", "attachments", "criticalTotal", "criticalOpen", "actionsTotal", "actionsLeftWithRig"}),
+    Typed = Table.TransformColumnTypes(Blanks, {{"file", type text}, {"rig", type text}, {"reporttype", type text}, {"type", type text}, {"discipline", type text}, {"wce", type text}, {"location", type text}, {"schedule", type text}, {"date", type text}, {"reportDate", type text}, {"dateEnd", type text}, {"exportedAt", type text}, {"rev", type text}, {"modified", type text}, {"tileCount", Int64.Type}, {"attachments", Int64.Type}, {"cbmEquipment", type text}, {"criticalTotal", Int64.Type}, {"criticalOpen", Int64.Type}, {"actionsTotal", Int64.Type}, {"actionsLeftWithRig", Int64.Type}, {"criticalItems", type text}, {"actionItems", type text}}),
+    Loaded = Table.AddColumn(Typed, "loaded_at", each DateTime.LocalNow(), type datetime)
+in
+    Loaded
+
+====================================================================================================
 TABLE: cbm_grades      (paste below, Name the query: cbm_grades)
 ====================================================================================================
 let

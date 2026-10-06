@@ -1344,7 +1344,21 @@ the digests and SACRED DATA only ever see the last one. This is the entry 11 dai
 **Evidence from Dan's scans on 6 Oct (scanner v2.78):** between two full scans, OEM copies went from **9 to 15** (six CBM
 reports sent to NOV; every OEM copy is unique, `..._<equipment-slug>_<yyyyMMdd-HHmmss>_cbm.json`) while reports went from
 **335 to 339** and digests from 348 to 352 (four new files of any type). NOV received six CBM reports; PostedReports kept at
-most four. Dan is confirming from SACRED DATA (OEM copies that share one `sourceFile` across different equipment).
+most four.
+
+**Confirmed from SACRED DATA, 6 Oct evening.** NOV copies (each uniquely named, so all survive) against the CBM files
+PostedReports holds for West Capella:
+
+| Day posted | Sent to NOV that day | CBM file PostedReports holds |
+|---|---|---|
+| 6 Oct | 5 × Gate Valves, 06:54 to 11:19 (different valves) | `..._2026-10-06_cbm-inspection.json`: Gate Valves (Upper Choke - Dual Failsafe), the last |
+| 5 Oct | Flexloops, Spools, Blocks 10:37; BOP Mandrel 11:40; Gate Valves 12:20 | `..._2026-10-05_cbm-inspection.json`: Gate Valves (Kill Isolation Valve), the last |
+| 30 Sep | Upper SBOP 04:59; Lower SBOP 08:12 and 09:30; Riser Adapter 10:18; C&K Stabs 13:20 | `..._2026-09-30_...`: C&K Stabs (the last); Riser Adapter in `..._2026-09-29_...` |
+
+Thirteen CBM reports reached NOV since 30 Sep; PostedReports holds four. Allowing for re-sends (Lower SBOP twice),
+about eight inspections exist only as earlier SharePoint versions. The July CBMs never collided because the crews named
+those files by hand; it started when SSORT took over the naming. The `sourceFile` field is blank on all fifteen OEM
+copies, so the "Sent to NOV" chip falls back to rig and date; item 2 below fixes that too.
 
 **The ask, SSORT:**
 1. Name every CBM post uniquely, the way the OEM copy already is:
