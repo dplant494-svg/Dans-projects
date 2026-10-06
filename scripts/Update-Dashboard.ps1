@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.79'
+$ScriptVersion = '2.80'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1702,6 +1702,7 @@ $ssceRequestRecords | Sort-Object -Property @{ Expression = { [string]$_.submitt
     ForEach-Object { $ssceRequestsSortedList.Add($_) | Out-Null }
 $ssceRequestsSorted = $ssceRequestsSortedList.ToArray()
 
+$preReadSeconds = $scanClock.Elapsed.TotalSeconds   # v2.80: finding the files, the lock, the Excel and SSCE reads, before the report loop
 $phaseClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.53: where a full scan's time goes
 $digestSeconds = 0.0
 $parseSeconds = 0.0
@@ -2820,7 +2821,7 @@ $complianceSorted = New-Object System.Collections.Generic.List[object]
 $complianceList | Sort-Object -Property @{ Expression = { [string]$_.date } } -Descending |
     ForEach-Object { $complianceSorted.Add($_) | Out-Null }
 
-Write-Host ("Timing: {0} files read and summarised in {1:N0} s (reading JSON {2:N0} s, {4} from the cache, writing digests {3:N0} s)" -f @($files | Where-Object { $_ }).Count, $phaseClock.Elapsed.TotalSeconds, $parseSeconds, $digestSeconds, $script:cacheHits) -ForegroundColor DarkGray
+Write-Host ("Timing: {0} files read and summarised in {1:N0} s (reading JSON {2:N0} s, {4} from the cache, writing digests {3:N0} s; finding the files and the lock before that {5:N0} s)" -f @($files | Where-Object { $_ }).Count, $phaseClock.Elapsed.TotalSeconds, $parseSeconds, $digestSeconds, $script:cacheHits, $preReadSeconds) -ForegroundColor DarkGray
 # v2.58: drop cache copies whose report is gone or no longer cacheable, then report.
 $cacheRemoved = 0
 if (-not $NoCache -and (Test-Path -Path $scanCacheDir)) {
@@ -3988,7 +3989,28 @@ function Export-DatabaseTable {
     $Tables[$Name] = $flat
     foreach ($ck in $children.Keys) { $Tables[$Name + '__' + $ck] = $children[$ck] }
 }
-if ($databaseExportPath) {
+# v2.80: once an hour, not on every scan. On Windows PowerShell 5.1 the export of about 19,000 rows took four to five
+# minutes, untimed, at the end of every scan (6 Oct: scans of 442 s and 685 s, the timed phases about 190 s and 350 s), so
+# a scan ran past the ten-minute task interval, the next start was skipped, and 'Data updated' reached 25 minutes and more.
+# The dataflow loads SACRED DATA hourly, so an export more often than that was never read. Written when the last
+# export_manifest.json is older than databaseExportMinutes less five (default 60), always with -Force. The freshness alert
+# (item 33) watches the same manifest with a two-hour threshold, so an hourly export still satisfies it.
+$exportEveryMinutes = 60
+if ($config.PSObject.Properties['databaseExportMinutes'] -and $config.databaseExportMinutes) { $exportEveryMinutes = [int]$config.databaseExportMinutes }
+$exportDue = $true
+$exportAgeMinutes = $null
+if ($databaseExportPath -and -not $Force) {
+    $exportManifestPath = Join-Path $databaseExportPath 'export_manifest.json'
+    if (Test-Path -Path $exportManifestPath) {
+        $exportAgeMinutes = ((Get-Date) - (Get-Item -Path $exportManifestPath).LastWriteTime).TotalMinutes
+        if ($exportAgeMinutes -lt ($exportEveryMinutes - 5)) { $exportDue = $false }
+    }
+}
+if ($databaseExportPath -and -not $exportDue) {
+    Write-Host ("Database export: not due (last export {0:N0} min ago; written every {1} min, or now with -Force)" -f $exportAgeMinutes, $exportEveryMinutes) -ForegroundColor DarkGray
+}
+if ($databaseExportPath -and $exportDue) {
+    $exportClock = [System.Diagnostics.Stopwatch]::StartNew()
     try {
         if (-not (Test-Path -Path $databaseExportPath)) { New-Item -ItemType Directory -Path $databaseExportPath -Force | Out-Null }
         $exportTables = @{}
@@ -4030,7 +4052,7 @@ if ($databaseExportPath) {
         }
         $manifest = [pscustomobject]@{ schemaVersion = $DatabaseExportSchema; scanner = $ScriptVersion; generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); tables = $manifestTables.ToArray() }
         Set-Content -Path (Join-Path $databaseExportPath 'export_manifest.json') -Value ($manifest | ConvertTo-Json -Depth 6) -Encoding UTF8
-        Write-Host "Database export: $($exportTables.Count) table(s), $exportRows row(s), schema $DatabaseExportSchema to $databaseExportPath" -ForegroundColor Cyan
+        Write-Host ("Database export: {0} table(s), {1} row(s), schema {2} to {3} in {4:N0} s" -f $exportTables.Count, $exportRows, $DatabaseExportSchema, $databaseExportPath, $exportClock.Elapsed.TotalSeconds) -ForegroundColor Cyan
     } catch { Write-Warning "Database export failed: $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
 }
 
@@ -4043,6 +4065,7 @@ if ($databaseExportPath) {
 # Passworded (Dan, 6 Oct 2026): the file goes to the status\ folder beside the dashboard folder (statusDeployPath), read
 # only by status\status.html behind its own gate; never into the public dashboard folder.
 # ---------------------------------------------------------------------------
+$statusClock = [System.Diagnostics.Stopwatch]::StartNew()
 try {
     $stToday = (Get-Date).ToUniversalTime().Date
     $stInv = [Globalization.CultureInfo]::InvariantCulture
@@ -4205,7 +4228,7 @@ try {
         $stDeployed = ", deployed to $statusDeployPath"
     }
     $dialLine = (@($stLoops | Where-Object { $_.kind -eq 'dial' } | ForEach-Object { '{0} {1}%' -f $_.key, $(if ($null -eq $_.percent) { '-' } else { $_.percent }) }) -join ', ')
-    Write-Host "Status page: $($stLoops.Count) loop(s), $($stRigs.Count) rig(s) ($dialLine)$stDeployed" -ForegroundColor Cyan
+    Write-Host ("Status page: {0} loop(s), {1} rig(s) ({2}){3} in {4:N0} s" -f $stLoops.Count, $stRigs.Count, $dialLine, $stDeployed, $statusClock.Elapsed.TotalSeconds) -ForegroundColor Cyan
 } catch { Write-Warning "Status page data not written (scan unaffected): $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
 
 if ($scanLockHeld) { try { Remove-Item -Path $scanLockFile -Force } catch { } }
