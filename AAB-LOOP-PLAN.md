@@ -248,7 +248,7 @@ password is unchanged). Deploy: save `aab/seadrill-bulletin-board.html` over the
 **6 October 2026: the create page handed back to Eric for HTML edits.** `AAB-REV11-HANDOFF-FOR-ERIC.md` with the Rev 11
 ungated source, his `build_gate.py`, fragment and template (zip `AAB-Rev11-for-Eric.zip`, sent through Dan). Rebuilt from
 the pack: byte-identical to the gated copy on the share. Eric works from Rev 11, returns Rev 12 (ungated, gated, note);
-lands before 12 Oct or after 20 Oct (freeze). No `gate-config.js` or `aab-data.js` in the pack.
+lands before 12 Oct or after 20 Oct (freeze). No `gate-config.js` or `aab-data.js` in the pack. Dan has told Eric to hand it back once his edits are done; on return the dashboard session checks it (every key still written, no URL, gated copy byte-identical) before Dan deploys.
 
 | Step | Owner | Needs first | Deliverable |
 |---|---|---|---|
