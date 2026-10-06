@@ -38,7 +38,7 @@ These need a fact from the client before they go in. Wrong data here is worse th
 - [ ] Deli sandwich descriptions: Cheesesteak, Chicken Parm, Fish Finger are name-only.
 - [ ] Possible rename: Veggie caprese → "panuozzo" (client deciding).
 - [ ] Real photography when available.
-- [ ] Suggestion box: mailto-based. Swap to Formspree free tier for direct-to-inbox (needs an account; the form already has `name`, `email`, `message` fields so only the `action` and the script change).
+- [x] Suggestion box: now a Netlify form (`suggestions`) landing on `/thanks/`; no mail client needed (6 Oct 2026).
 - [ ] Menus are labelled "example menus" until the client signs off.
 
 ## Working style
@@ -48,4 +48,29 @@ Feedback arrives as photos of handwritten notes and WhatsApp screenshots. Transc
 ## Social
 
 - **Reel 1 "Beneath our feet"** (6 Oct 2026): 30 s Instagram reel built from the client's storyboard, source in `social/reel-1/`. Waiting on client sign-off, full-resolution images, and a decision on real archive photos for the three historic frames. See `social/reel-1/README.md`.
-- Add the "Site by Plantworks Studio" footer link at launch (studio's Google plan).
+- [x] "Site by Plantworks Studio" footer credit added (6 Oct 2026).
+
+## Go-live (prepared 6 Oct 2026)
+
+Domain `the5thquarter.co.uk` is in the owner's (Mark's) GoDaddy account. Account details are never written into this repo; access goes through GoDaddy's **Delegate Access** (Account Settings → Delegate Access → invite Dan's email, "Products & Domains" level), not a shared password or PIN.
+
+1. **Balance paid** before the switch, per the proposal (balance due before the site goes live).
+2. **Email first**: in GoDaddy DNS, screenshot every record. Find out whether `info@` and `bookings@the5thquarter.co.uk` exist (MX records). The site links to both. If no mailbox exists, set one up before launch: forwarding to Mark's own inbox (free, e.g. ImprovMX) or proper mailboxes (Microsoft 365 / Google Workspace, ~£5 per user per month).
+3. **Netlify**: new project from GitHub, base and publish directory `plantworks-studio/clients/the-fifth-quarter`, branch `claude/new-business-venture-7pxnxz`, no build command. **Forms → enable form detection before the first deploy**; notifications for `suggestions` to info@ (or Mark's own email until info@ exists).
+4. Netlify → Domain management → add `the5thquarter.co.uk` and `www.the5thquarter.co.uk`.
+5. **GoDaddy DNS**: `A` record `@` → `75.2.60.5` (replacing GoDaddy's parked/forwarding record; turn off any domain forwarding), `CNAME` `www` → the project's `.netlify.app` address. **MX and TXT records untouched.**
+6. HTTPS issues itself once DNS resolves (usually within the hour).
+7. Test: `the5thquarter.co.uk` and `www.` with the padlock; the suggestion form arrives; a test email to info@ and bookings@.
+8. Search Console: Domain property for `the5thquarter.co.uk` (TXT record at GoDaddy), submit `https://the5thquarter.co.uk/sitemap.xml`.
+9. Then post Reel 1 on the restaurant's Instagram.
+
+## Head chef: David Henry
+
+David is writing his own bio (6 Oct 2026); his version wins. Facts so far, and conflicts to settle with him:
+- Started cooking at 16 (from a draft template; confirm).
+- Worked in Berkshire, "where I found the love for the old classics" (David).
+- MasterChef: The Professionals semi-finalist: **2009** per web sources, **2010** per the draft template. Confirm the year.
+- Order: **David says MasterChef came before Rockliffe Hall** (under Kenny Atkinson); Dan's message says Rockliffe came first. David's own word stands until he says otherwise.
+- Head chef, The Crathorne Arms near Yarm, from 2014. Voted best restaurant in Teesside **2020 and 2026**. Tom Parker Bowles named its Sunday lunch among the country's best.
+- Ethos: best ingredients from trusted local suppliers; herbs and vegetables grown in the garden. Kitchen garden at Lambton Park: unknown.
+- Instagram @chefdavidhenry.

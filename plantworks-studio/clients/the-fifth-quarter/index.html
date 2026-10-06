@@ -283,6 +283,9 @@
     padding:.8rem 2.4rem;cursor:pointer;
   }
   .suggest button:hover{background:var(--navy-deep)}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  footer .credit{display:block;margin-top:.9rem;font-size:.85rem;opacity:.7}
+  footer .credit a{color:inherit}
   .careers{padding:4.5rem 0;text-align:center}
   .careers p.body{max-width:36rem;margin:1.2rem auto 0;text-align:left}
   .careers .cta{
@@ -696,7 +699,9 @@
     <h2>The Suggestion Box</h2>
     <hr class="rule">
     <p class="lede">We&rsquo;re still building The Fifth Quarter &mdash; tell us what you&rsquo;d love to see on the menu, the shelves, or behind the bar.</p>
-    <form id="suggestForm">
+    <form id="suggestForm" name="suggestions" method="POST" action="/thanks/" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="suggestions">
+      <p class="hp"><label>Leave this empty <input name="bot-field"></label></p>
       <div>
         <label for="sg-name">Your name</label>
         <input id="sg-name" name="name" type="text" autocomplete="name">
@@ -726,18 +731,8 @@
   <div class="fm">THE 5TH QUARTER</div>
   Restaurant, Bar &amp; Delicatessen &mdash; Lions Gate, Lambton Park, DH3 4DT<br>
   Named for the Five Quarter seam of the Great Northern Coalfield.
+  <span class="credit">Site by <a href="https://plantworksstudio.com" rel="noopener">Plantworks Studio</a></span>
 </footer>
 
-<script>
-  document.getElementById('suggestForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    const name = document.getElementById('sg-name').value;
-    const email = document.getElementById('sg-email').value;
-    const msg = document.getElementById('sg-msg').value;
-    const body = encodeURIComponent(msg + '\n\nFrom: ' + name + (email ? ' (' + email + ')' : ''));
-    window.location.href = 'mailto:info@the5thquarter.co.uk?subject=' +
-      encodeURIComponent('Suggestion for The Fifth Quarter') + '&body=' + body;
-  });
-</script>
 </body>
 </html>
