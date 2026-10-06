@@ -1326,3 +1326,48 @@ So three rounds in total, not a pattern: the latch only bit when a crew opened D
 is included because its sheet (DAILY_CHECKS) differs from Capella's too and the same latch applied. Sevan Louisiana has no
 daily-check rounds on record. Those three rounds are what to take back to the rigs; the readings in them are real, taken
 against Capella's list of items. Nothing to change on the dashboard: each round shows the readings it carries.
+
+---
+
+## Entry 50 (dashboard side, 6 Oct 2026, evening): CBM inspections are overwriting each other; Vendor Surveillance still posts with no rig
+
+Dan, 6 Oct: "the dashboard isnt ingesting all of the CBM and the vendor survaillance is showing unattributed". Both are at
+source. The dashboard shows every file in PostedReports; neither needs a dashboard change.
+
+### 50.1 Two CBM inspections on one rig on one day share a file name, so the second overwrites the first (losing work)
+
+Since SSORT 148 a CBM post is named `seadrill-report_<Rig>_<yyyy-MM-dd>_cbm-inspection.json`: rig and date, no equipment, no
+time. A crew that inspects the C&K stabs and the riser adapter on the same day posts two different reports under **one name**.
+SharePoint overwrites the first with the second, the flow trigger does not fire on an overwrite, and the scanner, the dashboard,
+the digests and SACRED DATA only ever see the last one. This is the entry 11 daily-report overwrite again, on CBM.
+
+**Evidence from Dan's scans on 6 Oct (scanner v2.78):** between two full scans, OEM copies went from **9 to 15** (six CBM
+reports sent to NOV; every OEM copy is unique, `..._<equipment-slug>_<yyyyMMdd-HHmmss>_cbm.json`) while reports went from
+**335 to 339** and digests from 348 to 352 (four new files of any type). NOV received six CBM reports; PostedReports kept at
+most four. Dan is confirming from SACRED DATA (OEM copies that share one `sourceFile` across different equipment).
+
+**The ask, SSORT:**
+1. Name every CBM post uniquely, the way the OEM copy already is:
+   `seadrill-report_<Rig>_<yyyy-MM-dd>_cbm-inspection_<equipment-slug>_<yyyyMMdd-HHmmss>.json`. File names are not
+   load-bearing; the scanner reads `meta` and `cbmData`, so **nothing changes on the dashboard side**.
+2. The OEM copy's `meta.sourceFile` carries the new name, so the "Sent to NOV" chip lands on the right report row.
+3. Please check every other SSORT post for the same shape (rig and date only in the name). The SSORT rig visit post looks
+   like it: `seadrill-report_West-Saturn_2026-10-01.json`. Two of those on one rig and one day would collide the same way.
+
+**The freeze:** this is a rig losing work, so it is the exception the freeze allows, and it should ship before 12 Oct as
+SSORT 158 if it can. The class then runs on 158; any screenshot that shows the version badge is retaken. Dan decides.
+
+**What was lost is recoverable without asking the rigs:** PostedReports keeps versions (as in 12.6, Brad's dailies), so each
+overwritten CBM is an earlier version of the surviving file. The dashboard session restores them under unique names once the
+naming fix is in, so the next CBM does not overwrite the restored copy.
+
+### 50.2 Vendor Surveillance still posts with `meta.asset` blank (not losing work)
+
+Logged 5 Oct; Dan has raised it again. `seadrill-report_report_2026-10-03_vendor-surveillance.json` (WCGRRT REV 167) has no
+rig identity: the fail-closed rig guard from REV 153 / 159 does not cover the Vendor Surveillance path, and the file name
+carries `report` where the rig should be. The scanner lists it under **Unattributed**, by design: it never invents a rig from
+a file name.
+
+**The ask, WCGRRT:** put the Vendor Surveillance (and Vendor Audit) post behind the same rig guard, with the existing
+"Not rig-specific" choice (`meta.asset = "SSCE Equipment"`) for work at a vendor's premises. The report is ingested and
+nothing is lost, so this waits for after the class unless it rides along with another change before the freeze.
