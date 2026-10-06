@@ -44,3 +44,8 @@ These need a fact from the client before they go in. Wrong data here is worse th
 ## Working style
 
 Feedback arrives as photos of handwritten notes and WhatsApp screenshots. Transcribe carefully, fix obvious typos silently, flag judgement calls back rather than guessing. Everything stays on one page. Menu tabs stay pure CSS (radios before panels in source order).
+
+## Social
+
+- **Reel 1 "Beneath our feet"** (6 Oct 2026): 30 s Instagram reel built from the client's storyboard, source in `social/reel-1/`. Waiting on client sign-off, full-resolution images, and a decision on real archive photos for the three historic frames. See `social/reel-1/README.md`.
+- Add the "Site by Plantworks Studio" footer link at launch (studio's Google plan).
