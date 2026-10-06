@@ -584,6 +584,26 @@
   .rm-trend-tip strong { font-size: 12px; }
   .rm-empty { color: var(--sd-text-light); padding: 24px; text-align: center; }
 
+  /* ── Status tab (v2.79): one dial per loop, counted by the scanner into status-data.js ── */
+  .st-dials { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin: 6px 0 18px; }
+  .st-dial { border: 1px solid var(--sd-border); border-radius: 8px; padding: 12px 12px 10px; background: var(--sd-white); text-align: center; }
+  .st-dial svg { width: 100%; max-width: 180px; height: auto; display: block; margin: 0 auto; }
+  .st-dial .st-name { font-size: 12px; font-weight: 700; color: var(--sd-blue); margin-top: 4px; }
+  .st-dial .st-frac { font-size: 12px; color: var(--sd-text); margin-top: 2px; }
+  .st-dial .st-note { font-size: 11px; color: var(--sd-text-light); margin-top: 4px; line-height: 1.35; }
+  .st-dial .st-last { font-size: 10.5px; color: var(--sd-text-light); margin-top: 4px; }
+  .st-dial.st-count .st-big { font-size: 38px; font-weight: 800; color: var(--sd-blue); line-height: 1.1; margin: 14px 0 6px; }
+  .st-dial.st-count.st-warn .st-big { color: var(--sd-orange); }
+  .st-h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--sd-text-light); margin: 18px 0 8px; }
+  .st-table td.st-num, .st-table th.st-num { text-align: center; }
+  .st-table td:first-child { white-space: nowrap; }
+  .st-table td.st-amber { background: #fdf1d8; color: #7a4b00; font-weight: 700; }
+  .st-table td.st-zero { color: var(--sd-text-light); }
+  .st-table td.st-heat1 { background: #e6edf7; }
+  .st-table td.st-heat2 { background: #b9cbe6; }
+  .st-table td.st-heat3 { background: #002C77; color: #fff; font-weight: 700; }
+  .st-tag { display: inline-block; font-size: 10px; font-weight: 700; background: var(--sd-yellow); color: var(--sd-blue); border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: 1px; }
+
   /* ── View tabs (Report List / CBM Heatmap) ── */
   .view-tabs { display: flex; gap: 10px; margin-bottom: 14px; }
   .view-tab {
@@ -697,6 +717,7 @@
         <button type="button" class="view-tab" id="tab-invest-btn">Investigations</button>
         <button type="button" class="view-tab" id="tab-compliance-btn">Compliance</button>
         <button type="button" class="view-tab" id="tab-aab-btn">AABs</button>
+        <button type="button" class="view-tab" id="tab-status-btn">Status</button>
         <button type="button" class="errors-btn" id="errors-btn" hidden title="Posted files the scanner could not use, or that are over the size ceiling"></button>
       </div>
 
@@ -807,6 +828,19 @@
           <div class="rig-mon-empty" id="aab-none" hidden>No AAB posted yet.</div>
           <div class="table-scroll"><table class="aab-table" id="aab-master"></table></div>
           <div class="aab-legend" id="aab-legend"></div>
+        </section>
+      </div>
+
+      <div id="status-view" hidden>
+        <section class="card">
+          <h2>SACRED status</h2>
+          <div class="source-line">Every loop in SACRED on one page: a dial is the share done of what has been raised, a tile is a plain count. Counted by the scanner at the end of every scan from what was posted and recorded; nothing on this page is a judgement. <span id="status-stamp"></span></div>
+          <div class="rig-mon-empty" id="status-empty" hidden>No status yet. It appears after the first scan with scanner v2.79 or later.</div>
+          <div class="st-dials" id="status-dials"></div>
+          <div class="st-h3" id="status-rigs-h" hidden>By rig</div>
+          <div class="table-scroll"><table class="aab-table st-table" id="status-rigs"></table></div>
+          <div class="st-h3" id="status-types-h" hidden>Reports posted, last 30 days, rig by report type</div>
+          <div class="table-scroll"><table class="aab-table st-table" id="status-types"></table></div>
         </section>
       </div>
 
@@ -4682,6 +4716,143 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     el.appendChild(document.createTextNode(' (password).'));
   }
 
+  // ---------- Status tab (v2.79): reads window.SACRED_STATUS from status-data.js ----------
+
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, attrs) {
+    var n = document.createElementNS(SVG_NS, tag);
+    for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) n.setAttribute(k, attrs[k]);
+    return n;
+  }
+
+  // A semicircle gauge: grey track, coloured arc for the share done, the percentage in the middle.
+  function statusDialSvg(pct) {
+    var svg = svgEl('svg', { viewBox: '0 0 200 128', role: 'img' });
+    var cx = 100, cy = 100, r = 80;
+    function pt(f) { var a = Math.PI * (1 - f); return [cx + r * Math.cos(a), cy - r * Math.sin(a)]; }
+    var s0 = pt(0), s1 = pt(1);
+    svg.appendChild(svgEl('path', { d: 'M' + s0[0] + ' ' + s0[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + s1[0] + ' ' + s1[1], fill: 'none', stroke: '#e4e9f2', 'stroke-width': 18, 'stroke-linecap': 'round' }));
+    if (pct !== null && pct !== undefined) {
+      var f = Math.max(0, Math.min(1, pct / 100));
+      var colour = pct >= 90 ? '#002C77' : (pct >= 50 ? '#0082C0' : (pct >= 25 ? '#EDB71E' : '#E25303'));
+      if (f > 0) {
+        var e = pt(f);
+        svg.appendChild(svgEl('path', { d: 'M' + s0[0] + ' ' + s0[1] + ' A' + r + ' ' + r + ' 0 0 1 ' + e[0].toFixed(2) + ' ' + e[1].toFixed(2), fill: 'none', stroke: colour, 'stroke-width': 18, 'stroke-linecap': 'round' }));
+      }
+    }
+    var t = svgEl('text', { x: 100, y: 92, 'text-anchor': 'middle', 'font-size': 34, 'font-weight': 800, fill: '#002C77', 'font-family': 'inherit' });
+    t.textContent = (pct === null || pct === undefined) ? '–' : (pct + '%');
+    svg.appendChild(t);
+    var lo = svgEl('text', { x: 20, y: 126, 'text-anchor': 'middle', 'font-size': 10, fill: '#5a6880' }); lo.textContent = '0';
+    var hi = svgEl('text', { x: 180, y: 126, 'text-anchor': 'middle', 'font-size': 10, fill: '#5a6880' }); hi.textContent = '100';
+    svg.appendChild(lo); svg.appendChild(hi);
+    return svg;
+  }
+
+  function statusLastText(v) {
+    if (!v) return '';
+    return 'latest ' + String(v).substring(0, 10);
+  }
+
+  function renderStatus() {
+    var st = window.SACRED_STATUS;
+    var dials = $('status-dials'), rigsT = $('status-rigs'), typesT = $('status-types');
+    if (!dials) return;
+    dials.innerHTML = ''; rigsT.innerHTML = ''; typesT.innerHTML = '';
+    var has = st && Array.isArray(st.loops);
+    $('status-empty').hidden = !!has;
+    $('status-rigs-h').hidden = !has || !(st.rigs || []).length;
+    $('status-types-h').hidden = !has || !(st.posts30 || []).length;
+    $('status-stamp').textContent = has ? ('Counted ' + String(st.generatedAt || '').replace('T', ' ').substring(0, 16) + ', scanner v' + (st.scanner || '?') + '.') : '';
+    if (!has) return;
+
+    st.loops.forEach(function (l) {
+      var isDial = l.kind === 'dial';
+      var card = mk('div', 'st-dial' + (isDial ? '' : ' st-count') + (!isDial && l.open > 0 ? ' st-warn' : ''));
+      if (isDial) {
+        card.appendChild(statusDialSvg(l.total > 0 ? l.percent : null));
+        card.appendChild(mk('div', 'st-name', l.name));
+        card.appendChild(mk('div', 'st-frac', l.total > 0 ? (l.done + ' of ' + l.total + ' done' + (l.open > 0 ? ', ' + l.open + ' open' : '')) : 'nothing raised yet'));
+      } else {
+        card.appendChild(mk('div', 'st-big', String(l.key === 'cbm-high' ? l.open : l.total)));
+        card.appendChild(mk('div', 'st-name', l.name));
+      }
+      if (l.note) card.appendChild(mk('div', 'st-note', l.note));
+      if (l.last) card.appendChild(mk('div', 'st-last', statusLastText(l.last)));
+      card.title = l.name + (isDial && l.total > 0 ? ': ' + l.done + ' of ' + l.total : '');
+      dials.appendChild(card);
+    });
+
+    // By rig. Amber where something is open with that rig; the training asset is tagged, not counted as a rig at sea.
+    var cols = [
+      ['rig', 'Rig', 'text'],
+      ['lastRigVisitReport', 'Last rig visit report', 'text'],
+      ['lastDailyChecks', 'Last daily checks', 'text'],
+      ['checkRounds7', 'Check rounds, 7 days', 'checks'],
+      ['cbmInspections30', 'CBM inspections, 30 days', 'num'],
+      ['cbmGrade4or5', 'CBM tasks at 4 or 5', 'open'],
+      ['aabOutstanding', 'AABs to acknowledge', 'open'],
+      ['prechargeOpen', 'Precharge not issued', 'open'],
+      ['helpOpen', 'Help requests open', 'open']
+    ];
+    var thead = mk('thead'), hr = mk('tr');
+    cols.forEach(function (c) { hr.appendChild(mk('th', c[2] === 'text' ? '' : 'st-num', c[1])); });
+    thead.appendChild(hr); rigsT.appendChild(thead);
+    var tb = mk('tbody');
+    (st.rigs || []).forEach(function (r) {
+      var tr = mk('tr');
+      cols.forEach(function (c) {
+        var v = r[c[0]], td;
+        if (c[2] === 'text') {
+          td = mk('td', '', v ? String(v) : '–');
+          if (c[0] === 'rig' && r.training) td.appendChild(mk('span', 'st-tag', 'training'));
+        } else if (c[2] === 'checks') {
+          var exp = r.checksExpected7 || 0;
+          td = mk('td', 'st-num' + (exp && v < exp ? ' st-amber' : (!exp ? ' st-zero' : '')), exp ? (v + ' / ' + exp) : (v ? String(v) : '–'));
+        } else if (c[2] === 'open') {
+          td = mk('td', 'st-num' + (v > 0 ? ' st-amber' : ' st-zero'), String(v || 0));
+        } else {
+          td = mk('td', 'st-num' + (v > 0 ? '' : ' st-zero'), String(v || 0));
+        }
+        tr.appendChild(td);
+      });
+      tb.appendChild(tr);
+    });
+    rigsT.appendChild(tb);
+
+    // Rig by report type, last 30 days.
+    var types = st.types || [], cells = st.posts30 || [];
+    if (!cells.length) return;
+    var byKey = {}, rigs = {};
+    cells.forEach(function (c) { byKey[c.rig + '|' + c.type] = c.count; rigs[c.rig] = true; });
+    var rigList = Object.keys(rigs).sort();
+    var th2 = mk('thead'), h2 = mk('tr');
+    h2.appendChild(mk('th', '', 'Rig'));
+    types.forEach(function (t) { h2.appendChild(mk('th', 'st-num', t)); });
+    h2.appendChild(mk('th', 'st-num', 'Total'));
+    th2.appendChild(h2); typesT.appendChild(th2);
+    var tb2 = mk('tbody');
+    rigList.forEach(function (rg) {
+      var tr = mk('tr'), sum = 0;
+      tr.appendChild(mk('td', '', rg || 'Unattributed'));
+      types.forEach(function (t) {
+        var n = byKey[rg + '|' + t] || 0; sum += n;
+        tr.appendChild(mk('td', 'st-num ' + (n === 0 ? 'st-zero' : (n >= 10 ? 'st-heat3' : (n >= 4 ? 'st-heat2' : 'st-heat1'))), n ? String(n) : '·'));
+      });
+      tr.appendChild(mk('td', 'st-num', String(sum)));
+      tb2.appendChild(tr);
+    });
+    typesT.appendChild(tb2);
+  }
+
+  function reloadStatus() {
+    var s = document.createElement('script');
+    s.src = 'status-data.js?v=' + Date.now();
+    s.onload = function () { renderStatus(); s.remove(); };
+    s.onerror = function () { renderStatus(); s.remove(); };   // no file yet: the tab says so
+    document.body.appendChild(s);
+  }
+
   function render() {
     var data = window.DASHBOARD_DATA;
     var hasData = data && Array.isArray(data.reports);
@@ -4722,6 +4893,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
       if (stamp !== state.lastStamp) {
         state.lastStamp = stamp;
         render();
+        reloadStatus();
       } else {
         renderFreshness();  // keep the "x min ago" line honest
       }
@@ -4760,8 +4932,11 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     var isInvest = name === 'invest';
     var isCompliance = name === 'compliance';
     var isAab = name === 'aab';
+    var isStatus = name === 'status';
     $('tab-aab-btn').classList.toggle('active', isAab);
     $('aab-view').hidden = !isAab;
+    $('tab-status-btn').classList.toggle('active', isStatus);
+    $('status-view').hidden = !isStatus;
     $('tab-list-btn').classList.toggle('active', isList);
     $('tab-cbm-btn').classList.toggle('active', isCbm);
     $('tab-monitoring-btn').classList.toggle('active', isMonitoring);
@@ -4778,7 +4953,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     // The monitoring, investigations and compliance tabs are deliberately
     // fleet-wide (one tile/card per rig or investigation), so the rig
     // filter has nothing to scope there.
-    $('rig-filter').hidden = isMonitoring || isInvest || isCompliance;   // the AABs tab honours the rig filter: that rig's mirrored cases
+    $('rig-filter').hidden = isMonitoring || isInvest || isCompliance || isStatus;   // the AABs tab honours the rig filter: that rig's mirrored cases
   }
   $('tab-list-btn').addEventListener('click', function () { showTab('list'); });
   $('tab-cbm-btn').addEventListener('click', function () { showTab('cbm'); });
@@ -4787,6 +4962,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
   $('tab-invest-btn').addEventListener('click', function () { showTab('invest'); });
   $('tab-compliance-btn').addEventListener('click', function () { showTab('compliance'); });
   $('tab-aab-btn').addEventListener('click', function () { showTab('aab'); });
+  $('tab-status-btn').addEventListener('click', function () { showTab('status'); reloadStatus(); });
 
   $('cbm-class-select').addEventListener('change', function () {
     state.cbmClass = this.value;
@@ -4826,6 +5002,7 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     state.lastStamp = dataStamp();
     render();
     initBwmStatus();  // async; re-renders the Rig Monitoring tiles when planning status arrives
+    reloadStatus();   // the Status tab's counts, written by the scanner beside reports-data.js
     setInterval(reloadData, POLL_MS);
 
     // Deep link from notification emails: ?report=<file> opens that report.

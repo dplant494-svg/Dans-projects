@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.78'
+$ScriptVersion = '2.79'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4033,6 +4033,168 @@ if ($databaseExportPath) {
         Write-Host "Database export: $($exportTables.Count) table(s), $exportRows row(s), schema $DatabaseExportSchema to $databaseExportPath" -ForegroundColor Cyan
     } catch { Write-Warning "Database export failed: $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
 }
+
+# ---------------------------------------------------------------------------
+# v2.79: the Status tab. One small file, status-data.js, beside reports-data.js: every loop in SACRED counted at the end
+# of the run (total, done, open, percent done for a dial), one row per rig, and rig by report type for thirty days.
+# Counts only: every number is something posted or recorded; the board judges nothing. The same rules as the SQL views
+# in database/ddl-v5-status-views.sql, so the dashboard and the database agree. Dials read percent done; a daily-checks
+# dial reads rounds received against two a day (Day and Night) for the last seven days, for rigs that post checks.
+# ---------------------------------------------------------------------------
+try {
+    $stToday = (Get-Date).ToUniversalTime().Date
+    $stInv = [Globalization.CultureInfo]::InvariantCulture
+    function ConvertTo-StatusDate {
+        param($Value)
+        $t = [string]$Value
+        if ($t.Length -lt 10) { return $null }
+        $d = [datetime]::MinValue
+        if ([datetime]::TryParseExact($t.Substring(0, 10), 'yyyy-MM-dd', $stInv, [Globalization.DateTimeStyles]::None, [ref]$d)) { return $d }
+        return $null
+    }
+    function Get-StatusReportDate {
+        param($Row)
+        $d = ConvertTo-StatusDate (Get-Prop $Row 'reportDate')
+        if ($null -eq $d) { $d = ConvertTo-StatusDate (Get-Prop $Row 'date') }
+        return $d
+    }
+    function Get-StatusMax {
+        param($Rows, [string]$Field)
+        $m = ''
+        foreach ($r in $Rows) { $v = [string](Get-Prop $r $Field); if ($v -and ([string]::CompareOrdinal($v, $m) -gt 0)) { $m = $v } }
+        return $m
+    }
+    $stReports   = @(ConvertTo-ExportArray $payload.reports)
+    $stChecks    = @(ConvertTo-ExportArray $payload.rigChecks)
+    $stAab       = @(ConvertTo-ExportArray $payload.aabStatus)
+    $stHelp      = @(ConvertTo-ExportArray $payload.helpRequests)
+    $stOem       = @(ConvertTo-ExportArray $payload.oemCopies)
+    $stGrades    = @(ConvertTo-ExportArray $payload.cbmGrades)
+    $stPrecharge = @(ConvertTo-ExportArray $pcExportRows)
+    $stSsce      = @(ConvertTo-ExportArray $ssceRequestsArr)
+
+    $stLoops = New-Object System.Collections.ArrayList
+    function Add-StatusLoop {
+        param([string]$Key, [string]$Name, [int]$Total, [int]$Done, [int]$Open, [string]$Last, [string]$Kind, [string]$Note)
+        $pct = $null
+        if ($Kind -eq 'dial' -and $Total -gt 0) { $pct = [int][math]::Round(100.0 * [math]::Min($Done, $Total) / $Total, 0) }
+        [void]$stLoops.Add([ordered]@{ key = $Key; name = $Name; total = $Total; done = $Done; open = $Open; percent = $pct; last = $Last; kind = $Kind; note = $Note })
+    }
+
+    # Daily checks: rounds are distinct files (kind Daily Checks), last seven days, against two a day per rig that posts them.
+    $roundsByRig7 = @{}; $checkRigs30 = @{}; $lastCheckByRig = @{}; $allRounds = @{}
+    foreach ($c in $stChecks) {
+        $rig = [string](Get-Prop $c 'rig'); $file = [string](Get-Prop $c 'file'); $kind = [string](Get-Prop $c 'kind')
+        if (-not $rig -or -not $file) { continue }
+        $allRounds[$file] = $true
+        $d = ConvertTo-StatusDate (Get-Prop $c 'date')
+        if ($null -eq $d) { continue }
+        if (-not $lastCheckByRig.ContainsKey($rig) -or $d -gt $lastCheckByRig[$rig]) { $lastCheckByRig[$rig] = $d }
+        if ($kind -ne 'Daily Checks') { continue }
+        if ($d -ge $stToday.AddDays(-29)) { $checkRigs30[$rig] = $true }
+        if ($d -ge $stToday.AddDays(-6)) {
+            if (-not $roundsByRig7.ContainsKey($rig)) { $roundsByRig7[$rig] = @{} }
+            $roundsByRig7[$rig][$file] = $true
+        }
+    }
+    $rounds7 = 0; foreach ($k in $roundsByRig7.Keys) { $rounds7 += $roundsByRig7[$k].Count }
+    $expected7 = 14 * $checkRigs30.Count
+    $lastCheckAll = ''; foreach ($k in $lastCheckByRig.Keys) { $v = $lastCheckByRig[$k].ToString('yyyy-MM-dd'); if ([string]::CompareOrdinal($v, $lastCheckAll) -gt 0) { $lastCheckAll = $v } }
+
+    $rep7 = 0; foreach ($r in $stReports) { $d = Get-StatusReportDate $r; if ($null -ne $d -and $d -ge $stToday.AddDays(-6)) { $rep7++ } }
+    Add-StatusLoop 'reports' 'Reports posted' $stReports.Count $stReports.Count 0 (Get-StatusMax $stReports 'modified') 'count' "$rep7 in the last 7 days"
+    Add-StatusLoop 'checks' 'Daily checks, last 7 days' $expected7 $rounds7 ([math]::Max(0, $expected7 - $rounds7)) $lastCheckAll 'dial' ("$rounds7 rounds received against two a day on " + $checkRigs30.Count + " rig(s) that post checks; " + $allRounds.Count + " rounds on record")
+
+    $pcDone = @($stPrecharge | Where-Object { [string](Get-Prop $_ 'status') -eq 'issued' }).Count
+    Add-StatusLoop 'precharge' 'Precharge requests issued' $stPrecharge.Count $pcDone ($stPrecharge.Count - $pcDone) (Get-StatusMax $stPrecharge 'saved') 'dial' 'a request is done when its issued sheet is posted'
+
+    $aabAck = @($stAab | Where-Object { @('acknowledged','closed') -contains [string](Get-Prop $_ 'state') }).Count
+    $aabClosed = @($stAab | Where-Object { [string](Get-Prop $_ 'state') -eq 'closed' }).Count
+    $aabOverdue = @($stAab | Where-Object { [string](Get-Prop $_ 'overdue') -eq 'True' -or [string](Get-Prop $_ 'overdue') -eq 'true' }).Count
+    Add-StatusLoop 'aab-ack' 'AABs acknowledged by the rig' $stAab.Count $aabAck ($stAab.Count - $aabAck) (Get-StatusMax $stAab 'issueDate') 'dial' "one per advisory per rig; $aabOverdue overdue"
+    Add-StatusLoop 'aab-close' 'AABs closed by Technical Services' $stAab.Count $aabClosed ($stAab.Count - $aabClosed) (Get-StatusMax $stAab 'closedAt') 'dial' 'closed after the acknowledgement is reviewed'
+
+    $helpDone = @($stHelp | Where-Object { [string](Get-Prop $_ 'state') -ne 'open' }).Count
+    Add-StatusLoop 'help' 'Help Centre requests answered' $stHelp.Count $helpDone ($stHelp.Count - $helpDone) (Get-StatusMax $stHelp 'postedAt') 'dial' 'answered once the office acknowledges'
+
+    $ssceDone = @($stSsce | Where-Object { [string](Get-Prop $_ 'decision') -ne '' }).Count
+    Add-StatusLoop 'ssce' 'SSCE requests decided' $stSsce.Count $ssceDone ($stSsce.Count - $ssceDone) (Get-StatusMax $stSsce 'submittedAt') 'dial' 'approved or denied on the SSCE Requests Dashboard'
+
+    Add-StatusLoop 'oem' 'CBM reports sent to NOV' $stOem.Count $stOem.Count 0 (Get-StatusMax $stOem 'sent') 'count' 'through the CBM to OEM flow'
+
+    # CBM: the latest grade per rig, class, equipment and task; how many stand at 4 or 5.
+    $latest = @{}
+    foreach ($g in $stGrades) {
+        $key = ([string](Get-Prop $g 'rig')) + '|' + ([string](Get-Prop $g 'class')) + '|' + ([string](Get-Prop $g 'equip')) + '|' + ([string](Get-Prop $g 'itemKey'))
+        $gd = [string](Get-Prop $g 'date')
+        if (-not $latest.ContainsKey($key) -or [string]::CompareOrdinal($gd, [string](Get-Prop $latest[$key] 'date')) -gt 0) { $latest[$key] = $g }
+    }
+    $hiByRig = @{}; $hiAll = 0
+    foreach ($k in $latest.Keys) {
+        $gv = [string](Get-Prop $latest[$k] 'grade')
+        if ($gv -eq '4' -or $gv -eq '5') { $hiAll++; $rg = [string](Get-Prop $latest[$k] 'rig'); if ($hiByRig.ContainsKey($rg)) { $hiByRig[$rg]++ } else { $hiByRig[$rg] = 1 } }
+    }
+    Add-StatusLoop 'cbm-high' 'CBM tasks whose latest grade is 4 or 5' $hiAll 0 $hiAll (Get-StatusMax $stGrades 'date') 'count' "of $($latest.Count) graded tasks on record; a 5 on a test task is a failed test"
+
+    # One row per rig.
+    $stRigNames = @{}
+    foreach ($r in $stReports) { $rg = [string](Get-Prop $r 'rig'); if ($rg -and $rg -ne 'Unattributed') { $stRigNames[$rg] = $true } }
+    $stRigs = New-Object System.Collections.ArrayList
+    foreach ($rg in ($stRigNames.Keys | Sort-Object)) {
+        $lastVisit = $null; $cbm30 = 0
+        foreach ($r in $stReports) {
+            if ([string](Get-Prop $r 'rig') -ne $rg) { continue }
+            $d = Get-StatusReportDate $r; $rt = [string](Get-Prop $r 'reporttype')
+            if ($rt -eq 'Rig Visit' -and $null -ne $d -and ($null -eq $lastVisit -or $d -gt $lastVisit)) { $lastVisit = $d }
+            if ($rt -eq 'CBM Inspection' -and $null -ne $d -and $d -ge $stToday.AddDays(-29)) { $cbm30++ }
+        }
+        $r7 = 0; if ($roundsByRig7.ContainsKey($rg)) { $r7 = $roundsByRig7[$rg].Count }
+        [void]$stRigs.Add([ordered]@{
+            rig = $rg
+            lastRigVisitReport = $(if ($lastVisit) { $lastVisit.ToString('yyyy-MM-dd') } else { '' })
+            lastDailyChecks    = $(if ($lastCheckByRig.ContainsKey($rg)) { $lastCheckByRig[$rg].ToString('yyyy-MM-dd') } else { '' })
+            checkRounds7       = $r7
+            checksExpected7    = $(if ($checkRigs30.ContainsKey($rg)) { 14 } else { 0 })
+            cbmInspections30   = $cbm30
+            cbmGrade4or5       = $(if ($hiByRig.ContainsKey($rg)) { $hiByRig[$rg] } else { 0 })
+            aabOutstanding     = @($stAab | Where-Object { [string](Get-Prop $_ 'rig') -eq $rg -and -not (@('acknowledged','closed') -contains [string](Get-Prop $_ 'state')) }).Count
+            prechargeOpen      = @($stPrecharge | Where-Object { [string](Get-Prop $_ 'rig') -eq $rg -and [string](Get-Prop $_ 'status') -ne 'issued' }).Count
+            helpOpen           = @($stHelp | Where-Object { [string](Get-Prop $_ 'rig') -eq $rg -and [string](Get-Prop $_ 'state') -eq 'open' }).Count
+            training           = ($rg -eq 'SSCE Equipment')
+        })
+    }
+
+    # Rig by report type, last thirty days.
+    $stTypes = @{}; $stMatrix = @{}
+    foreach ($r in $stReports) {
+        $d = Get-StatusReportDate $r
+        if ($null -eq $d -or $d -lt $stToday.AddDays(-29)) { continue }
+        $rg = [string](Get-Prop $r 'rig'); $rt = [string](Get-Prop $r 'reporttype'); if (-not $rt) { $rt = 'Other' }
+        $stTypes[$rt] = $true
+        $mk = $rg + '|' + $rt
+        if ($stMatrix.ContainsKey($mk)) { $stMatrix[$mk]++ } else { $stMatrix[$mk] = 1 }
+    }
+    $stCells = New-Object System.Collections.ArrayList
+    foreach ($mk in $stMatrix.Keys) { $parts = $mk.Split('|'); [void]$stCells.Add([ordered]@{ rig = $parts[0]; type = $parts[1]; count = $stMatrix[$mk] }) }
+
+    $statusOut = [ordered]@{
+        generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
+        scanner     = $ScriptVersion
+        loops       = $stLoops.ToArray()
+        rigs        = $stRigs.ToArray()
+        types       = @($stTypes.Keys | Sort-Object)
+        posts30     = $stCells.ToArray()
+    }
+    $statusFile = Join-Path (Split-Path -Parent $outputFile) 'status-data.js'
+    [System.IO.File]::WriteAllText($statusFile, ('window.SACRED_STATUS = ' + (ConvertTo-ReportJson $statusOut) + ";`n"), (New-Object System.Text.UTF8Encoding($false)))
+    $stDeployed = ''
+    if ($deployPath -and $stReports.Count -gt 0 -and (Test-Path -Path $deployPath)) {
+        Copy-Item -Path $statusFile -Destination (Join-Path $deployPath 'status-data.js') -Force
+        $stDeployed = ", deployed to $deployPath"
+    }
+    $dialLine = (@($stLoops | Where-Object { $_.kind -eq 'dial' } | ForEach-Object { '{0} {1}%' -f $_.key, $(if ($null -eq $_.percent) { '-' } else { $_.percent }) }) -join ', ')
+    Write-Host "Status tab: $($stLoops.Count) loop(s), $($stRigs.Count) rig(s) ($dialLine)$stDeployed" -ForegroundColor Cyan
+} catch { Write-Warning "Status tab data not written (scan unaffected): $($_.Exception.Message) at $($_.InvocationInfo.ScriptLineNumber)" }
 
 if ($scanLockHeld) { try { Remove-Item -Path $scanLockFile -Force } catch { } }
 Write-Host ("Scan finished in {0:N0} s" -f $scanClock.Elapsed.TotalSeconds) -ForegroundColor Green
