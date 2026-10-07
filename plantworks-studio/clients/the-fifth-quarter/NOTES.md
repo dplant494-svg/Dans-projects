@@ -32,7 +32,7 @@ These need a fact from the client before they go in. Wrong data here is worse th
 
 ## Open items (carried from the handoff)
 
-- [ ] **January 2027**: replace the two booking mailtos with the real booking-system URL (hero button, nav "Book" link, and the `ReserveAction` target in the JSON-LD).
+- [ ] **Bookings: Toast Tables** (decided 7 Oct 2026). In the UK Toast doesn't offer its embedded widget, so the site links out. When Toast is set up, get the link from Toast Web → Settings → Reservations → Online access → "Copy online reservation link", and swap it in for the three `mailto:bookings@` links (hero button, nav "Book", and the `ReserveAction` target in the JSON-LD). Same link on Instagram's "Reserve" action button and as a QR code on printed menus. Until then, the mailto stays, so `bookings@` must receive email at launch.
 - [ ] **Verify steak pricing**: "from £23 per 100g" is £230/kg. Entered as written; check with client.
 - [ ] Prices missing from lunch, deli, dinner, Sunday mains, steak extras. Layout supports `.dish-price` spans.
 - [ ] Deli sandwich descriptions: Cheesesteak, Chicken Parm, Fish Finger are name-only.
