@@ -54,7 +54,7 @@ Feedback arrives as photos of handwritten notes and WhatsApp screenshots. Transc
 
 Domain `the5thquarter.co.uk` is in the owner's (Mark's) GoDaddy account. Account details are never written into this repo; access goes through GoDaddy's **Delegate Access** (Account Settings → Delegate Access → invite Dan's email, "Products & Domains" level), not a shared password or PIN.
 
-1. **Balance paid** before the switch, per the proposal (balance due before the site goes live).
+1. **Free build (confirmed 7 Oct 2026)**: no invoice. In return, in writing (a WhatsApp or email from Mark is enough): permission to show the site and reel in the Plantworks portfolio and socials; the "Site by Plantworks Studio" footer credit stays; a named testimonial at launch. Also agreed in the same message: hosting sits free on the Plantworks Netlify account; the domain and any mailboxes stay in Mark's name and he pays their renewals; changes after launch are either the €40/month Care plan or quoted small jobs.
 2. **Email first**: in GoDaddy DNS, screenshot every record. Find out whether `info@` and `bookings@the5thquarter.co.uk` exist (MX records). The site links to both. If no mailbox exists, set one up before launch: forwarding to Mark's own inbox (free, e.g. ImprovMX) or proper mailboxes (Microsoft 365 / Google Workspace, ~£5 per user per month).
 3. **Netlify**: new project from GitHub, base and publish directory `plantworks-studio/clients/the-fifth-quarter`, branch `claude/new-business-venture-7pxnxz`, no build command. **Forms → enable form detection before the first deploy**; notifications for `suggestions` to info@ (or Mark's own email until info@ exists).
 4. Netlify → Domain management → add `the5thquarter.co.uk` and `www.the5thquarter.co.uk`.

@@ -125,7 +125,7 @@ Placeholders that must be swapped before launch are listed in the checklist belo
 ## Roadmap
 
 1. **Portfolio of three**
-   - [x] The Fifth Quarter (in flight; open items in `clients/the-fifth-quarter/NOTES.md`)
+   - [x] The Fifth Quarter (free build for the portfolio; go-live checklist and open items in `clients/the-fifth-quarter/NOTES.md`)
    - [x] Praetorian Fitness, premium gym apparel (draft built; placeholders and asks in `clients/praetorian-fitness/NOTES.md`)
    - [x] Fictional bilingual Marbella restaurant: Brasa y Sal (`site/work/brasa-y-sal/`)
    - [x] Fictional property-services site: Pinar Property Care (`site/work/pinar-property/`)
