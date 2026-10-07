@@ -47,6 +47,8 @@ Feedback arrives as photos of handwritten notes and WhatsApp screenshots. Transc
 
 ## Social
 
+- **Launch grid** (7 Oct 2026): nine 1080×1350 posts, profile picture, captions and a from-scratch setup guide for Mark in `social/launch-grid/`. Mark creates and owns the accounts on info@; Plantworks gets access through Meta Business Suite and as a Google Business Profile manager.
+
 - **Reel 1 "Beneath our feet"** (6 Oct 2026): 30 s Instagram reel built from the client's storyboard, source in `social/reel-1/`. Waiting on client sign-off, full-resolution images, and a decision on real archive photos for the three historic frames. See `social/reel-1/README.md`.
 - [x] "Site by Plantworks Studio" footer credit added (6 Oct 2026).
 
