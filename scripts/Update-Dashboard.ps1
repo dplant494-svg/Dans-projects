@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.80'
+$ScriptVersion = '2.81'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4175,7 +4175,7 @@ try {
         }
         $r7 = 0; if ($roundsByRig7.ContainsKey($rg)) { $r7 = $roundsByRig7[$rg].Count }
         [void]$stRigs.Add([ordered]@{
-            rig = $rg
+            rig = [string]$rg
             lastRigVisitReport = $(if ($lastVisit) { $lastVisit.ToString('yyyy-MM-dd') } else { '' })
             lastDailyChecks    = $(if ($lastCheckByRig.ContainsKey($rg)) { $lastCheckByRig[$rg].ToString('yyyy-MM-dd') } else { '' })
             checkRounds7       = $r7
@@ -4207,13 +4207,17 @@ try {
         scanner     = $ScriptVersion
         loops       = $stLoops.ToArray()
         rigs        = $stRigs.ToArray()
-        types       = @($stTypes.Keys | Sort-Object)
+        types       = [string[]]@($stTypes.Keys | Sort-Object)
         posts30     = $stCells.ToArray()
     }
     $statusDir = Join-Path $repoRoot 'status'
     if (-not (Test-Path -Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir -Force | Out-Null }
     $statusFile = Join-Path $statusDir 'status-data.js'
-    [System.IO.File]::WriteAllText($statusFile, ('window.SACRED_STATUS = ' + (ConvertTo-ReportJson $statusOut) + ";`n"), (New-Object System.Text.UTF8Encoding($false)))
+    # v2.81: through ConvertTo-AabPlain first. On Windows PowerShell 5.1 the rig and report-type names come out of
+    # Sort-Object wrapped in PSObject, and the JavaScriptSerializer walks the wrapper's members into a circular reference
+    # (Dan's PC, 8 Oct: "A circular reference was detected ... PSParameterizedProperty"). PowerShell 7 uses ConvertTo-Json,
+    # which unwraps them, so the test set never showed it. ConvertTo-AabPlain unwraps every value, as it does for aab-data.js.
+    [System.IO.File]::WriteAllText($statusFile, ('window.SACRED_STATUS = ' + (ConvertTo-ReportJson (ConvertTo-AabPlain $statusOut)) + ";`n"), (New-Object System.Text.UTF8Encoding($false)))
     $oldPublic = Join-Path (Split-Path -Parent $outputFile) 'status-data.js'     # the first v2.79 build wrote it beside reports-data.js
     if (Test-Path -Path $oldPublic) { Remove-Item -Path $oldPublic -Force }
     $stDeployed = ''
