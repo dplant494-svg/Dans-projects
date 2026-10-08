@@ -1,6 +1,6 @@
 # Sweetfield's at The Fifth Quarter
 
-**Status: ready, not live.** Waiting for Mark's go-ahead. Laura approved the paragraph word for word (8 Oct 2026).
+**Status: LIVE on the site from 8 Oct 2026** (end of the Deli section, images in `img/sweetfields/`). Laura approved the paragraph word for word (8 Oct 2026).
 
 ## The arrangement (from Mark, private)
 Laura runs Sweetfield's from The Fifth Quarter's kitchen rent free. She has her own space in the deli fridges and a shelf or two, and her own sign ("Sweetfield's @ The 5th Quarter"). In return the restaurant gets a bakery: she makes cakes, bread and desserts for it (restaurant's ingredients for its stock, hers for her own), and she's an extra pair of hands when it's busy. It works both ways: the team helps on her big orders. Joint stalls at the Christmas markets.
