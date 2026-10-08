@@ -1,0 +1,36 @@
+<!-- CSS: paste into the <style> block, before "Menu" -->
+<style>
+  /* ---------- Sweetfields (mockup) ---------- */
+  .sf{max-width:60rem;margin:3.2rem auto 0;padding:2.4rem 1.4rem 0;border-top:1px solid rgba(184,149,90,.5);text-align:center}
+  .sf-kicker{font-family:'Marcellus',serif;letter-spacing:.24em;color:var(--brass);font-size:.95rem}
+  .sf-head{display:flex;align-items:center;justify-content:center;gap:1.6rem;margin-top:1rem;flex-wrap:wrap}
+  .sf-logo{width:7.5rem;height:7.5rem;border-radius:50%;background:#fff;object-fit:cover;border:1px solid rgba(184,149,90,.6)}
+  .sf h3{font-family:'Marcellus',serif;font-weight:400;color:var(--navy);font-size:1.7rem;letter-spacing:.06em;text-align:left}
+  .sf h3 small{display:block;font-size:.95rem;letter-spacing:.18em;color:var(--brass);margin-top:.3rem}
+  .sf p{max-width:38rem;margin:1.3rem auto 0;text-align:left}
+  .sf-photos{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:2rem}
+  .sf-photos img{width:100%;aspect-ratio:1;object-fit:cover;display:block;border:1px solid rgba(184,149,90,.4)}
+  .sf p.sf-order{text-align:center;margin-top:2rem;font-style:italic}
+  .sf-cta{display:inline-block;margin:.9rem .4rem 0;font-family:'Marcellus',serif;letter-spacing:.14em;color:var(--navy);text-decoration:none;border:1px solid var(--brass);padding:.75rem 1.8rem}
+  @media (max-width:46rem){.sf-photos{grid-template-columns:repeat(2,1fr)}.sf h3{text-align:center}}
+
+</style>
+
+<!-- HTML: paste at the end of the Deli section, before its </section>. Images go in /img/sweetfields/ (change src paths from img/ to img/sweetfields/). -->
+  <div class="sf" id="sweetfields">
+    <div class="sf-kicker">THE BAKERY</div>
+    <div class="sf-head">
+      <img class="sf-logo" src="img/logo.jpg" alt="Sweetfield&rsquo;s logo">
+      <h3>Sweetfield&rsquo;s<small>AT THE FIFTH QUARTER</small></h3>
+    </div>
+    <p>Our bakery belongs to Sweetfield&rsquo;s. It began in lockdown as Say Cheesecake, baked at home and on the shelves of Fenwick Food Hall in Newcastle within no time. Six years on, Sweetfield&rsquo;s bakes from our kitchen for cheesecake lovers and cheesecake haters alike: look for her fridge and shelves in the deli, and for her bakes on our menus.</p>
+    <div class="sf-photos">
+      <img src="img/cheesecakes.jpg" alt="Mini cheesecakes with raspberry, chocolate and caramel toppings">
+      <img src="img/custard-cream.jpg" alt="Custard cream cheesecakes">
+      <img src="img/croissants.jpg" alt="Filled croissants drizzled with caramel">
+      <img src="img/sausage-rolls.jpg" alt="Sausage rolls">
+    </div>
+    <p class="sf-order">Celebration cakes and orders go straight to Laura:</p>
+    <a class="sf-cta" href="https://m.me/Saycheese.cake20" rel="noopener">Message on Facebook</a>
+    <!-- add when Laura's new email exists: <a class="sf-cta" href="mailto:EMAIL">Email Laura</a> -->
+  </div>
