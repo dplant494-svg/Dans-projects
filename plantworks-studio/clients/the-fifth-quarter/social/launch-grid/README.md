@@ -125,15 +125,19 @@ Roast sirloin of beef. Herb rolled pork belly with crackling. Roast chicken with
 #TheFifthQuarter #SundayRoast #SundayLunch #DurhamFood #CountyDurham
 ```
 
-**Post 7: Head chef** (post this as a **Collab** with @chefdavidhenry: tap Tag people, Invite collaborator. It then appears on his profile too, in front of his followers.)
+**Post 7: Head chef**, a three-image carousel: `fifth-quarter-07.png`, then `07b` (the road), then `07c` (his quote). Select all three when posting. Post it as a **Collab** with @chefdavidhenry: tap Tag people, Invite collaborator. It then appears on his profile too, in front of his followers.
 ```
 Meet our head chef, David Henry.
 
-A MasterChef: The Professionals semi-finalist who cooked at Rockliffe Hall under Kenny Atkinson, then led The Crathorne Arms near Yarm to Teesside's best restaurant, in 2020 and again in 2026.
+He left school with no idea what he wanted to do. One catering course in Middlesbrough later, he knew: cooking was the job.
 
-Now he's cooking above the Five Quarter seam.
+Scotland made him. Then came the road: Storrs Hall, Sharrow Bay, the Bay Horse at Hurworth, and the Pot Kiln in Berkshire, pulling the crayfish traps from the Kennet every morning. A MasterChef: The Professionals semi-finalist while cooking in Bangor. Rockliffe Hall under Kenny Atkinson. Then twelve years at the Crathorne Arms, named Teesside's best restaurant in 2020 and again in 2026.
 
-#TheFifthQuarter #ChefDavidHenry #MasterChef #DurhamFood #NorthEastChefs
+"The North East always brings you home."
+
+Now he's cooking above the Five Quarter seam. Opening spring 2027.
+
+#TheFifthQuarter #ChefDavidHenry #MasterChef #DurhamFood #NorthEastChefs #LambtonPark
 ```
 
 **Post 8: The Bar**
@@ -170,7 +174,7 @@ Opening spring 2027.
 - Don't buy followers or run giveaways for follows; they bring the wrong people and Instagram shows the posts to fewer of the right ones.
 
 ## Before posting, check
-- **Post 7**: David approves every line (MasterChef year and order, the 2020 and 2026 awards).
+- **Post 7**: David approves all three slides and the caption. They're written from his own bio (8 Oct).
 - **Post 6**: Sunday menu as shown, or change it to something he's sure of.
 - **Post 4**: "seven days from 9am" is still the plan.
 

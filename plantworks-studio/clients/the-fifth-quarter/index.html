@@ -157,6 +157,22 @@
   }
   .strata-caption{font-size:.95rem;font-style:italic;color:#5a5342;margin-top:.8rem}
 
+  /* ---------- Head chef ---------- */
+  .chef{padding:4.5rem 0 4rem;background:var(--parchment-dim);text-align:center}
+  .chef h2{font-size:2rem;letter-spacing:.08em;color:var(--navy)}
+  .chef .chef-name{font-family:'Marcellus',serif;letter-spacing:.22em;color:var(--brass);font-size:1.05rem;margin-top:.5rem;text-align:center}
+  .chef p{max-width:38rem;margin:1.1rem auto 0;text-align:left}
+  .chef blockquote{
+    max-width:34rem;margin:2.4rem auto .4rem;font-style:italic;font-size:1.5rem;line-height:1.4;color:var(--navy);
+  }
+  .chef blockquote::before,.chef blockquote::after{color:var(--brass)}
+  .chef blockquote::before{content:"\201C"} .chef blockquote::after{content:"\201D"}
+  .chef .chef-road{
+    max-width:38rem;margin:2rem auto 0;padding-top:1.4rem;border-top:1px solid rgba(184,149,90,.5);
+    font-family:'Marcellus',serif;letter-spacing:.08em;color:#5a5342;font-size:.95rem;line-height:2;
+  }
+  .chef .chef-road span{display:inline-block;white-space:nowrap;margin:0 .8rem}
+
   /* ---------- Menu ---------- */
   .menu{
     background:var(--navy);color:var(--parchment);padding:4.5rem 0 5rem;
@@ -309,6 +325,7 @@
     <a class="nav-mark" href="#top">THE 5TH QUARTER</a>
     <div class="nav-links">
       <a href="#story">Our Name</a>
+      <a href="#chef">The Chef</a>
       <a href="#menu">Menu</a>
       <a href="#deli">The Deli</a>
       <a href="#bar">The Bar</a>
@@ -372,6 +389,23 @@
     <circle cx="560" cy="146" r="3" fill="#D8BC85"/>
   </svg>
   <p class="strata-caption">The seams of the Durham coalfield, as the mining engineers lettered them.</p>
+</section>
+
+<section class="chef" id="chef">
+  <div class="container">
+    <h2>The Head Chef</h2>
+    <p class="chef-name">DAVID HENRY</p>
+    <hr class="rule">
+    <p>David left school with no idea what he wanted to do. A catering course at college in Middlesbrough settled it quickly: cooking was the job. He qualified and went to the south-west coast of Scotland, and still says that is where he was made as a chef. As soon as he passed his driving test he worked his way through all five of the group&rsquo;s hotels, learning the classics one kitchen at a time.</p>
+    <p>Then came the road. Storrs Hall on Windermere. Sharrow Bay on Ullswater, a house that held a Michelin star and a name known around the world. The pastry section back in Scotland. Opening the Bay Horse at Hurworth. And the Pot Kiln in Berkshire, Mike Robinson&rsquo;s game kitchen, where the day began by collecting the crayfish traps from the Kennet. That is where David found his love of rustic food: proper, homemade, cooked with care.</p>
+    <p>Cooking at Jeffers by the Marina in Bangor, Northern Ireland, he entered <em>MasterChef: The Professionals</em> and reached the final eight, a semi-finalist from thousands who applied. A pub kitchen near Kirkby Stephen brought him back towards home; a call from a friend brought him the rest of the way, to the North East, where he and Mark first met. Then Rockliffe Hall under Kenny Atkinson.</p>
+    <p>A call out of the blue from Eugene McCoy took him to the Crathorne Arms near Yarm, and he stayed twelve years. The kitchen was named Teesside&rsquo;s best restaurant in 2020 and again in 2026, and those years taught him the lesson he brings to Lambton Park: cook what people want, not what the chef wants.</p>
+    <p>He and Mark have been planning The Fifth Quarter for months. The aim is simple: a real destination, a place people travel to for the food and for the whole experience.</p>
+    <blockquote>The North East always brings you home.</blockquote>
+    <div class="chef-road" aria-label="Kitchens David has cooked in">
+      <span>South-west Scotland</span> <span>Storrs Hall</span> <span>Sharrow Bay</span> <span>The Bay Horse, Hurworth</span> <span>The Pot Kiln</span> <span>Jeffers by the Marina</span> <span>Rockliffe Hall</span> <span>The Crathorne Arms</span>
+    </div>
+  </div>
 </section>
 
 <section class="menu" id="menu">

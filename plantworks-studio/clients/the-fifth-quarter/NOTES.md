@@ -86,11 +86,15 @@ Only the two bold rows change. SPF note: the record covers GoDaddy's relay (`sec
 
 ## Head chef: David Henry
 
-David is writing his own bio (6 Oct 2026); his version wins. Facts so far, and conflicts to settle with him:
+**His own bio arrived 8 Oct 2026** and is now the source. The site's "The Head Chef" section (`#chef`) and launch post 7 (three-slide carousel) are written from it, in the third person, with his line "The North East always brings you home" as the pull quote. His career, in his order: college in Middlesbrough; a five-hotel group on the south-west coast of Scotland ("what moulded me"); Storrs Hall, Windermere; back to the Scottish group; Hide café bar and grill, then Newcastle; Sharrow Bay; Scotland again, on pastry; opened the Bay Horse, Hurworth; the Pot Kiln, Berkshire (Mike Robinson, crayfish from the Kennet, "rustic food"); Jeffers by the Marina, Bangor, where he entered MasterChef: The Professionals (semi-finalist, final 8); a pub near Kirkby Stephen; back to the North East, where he met Mark; Rockliffe Hall under Kenny Atkinson; the Crathorne Arms (Eugene McCoy), 12 years.
+
+Left out of the public version on purpose: his first child; the name of the place where he and Mark met, and that it "didn't go to plan"; why Sharrow Bay was sold; Hide and Newcastle (kept the story moving). Spellings corrected from his draft: Storrs Hall, Kirkby Stephen, the Kennet. He ends with "Roll on April 2027": the site still says spring 2027 until Mark confirms April publicly.
+
+Earlier facts and conflicts:
 - Started cooking at 16 (from a draft template; confirm).
 - Worked in Berkshire, "where I found the love for the old classics" (David).
 - MasterChef: The Professionals semi-finalist: **2009** per web sources, **2010** per the draft template. Confirm the year.
-- Order: **David says MasterChef came before Rockliffe Hall** (under Kenny Atkinson); Dan's message says Rockliffe came first. David's own word stands until he says otherwise.
+- Order: settled by his bio. MasterChef (while at Jeffers, Bangor) came before Rockliffe Hall.
 - Head chef, The Crathorne Arms near Yarm, from 2014. Voted best restaurant in Teesside **2020 and 2026**. Tom Parker Bowles named its Sunday lunch among the country's best.
 - Ethos: best ingredients from trusted local suppliers; herbs and vegetables grown in the garden. Kitchen garden at Lambton Park: unknown.
 - Instagram @chefdavidhenry.
