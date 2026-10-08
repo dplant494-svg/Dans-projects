@@ -54,6 +54,8 @@ Feedback arrives as photos of handwritten notes and WhatsApp screenshots. Transc
 
 ## Go-live (prepared 6 Oct 2026)
 
+**LIVE 8 Oct 2026.** DNS switched at GoDaddy, Netlify project deployed, HTTPS on, Netlify visitor-access protection switched off (it was on by default and showed "This site is private"). Dan confirmed the public site loads. Still to do: confirm info@ and bookings@ exist in Mark's Microsoft 365 (step 2), test the suggestion form and a test email (step 7), Search Console (step 8), Reel 1 (step 9). Check Netlify's team setting so new projects aren't private by default.
+
 Domain `the5thquarter.co.uk` is in the owner's (Mark's) GoDaddy account. Account details are never written into this repo; access goes through GoDaddy's **Delegate Access** (Account Settings → Delegate Access → invite Dan's email, "Products & Domains" level), not a shared password or PIN.
 
 1. **Free build (confirmed 7 Oct 2026)**: no invoice. In return, in writing (a WhatsApp or email from Mark is enough): permission to show the site and reel in the Plantworks portfolio and socials; the "Site by Plantworks Studio" footer credit stays; a named testimonial at launch. Also agreed in the same message: hosting sits free on the Plantworks Netlify account; the domain and any mailboxes stay in Mark's name and he pays their renewals; changes after launch are either the €40/month Care plan or quoted small jobs.
