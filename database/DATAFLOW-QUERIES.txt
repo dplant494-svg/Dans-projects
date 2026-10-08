@@ -29,6 +29,8 @@ columns were typed as dates and arrived in SACRED DATA empty (every row NULL, fo
 is text except the six counts, exactly as the table was made in ddl-v1.sql.
 How: open the dataflow, click the reports query, Home > Advanced editor, select all, paste this, OK. Then
 check its Data destination (bottom right): Existing table reports, Replace, every column mapped. Save, run.
+8 Oct: on Dan's dataflow the old mapping had date and reportDate set to (none); Reset column mappings fixed it.
+Any column showing (none) in a destination mapping is silently dropped: check the mapping after any query change.
 let
     Source = SharePoint.Files("https://sdrl.sharepoint.com/sites/wellcontrol", [ApiVersion = 15]),
     Matches = Table.SelectRows(Source, each Text.Contains([Folder Path], "DatabaseExport") and [Name] = "export_reports.csv"),
