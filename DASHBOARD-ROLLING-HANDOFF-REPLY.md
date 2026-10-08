@@ -1429,3 +1429,54 @@ wording in module 1 and Q&A 1.3 is now true; on 167 it also posted.
 **For the record (ORR workbook, 6 Oct):** frozen builds WCGRRT 168 / SSORT 158 (live hashes `a723b6df13b6`, `6c06a4712ebf`);
 known errors RT KE-15 and RT KE-16 added, closed, with the 52.2 residual stated on KE-15; test summary row for both; open
 actions for the recovery, the 52.2 check and the quiet-rig watch; Day 2 questions, walkthrough and the UAT form on 168 / 158.
+
+---
+
+## From the dashboard side, 8 Oct 2026: an asset field on the C&K Stabs CBM (Dan's ask), and the CBM recovery result
+
+### A. Dan's ask: an asset field on the choke and kill stab CBM in SSORT
+
+**What Dan asked:** "We need to add an asset field for the choke and kill stab CBM in SSORT."
+
+**What the post carries today.** The CBM receipt block (`cbmData.rcpt_*`) has inspection date, company, PO, job, rig,
+model, config, serial and the test-pressure fields; **no asset number**. One C&K Stabs inspection covers **four stabs**, and
+the crew has nowhere to put four identities, so West Capella's 30 Sep post reads:
+
+```
+rcpt_model : PN: 20084080-100 (Female) - PN: 735530 (Male)
+rcpt_serial: Choke (Fem) - 10696444-001-88 - Kill (Fem) - 20084080-3086 - Choke (male) - 060929-5 - Kill (male) - 060929-9
+```
+
+**The ask, SSORT:**
+1. An **asset number** for the C&K Stabs CBM, as a field the crew fills in, never derived. Our reading of "asset" is the
+   Maximo asset number of each stab, the identity the CoC tracker and the Maximo extract key on (asset + OEM part +
+   serial), so a stab's CBM can later be matched to its certificate. **Dan to confirm that reading.**
+2. **One per stab, we suggest, not one box for four.** Choke female, kill female, choke male, kill male, each with its part
+   number, serial and asset number, so the serial box stops carrying a sentence. If you would rather add one free-text
+   asset field first, say so and why; either is additive.
+3. **Never under the key `asset`.** `meta.asset` is the rig identity contract everywhere in SACRED. Something like
+   `rcpt_asset` (one field) or a small array for the four positions; tell us the key names before it ships and the scanner
+   will show them on the report row, in the viewer and in the database export. Until then the scanner ignores the new keys
+   and nothing breaks.
+4. **The OEM copy** carries the asset numbers in the HTML NOV receive, beside the serials.
+5. **The file name:** please say what SSORT 158's name does for C&K Stabs, which today appends the whole serial box as the
+   `-SN` part. Names are not load-bearing here; we only want to know.
+
+**The freeze:** this is not a rig losing work, so it is after the class (from 21 Oct) unless Dan says otherwise before
+12 Oct. Dan decides.
+
+### B. The CBM recovery (your 51.6 note), done on 8 Oct
+
+- **7 of 8 overwritten West Capella CBMs restored**, all from Brad's own saved copies, matched to their NOV copies by
+  component and time, named as SSORT 158 would (`..._cbm-inspection_Gate-Valves-SN973654-0015-1.json` and so on), and
+  confirmed on the dashboard (350 reports). No flow fired: none carries a visit type.
+- **Upper SBOP is still missing.** Brad's saved copy is **not complete JSON**: it stops part-way through a photograph.
+  Was it cut short in transfer (email, Teams), or can SSORT's Save to File write a file that short? Worth a look; if it is
+  the tool, a crew's only backup could be unreadable without anyone knowing. Brad is asked to re-post Upper SBOP from SSORT
+  158 with Post Report only.
+- **Upper Kill FSV carries the Riser Adapter's serial** (`20035633-66`), carried over and not changed; NOV received it that
+  way too. Brad is asked to correct it and re-post. Another reason for item A: a per-stab, per-valve identity the crew
+  fills in fresh is harder to carry over by mistake than one free-text box.
+- **SSORT 158's name, live:** `..._cbm-inspection_Gate-Valves-SN973654-0012-1.json` and
+  `..._Upper-Triple-NXT-Body-SN20093748-7.json` on 7 Oct, both with serials entered. Our 52.2 (two gate valves, serial
+  blank) is still untested, so the question stands.
