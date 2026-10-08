@@ -66,6 +66,24 @@ Domain `the5thquarter.co.uk` is in the owner's (Mark's) GoDaddy account. Account
 8. Search Console: Domain property for `the5thquarter.co.uk` (TXT record at GoDaddy), submit `https://the5thquarter.co.uk/sitemap.xml`.
 9. Then post Reel 1 on the restaurant's Instagram.
 
+### DNS before the switch (GoDaddy, screenshot 8 Oct 2026)
+
+Nameservers `ns27/ns28.domaincontrol.com` (GoDaddy DNS). **Email is Microsoft 365 bought through GoDaddy** (tenant `NETORGFT21104179.onmicrosoft.com`), already live.
+
+| Type | Name | Value | Switch day |
+|---|---|---|---|
+| A | @ | Parked | **change to `75.2.60.5`** |
+| CNAME | www | `the5thquarter.co.uk.` | **change to the project's `.netlify.app` address** |
+| MX | @ | `the5thquarter-co-uk.mail.protection.outlook.com` (0) | leave |
+| TXT | @ | `NETORGFT21104179.onmicrosoft.com` | leave |
+| TXT | @ | `v=spf1 include:secureserver.net -all` | leave (see note) |
+| TXT | _dmarc | `v=DMARC1; p=quarantine; …` | leave |
+| CNAME | autodiscover, email, lyncdiscover, msoid, sip, selector1._domainkey, selector2._domainkey, _domainconnect | Microsoft 365 / GoDaddy | leave |
+| SRV | _sip._tls, _sipfederationtls._tcp | Microsoft 365 | leave |
+| NS, SOA | @ | GoDaddy | leave |
+
+Only the two bold rows change. SPF note: the record covers GoDaddy's relay (`secureserver.net`) but not `spf.protection.outlook.com`. That's how GoDaddy sets up its own 365 product and isn't part of the site launch; if Mark's outgoing mail starts landing in spam, that's the first thing to look at, with GoDaddy support.
+
 ## Head chef: David Henry
 
 David is writing his own bio (6 Oct 2026); his version wins. Facts so far, and conflicts to settle with him:
