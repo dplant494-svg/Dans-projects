@@ -19,3 +19,10 @@
     Cache-Control = "public, max-age=604800"
 
 [[headers]]
+
+# Internal files in this folder are never served.
+[[redirects]]
+  from = "/NOTES.md"
+  to = "/404.html"
+  status = 404
+  force = true
