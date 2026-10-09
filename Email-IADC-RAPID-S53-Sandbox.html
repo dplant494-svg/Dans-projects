@@ -1,0 +1,22 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Email: RAPID-S53 sandbox access, for Mike Kucharski</title>
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1b2733;line-height:1.35}p{margin:0 0 8pt}ul,ol{margin:0 0 8pt 18pt}li{margin-bottom:3pt}code{font-family:Consolas,monospace;font-size:10pt}</style></head><body>
+<p><b>To:</b> mike.kucharski@iadc.org<br><b>Cc:</b> iadc_dev@softway.com<br><b>Subject:</b> RE: RAPID-S53 Inbound API — sandbox access and a Teams session</p>
+<hr>
+<p>Hi Mike,</p>
+<p>Apologies for the slow reply. Your answers on 17 August and the v1.1.0 Swagger settled everything we had open, and I should have come back to you sooner. We are now ready to move, on exactly the basis you described:</p>
+<ul>
+<li>API key and HMAC-SHA256 sign-in, with the token from <code>GET /authentication</code>;</li>
+<li><code>what_was_the_system_status</code> in place of the deprecated event date;</li>
+<li>reporter names taken from the authorised list for each rig. We will treat a name that does not match as an error on our side, before anything is sent.</li>
+</ul>
+<p>Our submission will run as a Power Automate flow. Our rig reporting tool already builds the incident in RAPID's own field names, so the flow only checks it and submits it.</p>
+<p>Three things to get us started:</p>
+<ol>
+<li><b>Sandbox access.</b> Could the system administrator set us up for https://api-demo.rapid4s53.com: username, password, secret key and API key? We will run our whole test sequence there first: create, edit and resubmit the same incident, and our own rejection checks. If the sandbox has rate limits, please let me know.</li>
+<li><b>Our rigs and reporters in the sandbox.</b> Could Seadrill's rigs and their authorised reporters appear in the sandbox's <code>GET /rigs</code>, so we can test the reporter check properly? If there is a form or list you need from us for that, send it over and I will fill it in.</li>
+<li><b>A Teams session</b> on the portal-only steps, once we have run our test submissions. I will bring the test incident numbers so we can look at them together. Please suggest a few times that suit you.</li>
+</ol>
+<p>And one quick check: is v1.1.0 still the current version of the Inbound API, or has anything changed since August?</p>
+<p>Thanks again for your help.</p>
+<p>Best regards,<br>Dan Plant<br>Technical Superintendent, Well Control Engineering — Seadrill</p>
+</body></html>
