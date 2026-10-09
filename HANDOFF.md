@@ -400,7 +400,7 @@ paths with credentials, but this shape is fine to document)
   (18 rigs each, byte-identical round-trip through the scanner, correct
   rendering and week-switching in a headless browser) — see
   `INTEGRATION-CONTRACT.md`'s `excelSnapshots` entry for the exact shape.
-- **RAPID-S53 — UNBLOCKED 2026-08-17, in progress via Power Automate.**
+- **RAPID-S53 — UNBLOCKED 2026-08-17, NOT STARTED (Dan, 9 Oct 2026: nothing done since Mike's 17 Aug email; the IADC reply is still unsent, no flow built, no builder named).** Status slide for Lee's report, 9 Oct: https://claude.ai/artifact/B9eBifnT3Y6gVKgZECp8T9
   IADC (Mike Kucharski) answered all four blocking questions and issued
   Swagger v1.1.0 (`RAPIDS53_Inbound_API_v1.1.0.yaml`, in this repo):
   auth is confirmed **API-Key + HMAC-SHA256** (OAuth2 was their labeling
