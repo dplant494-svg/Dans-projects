@@ -5,8 +5,9 @@ than two hours ago. Nothing is sent while the scanner is healthy.
 
 **What it watches (changed from the plan's first sketch, 6 Oct):** not the newest digest. Digests are only rewritten when a
 report changes, so a quiet night with no posts would look like a stopped scanner. It watches
-`Digests / DatabaseExport / export_manifest.json`, which the scanner rewrites at the end of **every** complete run (v2.76 on),
-quiet or not. Two hours without a new manifest means twelve scans in a row did not finish.
+`Digests / DatabaseExport / export_manifest.json`, which the scanner rewrites with the database export, quiet or not.
+**Since v2.80 that is once an hour** (the first complete scan an hour or more after the last export), so a healthy manifest is
+at most about 70 minutes old. Two hours or more means at least an hour of scans did not finish.
 
 **Where:** Power Automate, environment **SEADRILL-WC-DEV**, same as the other flows. Lee as co-owner afterwards.
 
