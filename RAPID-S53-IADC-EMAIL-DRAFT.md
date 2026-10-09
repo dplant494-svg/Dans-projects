@@ -4,10 +4,12 @@
 > the August reply drafted here was never sent, so this version acknowledges the gap. The Teams session is
 > left until our test submissions run (Dan, 9 Oct: see it working first). Paste-ready copy for Outlook:
 > `Email-IADC-RAPID-S53-Sandbox.html`.
+>
+> Checked 9 Oct against Mike's 17 Aug email as Dan forwarded it: the attached `RAPIDS53_Inbound_API_Doc_Vers110_081626.yaml`
+> is byte-identical to `RAPIDS53_Inbound_API_v1.1.0.yaml` in this repo, and all four answers match the spec and the plan.
 
-**To:** mike.kucharski@iadc.org
-**Cc:** iadc_dev@softway.com
-**Subject:** RE: RAPID-S53 Inbound API — sandbox access
+**How to send:** Reply All to Mike's email of 17 Aug, "RE: RAPID-S53 - Documentation for Inbound and Outbound APIs"
+(Mike; Eric Rachall and Lee Arnold copied), so it stays in the thread. Your Outlook signature goes underneath.
 
 ---
 
@@ -41,5 +43,4 @@ And one quick check: is v1.1.0 still the current version of the Inbound API, or 
 Thanks again for your help.
 
 Best regards,
-Dan Plant
-Technical Superintendent, Well Control Engineering — Seadrill
+Dan
