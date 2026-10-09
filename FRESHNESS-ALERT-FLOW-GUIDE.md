@@ -14,12 +14,13 @@ at most about 70 minutes old. Two hours or more means at least an hour of scans 
 ## Build (about ten minutes)
 
 1. **+ Create**, **Scheduled cloud flow**. Name `SACRED scanner freshness`. Repeat every **1 Hour**. **Create**.
-2. **+ New step**, search `Get file properties` (SharePoint). Site Address: the WellControl site. File Identifier: browse the
-   folder icon to `Digests` > `DatabaseExport` > `export_manifest.json`. Rename the card **Manifest**.
+2. **+ New step**, search `Get file metadata using path` (SharePoint), **not** Get file properties (that one wants the
+   file's ID number). Site Address: the WellControl site. File Path: the folder icon, then `Digests` > `DatabaseExport` >
+   `export_manifest.json`. Rename the card **Manifest**.
 3. **+ New step**, **Compose**, rename **AgeHours**. Expression (fx):
 
 ```
-div(sub(ticks(utcNow()), ticks(body('Manifest')?['Modified'])), 36000000000)
+div(sub(ticks(utcNow()), ticks(body('Manifest')?['LastModified'])), 36000000000)
 ```
 
 4. **+ New step**, **Condition**. Left: fx `outputs('AgeHours')`. Operator **is greater than or equal to**. Right: `2`.
@@ -32,7 +33,7 @@ concat('SACRED scanner has stopped: no complete scan for ', string(outputs('AgeH
 ```
 
    - Body (type it, with the dynamic content where shown):
-     `The last complete scan finished at ` + Modified (from Manifest) + ` UTC. The dashboard, the digests and the database stop updating until it runs. Check the scheduled task on the scanner machine (Dan's PC; the server from the transfer week): run C:\TSC-Dashboard\scripts\Update-Dashboard.ps1 -Force and read its last lines. Dashboard: http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html`
+     `The last complete scan finished at ` + LastModified (from Manifest) + ` UTC. The dashboard, the digests and the database stop updating until it runs. Check the scheduled task on the scanner machine (Dan's PC; the server from the transfer week): run C:\TSC-Dashboard\scripts\Update-Dashboard.ps1 -Force and read its last lines. Dashboard: http://sdrlazneuiis01d.corp.local:8080/sacred/dashboard/dashboard.html`
    - Importance: High.
 6. **If no**: leave empty.
 7. **Save**. Then **Test**, **Manually**, **Run flow**: it should finish green with the Condition going to **If no**.
