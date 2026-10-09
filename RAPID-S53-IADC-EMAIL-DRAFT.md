@@ -1,12 +1,13 @@
 # Email draft — reply to Mike Kucharski (IADC), RAPID-S53 next steps
 
 > Refreshed 9 Oct 2026 (plan item 50, step 1). Mike answered all four open questions on 17 Aug and issued v1.1.0;
-> the August reply drafted here was never sent, so this version acknowledges the gap. Paste-ready copy for Outlook:
+> the August reply drafted here was never sent, so this version acknowledges the gap. The Teams session is
+> left until our test submissions run (Dan, 9 Oct: see it working first). Paste-ready copy for Outlook:
 > `Email-IADC-RAPID-S53-Sandbox.html`.
 
 **To:** mike.kucharski@iadc.org
 **Cc:** iadc_dev@softway.com
-**Subject:** RE: RAPID-S53 Inbound API — sandbox access and a Teams session
+**Subject:** RE: RAPID-S53 Inbound API — sandbox access
 
 ---
 
@@ -23,7 +24,7 @@ should have come back to you sooner. We are now ready to move, on exactly the ba
 Our submission will run as a Power Automate flow. Our rig reporting tool already builds the incident in RAPID's own field
 names, so the flow only checks it and submits it.
 
-Three things to get us started:
+Two things to get us started:
 
 1. **Sandbox access.** Could the system administrator set us up for https://api-demo.rapid4s53.com: username, password,
    secret key and API key? We will run our whole test sequence there first: create, edit and resubmit the same incident,
@@ -31,8 +32,9 @@ Three things to get us started:
 2. **Our rigs and reporters in the sandbox.** Could Seadrill's rigs and their authorised reporters appear in the sandbox's
    `GET /rigs`, so we can test the reporter check properly? If there is a form or list you need from us for that, send it
    over and I will fill it in.
-3. **A Teams session** on the portal-only steps, once we have run our test submissions. I will bring the test incident
-   numbers so we can look at them together. Please suggest a few times that suit you.
+
+Once our test submissions are running, I would welcome a Teams session on the portal-only steps; I will be in touch
+then.
 
 And one quick check: is v1.1.0 still the current version of the Inbound API, or has anything changed since August?
 
