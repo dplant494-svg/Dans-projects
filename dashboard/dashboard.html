@@ -959,10 +959,19 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
 
     row.appendChild(tile('Reports', String(reports.length), rangeLabel));
 
-    var latest = reports[0];
+    // The newest post, not the newest report date: a CBM inspected on the
+    // 30th and posted on the 7th is news on the 7th. Unattributed posts have
+    // no rig to show, so they never take the tile (Dan, 9 Oct 2026).
+    var latest = null, latestAt = null;
+    reports.forEach(function (r) {
+      if (r.rig === 'Unattributed') return;
+      var at = r.modified ? parseDate(r.modified) : NaN;
+      if (isNaN(at)) at = reportDate(r);
+      if (!latest || at > latestAt) { latest = r; latestAt = at; }
+    });
     row.appendChild(tile('Latest report',
       latest ? latest.rig : '—',
-      latest ? (latest.type || latest.reporttype || 'Report') + ' · ' + relTime(reportDate(latest)) : 'no reports in range'));
+      latest ? (latest.type || latest.reporttype || 'Report') + ' · posted ' + relTime(latestAt) : 'no reports in range'));
 
     var critOpen = 0, actions = 0;
     reports.forEach(function (r) {
