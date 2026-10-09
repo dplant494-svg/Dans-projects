@@ -75,6 +75,8 @@
   .banner-meta .ask-copilot .spark { display: inline-block; margin-right: 6px; font-size: 15px; line-height: 1; }
   .banner-meta .help-centre-btn { display: inline-block; margin-top: 8px; margin-left: 8px; padding: 7px 14px; background: #fff; color: var(--sd-blue); border: 2px solid var(--sd-yellow); border-radius: 22px; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; text-transform: none; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
   .banner-meta .help-centre-btn:hover { filter: brightness(1.04); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+  .banner-meta .status-btn { display: inline-flex; align-items: center; justify-content: center; vertical-align: bottom; width: 34px; height: 34px; margin-top: 8px; margin-left: 8px; background: #fff; color: var(--sd-blue); border: 2px solid var(--sd-yellow); border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.25); box-sizing: border-box; }
+  .banner-meta .status-btn:hover { filter: brightness(1.04); box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
 
   .page-body { padding: 24px 32px 32px; }
 
@@ -4158,6 +4160,17 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     help.textContent = 'TSC Help Centre';
     help.title = 'The rigs\u2019 requests for help from Technical Services: each request, who it went to, the delivery receipt and the trail. Password.';
     el.appendChild(help);
+    // The SACRED Status board (Dan, 9 Oct): a small dial icon beside the Help Centre, opening the passworded
+    // status page in a new tab. The password stays on that page; the link alone shows nothing.
+    var st = document.createElement('a');
+    st.className = 'status-btn';
+    st.href = '../status/status.html';
+    st.target = '_blank';
+    st.rel = 'noopener';
+    st.title = 'SACRED Status: the dials and metrics for the whole of SACRED. Password.';
+    st.setAttribute('aria-label', 'SACRED Status (password)');
+    st.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M12 16l4.2-5.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="16" r="1.8" fill="currentColor"/></svg>';
+    el.appendChild(st);
   }
 
   // ---------- rig & type filter options ----------

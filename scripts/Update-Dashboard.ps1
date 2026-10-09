@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.83'
+$ScriptVersion = '2.84'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4129,6 +4129,14 @@ try {
         if ($null -eq $d) { $d = ConvertTo-StatusDate (Get-Prop $Row 'date') }
         return $d
     }
+    # v2.84: when a report was POSTED (the file's time), for the 'in the last 7 days' count and the 30-day posting matrix
+    # (Dan, 9 Oct: "2 in the last 7 days" counted by report date, while a week's posts carry older inspection dates).
+    function Get-StatusPostedDate {
+        param($Row)
+        $d = ConvertTo-StatusDate (Get-Prop $Row 'modified')
+        if ($null -eq $d) { $d = Get-StatusReportDate $Row }
+        return $d
+    }
     function Get-StatusMax {
         param($Rows, [string]$Field)
         $m = ''
@@ -4172,8 +4180,8 @@ try {
     $expected7 = 14 * $checkRigs30.Count
     $lastCheckAll = ''; foreach ($k in $lastCheckByRig.Keys) { $v = $lastCheckByRig[$k].ToString('yyyy-MM-dd'); if ([string]::CompareOrdinal($v, $lastCheckAll) -gt 0) { $lastCheckAll = $v } }
 
-    $rep7 = 0; foreach ($r in $stReports) { $d = Get-StatusReportDate $r; if ($null -ne $d -and $d -ge $stToday.AddDays(-6)) { $rep7++ } }
-    Add-StatusLoop 'reports' 'Reports posted' $stReports.Count $stReports.Count 0 (Get-StatusMax $stReports 'modified') 'count' "$rep7 in the last 7 days"
+    $rep7 = 0; foreach ($r in $stReports) { $d = Get-StatusPostedDate $r; if ($null -ne $d -and $d -ge $stToday.AddDays(-6)) { $rep7++ } }
+    Add-StatusLoop 'reports' 'Reports posted' $stReports.Count $stReports.Count 0 (Get-StatusMax $stReports 'modified') 'count' "$rep7 posted in the last 7 days"
     Add-StatusLoop 'checks' 'Daily checks, last 7 days' $expected7 $rounds7 ([math]::Max(0, $expected7 - $rounds7)) $lastCheckAll 'dial' ("$rounds7 rounds received against two a day on " + $checkRigs30.Count + " rig(s) that post checks; " + $allRounds.Count + " rounds on record")
 
     $pcDone = @($stPrecharge | Where-Object { [string](Get-Prop $_ 'status') -eq 'issued' }).Count
@@ -4238,7 +4246,7 @@ try {
     # Rig by report type, last thirty days.
     $stTypes = @{}; $stMatrix = @{}
     foreach ($r in $stReports) {
-        $d = Get-StatusReportDate $r
+        $d = Get-StatusPostedDate $r
         if ($null -eq $d -or $d -lt $stToday.AddDays(-29)) { continue }
         $rg = [string](Get-Prop $r 'rig'); $rt = [string](Get-Prop $r 'reporttype'); if (-not $rt) { $rt = 'Other' }
         $stTypes[$rt] = $true
