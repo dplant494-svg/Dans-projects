@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.81'
+$ScriptVersion = '2.82'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1974,6 +1974,14 @@ foreach ($f in $files) {
     $cbmReplayFlagged = $false
     $rig = $assetRaw
     if (-not $rig) { $rig = $checksRigRaw }
+    # v2.82: a Vendor Surveillance / Vendor Audit with no rig is SSCE work at a vendor's premises
+    # (Dan, 9 Oct 2026: "it should be SSCE"). WCGRRT names the file by its own report type
+    # (..._vendor-surveillance.json / ..._vendor-audit.json), so this is the tool's label, not a
+    # guess at a rig. One with a rig set keeps its rig.
+    if (-not $rig -and $f.Name -match '_vendor-(surveillance|audit)\.json$') {
+        $rig = 'SSCE Equipment'
+        Write-Host "  $($f.Name): Vendor report with no rig - listed under 'SSCE Equipment'"
+    }
     if (-not $rig) {
         # v2.36: never invent a "rig" from the filename - real files posted
         # with no meta.asset (seen live: vendor-audit / vendor-surveillance /

@@ -1480,3 +1480,17 @@ rcpt_serial: Choke (Fem) - 10696444-001-88 - Kill (Fem) - 20084080-3086 - Choke 
 - **SSORT 158's name, live:** `..._cbm-inspection_Gate-Valves-SN973654-0012-1.json` and
   `..._Upper-Triple-NXT-Body-SN20093748-7.json` on 7 Oct, both with serials entered. Our 52.2 (two gate valves, serial
   blank) is still untested, so the question stands.
+
+---
+
+## From the dashboard side, 9 Oct 2026: Vendor Surveillance and Vendor Audit with no rig now read as SSCE Equipment
+
+**Dan, 9 Oct:** "it should be SSCE, majority of vendor surveillance are unattributed and SSCE equipment."
+
+**Done on our side, scanner v2.82.** A post with `meta.asset` blank whose name ends `_vendor-surveillance.json` or
+`_vendor-audit.json` (your report-type suffix) is listed under `SSCE Equipment`, not `Unattributed`. A vendor report with a
+rig set keeps that rig. Any other blank-rig post is still Unattributed. This covers the history, including the 3 Oct file.
+
+**The ask, WCGRRT (after the class, not losing work; replaces our 50.2 ask, which 51.3 answered):** when the report type
+is Vendor Surveillance or Vendor Audit, preselect **Not rig-specific → SSCE Equipment** in Rig / Asset, so the crew
+changes it only when the work was for one rig. The post still carries `meta.asset = "SSCE Equipment"`; no new key.
