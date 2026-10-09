@@ -2,7 +2,7 @@
 
 **For:** whichever Claude Code session picks this project up next.
 **Owner:** Dan Plant, WCE Technical Superintendent, Technical Services / Well Control Group, Seadrill.
-**Repo:** `dplant494-svg/Dans-projects` — working branch `claude/dashboard-automation-planning-aa0sqi`.
+**Repo:** `dplant494-svg/Dans-projects` — working branch `claude/hopeful-goodall-zp6yls` (from 9 Oct; the old `claude/dashboard-automation-planning-aa0sqi` session could not restart).
 **Last updated:** 2026-08-09.
 
 Read this before touching anything. It's written so a fresh session with zero

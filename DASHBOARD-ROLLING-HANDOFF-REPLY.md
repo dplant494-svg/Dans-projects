@@ -1448,9 +1448,9 @@ rcpt_serial: Choke (Fem) - 10696444-001-88 - Kill (Fem) - 20084080-3086 - Choke 
 ```
 
 **The ask, SSORT:**
-1. An **asset number** for the C&K Stabs CBM, as a field the crew fills in, never derived. Our reading of "asset" is the
-   Maximo asset number of each stab, the identity the CoC tracker and the Maximo extract key on (asset + OEM part +
-   serial), so a stab's CBM can later be matched to its certificate. **Dan to confirm that reading.**
+1. An **asset number** for the C&K Stabs CBM, as a field the crew fills in, never derived. **Confirmed by Dan (9 Oct):
+   "asset" means the Maximo asset number** of each stab, the identity the CoC tracker and the Maximo extract key on
+   (asset + OEM part + serial), so a stab's CBM can later be matched to its certificate.
 2. **One per stab, we suggest, not one box for four.** Choke female, kill female, choke male, kill male, each with its part
    number, serial and asset number, so the serial box stops carrying a sentence. If you would rather add one free-text
    asset field first, say so and why; either is additive.
