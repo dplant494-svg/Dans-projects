@@ -23,7 +23,7 @@ at most about 70 minutes old. Two hours or more means at least an hour of scans 
 div(sub(ticks(utcNow()), ticks(body('Manifest')?['LastModified'])), 36000000000)
 ```
 
-4. **+ New step**, **Condition**. Left: fx `outputs('AgeHours')`. Operator **is greater than or equal to**. Right: `2`.
+4. **+ New step**, **Condition**. Left: fx `int(outputs('AgeHours'))` (a number, not text). Operator **is greater than or equal to**. Right: `2`.
 5. In **If yes**: **Send an email (V2)** (Office 365 Outlook).
    - To: Dan's and Lee's addresses.
    - Subject, fx:
