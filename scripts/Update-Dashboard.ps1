@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.82'
+$ScriptVersion = '2.83'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1292,6 +1292,44 @@ function Read-HelpAck { param($Json, $Meta, $File)
 # meets a circular reference (PSParameterizedProperty). Sort-Object and pipelines wrap
 # dictionaries in PSObjects, so everything is unwrapped to plain hashtables, arrays and
 # scalars before serialising aab-data.js.
+# v2.83: a small JSON writer of its own, for the Status page data. Windows PowerShell 5.1's JavaScriptSerializer
+# still found a circular reference after v2.81's unwrap (Dan's PC, 9 Oct: "PSParameterizedProperty"), so this file
+# no longer goes through it. It writes only what the status data holds: null, true/false, numbers, strings, dictionaries
+# and lists, unwrapping any PSObject first; anything else is written as its string.
+function ConvertTo-PlainJson { param($Value)
+    if ($null -eq $Value) { return 'null' }
+    if ($Value -is [System.Management.Automation.PSObject]) { $Value = $Value.PSObject.BaseObject }
+    if ($null -eq $Value) { return 'null' }
+    if ($Value -is [bool]) { if ($Value) { return 'true' } else { return 'false' } }
+    if ($Value -is [int] -or $Value -is [long] -or $Value -is [double] -or $Value -is [decimal] -or $Value -is [single] -or $Value -is [int16] -or $Value -is [byte]) {
+        return ([System.Convert]::ToString($Value, [System.Globalization.CultureInfo]::InvariantCulture))
+    }
+    if ($Value -is [System.Collections.IDictionary]) {
+        $parts = New-Object System.Collections.Generic.List[string]
+        foreach ($k in @($Value.Keys)) { $parts.Add((ConvertTo-PlainJsonString ([string]$k)) + ':' + (ConvertTo-PlainJson $Value[$k])) }
+        return '{' + ($parts -join ',') + '}'
+    }
+    if ($Value -is [string]) { return (ConvertTo-PlainJsonString $Value) }
+    if ($Value -is [System.Collections.IEnumerable]) {
+        $parts = New-Object System.Collections.Generic.List[string]
+        foreach ($x in $Value) { $parts.Add((ConvertTo-PlainJson $x)) }
+        return '[' + ($parts -join ',') + ']'
+    }
+    return (ConvertTo-PlainJsonString ([string]$Value))
+}
+function ConvertTo-PlainJsonString { param([string]$Text)
+    $sb = New-Object System.Text.StringBuilder
+    [void]$sb.Append('"')
+    foreach ($ch in $Text.ToCharArray()) {
+        $c = [int]$ch
+        if ($ch -eq '"') { [void]$sb.Append('\"') }
+        elseif ($ch -eq '\') { [void]$sb.Append('\\') }
+        elseif ($c -lt 32 -or $c -eq 0x2028 -or $c -eq 0x2029 -or $ch -eq '<') { [void]$sb.Append(('\u{0:x4}' -f $c)) }
+        else { [void]$sb.Append($ch) }
+    }
+    [void]$sb.Append('"')
+    return $sb.ToString()
+}
 function ConvertTo-AabPlain { param($Value)
     if ($null -eq $Value) { return $null }
     if ($Value -is [System.Management.Automation.PSObject] -and -not ($Value.BaseObject -is [System.Management.Automation.PSCustomObject])) { $Value = $Value.BaseObject }
@@ -4224,8 +4262,9 @@ try {
     # v2.81: through ConvertTo-AabPlain first. On Windows PowerShell 5.1 the rig and report-type names come out of
     # Sort-Object wrapped in PSObject, and the JavaScriptSerializer walks the wrapper's members into a circular reference
     # (Dan's PC, 8 Oct: "A circular reference was detected ... PSParameterizedProperty"). PowerShell 7 uses ConvertTo-Json,
-    # which unwraps them, so the test set never showed it. ConvertTo-AabPlain unwraps every value, as it does for aab-data.js.
-    [System.IO.File]::WriteAllText($statusFile, ('window.SACRED_STATUS = ' + (ConvertTo-ReportJson (ConvertTo-AabPlain $statusOut)) + ";`n"), (New-Object System.Text.UTF8Encoding($false)))
+    # which unwraps them, so the test set never showed it. v2.83: that was not enough on Dan's PC (9 Oct), so the file is now
+    # written by ConvertTo-PlainJson, which never touches the serializer.
+    [System.IO.File]::WriteAllText($statusFile, ('window.SACRED_STATUS = ' + (ConvertTo-PlainJson $statusOut) + ";`n"), (New-Object System.Text.UTF8Encoding($false)))
     $oldPublic = Join-Path (Split-Path -Parent $outputFile) 'status-data.js'     # the first v2.79 build wrote it beside reports-data.js
     if (Test-Path -Path $oldPublic) { Remove-Item -Path $oldPublic -Force }
     $stDeployed = ''
