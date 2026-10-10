@@ -220,17 +220,14 @@ if(equals(outputs('Action'), 'close'), 'CLOSED', if(equals(outputs('Action'), 'u
    **Comment**: `coalesce(body('Parse_JSON')?['comment'], '')`.
    **HelpLink**: `http://sdrlazneuiis01d.corp.local:8080/sacred/help/help-centre.html`.
 7. **Get files (properties only)** (SharePoint), rename **ReceiptFiles**: Site WellControl, Library
-   **Digests**, Limit Entries to Folder `/help-receipts` (pick it with the folder icon), Filter Query fx (an expression
-   that builds the OData string; the doubled quotes are the quotes inside it)
-```
-concat('startswith(FileLeafRef,''help-receipt_', outputs('ReqId'), '_'')')
-```
+   **Digests**, Limit Entries to Folder `/help-receipts` (pick it with the folder icon). **No Filter Query** (10 Oct:
+   a `startswith(FileLeafRef, ...)` filter returned nothing; the folder is small, so the name match is done in the next card).
 8. **Filter array**, rename **AssistanceReceipts**: From `body('ReceiptFiles')?['value']`, condition
    (Edit in advanced mode) fx
 ```
-@not(contains(item()?['{FilenameWithExtension}'], '_directive_'))
+@and(startsWith(item()?['{FilenameWithExtension}'], concat('help-receipt_', outputs('ReqId'), '_')), not(contains(item()?['{FilenameWithExtension}'], '_directive_')))
 ```
-   (the six-hour chat's receipt shares the prefix and is not the one wanted).
+   (the request's receipt by its id; the six-hour chat's receipt shares the prefix and is not the one wanted).
 8a. Compose **Text**, BEFORE the HasReceipt condition (both of its branches read it; a card inside one branch is
     invisible to the other, 10 Oct). Plain text, one card so the email and the chat say the same:
 ```
