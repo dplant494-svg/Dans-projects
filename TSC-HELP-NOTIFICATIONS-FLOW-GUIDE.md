@@ -254,14 +254,16 @@ concat('RE: ', if(equals(outputs('Guard'), true), '[TEST MODE] ', ''), coalesce(
 ```
       This is the request's subject with `RE:` in front; Outlook groups it into the same conversation.
     - **Send an email (V2)**, rename **AckEmail**: To fx `outputs('SendTo')`, Subject fx `outputs('Subject')`,
-      Body pasted as plain text: `@{outputs('Text')}`. Importance Normal.
+      Body fx `replace(outputs('Text'), decodeUriComponent('%0A'), '<br>')` (the Text card's line breaks become
+      HTML breaks; pasted plain, Outlook ran the lines together, 10 Oct). Importance Normal.
     - **Condition**, rename **HasChat**: fx `not(empty(coalesce(body('Receipt')?['chatId'], '')))` is equal to `true`.
       **True:** **Post message in a chat or channel** (Teams), rename **ChatAck**: Post as **Flow bot**,
-      Post in **Group chat**, Group chat fx `body('Receipt')?['chatId']`, Message fx `outputs('Text')`.
+      Post in **Group chat**, Group chat fx `body('Receipt')?['chatId']`, Message fx
+      `replace(outputs('Text'), decodeUriComponent('%0A'), '<br>')`.
       **False:** nothing.
 11. In **HasReceipt / False**: **Send an email (V2)**, rename **AckNoReceipt**: To `outputs('OfficeList')`,
     Subject fx `concat('RE: ', outputs('RigName'), ' - ', outputs('Subj'), ' (no delivery receipt for the request)')`,
-    Body: `@{outputs('Text')}` with a first line `This request has no delivery receipt, so the acknowledgement went to the office only. Forward it to the rig by hand if the request email never went.`
+    Body: fx `replace(outputs('Text'), decodeUriComponent('%0A'), '<br>')` under a first line `This request has no delivery receipt, so the acknowledgement went to the office only. Forward it to the rig by hand if the request email never went.`
 12. **Save.**
 
 **No receipt is written for an acknowledgement.** The trail on the Help Centre page is the record of
