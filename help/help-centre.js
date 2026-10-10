@@ -127,7 +127,6 @@
   var posted = {};
   function actForm(r) {
     var f = mk('form', 'act');
-    if (posted[r.requestId]) { var d = mk('div', 'msg ok', 'Posted; the state updates within ten minutes.'); f.appendChild(d); return f; }
     var lab = function (t) { return mk('label', '', t); };
     f.appendChild(lab('Action')); f.appendChild(lab('Your name'));
     var sel = mk('select'); [['acknowledge', 'Acknowledge: Technical Services are on it'], ['update', 'Post an update to the trail'], ['close', 'Close the request']].forEach(function (o) { var op = mk('option', '', o[1]); op.value = o[0]; sel.appendChild(op); });
@@ -150,7 +149,10 @@
       var url = window.PCGATE && window.PCGATE.postUrl;
       btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Posting…';
       var done = function (ok, why) {
-        if (ok) { posted[r.requestId] = true; msg.className = 'msg ok'; msg.textContent = 'Posted as ' + fileName + '; the state updates within ten minutes.'; }
+        // 10 Oct 2026 (Dan): after a post the form stays usable, so a second action (an update after the
+        // acknowledgement, a close after the update) can be posted without reloading the page. The note is
+        // cleared; the action and name stay. The page still shows the new state only after the next scan.
+        if (ok) { posted[r.requestId] = true; btn.disabled = false; note.value = ''; if (sel.value === 'acknowledge') sel.value = 'update'; msg.className = 'msg ok'; msg.textContent = 'Posted as ' + fileName + '; the state updates within ten minutes. You can post another action now.'; }
         else { var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = fileName; document.body.appendChild(a); a.click(); setTimeout(function () { a.remove(); }, 0); btn.disabled = false; msg.className = 'msg err'; msg.textContent = 'Not posted (' + why + '). The record was downloaded instead: send it to Dan Plant and it is filed by hand.'; }
       };
       if (!url) { done(false, 'no intake endpoint on this copy, gate-config.js'); return; }

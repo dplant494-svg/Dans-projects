@@ -105,8 +105,12 @@ Technical Services - Well Control Engineering
 ```
     - Attachments (Advanced parameters, Switch to input entire array): fx `union(body('ReqPhotos'), body('ReqDocs'))`.
     - Importance: **High** when rig down: fx `if(equals(outputs('IsDown'), true), 'High', 'Normal')`.
-13. **Create a chat** (Microsoft Teams), rename **HelpChat**: Members fx `replace(outputs('SendTo'), ';', ',')`
-    (the action takes a comma list), Title fx
+12a. **Filter array** (Data Operation), rename **ToClean**: From fx `split(outputs('SendTo'), ';')`, condition
+    `item()` **is not equal to** (leave the right box empty). Drops the blank entries a missing rig row or an empty table
+    row leaves behind (10 Oct: the trailing `;` made Create a chat return BadRequest). Help Email To becomes
+    `join(body('ToClean'), ';')`.
+13. **Create a chat** (Microsoft Teams), rename **HelpChat**: Members fx `join(body('ToClean'), ';')`
+    (semicolons, not commas: 10 Oct, the comma list was one invalid member, BadRequest), Title fx
 ```
 concat(if(equals(outputs('Guard'), true), '[TEST] ', ''), outputs('RigName'), ' - ', formatDateTime(utcNow(),'yyyy-MM-dd'), ' - ', outputs('Subj'))
 ```
@@ -118,7 +122,7 @@ concat(if(equals(outputs('Guard'), true), '[TEST] ', ''), outputs('RigName'), ' 
     `concat('help-receipt_', outputs('ReqId'), '_', formatDateTime(utcNow(),'yyyyMMdd-HHmmss'), '.json')`,
     File Content fx
 ```
-json(concat('{"requestId":"', outputs('ReqId'), '","kind":"assistance","ok":true,"sentTo":', string(split(outputs('SendTo'), ';')), ',"sentAt":"', utcNow(), '","error":"","chatCreated":true,"chatId":"', coalesce(outputs('HelpChat')?['body/id'],''), '","mode":"', outputs('Mode'), '"}'))
+json(concat('{"requestId":"', outputs('ReqId'), '","kind":"assistance","ok":true,sentTo":', string(body('ToClean')), ',"sentAt":"', utcNow(), '","error":"","chatCreated":true,"chatId":"', coalesce(outputs('HelpChat')?['body/id'],''), '","mode":"', outputs('Mode'), '"}'))
 ```
 16. **The failure branch.** Click the **+** under **Help Email**, **Add a parallel branch**, **Send an email
     (V2)**, rename **NotSent**: To `outputs('OfficeList')`, Subject fx
