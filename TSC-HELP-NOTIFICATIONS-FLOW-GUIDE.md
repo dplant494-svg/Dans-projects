@@ -105,11 +105,15 @@ Technical Services - Well Control Engineering
 ```
     - Attachments (Advanced parameters, Switch to input entire array): fx `union(body('ReqPhotos'), body('ReqDocs'))`.
     - Importance: **High** when rig down: fx `if(equals(outputs('IsDown'), true), 'High', 'Normal')`.
-12a. **Filter array** (Data Operation), rename **ToClean**: From fx `split(outputs('SendTo'), ';')`, condition
+12a. **Filter array** (Data Operation), rename **ToClean**: From fx `split(toLower(outputs('SendTo')), ';')`, condition
     `item()` **is not equal to** (leave the right box empty). Drops the blank entries a missing rig row or an empty table
     row leaves behind (10 Oct: the trailing `;` made Create a chat return BadRequest). Help Email To becomes
     `join(body('ToClean'), ';')`.
-13. **Create a chat** (Microsoft Teams), rename **HelpChat**: Members fx `join(body('ToClean'), ';')`
+12b. **Filter array**, rename **ChatMembers**: From fx `body('ToClean')`, condition `item()` **is not equal to**
+    `daniel.plant@seadrill.com` (the account the flow runs as: Teams adds the creator to the chat itself, and listing them
+    again is "Duplicate chat members", BadRequest, 10 Oct. At the service-account handover, item 40, this becomes the
+    service account's address).
+13. **Create a chat** (Microsoft Teams), rename **HelpChat**: Members fx `join(body('ChatMembers'), ';')`
     (semicolons, not commas: 10 Oct, the comma list was one invalid member, BadRequest), Title fx (a chat topic
     may not contain a colon, so the subject's colons become ' -'; 10 Oct, BadRequest on 'TEST: ...')
 ```
@@ -138,6 +142,11 @@ json(concat('{"requestId":"', outputs('ReqId'), '","kind":"assistance","ok":true
 17. **Save.**
 
 ## Part C — proving it (test mode)
+
+**Proven 10 Oct 2026** on a synthetic `seadrill-help_SSCE-Equipment_2026-10-10_flow-test.json` (test mode, SSCE Equipment,
+dryRun): the office email with the red line and the test photo, the `[TEST] SSCE Equipment - 2026-10-10 - TEST - ...` chat,
+the receipt. Four fixes on the way, all in Part B now: Get file properties → metadata by path is not this flow (that was the
+freshness flow); chat members by semicolon; colons out of the chat topic; the creator out of the members list.
 
 Settings B2 `Yes`. Post one assistance request from SSORT (stage 2 of the tools' build) against
 **SSCE Equipment**, or drop a synthetic `seadrill-help_*.json` into PostedReports. Expect: the office
