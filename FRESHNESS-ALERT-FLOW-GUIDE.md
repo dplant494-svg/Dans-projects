@@ -23,7 +23,15 @@ at most about 70 minutes old. Two hours or more means at least an hour of scans 
 div(sub(ticks(utcNow()), ticks(body('Manifest')?['LastModified'])), 36000000000)
 ```
 
-4. **+ New step**, **Condition**. Left: fx `int(outputs('AgeHours'))` (a number, not text). Operator **is greater than or equal to**. Right: `2`.
+4. **+ New step**, **Condition**. Left: fx
+
+```
+or(equals(int(outputs('AgeHours')), 2), and(greater(int(outputs('AgeHours')), 2), equals(mod(sub(int(outputs('AgeHours')), 2), 8), 0)))
+```
+
+   **is equal to** fx `true`. One email at two hours stale, then one every eight hours (10, 18, 26...) while it stays
+   stale. (The first build emailed every hour: Dan's laptop off overnight on 10 Oct gave sixteen emails. Change the
+   `8` to `24` for one a day after the first.)
 5. In **If yes**: **Send an email (V2)** (Office 365 Outlook).
    - To: Dan's and Lee's addresses.
    - Subject, fx:
