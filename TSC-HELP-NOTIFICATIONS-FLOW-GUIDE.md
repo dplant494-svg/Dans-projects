@@ -110,9 +110,10 @@ Technical Services - Well Control Engineering
     row leaves behind (10 Oct: the trailing `;` made Create a chat return BadRequest). Help Email To becomes
     `join(body('ToClean'), ';')`.
 13. **Create a chat** (Microsoft Teams), rename **HelpChat**: Members fx `join(body('ToClean'), ';')`
-    (semicolons, not commas: 10 Oct, the comma list was one invalid member, BadRequest), Title fx
+    (semicolons, not commas: 10 Oct, the comma list was one invalid member, BadRequest), Title fx (a chat topic
+    may not contain a colon, so the subject's colons become ' -'; 10 Oct, BadRequest on 'TEST: ...')
 ```
-concat(if(equals(outputs('Guard'), true), '[TEST] ', ''), outputs('RigName'), ' - ', formatDateTime(utcNow(),'yyyy-MM-dd'), ' - ', outputs('Subj'))
+concat(if(equals(outputs('Guard'), true), '[TEST] ', ''), outputs('RigName'), ' - ', formatDateTime(utcNow(),'yyyy-MM-dd'), ' - ', replace(outputs('Subj'), ':', ' -'))
 ```
 14. **Post message in a chat or channel** (Teams), rename **ChatOpen**: Post as **Flow bot**, Post in
     **Group chat**, Group chat fx `outputs('HelpChat')?['body/id']`, Message: the same text as the email
