@@ -122,7 +122,7 @@ concat(if(equals(outputs('Guard'), true), '[TEST] ', ''), outputs('RigName'), ' 
     `concat('help-receipt_', outputs('ReqId'), '_', formatDateTime(utcNow(),'yyyyMMdd-HHmmss'), '.json')`,
     File Content fx
 ```
-json(concat('{"requestId":"', outputs('ReqId'), '","kind":"assistance","ok":true,sentTo":', string(body('ToClean')), ',"sentAt":"', utcNow(), '","error":"","chatCreated":true,"chatId":"', coalesce(outputs('HelpChat')?['body/id'],''), '","mode":"', outputs('Mode'), '"}'))
+json(concat('{"requestId":"', outputs('ReqId'), '","kind":"assistance","ok":true,"sentTo":', string(body('ToClean')), ',"sentAt":"', utcNow(), '","error":"","chatCreated":true,"chatId":"', coalesce(outputs('HelpChat')?['body/id'],''), '","mode":"', outputs('Mode'), '"}'))
 ```
 16. **The failure branch.** Click the **+** under **Help Email**, **Add a parallel branch**, **Send an email
     (V2)**, rename **NotSent**: To `outputs('OfficeList')`, Subject fx
