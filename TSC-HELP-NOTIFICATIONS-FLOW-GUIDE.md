@@ -270,6 +270,13 @@ concat('RE: ', if(equals(outputs('Guard'), true), '[TEST MODE] ', ''), coalesce(
 who acknowledged what and when; the scanner already shows it. (A receipt of kind `ack` would be read as
 the request's own receipt by scanner v2.71 and must not be written.)
 
+**Proven 10 Oct 2026** on the second synthetic request: request email, chat and receipt from Part B; Acknowledge from the
+Help Centre page gave HasReceipt True, `RE: [TEST MODE] RIG DOWN - SSCE Equipment - TEST: second flow test...` to the
+office, and the same words as the second message in the `[TEST] SSCE Equipment - 2026-10-10 - ...` chat. The False side
+was proven by accident on the 29 Sep sample request, which has no receipt: office only, marked so. Four fixes on the
+way, all in the steps above: the receipt filter moved into the Filter array; Text before HasReceipt; the receipt query
+as a built string; line breaks as `<br>`.
+
 **Proof, in test mode (after Part C):** on the Help Centre, acknowledge the SSCE Equipment test request
 with a name, a role and a note. Expect within fifteen minutes: the office gets `RE: [TEST MODE] RIG DOWN -
 SSCE Equipment - …`, sitting under the request in Outlook's conversation view, with the note in it; the
