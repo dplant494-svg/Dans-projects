@@ -231,6 +231,16 @@ concat('startswith(FileLeafRef,''help-receipt_', outputs('ReqId'), '_'')')
 @not(contains(item()?['{FilenameWithExtension}'], '_directive_'))
 ```
    (the six-hour chat's receipt shares the prefix and is not the one wanted).
+8a. Compose **Text**, BEFORE the HasReceipt condition (both of its branches read it; a card inside one branch is
+    invisible to the other, 10 Oct). Plain text, one card so the email and the chat say the same:
+```
+@{outputs('ActionText')}
+@{outputs('RigName')} - @{outputs('Subj')}
+By: @{outputs('Who')} on @{coalesce(body('Parse_JSON')?['at'], formatDateTime(utcNow(),'yyyy-MM-dd'))}
+@{outputs('Comment')}
+The trail is on the TSC Help Centre (password): @{outputs('HelpLink')}
+Technical Services - Well Control Engineering
+```
 9. **Condition**, rename **HasReceipt**: fx `greater(length(body('AssistanceReceipts')), 0)` is equal to `true`.
 10. In **HasReceipt / True**:
     - **Get file content** (SharePoint), rename **ReceiptContent**: Site WellControl, File Identifier fx
@@ -246,15 +256,6 @@ concat('startswith(FileLeafRef,''help-receipt_', outputs('ReqId'), '_'')')
 concat('RE: ', if(equals(outputs('Guard'), true), '[TEST MODE] ', ''), coalesce(body('Receipt')?['mode'], 'ASSISTANCE REQUEST'), ' - ', outputs('RigName'), ' - ', outputs('Subj'))
 ```
       This is the request's subject with `RE:` in front; Outlook groups it into the same conversation.
-    - Compose **Text** (plain text, one card so the email and the chat say the same):
-```
-@{outputs('ActionText')}
-@{outputs('RigName')} - @{outputs('Subj')}
-By: @{outputs('Who')} on @{coalesce(body('Parse_JSON')?['at'], formatDateTime(utcNow(),'yyyy-MM-dd'))}
-@{outputs('Comment')}
-The trail is on the TSC Help Centre (password): @{outputs('HelpLink')}
-Technical Services - Well Control Engineering
-```
     - **Send an email (V2)**, rename **AckEmail**: To fx `outputs('SendTo')`, Subject fx `outputs('Subject')`,
       Body pasted as plain text: `@{outputs('Text')}`. Importance Normal.
     - **Condition**, rename **HasChat**: fx `not(empty(coalesce(body('Receipt')?['chatId'], '')))` is equal to `true`.
