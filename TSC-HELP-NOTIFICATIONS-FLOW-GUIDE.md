@@ -220,9 +220,10 @@ if(equals(outputs('Action'), 'close'), 'CLOSED', if(equals(outputs('Action'), 'u
    **Comment**: `coalesce(body('Parse_JSON')?['comment'], '')`.
    **HelpLink**: `http://sdrlazneuiis01d.corp.local:8080/sacred/help/help-centre.html`.
 7. **Get files (properties only)** (SharePoint), rename **ReceiptFiles**: Site WellControl, Library
-   **Digests**, Folder `/help-receipts` (pick it with the folder icon), Filter Query fx
+   **Digests**, Limit Entries to Folder `/help-receipts` (pick it with the folder icon), Filter Query fx (an expression
+   that builds the OData string; the doubled quotes are the quotes inside it)
 ```
-startswith(FileLeafRef, concat('help-receipt_', outputs('ReqId'), '_'))
+concat('startswith(FileLeafRef,''help-receipt_', outputs('ReqId'), '_'')')
 ```
 8. **Filter array**, rename **AssistanceReceipts**: From `body('ReceiptFiles')?['value']`, condition
    (Edit in advanced mode) fx
