@@ -1,6 +1,6 @@
 # Praetorian Fitness — working notes
 
-Client: friend's premium fitness-apparel brand. Positioning: simple, high quality, upmarket (Lululemon end of the market) for athletes and gym-goers. Pre-launch site: a "coming soon" collection page that builds a launch list.
+Client: friend's premium fitness-apparel brand. CEO James, Houston, Texas; launching in the USA, men's first. **Launch plan, job list and supplier list: `LAUNCH-PLAN.md`.** Positioning: simple, high quality, upmarket (Lululemon end of the market) for athletes and gym-goers. Pre-launch site: a "coming soon" collection page that builds a launch list.
 
 This folder is the deploy folder. Drag it as-is onto Netlify as its own project (not inside the Plantworks project), then point the brand's domain at it.
 
@@ -23,7 +23,7 @@ This folder is the deploy folder. Drag it as-is onto Netlify as its own project 
 | `https://praetorianfitness.com/` | canonical, OG tags, JSON-LD | the real domain once bought |
 | `hello@praetorianfitness.com` | footer | the real mailbox |
 | Instagram link `#` | footer | the real handle |
-| Prices in GBP (£38 tee, £44 short, £62 quarter-zip, £68 hoodie, £26 cap, £16 shaker, £74 duffel) | collection cards | the client's prices, or remove prices until confirmed |
+| Prices in USD (switched 10 Oct 2026 for the US launch: $58 tee, $64 short, $98 quarter-zip, $108 hoodie, $38 cap, $24 shaker, $110 duffel) | collection cards | the client's prices once factory quotes are in |
 | "Notify me" buttons | collection cards | Stripe Payment Links or a shop (Shopify / Snipcart) when stock exists |
 
 ## Imagery
@@ -39,7 +39,7 @@ Netlify Forms, form name `launch-list`, fields: name, email, size, piece of inte
 
 ## Open items
 
-- [ ] Domain: `praetorianfitness.com` availability unknown (proxy blocks WHOIS from here). Check on Namecheap; `.co.uk` as fallback.
+- [ ] Domain: `praetorianfitness.com` availability unknown (proxy blocks WHOIS from here). Check on Namecheap. US launch, so stick to `.com`.
 - [ ] Confirm product names, prices and colourways (site shows five tee colours: black, charcoal, stone, navy, white).
 - [ ] Sizing guide page once the size chart exists.
 - [ ] Shop: decide Shopify (full shop, ~£25/month) vs Stripe Payment Links on this static site (cheapest for a small launch range).
