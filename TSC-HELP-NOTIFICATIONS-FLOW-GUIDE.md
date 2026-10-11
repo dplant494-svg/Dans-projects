@@ -29,8 +29,10 @@ In `WCE_Precharge_Notification.xlsx`, two new sheets, each with a table of the s
 
 1. **HelpFixed**: columns `Name`, `Email`. Rows: Ian Jack, `Ian.Jack@seadrill.com`; BOP Controls,
    `BOPcontrols@seadrill.com`. Select A1:B3, Insert, Table, "My table has headers", name it `HelpFixed`.
-2. **Downtime** (for Part E, the six-hour chat): columns `Role`, `Name`, `Email`. Rows: Ops Director;
-   Director of Technical Services; Downtime Event SME. Table name `Downtime`.
+2. **Downtime** (for Part E, the six-hour chat): columns `Role`, `Name`, `Email`. Rows: Director of Technical
+   Services (Arnaud Gabaut, 11 Oct); Downtime Event SME (blank for now, covered by the other lists). Table name
+   `Downtime`. **The Ops Director is per region, so not here**: a column `OpsDirectorEmail` on the **Rigs** table,
+   filled per rig, read by Part E's RigMgmt card (11 Oct, Dan).
 
 The Rigs sheet already carries `TslEmail`, `SubseaSupervisorEmail`, `ARMEmail`, `RigManagerEmail` per
 rig; nothing changes there. Close Excel (edit in the browser, or close before testing).
@@ -226,9 +228,10 @@ Everything in **SEADRILL-WC-DEV**, the same workbook, the same connections.
     to `true`. Everything below goes in **True**; **False** stays empty.
 12. In **NoChatYet / True**, **List rows present in a table**, rename **RigRow**: table **Rigs**, Filter Query fx
     `concat('RigKey eq ''', outputs('RigKey'), '''')`, Top Count 1.
-    Compose **RigMgmt** (Rig Manager and ARM for this rig):
+    Compose **RigMgmt** (Rig Manager, ARM and the regional Ops Director for this rig; `OpsDirectorEmail` is a column on
+    the Rigs table, blank where not yet known):
 ```
-concat(coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''))
+concat(coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['OpsDirectorEmail'],''))
 ```
     Compose **AllTo**:
 ```
