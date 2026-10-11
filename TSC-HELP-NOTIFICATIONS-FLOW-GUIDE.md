@@ -164,20 +164,129 @@ after twenty minutes, or **pending** in the first twenty. A request still withou
 hour, or one marked NOT SENT, is on the dashboard's Errors button as an assistance request without
 a delivery receipt.
 
-## Part E — the six-hour chat (DIR-00-0116 §3.5.1.1), a second, scheduled flow (30 minutes)
+## Part E — the six-hour chat (DIR-00-0116 §3.5.1.1), a third, scheduled flow (30 minutes)
 
-Not built with Part B; built once Part B is proven. **Recurrence** every hour. **Get file content**
-of `help-data.js`? No: a flow cannot read the server share. Instead the scanner writes
-`help-open.json` beside the receipts (the open rig-down requests with `requestId`, `rigKey`, `rig`,
-`subject`, `occurredAt`; scanner v2.72, on request). The flow: **Get file content** on that file,
-**Parse JSON**, **Apply to each** row: Condition `less(addHours(item()?['occurredAt'], 6), utcNow())`
-is `true` → **Get files (properties only)** on `/Digests/help-receipts` filtered to
-`help-receipt_<requestId>_directive_*` (Filter Query `startswith(FileLeafRef,'…')`); if none:
-**RigRow** for the rig, **DowntimeRows** (table `Downtime`), **Create a chat** with Rig Manager, ARM,
-the three Downtime rows and the office, Title `<Rig> – <occurred date> – <subject>`, **Post message**
-with the request and the assistance chat's link, and a receipt file named
-`help-receipt_<requestId>_directive_<stamp>.json` with `"kind":"directive","chatCreated":true`.
-The Help Centre then shows **Six-hour Teams chat created** on the card.
+**What it does:** the directive says a rig-down event still open after six hours gets a chat with the downtime group
+(Ops Director, Director of Technical Services, Downtime Event SME) plus the rig's management. This flow runs every
+hour, reads the scanner's list of open rig-down requests, and for each one past six hours that has no six-hour receipt
+yet, creates that chat once, posts the request into it, and writes a receipt of kind `directive` so it never does it
+twice. The Help Centre card then shows **Six-hour Teams chat created**.
+
+**Before the flow: scanner v2.85** (11 Oct). A flow can read SharePoint but not the server share, so the scanner
+writes `help-open.json` into the same synced folder as the receipts (`helpReceiptPath`, Digests/help-receipts): every
+request not closed, rig down, not a dry run, with `requestId`, `rigKey`, `rig`, `subject`, `occurredAt`, `hoursSince`,
+`postedAt`, `state`, `synergiCase`, `directiveDone`. SSCE Equipment rows stay in, so the flow can be tested in test
+mode. Install v2.85 (`Install-DashboardUpdate.ps1` or copy the script over), run once, and check the file is in the
+Digests library under help-receipts before building the flow. The Downtime table (Part A) must have its three rows
+with emails; the roles are read by position, so the emails are what matter.
+
+Everything in **SEADRILL-WC-DEV**, the same workbook, the same connections.
+
+1. **+ Create**, **Scheduled cloud flow**, name `TSC Help Six-hour Chat`, Repeat every **1 Hour**, **Create**.
+2. **+ New step**, **Get file content using path** (SharePoint), rename **OpenList**: Site Address **WellControl**,
+   File Path: click the folder icon and pick **Digests / help-receipts / help-open.json**. Infer Content Type: Yes.
+3. **Parse JSON**, rename **OpenRows**: Content = **File Content** (from OpenList); Schema:
+```
+{"type":"object","properties":{"generatedAt":{"type":"string"},"count":{"type":"integer"},"open":{"type":"array","items":{"type":"object","properties":{"requestId":{"type":"string"},"rigKey":{"type":"string"},"rig":{"type":"string"},"subject":{"type":"string"},"occurredAt":{"type":"string"},"hoursSince":{},"postedAt":{"type":"string"},"state":{"type":"string"},"synergiCase":{"type":"string"},"directiveDone":{"type":"boolean"}}}}}}
+```
+4. **SettingsRow** and **TestMode**: the same two cards as Part B step 5 (List rows present in a table, table
+   Settings, Filter Query `Key eq 'TestMode'`; Compose TestMode
+   `equals(toLower(coalesce(first(body('SettingsRow')?['value'])?['Value'],'no')), 'yes')`).
+5. **OfficeRows** / **OfficeEmails** / **OfficeList**: the same three cards as Part B step 8 (table Office).
+6. **List rows present in a table**, rename **DowntimeRows**: the workbook, table **Downtime**, no filter.
+   **Select**, rename **DowntimeEmails**: From `body('DowntimeRows')?['value']`, Map: switch to text mode (the small
+   icon on the right of the Map box), fx `item()?['Email']`.
+   Compose **DowntimeList**: `join(body('DowntimeEmails'), ';')`.
+7. **Filter array**, rename **Due**: From fx `body('OpenRows')?['open']`, Edit in advanced mode, fx
+```
+@and(equals(item()?['directiveDone'], false), not(empty(coalesce(item()?['occurredAt'], ''))), less(addHours(item()?['occurredAt'], 6), utcNow()))
+```
+   (not done yet, has an event time, and the event time plus six hours is in the past). A request with no
+   `occurredAt` is left alone: the Help Centre shows it without an hours count and the office handles it by hand.
+8. **Apply to each**, rename **EachDue**: Select an output from previous steps fx `body('Due')`. Everything from here
+   goes **inside** EachDue. Click **Add an action** inside it for each card below.
+9. Inside EachDue, Compose cards (one each, **Compose** from Data Operation):
+   **ReqId**: `item()?['requestId']`
+   **RigName**: `coalesce(item()?['rig'], 'Unknown rig')`
+   **RigKey**: `toLower(coalesce(item()?['rigKey'], ''))`
+   **Subj**: `coalesce(item()?['subject'], 'Assistance request')`
+   **Occurred**: `item()?['occurredAt']`
+   **HoursDown**: `string(div(sub(ticks(utcNow()), ticks(item()?['occurredAt'])), 36000000000))`
+   **TestAsset**: `equals(toLower(outputs('RigName')), 'ssce equipment')`
+   **Guard**: `or(equals(outputs('TestMode'), true), equals(outputs('TestAsset'), true))`
+   **HelpLink**: `http://sdrlazneuiis01d.corp.local:8080/sacred/help/help-centre.html`
+10. Inside EachDue, **Get files (properties only)** (SharePoint), rename **ReceiptFiles**: Site WellControl, Library
+    **Digests**, Limit Entries to Folder `/help-receipts` (folder icon). No Filter Query.
+    **Filter array**, rename **DirectiveReceipts**: From `body('ReceiptFiles')?['value']`, advanced mode fx
+```
+@and(startsWith(item()?['{FilenameWithExtension}'], concat('help-receipt_', outputs('ReqId'), '_directive_')), endsWith(item()?['{FilenameWithExtension}'], '.json'))
+```
+    (the belt to the scanner's braces: if a receipt exists but the scanner has not rescanned yet, no second chat.)
+11. Inside EachDue, **Condition**, rename **NoChatYet**: fx `equals(length(body('DirectiveReceipts')), 0)` is equal
+    to `true`. Everything below goes in **True**; **False** stays empty.
+12. In **NoChatYet / True**, **List rows present in a table**, rename **RigRow**: table **Rigs**, Filter Query fx
+    `concat('RigKey eq ''', outputs('RigKey'), '''')`, Top Count 1.
+    Compose **RigMgmt** (Rig Manager and ARM for this rig):
+```
+concat(coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''))
+```
+    Compose **AllTo**:
+```
+join(union(split(replace(concat(outputs('OfficeList'), ';', outputs('DowntimeList'), ';', outputs('RigMgmt')), ';;', ';'), ';'), json('[]')), ';')
+```
+    Compose **SendTo**: `if(equals(outputs('Guard'), true), outputs('OfficeList'), outputs('AllTo'))`.
+    **Filter array**, rename **ToClean**: From fx `split(toLower(outputs('SendTo')), ';')`, `item()` **is not equal
+    to** (right box empty).
+    **Filter array**, rename **ChatMembers**: From fx `body('ToClean')`, `item()` **is not equal to**
+    `daniel.plant@seadrill.com` (the account the flow runs as; same reason as Part B step 12b).
+13. Still in True, **Create a chat** (Teams), rename **SixHourChat**: Members fx `join(body('ChatMembers'), ';')`,
+    Title fx
+```
+concat(if(equals(outputs('Guard'), true), '[TEST] ', ''), 'SIX-HOUR RIG DOWN - ', outputs('RigName'), ' - ', formatDateTime(outputs('Occurred'),'yyyy-MM-dd'), ' - ', replace(outputs('Subj'), ':', ' -'))
+```
+14. Still in True, Compose **Text** (plain text, one card):
+```
+SIX-HOUR RIG DOWN NOTICE (DIR-00-0116 3.5.1.1)
+@{outputs('RigName')} - @{outputs('Subj')}
+Event occurred: @{outputs('Occurred')}. Hours down now: @{outputs('HoursDown')}.
+Synergi case: @{coalesce(item()?['synergiCase'],'not yet raised')}. Request status: @{item()?['state']}.
+The rig has been down more than six hours on an open assistance request. This chat brings in the downtime group and rig management.
+The request, its trail and the assistance chat are on the TSC Help Centre (password): @{outputs('HelpLink')}
+Technical Services - Well Control Engineering
+```
+    **Post message in a chat or channel** (Teams), rename **ChatSixHour**: Post as **Flow bot**, Post in **Group
+    chat**, Group chat fx `outputs('SixHourChat')?['body/id']`, Message fx
+    `replace(outputs('Text'), decodeUriComponent('%0A'), '<br>')`.
+15. Still in True, **Send an email (V2)**, rename **SixHourEmail**: To fx `join(body('ToClean'), ';')`, Subject fx
+```
+concat(if(equals(outputs('Guard'), true), '[TEST MODE] ', ''), 'SIX-HOUR RIG DOWN - ', outputs('RigName'), ' - ', outputs('Subj'))
+```
+    Body fx `replace(outputs('Text'), decodeUriComponent('%0A'), '<br>')`, Importance High.
+    (Teams chats get missed; the email is the record and the nudge.)
+16. Still in True, **Create file** (SharePoint), rename **DirectiveReceipt**: Site WellControl, Folder Path
+    `/Digests/help-receipts`, File Name fx
+    `concat('help-receipt_', outputs('ReqId'), '_directive_', formatDateTime(utcNow(),'yyyyMMdd-HHmmss'), '.json')`,
+    File Content fx
+```
+json(concat('{"requestId":"', outputs('ReqId'), '","kind":"directive","ok":true,"sentTo":', string(body('ToClean')), ',"sentAt":"', utcNow(), '","error":"","chatCreated":true,"chatId":"', coalesce(outputs('SixHourChat')?['body/id'],''), '","mode":"SIX-HOUR RIG DOWN"}'))
+```
+    The `_directive_` in the name is what Part F's AssistanceReceipts filter excludes and what the scanner reads as the
+    six-hour receipt.
+17. **Save.** Click **Flow checker** (top right) and clear anything red before testing.
+
+**Proof, in test mode (Settings B2 Yes):** post a new SSCE Equipment help request with `rigDown: true` and an
+`occurredAt` seven hours ago (copy `seadrill-help_SSCE-Equipment_sample.json`, change `requestId`, `saved`, and set
+`occurredAt` to today's date at a time seven hours back, UTC). Wait for a scan (10 minutes) and check `help-open.json`
+in Digests/help-receipts lists it with `directiveDone: false`. Then **Test**, **Manually**, **Run flow**. Expect: Due
+holds one row; a `[TEST] SIX-HOUR RIG DOWN - SSCE Equipment - ...` chat with the office only; the `[TEST MODE]
+SIX-HOUR RIG DOWN` email to the office; a `help-receipt_<id>_directive_<stamp>.json` in the folder. Run the flow again
+by hand: Due still holds the row (the scanner has not rescanned), NoChatYet goes **False**, nothing is sent. After the
+next scan the Help Centre card shows **Six-hour Teams chat created** and `help-open.json` carries `directiveDone: true`.
+Close the request from the page.
+
+**Limits, said plainly:** the clock is `occurredAt` as the rig typed it, in UTC. A request posted without an event
+time never gets the six-hour chat from the flow; the Help Centre shows it without an hours figure and the office
+raises the chat by hand. The hour's recurrence means the chat lands between six and seven hours after the event.
 
 ## Part F — the acknowledgement back into the same conversation (30 minutes, after Part C)
 
