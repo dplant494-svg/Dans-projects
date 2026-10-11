@@ -1,7 +1,7 @@
 ## Entry 60 — The Technical Assistance Request is built (SSORT 161), against your live flow. The keys, and eight questions before it goes live
 
 **Rev: SSORT 161, built and tested 11 October; NOT deployed.** sha256
-`69477019fbe5375ad86a94dfbf361b844b51c7dc8964234743349902a669ad7f`, 6,929,498 bytes. Status: **NEEDS ACTION**
+`a5da5eacfcc7878e45e7a509cae60708127bb701cd3f3da920ae31a694bc14f9`, 6,936,884 bytes (rebuilt after your 60.4 answers, 60.6, and with the FRM copy, 60.7). Status: **NEEDS ACTION**
 — answer 60.4 before Dan deploys; 60.5 is the end-to-end test Dan runs.
 
 **Dan, 11 October:** *"build it before the 15th, ask the dashboard what you need, this goes into ssort as a drop down
@@ -140,6 +140,63 @@ Once 60.4 is answered:
 
 Then deploy. WCGRRT is untouched. The training pack stays held (entry 56), so the class deck has no assistance-request
 shot until Dan releases the pack.
+
+### 60.6 — Your 60.4 answers (11 Oct), and the one change they made
+
+All eight are answered. The schema holds. The tool keeps folding the form into `description`, keeps one send per
+request, and sends blanks as `""` (you drop them; `fieldLabels` is used from scanner v2.87). `notifyKind` is a label,
+not a trigger; the roles are never read for addressing; and nothing else is expected.
+
+**One change, built:** at most **20 MB of files in total per request** (the tenant's 25 MB email send limit). The file
+that would cross it is refused with the reason, and Send refuses as well if the total is ever over. The 8 MB warning
+and 20 MB refusal per file, and `sdSizeOk`'s 10 MB warning, are unchanged. Tested: two 7.5 MB PDFs were attached and
+the third was refused at 22.5 MB. 161 was never deployed, so it was rebuilt in place; the hash above is the new
+build. Every byte-identical check still passes.
+
+**West Phoenix, Elara, Aquarius, Eclipse** as Rigs-sheet rows: Dan's call (your 60.4.4). The tool needs no change
+either way, because `rigkey` falls back to the rig name.
+
+### 60.7 — A copy of the FRM on the email (Dan, 11 Oct). No flow change, by design: please confirm
+
+Dan: *"we want to attach a copy of the FRM and any attachments to the email"*. The crew's files already go on the
+email, because your flow attaches every `attachments[]` and `photos[]` item. So the tool now builds the filled-in
+**FRM-00-0169** itself and puts it as the **first `attachments[]` item**:
+
+```
+{ name: "FRM-00-0169_<rigkey>_<yyyyMMdd-HHmm>.html", type: "text/html", bytes, data: <bare base64 of UTF-8 HTML>, frm: true }
+```
+
+- **The document** is laid out as the form is: the Rig Down / Equipment Failure selector ticked, then its fifteen
+  numbered fields in its order, conference call YES/NO ticked. After those come what the tool adds: subject,
+  Synergi case, raised by and contact, assistance or mandatory, the names of the files sent with it, the request id,
+  and the SSORT revision.
+- On a `dryRun` or `SSCE Equipment` send it carries a **TEST** banner.
+- It is self-contained HTML with no images, about 4 KB, and all crew text is escaped. It opens in any browser and prints
+  to PDF. That is the same route NOV already receive the CBM report by: the tenant converter refuses HTML (ORR known
+  error 4), and the tool has no PDF library offline.
+- `frm: true` is an extra key on that one item, so the Help Centre can tell it from the crew's files if you want to.
+  The flow ignores it.
+- It does not count toward the 20 MB file cap.
+- The crew can see the exact document before sending: **🖨 View / print FRM**.
+
+**So nothing changes in `TSC Help Notifications`**, because `ReqDocs` already maps every attachment. **Please confirm two
+things, or say otherwise:**
+
+- **(a)** Nothing in the flow or the scanner filters `attachments[]` by type, so a `text/html` item goes on the email
+  like a PDF.
+- **(b)** The Help Centre lists it as a downloadable attachment. Its `blobUrl` with `type: text/html` opens it.
+
+Verified on 161, posting stubbed and nothing posted:
+
+- the FRM is first, then the crew's PDF;
+- the base64 decodes to the document;
+- all fifteen rows are present, and the ticks are right;
+- `<` and `&` in crew text are escaped;
+- the TEST banner shows;
+- the files are listed.
+
+**This lands in Dan's practice send (60.5):** the office email should carry `FRM-00-0169_ssce_<stamp>.html` plus the
+photo and the PDF.
 
 ---
 

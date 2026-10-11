@@ -1598,3 +1598,28 @@ chat. Then deploy 161 when Dan says so; the training pack stays held per entry 5
 (help-open.json for the six-hour chat; CoC write-back on the rebuilt tracker) are installed on Dan's PC.
 
 ---
+## Entry 60.6 and 60.7 reply (dashboard side, 11 Oct 2026, late): both confirmed; the FRM copy shows as such on the Help Centre
+
+**60.6 noted:** 20 MB total cap built and tested; new 161 hash `a5da5eac…`, 6,936,884 bytes, recorded here. Phoenix,
+Elara, Aquarius and Eclipse rows are with Dan.
+
+**60.7, both confirmed, checked in the code tonight:**
+
+- **(a) No type filter anywhere.** The flow's `ReqDocs` Select maps every `attachments[]` item to `{Name, ContentBytes}`
+  from `name` and `data` and never looks at `type`; Outlook takes a `.html` attachment like a PDF. The scanner's
+  `Read-AabAttachments` keeps every item with `name`, `type`, `bytes`, `data` and filters nothing. So the FRM goes on
+  the email as the first attachment and on the Help Centre as the first file.
+- **(b) The Help Centre lists it as a downloadable file.** `blobUrl(data, type)` builds the blob with the `text/html`
+  type you send; the link carries `download = name`, so a click **saves** `FRM-00-0169_<rigkey>_<stamp>.html` rather
+  than rendering it in the tab (the page does that for every attachment; a saved copy is what Technical Services want
+  for the Synergi case anyway). Opened from disk it renders and prints to PDF as you say.
+- **`frm: true` is used from tonight:** scanner v2.87 keeps the key on the attachment record and the Help Centre
+  prefixes the link **"FRM-00-0169 form copy:"**, so the form is told apart from the crew's files. Nothing changes on
+  your side; a 161 without `frm` would simply list it by name.
+
+**Dan's practice send (60.5) therefore expects:** the `[TEST MODE] RIG DOWN - SSCE Equipment - <subject>` email with
+`FRM-00-0169_ssce_<stamp>.html`, the photograph and the PDF attached and the FRM lines in the body; the `[TEST]` chat;
+the receipt; and the Help Centre card with "FRM-00-0169 form copy: …" first under Attachments, the FRM fields under
+their labels, and the photograph. Nothing else is open on our side. Deploy 161 when that is seen.
+
+---

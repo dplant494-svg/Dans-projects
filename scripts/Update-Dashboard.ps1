@@ -1374,7 +1374,7 @@ function Read-AabAttachments { param($Json)
             $data = ConvertTo-AabText (Get-Prop $a 'data')
             $bytes = 0L; [void][long]::TryParse((ConvertTo-AabText (Get-Prop $a 'bytes')), [ref]$bytes)
             if ($bytes -le 0 -and $data) { $bytes = [long][math]::Floor($data.Length * 0.75) }
-            $atts.Add([ordered]@{ name = ConvertTo-AabText (Get-Prop $a 'name'); type = ConvertTo-AabText (Get-Prop $a 'type'); bytes = $bytes; primary = (ConvertTo-AabBool (Get-Prop $a 'primary')); data = $data }) | Out-Null
+            $atts.Add([ordered]@{ name = ConvertTo-AabText (Get-Prop $a 'name'); type = ConvertTo-AabText (Get-Prop $a 'type'); bytes = $bytes; primary = (ConvertTo-AabBool (Get-Prop $a 'primary')); frm = (ConvertTo-AabBool (Get-Prop $a 'frm')); data = $data }) | Out-Null
         }
     }
     # schema 1.0 (Rev 4): one 'bulletin' object -> a single primary attachment
