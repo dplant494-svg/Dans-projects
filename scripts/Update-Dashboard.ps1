@@ -1244,7 +1244,7 @@ $dl1Closeouts = @{}    # planId -> close-out (aar read whole)
 $dl1Evidence = New-Object System.Collections.Generic.List[object]   # one row per file: names and sizes, never the bytes
 $dl1Test = New-Object System.Collections.Generic.List[object]       # the test posts, listed so the Status page and Dan can see them
 $dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
-function ConvertTo-Dl1Text { param($Value) if ($null -eq $Value) { return '' }; if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }; return [string]$Value }   # PS7's ConvertFrom-Json turns ISO strings into [datetime]: written back as UTC; Windows PowerShell 5.1 keeps the string with its offset
+function ConvertTo-Dl1Text { param($Value) if ($null -eq $Value) { return '' }; if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }; return [string]$Value }   # PowerShell 7's ConvertFrom-Json turns a full ISO timestamp into [datetime] (a date-only string such as 2026-11-14 stays a string, checked 12 Oct): written back as UTC, the instant unchanged. Windows PowerShell 5.1 (Dan's PC, the server) keeps every string exactly as sent, offset included.
 function ConvertTo-Dl1Number { param($Value) if ($null -eq $Value -or $Value -is [string] -and [string]$Value -eq '') { return $null }; $d = 0.0; if ([double]::TryParse([string]$Value, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$d)) { return $d }; return $null }
 function Read-Dl1Post { param($Json, $Meta, $File, [string]$Kind)
     $rig = (ConvertTo-AabText (Get-Prop $Meta 'asset')).Trim()
@@ -1283,8 +1283,11 @@ function Get-Dl1PlanSummary { param($Post)
             techs = ConvertTo-Dl1Number (Get-Prop $t 'techs'); predecessors = (@(ConvertTo-AabList (Get-Prop $t 'predecessors')) | ForEach-Object { [string]$_ }) -join '; '
             critical = ConvertTo-AabBool (Get-Prop $t 'critical'); floatHrs = ConvertTo-Dl1Number (Get-Prop $t 'floatHrs'); dueDate = ConvertTo-Dl1Text (Get-Prop $t 'dueDate')
             woStatus = ConvertTo-AabText (Get-Prop $t 'woStatus'); crew = ConvertTo-AabText (Get-Prop $t 'crew'); status = ConvertTo-AabText (Get-Prop $t 'status')
-            hubCode = $(if ($hub) { ConvertTo-AabText (Get-Prop $hub 'code') } else { '' }); hubAab = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'AAB') } else { $null }); hubTr = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'TR') } else { $null })
-            hubAlert = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'Alert') } else { $null }); hubOpEvent = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'OpEvent') } else { $null }); hubNptHrs = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'nptHrs') } else { $null })
+            hubCode = $(if ($hub) { ConvertTo-AabText (Get-Prop $hub 'code') } else { '' })
+            hubOpEvent = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'OpEvent') } else { $null }); hubAlert = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'Alert') } else { $null }); hubHse = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'HSE') } else { $null })
+            hubMoc = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'MoC') } else { $null }); hubTb = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'TB') } else { $null }); hubTr = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'TR') } else { $null })
+            hubTp = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'TP') } else { $null }); hubIr = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'IR') } else { $null }); hubAab = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'AAB') } else { $null })
+            hubNptHrs = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'nptHrs') } else { $null })   # DL-1 entry 2: all nine Reference Hub counts, not six
         }) | Out-Null
     }
     $ms = New-Object System.Collections.Generic.List[object]
@@ -1321,9 +1324,14 @@ function Get-Dl1ProgressSummary { param($Post, $Plan)
         $rows.Add([ordered]@{ planId = $Post.planId; scopeVersion = $Post.scopeVersion; asOf = ConvertTo-Dl1Text (Get-Prop $pg 'asOf'); taskId = $tid; pct = $pct; status = ConvertTo-AabText (Get-Prop $t 'status'); note = ConvertTo-AabText (Get-Prop $t 'note'); actualStart = ConvertTo-Dl1Text (Get-Prop $t 'actualStart'); actualEnd = ConvertTo-Dl1Text (Get-Prop $t 'actualEnd'); actualHrs = ConvertTo-Dl1Number (Get-Prop $t 'actualHrs') }) | Out-Null
     }
     $overall = $null; if ($wSum -gt 0) { $overall = [math]::Round(100.0 * $wDone / $wSum, 1) }
+    # DL-1 entry 2 (12 Oct): one writer. When the snapshot carries the tool's own pctComplete (REV 11), that figure is
+    # shown and the scanner's duration-weighted figure is kept beside it as pctComputed for the check; without it, the
+    # scanner's figure stands.
+    $toolPct = ConvertTo-Dl1Number (Get-Prop $pg 'pctComplete')
+    $shown = $overall; if ($null -ne $toolPct) { $shown = [math]::Round([double]$toolPct, 1) }
     return [ordered]@{
         planId = $Post.planId; scopeVersion = $Post.scopeVersion; rig = $Post.rig; rigKey = $Post.rigKey; bopNo = $Post.bopNo; asOf = ConvertTo-Dl1Text (Get-Prop $pg 'asOf'); shift = ConvertTo-AabText (Get-Prop $pg 'shift')
-        snapshot = ConvertTo-AabBool (Get-Prop $pg 'snapshot'); taskCount = $n; tasksComplete = $nDone; tasksInProgress = $nProg; pctComplete = $overall
+        snapshot = ConvertTo-AabBool (Get-Prop $pg 'snapshot'); taskCount = $n; tasksComplete = $nDone; tasksInProgress = $nProg; pctComplete = $shown; pctComputed = $overall; pctSource = $(if ($null -ne $toolPct) { 'tool' } else { 'scanner' })
         pdcItemsTicked = (@(ConvertTo-AabList (Get-Prop $pg 'pdcItemsTicked')) | ForEach-Object { [string]$_ }) -join '; '
         rev = $Post.rev; posted = $Post.posted; file = $Post.file; dryRun = $Post.dryRun; isTest = $Post.isTest; tasks = $rows.ToArray()
     }

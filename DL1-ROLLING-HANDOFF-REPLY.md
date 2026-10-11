@@ -178,3 +178,63 @@ rig's DL-1 could show "Verified by TSC: 3 of 4" by reading the scanner's `help-d
 there), the same read your Reference Hub will do on `aab-data.js`. Optional.
 
 ---
+## Entry 2 reply (dashboard side, 12 Oct 2026): the four points, all taken; the open items answered again; WO.csv is Dan's to chase
+
+Good review. Three of your four points are changed in the scanner tonight (v2.88, same version, rebuilt), the fourth is
+answered with a number. The "open items" were answered in our **Entry 1 reply** of 12 Oct, which it seems did not reach
+you: only the addendum did. Dan is sending the full reply with this; the answers are repeated below in short.
+
+### Your four points
+
+1. **Percent complete, one writer: agreed, and built.** From tonight the scanner shows the tool's figure when the
+   `plan-progress` snapshot carries `progress.pctComplete` (REV 11), and keeps its own duration-weighted figure beside it
+   as `pctComputed` with `pctSource` = `tool` or `scanner`, for the check only. Without the tool's figure the scanner's
+   stands, as in the samples. Fabric's `v_plan_pct` view is the same check in SQL. Your REV 11 change to task-`pct`
+   weighting is welcome; the two will then agree by construction, and a planner override shows as a difference we can see.
+2. **Timestamps: checked tonight, and the date-only fields are safe.** PowerShell 7's `ConvertFrom-Json` turns a full
+   ISO timestamp into a date and leaves a date-only string (`2026-11-14`) as a string: tested on your three forms. So
+   `dueDate`, milestone `baseline` / `est` / `actual` and `window.from` / `to` are never shifted. A full timestamp
+   under PowerShell 7 is written back as UTC `Z`, the same instant, the rig's offset dropped. **Production is Windows
+   PowerShell 5.1** (Dan's PC today, the server from 18 Oct), which keeps every string exactly as sent, offset included.
+   Fabric therefore holds what you send; only a scratch scan on PowerShell 7 writes UTC. Documented in the script.
+3. **`hubRefs`: all nine counts now.** `hubOpEvent`, `hubAlert`, `hubHse`, `hubMoc`, `hubTb`, `hubTr`, `hubTp`,
+   `hubIr`, `hubAab`, plus `hubCode` and `hubNptHrs`, on every `plan_tasks` row; the DDL (`ddl-v6-dl1-plans.sql`)
+   matches.
+4. **Evidence size: the proven figure is far above one photo.** The "several hundred KB failed" line in the posting
+   contract is from the CoC dashboard's browser in August, before the Content-Type and base64 rules were settled. Since
+   then SSORT's CBM posts go through the same intake from rig laptops at **10 to 21 MB each** (four West Capella CBMs on
+   today's scan are 10.5, 12.4, 19.3 and 21 MB; the scanner warns above 10 MB and ingests them). So: **cap an evidence
+   post at 10 MB total**, one task per post, any number of files under it; refuse a single file above 8 MB as SSORT does.
+   The scanner keeps names and sizes only.
+
+### The open items, from the Entry 1 reply
+
+- **"From now on":** Dan's words were the direction, not the switch. **WCGRRT's planning report keeps running until the
+  agreed parallel pilot cycle is done**; the scanner reads both today (the planning report by `meta.rev`, DL-1's kinds by
+  `planId`) and the BOP page names the source on every panel. Nothing is switched off by us.
+- **`scheduleBuilderState`: inside `plan`.** 226 KB is nothing against the CBM posts above. Last key in the object,
+  as asked, so the scanner skips it.
+- **The `rigkey` list** is the table in the Entry 1 reply (thirteen rigs plus `ssce`), now with `elara`, `phoenix`,
+  `aquarius`, `eclipse`. `vela` is right for West Vela. Aquarius and Eclipse build zero tasks until they are in `WO.csv`;
+  adding them to your site table and `RIG_CODES` in REV 11 is right.
+- **`next[]`:** agreed as you proposed: in progress plus everything starting in the next 24 h, `target` the planned
+  start in ISO with offset, `taskId` beside `id`.
+- **`PMNUM`:** not from SACRED; Dan asks Manpreet to add it to `WO.csv`. Until then `pm` is blank and nothing waits on it.
+- **The Hub reading `aab-data.js`: yes.** `/sacred/aab/aab-data.js`, plain JSON, rewritten every scan, internal only;
+  read `aabStatus[]` for state. Read-only.
+- **Rig + BOP:** shipped. The BOP page now shows the newest planning report per rig and BOP, and one DL-1 panel per plan.
+
+### Your problem, and ours
+
+**`WO.csv` last written 25 September.** Dan chases Manpreet; please tell him when it moves. Until it does, a plan
+built today is on three-week-old work orders, and the dashboard would show it as such only through `dueDate` drift.
+Suggestion for REV 11: put the extract's date in `plan.sourceDate` (the `WO.csv` write time) so the scanner can warn
+when a plan is built on an extract older than, say, three days. One field, additive.
+
+**Please write entry 2 of the rolling handoff as you propose**, with the REV 11 list: task-`pct` weighting and
+`progress.pctComplete`, Aquarius and Eclipse, the evidence shape and the 10 MB cap, `scheduleBuilderState` inside
+`plan`, `plan.sourceDate`. Dan's loop design (the rig is the planner; TSC verify on a Help Centre tab; verified-by-all
+tells the rig to freeze; the frozen post is the ready-for-execution notice; edits and break-ins into the plan's chat)
+is in our file as a held note and comes back with that entry.
+
+---

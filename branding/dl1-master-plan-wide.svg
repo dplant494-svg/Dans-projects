@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 400" width="1400" height="400">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0A3A8C"/><stop offset="1" stop-color="#002C77"/></linearGradient>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+  <rect width="1400" height="400" rx="40" fill="url(#bg)"/>
+  <g transform="translate(60,40) scale(0.62)">
+    <g stroke="#FFFFFF" stroke-opacity=".18" stroke-width="3"><line x1="96" y1="150" x2="96" y2="440"/><line x1="176" y1="150" x2="176" y2="440"/><line x1="256" y1="150" x2="256" y2="440"/><line x1="336" y1="150" x2="336" y2="440"/><line x1="416" y1="150" x2="416" y2="440"/></g>
+    <g fill="#FFFFFF"><rect x="72" y="268" width="150" height="34" rx="8"/><rect x="150" y="320" width="180" height="34" rx="8"/><rect x="236" y="372" width="196" height="34" rx="8"/></g>
+    <rect x="72" y="268" width="62" height="34" rx="8" fill="#0091DA"/><rect x="150" y="320" width="40" height="34" rx="8" fill="#0091DA"/>
+    <polyline points="72,240 152,222 232,196 312,158 392,96" fill="none" stroke="#FFD100" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <g fill="#FFD100" stroke="#002C77" stroke-width="3"><rect x="58" y="226" width="28" height="28" rx="4" transform="rotate(45 72 240)"/><rect x="138" y="208" width="28" height="28" rx="4" transform="rotate(45 152 222)"/><rect x="218" y="182" width="28" height="28" rx="4" transform="rotate(45 232 196)"/><rect x="298" y="144" width="28" height="28" rx="4" transform="rotate(45 312 158)"/></g>
+    <g filter="url(#glow)"><polygon points="420,44 436,86 480,88 445,115 457,158 420,133 383,158 395,115 360,88 404,86" fill="#FFD100" stroke="#FFFFFF" stroke-width="3" stroke-linejoin="round"/></g>
+  </g>
+  <text x="420" y="190" font-family="Montserrat, 'Segoe UI', Arial, sans-serif" font-weight="800" font-size="124" fill="#FFFFFF" letter-spacing="3">DL-1</text>
+  <text x="422" y="262" font-family="Montserrat, 'Segoe UI', Arial, sans-serif" font-weight="700" font-size="58" fill="#FFD100" letter-spacing="10">MASTER PLAN</text>
+  <text x="424" y="318" font-family="Montserrat, 'Segoe UI', Arial, sans-serif" font-weight="500" font-size="30" fill="#B9C8E4" letter-spacing="2">BOP Schedule Builder  ·  Seadrill Well Control Engineering</text>
+</svg>

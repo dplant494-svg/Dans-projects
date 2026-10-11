@@ -83,10 +83,15 @@ CREATE TABLE dbo.[plan_tasks] (
     [crew] NVARCHAR(400) NULL,
     [status] NVARCHAR(400) NULL,
     [hubCode] NVARCHAR(400) NULL,
-    [hubAab] NVARCHAR(400) NULL,
-    [hubTr] NVARCHAR(400) NULL,
-    [hubAlert] NVARCHAR(400) NULL,
     [hubOpEvent] NVARCHAR(400) NULL,
+    [hubAlert] NVARCHAR(400) NULL,
+    [hubHse] NVARCHAR(400) NULL,
+    [hubMoc] NVARCHAR(400) NULL,
+    [hubTb] NVARCHAR(400) NULL,
+    [hubTr] NVARCHAR(400) NULL,
+    [hubTp] NVARCHAR(400) NULL,
+    [hubIr] NVARCHAR(400) NULL,
+    [hubAab] NVARCHAR(400) NULL,
     [hubNptHrs] NVARCHAR(400) NULL,
     [loaded_at] DATETIME2 NULL DEFAULT SYSUTCDATETIME()
 );
