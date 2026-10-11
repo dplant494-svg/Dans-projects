@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.86'
+$ScriptVersion = '2.87'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1242,7 +1242,12 @@ function Read-HelpRequest { param($Json, $Meta, $File)
     if (-not $rig -and $rigKey -and $AabRigCodes.Contains($rigKey)) { $rig = [string]$AabRigCodes[$rigKey] }
     $hours = $null; $hv = ConvertTo-AabText (Get-Prop $Json 'hoursDown'); $hd = 0.0
     if ($hv -and [double]::TryParse($hv, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$hd)) { $hours = [math]::Round($hd, 1) }
-    $known = @('meta','attachments','photos','photodump','requestid','notifykind','rigdown','hoursdown','occurredat','synergicase','subject','dryrun','description')
+    $known = @('meta','attachments','photos','photodump','requestid','notifykind','rigdown','hoursdown','occurredat','synergicase','subject','dryrun','description','fieldlabels')
+    # v2.87 (11 Oct 2026, SSORT 161 entry 60.3): fieldLabels {key: "FRM-00-0169 wording"} labels the extra fields on the
+    # Help Centre; blank fields are already left out of fields{} below.
+    $fieldLabels = [ordered]@{}
+    $fl = Get-Prop $Json 'fieldLabels'
+    if ($null -ne $fl -and -not ($fl -is [string])) { foreach ($k in (Get-KeyNames $fl)) { $lv = Get-Prop $fl ([string]$k); if ($lv -is [string] -and $lv.Trim() -ne '') { $fieldLabels[[string]$k] = $lv } } }
     $fields = [ordered]@{}
     foreach ($k in (Get-KeyNames $Json)) {
         $ks = [string]$k; if ($known -contains $ks.ToLowerInvariant()) { continue }
@@ -1270,6 +1275,7 @@ function Read-HelpRequest { param($Json, $Meta, $File)
         reporttype  = (ConvertTo-AabText (Get-Prop $Meta 'reporttype')).Trim()
         saved       = (ConvertTo-AabText (Get-Prop $Meta 'saved')).Trim()
         fields      = $fields
+        fieldLabels = $fieldLabels
         attachments = (Read-AabAttachments -Json $Json)
         photos      = (Read-AabPhotos (Get-Prop $Json 'photos'))
     }

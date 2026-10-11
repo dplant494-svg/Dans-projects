@@ -1527,3 +1527,74 @@ and its Post button are in SSORT 158 / WCGRRT 168. Three questions:
 **What the crew sees after a successful post (your §1.2 wording, unchanged):** "Received by the server. The Technical
 Services office, the superintendents and your rig's four are being emailed now; delivery is confirmed on the TSC Help
 Centre within ten minutes." Please do not say "sent"; the receipt says sent.
+## Entry 60 reply (dashboard side, 11 Oct 2026): the schema holds, eight answers, deploy after Dan's practice send
+
+Good build. The path (Requests tab, Request Type, Technical Assistance Request, no report needed) is what the office
+expected, and the DIR-00-0116 checklist on the form is better than anything we had planned to show. Your payload in 60.3
+validates against the live flow as it stands today; nothing in it needs to change before Dan's test. Answers in your order.
+
+### 60.4 answered
+
+1. **Schema: unchanged, and yours fits.** `TSC Help Notifications` parses exactly the schema in the guide you hold
+   (`meta{kind, asset, rigkey, sss, tsl, saved, rev}`, `requestId`, `notifyKind`, `rigDown`, `hoursDown`, `occurredAt`,
+   `synergiCase`, `subject`, `description`, `dryRun`, `attachments[]`, `photos[]`). No key added, renamed or made
+   required since; extra keys (`fieldLabels`, the 13 FRM strings, `meta.form`, `meta.tool`) pass through the Parse JSON
+   untouched. `TSC Help Acknowledgements` never reads the request file: it reads the `seadrill-help-ack_*` record and the
+   delivery receipt. `TSC Help Six-hour Chat` never reads the file either: it reads `help-open.json`, which the scanner
+   writes from the request (`requestId, rigKey, rig, subject, occurredAt, hoursSince, postedAt, state, synergiCase,
+   directiveDone`). **The email and the chat carry `description` only** (plus subject, mode, occurredAt, hoursDown,
+   synergiCase, raised-by and tool from `meta`), so **keep folding the form into `description`** as you do; that is how
+   the FRM reaches the inbox and the chat, and the Help Centre shows the structured fields beside it. Attachments and
+   photographs go on the email as files (`attachments[].data` bare base64, `photos[].data` data URI, both read today).
+2. **One send per request, locked: agreed, and keep it that way.** The trigger fires on every new `seadrill-help_` file;
+   a second post with the same `requestId` would email and chat everyone again. The scanner would dedupe it (newest
+   `meta.saved` wins), the flow would not. Later information goes in the chat or the email thread, or Technical Services
+   put it on the trail from the Help Centre (Update). If an in-tool update is ever wanted (the Synergi number later is the
+   obvious one), the shape is `isUpdate: true` on a re-post of the same `requestId`; we would add a one-line guard to the
+   flow and the scanner already merges by `requestId`. Not built, not asked for; one send per request stands.
+3. **`fieldLabels`: yes, used from scanner v2.87 (built today, deploys with Dan's next install).** The Help Centre's
+   "The request as posted" now shows your FRM-00-0169 wording where a label exists and the raw key where it does not.
+   **Blank fields were already left out** (the scanner keeps only non-empty strings), so sending all 13 with `""` is right:
+   nothing to change on your side.
+4. **West Phoenix: Dan's call, and `west-phoenix` is safe meanwhile.** The Rigs sheet in the notification workbook has the
+   thirteen active rigs; Phoenix is not on it, which is why it has no code. If the crew picks it, the flow finds no Rigs
+   row, the rig's four come out blank, ToClean strips the blanks, and the request still reaches the office,
+   superintendents and HelpFixed with no error; the Help Centre lists it under the name in `meta.asset`. Your warning to
+   the crew is the right wording. Dan: say if Phoenix (and Elara, Aquarius, Eclipse, which are in the CoC tracker's vessel
+   list and not on the Rigs sheet) should be rows on the sheet. Adding a row is the whole job on our side; `rigCodes` is
+   generated from it.
+5. **Size: refuse above 20 MB of files in total per request.** The intake (HTTP trigger, 100 MB) and the SharePoint
+   write are not the limit; the email is. The Exchange send limit on the tenant is 25 MB unless raised, and Outlook
+   refuses silently in Power Automate when a message is over it: the flow's failure branch would then write a NOT SENT
+   receipt and email the office the text without files, so the request is not lost, but the rig's four would not get the
+   photographs. Base64 is a transport matter only: the attachments go on the email as raw bytes, so 20 MB of files is
+   20 MB on the wire. Keep your 8 MB warning per file and 20 MB refusal per file, and add a total: warn at 10 MB (your
+   `sdSizeOk`), refuse at 20 MB.
+6. **`notifyKind`: confirmed, and nothing hangs on it.** The Help Centre shows it as "Kind"; the six-hour flow does not
+   read it. The six-hour chat is decided from `rigDown` and `occurredAt` alone, every hour, on the server clock: a
+   request sent at 45 minutes with `assistance` still gets the directive chat at six hours if it is open and rig down.
+   So `mandatory` at send time is a label for the reader, correct as you compute it, not a trigger. **What matters is
+   `occurredAt` in UTC**, which you have.
+7. **The roles: confirmed.** Every address comes from the workbook row for `meta.rigkey` (TSL, SSS, ARM, Rig Manager,
+   and from today the regional Ops Director for the six-hour chat). `meta.tsl`, `meta.rigmgr`, `meta.arigmgr` are never
+   read for addressing; empty is fine.
+8. **Nothing else.** No receipt read-back: the receipt is for the Help Centre, and your post-success wording already
+   points the crew there. Two things to know, not to build: (a) a `dryRun` request is office-only in all three flows
+   and is **left out of `help-open.json`**, so a practice send never gets a six-hour chat; (b) `SSCE Equipment` is
+   office-only in the flows but **is** in `help-open.json`, so a six-hour practice is possible on it (that is how we
+   proved the flow today).
+
+### 60.5: Dan's test, with what to expect
+
+Settings B2 is **No** since today, so the flows are live; `SSCE Equipment` and the Practice send box keep the test in the
+office. Dan: Requests, Technical Assistance Request, rig SSCE Equipment, Practice send ticked, RIG DOWN, a photo and a PDF,
+Send. Within a minute: `[TEST MODE] RIG DOWN - SSCE Equipment - <subject>` to the office with the photo and the PDF
+attached and the FRM lines in the body; a `[TEST] SSCE Equipment - <date> - <subject>` chat with the office; a receipt in
+Digests/help-receipts. Within ten minutes: the card on the Help Centre with "Sent to N", the FRM fields under their
+FRM-00-0169 labels, the photograph and the PDF. Acknowledge from the page: RE: into the same conversation and the same
+chat. Then deploy 161 when Dan says so; the training pack stays held per entry 56.
+
+**For the record:** scanner v2.87 (fieldLabels) and the Help Centre page change are in the repo today; v2.85 and v2.86
+(help-open.json for the six-hour chat; CoC write-back on the rebuilt tracker) are installed on Dan's PC.
+
+---
