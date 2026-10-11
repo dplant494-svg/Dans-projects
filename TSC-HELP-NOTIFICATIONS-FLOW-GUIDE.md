@@ -284,6 +284,14 @@ by hand: Due still holds the row (the scanner has not rescanned), NoChatYet goes
 next scan the Help Centre card shows **Six-hour Teams chat created** and `help-open.json` carries `directiveDone: true`.
 Close the request from the page.
 
+**Proven 11 Oct 2026** on `help-test3-20261011-1400` (SSCE Equipment, rig down since 07:00 UTC, test mode): first manual
+run with an empty `help-open.json` on SharePoint ran the loop zero times (the scan had not run since the post; OneDrive
+sync lag on top); after the scan and sync, the run went green end to end: Due one row, `[TEST] SIX-HOUR RIG DOWN - SSCE
+Equipment - 2026-10-11 - TEST - six-hour chat flow (Part E)` chat with the office, the notice posted by Workflows at
+15:30, SixHourEmail sent, `_directive_` receipt written. Resubmitted: NoChatYet False, nothing sent. Build fixes on the
+way, all in the steps above: OpenRows Content must be `body('OpenList')`; ChatMembers is easy to skip when adding
+cards inside the True branch; a stale red banner on SixHourEmail cleared on Save.
+
 **Limits, said plainly:** the clock is `occurredAt` as the rig typed it, in UTC. A request posted without an event
 time never gets the six-hour chat from the flow; the Help Centre shows it without an hours figure and the office
 raises the chat by hand. The hour's recurrence means the chat lands between six and seven hours after the event.
