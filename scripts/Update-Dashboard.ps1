@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.84'
+$ScriptVersion = '2.85'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -3033,6 +3033,33 @@ foreach ($id in $helpByReq.Keys) {
     }) | Out-Null
 }
 $helpStatusSorted = @($helpStatus | Sort-Object -Property @{ Expression = { switch ($_.state) { 'open' { 0 } 'acknowledged' { 1 } default { 2 } } } }, @{ Expression = { if ($_.rigDown) { 0 } else { 1 } } }, @{ Expression = { [string]$_.postedAt }; Descending = $true })
+# v2.85: help-open.json beside the receipts (helpReceiptPath, a synced SharePoint folder), for Part E of the help
+# flows, the six-hour chat (DIR-00-0116 3.5.1.1). A flow can read SharePoint but not the server share, so the scanner
+# writes the list there: every request not yet closed where the rig is down, with the time of the event and whether a
+# directive (six-hour) receipt already exists. Dry runs are left out; SSCE Equipment rows stay in, so the flow can be
+# tested in test mode. Rewritten only when the content changes, so the folder does not churn.
+if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir)) {
+    try {
+        $helpOpenRows = New-Object System.Collections.Generic.List[object]
+        foreach ($h in $helpStatusSorted) {
+            if ($h.state -eq 'closed' -or $h.dryRun -or -not $h.rigDown) { continue }
+            $hoRow = [ordered]@{ requestId = [string]$h.requestId; rigKey = [string]$h.rigKey; rig = [string]$h.rig; subject = [string]$h.subject
+                occurredAt = [string]$h.occurredAt; hoursSince = $h.hoursSince; postedAt = [string]$h.postedAt; state = [string]$h.state
+                synergiCase = [string]$h.synergiCase; directiveDone = [bool]($null -ne $h.directiveChat -and $h.directiveChat.created) }
+            $helpOpenRows.Add($hoRow)
+        }
+        $helpOpenJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = $helpNow.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $helpOpenRows.Count; open = $helpOpenRows.ToArray() })
+        $helpOpenFile = Join-Path $helpReceiptDir 'help-open.json'
+        $prevOpen = ''; if (Test-Path -Path $helpOpenFile) { $prevOpen = [System.IO.File]::ReadAllText($helpOpenFile) }
+        # generatedAt changes every run; compare without it so the file is only rewritten when the rows change
+        $stripStamp = { param($t) [regex]::Replace($t, '"generatedAt":"[^"]*"', '') }
+        if ((& $stripStamp $prevOpen) -ne (& $stripStamp $helpOpenJson)) {
+            [System.IO.File]::WriteAllText($helpOpenFile, $helpOpenJson, (New-Object System.Text.UTF8Encoding($false)))
+            Write-Host "Help open list written: $($helpOpenRows.Count) rig-down request(s) in help-open.json" -ForegroundColor Green
+        }
+    }
+    catch { Write-Warning "help-open.json failed (scan unaffected): $($_.Exception.Message)" }
+}
 if ($helpRaw.Count -gt 0 -or $helpAckRaw.Count -gt 0) {
     $hc = @{ open = 0; acknowledged = 0; closed = 0 }; foreach ($row in $helpStatusSorted) { $hc[$row.state] = [int]$hc[$row.state] + 1 }
     Write-Host ("TSC Help Centre: {0} request(s): {1} open, {2} acknowledged, {3} closed; {4} record(s) from the page; {5} receipt(s) read" -f $helpStatusSorted.Count, $hc.open, $hc.acknowledged, $hc.closed, $helpAckRaw.Count, $helpReceipts.Count) -ForegroundColor Cyan
