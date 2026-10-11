@@ -127,3 +127,40 @@ The `sample-files/` folder did not reach us: only the two `.md` files arrived. *
 
 Nothing in this reply changes a shape you have proposed; the only decisions outstanding are Dan's (the four extra rigs,
 the cadence, the Synergi share path, Manpreet's `PMNUM`) and Lee's (AAR typed fields, Q19).
+## Entry 1 reply, addendum (dashboard side, 12 Oct 2026): samples received, the four rigs added, the scanner reads the kinds
+
+**Samples received** (the three West Vela files, filed in the SACRED repo under `tools/received/dl1/sample-files`).
+**Dan, 12 Oct:** West Elara, West Phoenix, West Aquarius and West Eclipse are added (`elara`, `phoenix`, `aquarius`,
+`eclipse`; Maximo sites 2090, 2070, 2250, 2327): scanner v2.88 carries them in the rig table; the notification workbook's
+Rigs sheet rows and the BOP dashboard roster follow from Dan. Also from Dan: DL-1 reads Manpreet's WO extract every 24 h,
+and **the 12-hour planning data on the BOP Fleet Planning Dashboard will come from DL-1 from now on**, since the planning
+report is leaving WCGRRT; the scanner side of that is below, the page change is next on our list.
+
+**Scanner v2.88, built and proven today on your samples plus a non-test twin:**
+
+- `plan`, `plan-progress`, `plan-closeout`, `plan-evidence` are read by `meta.kind`, keyed by `planId`; the newest
+  `scopeVersion` wins for `plan`, the newest `asOf` for `plan-progress`. `planning-report` keeps the WCGRRT path.
+  `scheduleBuilderState` is never read.
+- **Test rule, as promised:** `dryRun: true`, `meta.sample: true` or `SSCE Equipment` is a test post. It is listed under
+  `dl1.tests`, kept under its own key so it can never replace a real plan, kept off the rig's planning panel, and never
+  exported to Fabric. Proven: your v1 samples and a v2 twin with `dryRun: false` scanned together; the twin is the plan
+  (frozen, scopeVersion 2), the samples are the three test posts.
+- **Percent complete** is computed here from the progress snapshot, duration-weighted against the plan's tasks
+  (complete = 100 % of the hours, otherwise the task's `pct`): five tasks complete and one at 50 % on the 917.5-hour plan
+  gave 3.9 %, which matches your Q3 definition.
+- **Fabric tables written** (test posts excluded): `plans`, `plan_versions` (every plan post: status, changeReason,
+  frozenAt), `plan_tasks` (147 rows, `hubRefs` flattened to code / AAB / TR / Alert / OpEvent / nptHrs), `plan_milestones`,
+  `plan_deferrals`, `plan_synergi` (161 rows, `linkedTaskIds` joined with `; `), `plan_progress` (one row per task per
+  snapshot), `plan_evidence` (names and sizes only). Keys as in the data dictionary.
+- **Timestamps:** stored as you send them; where the scanner's JSON reader turns an ISO string into a date (PowerShell 7
+  does, Windows PowerShell 5.1 does not) it is written back as UTC `Z`. Fabric therefore holds UTC; the rig-local offset
+  is on the file in PostedReports.
+- The BOP dashboard's data file (`bop-planning-data.js`) now carries a `dl1` block: the plans (slim: totals, milestones,
+  deferrals, the latest progress summary, any close-out), the tests, the evidence counts. **The page does not read it
+  yet**; that is the next build, with the newest `planning-report` per rig and BOP.
+
+**For your REV 11:** nothing changes from the samples. One small ask: on a `plan-evidence` post put the files under
+`evidence.files[]` with `name`, `type`, `bytes`, `data`, and `evidence.taskId` and `evidence.asOf` beside `planId`; the
+scanner counts and names them and never keeps the bytes. On `plan-closeout`, `closeout.aar` is read whole.
+
+---

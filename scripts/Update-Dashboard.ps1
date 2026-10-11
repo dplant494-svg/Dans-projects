@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.87'
+$ScriptVersion = '2.88'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1217,7 +1217,7 @@ $oemCopies = New-Object System.Collections.Generic.List[object]
 $aabFiles = @{}
 $aabRaw = New-Object System.Collections.Generic.List[object]
 $aabAckRaw = New-Object System.Collections.Generic.List[object]
-$AabRigCodes = [ordered]@{ nov = 'West Neptune'; auriga = 'West Auriga'; saturn = 'West Saturn'; jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'; vela = 'West Vela'; gemini = 'West Gemini'; capella = 'West Capella'; libongos = 'Sonangol Libongos'; quenguela = 'Sonangol Quenguela'; cam = 'Sevan Louisiana' }
+$AabRigCodes = [ordered]@{ nov = 'West Neptune'; auriga = 'West Auriga'; saturn = 'West Saturn'; jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'; vela = 'West Vela'; gemini = 'West Gemini'; capella = 'West Capella'; libongos = 'Sonangol Libongos'; quenguela = 'Sonangol Quenguela'; cam = 'Sevan Louisiana'; elara = 'West Elara'; phoenix = 'West Phoenix'; aquarius = 'West Aquarius'; eclipse = 'West Eclipse' }   # v2.88 (12 Oct 2026, Dan): Elara, Phoenix, Aquarius, Eclipse added for DL-1 and SSORT 161; Maximo sites 2090, 2070, 2250, 2327
 function ConvertTo-AabBool { param($Value)
     if ($Value -is [bool]) { return $Value }
     if ($null -eq $Value) { return $false }
@@ -1231,6 +1231,102 @@ function ConvertTo-AabText { param($Value) if ($null -eq $Value) { return '' } i
 # (helpReceiptPath), never in PostedReports. Written whole to help\help-data.js, slim to
 # reports-data.js (helpRequests[]). The email is the mechanism; this is the record.
 $helpFiles = @{}
+# v2.88 (12 Oct 2026): DL-1, the BOP Schedule Builder (Lee Arnold), posts five kinds beside the planning report it already
+# sends (DL1-PLANNING-TOOL-SACRED-HANDOFF.md, DL1-ROLLING-HANDOFF.md entry 1, the West Vela samples under
+# tools/received/dl1/sample-files). plan, plan-progress, plan-closeout and plan-evidence are records keyed by planId,
+# never reports; planning-report keeps the WCGRRT path (tiles[0].planningData). Test rule for every kind: dryRun true or
+# asset 'SSCE Equipment' is a test post: kept under dl1.test, never a rig's panel, never the Fabric plan tables.
+$dl1Files = @{}
+$dl1Plans = @{}        # planId -> newest scopeVersion's plan summary (tasks, milestones, deferred, synergi; scheduleBuilderState never read)
+$dl1Progress = @{}     # planId -> newest asOf snapshot
+$dl1Closeouts = @{}    # planId -> close-out (aar read whole)
+$dl1Evidence = New-Object System.Collections.Generic.List[object]   # one row per file: names and sizes, never the bytes
+$dl1Test = New-Object System.Collections.Generic.List[object]       # the test posts, listed so the Status page and Dan can see them
+$dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
+function ConvertTo-Dl1Text { param($Value) if ($null -eq $Value) { return '' }; if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }; return [string]$Value }   # PS7's ConvertFrom-Json turns ISO strings into [datetime]: written back as UTC; Windows PowerShell 5.1 keeps the string with its offset
+function ConvertTo-Dl1Number { param($Value) if ($null -eq $Value -or $Value -is [string] -and [string]$Value -eq '') { return $null }; $d = 0.0; if ([double]::TryParse([string]$Value, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$d)) { return $d }; return $null }
+function Read-Dl1Post { param($Json, $Meta, $File, [string]$Kind)
+    $rig = (ConvertTo-AabText (Get-Prop $Meta 'asset')).Trim()
+    $rigKey = (ConvertTo-AabText (Get-Prop $Meta 'rigkey')).Trim().ToLowerInvariant()
+    if (-not $rigKey -and $rig) { foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $rig) { $rigKey = [string]$k } } }
+    if (-not $rig -and $rigKey -and $AabRigCodes.Contains($rigKey)) { $rig = [string]$AabRigCodes[$rigKey] }
+    $dry = ConvertTo-AabBool (Get-Prop $Json 'dryRun')
+    $isTest = ($dry -or $rig -eq 'SSCE Equipment' -or (ConvertTo-AabBool (Get-Prop $Meta 'sample')))
+    $body = $null
+    switch ($Kind) { 'plan' { $body = Get-Prop $Json 'plan' } 'plan-progress' { $body = Get-Prop $Json 'progress' } 'plan-closeout' { $body = Get-Prop $Json 'closeout' } 'plan-evidence' { $body = Get-Prop $Json 'evidence' } }
+    if ($null -eq $body) { return $null }
+    $planId = (ConvertTo-AabText (Get-Prop $body 'planId')).Trim()
+    if (-not $planId) { return $null }
+    $sv = ConvertTo-Dl1Number (Get-Prop $body 'scopeVersion'); if ($null -eq $sv) { $sv = 0 }
+    $posted = ConvertTo-StableTimestamp (Get-Prop $Meta 'saved'); if (-not $posted) { $posted = ConvertTo-StableTimestamp (Get-Prop $Json 'exportedAt') }; if (-not $posted) { $posted = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+    return [ordered]@{
+        file = $File.Name; kind = $Kind; planId = $planId; scopeVersion = [int]$sv; rig = $rig; rigKey = $rigKey
+        bopNo = (ConvertTo-AabText (Get-Prop $Meta 'bopNo')).Trim(); rev = (ConvertTo-AabText (Get-Prop $Meta 'rev')).Trim(); tool = (ConvertTo-AabText (Get-Prop $Meta 'tool')).Trim()
+        posted = $posted; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss'); dryRun = [bool]$dry; isTest = [bool]$isTest; body = $body
+        storeKey = $(if ($isTest) { $planId + '|test' } else { $planId })   # a test post is kept apart and can never replace a real plan
+        asOf = ConvertTo-Dl1Text (Get-Prop $body 'asOf')
+    }
+}
+function Get-Dl1PlanSummary { param($Post)
+    $pl = $Post.body
+    $tasks = New-Object System.Collections.Generic.List[object]
+    foreach ($t in (ConvertTo-AabList (Get-Prop $pl 'tasks'))) {
+        if ($null -eq $t -or $t -is [string]) { continue }
+        $hub = Get-Prop $t 'hubRefs'
+        $tasks.Add([ordered]@{
+            planId = $Post.planId; scopeVersion = $Post.scopeVersion; taskId = ConvertTo-AabText (Get-Prop $t 'taskId'); seq = ConvertTo-Dl1Number (Get-Prop $t 'seq')
+            type = ConvertTo-AabText (Get-Prop $t 'type'); branch = ConvertTo-AabText (Get-Prop $t 'branch'); group = ConvertTo-AabText (Get-Prop $t 'group')
+            sfi = ConvertTo-AabText (Get-Prop $t 'sfi'); location = ConvertTo-AabText (Get-Prop $t 'location'); jobPlan = ConvertTo-AabText (Get-Prop $t 'jobPlan')
+            woNum = ConvertTo-AabText (Get-Prop $t 'woNum'); pm = ConvertTo-AabText (Get-Prop $t 'pm'); description = ConvertTo-AabText (Get-Prop $t 'description')
+            plannedStart = ConvertTo-Dl1Text (Get-Prop $t 'plannedStart'); plannedEnd = ConvertTo-Dl1Text (Get-Prop $t 'plannedEnd'); durationHrs = ConvertTo-Dl1Number (Get-Prop $t 'durationHrs')
+            techs = ConvertTo-Dl1Number (Get-Prop $t 'techs'); predecessors = (@(ConvertTo-AabList (Get-Prop $t 'predecessors')) | ForEach-Object { [string]$_ }) -join '; '
+            critical = ConvertTo-AabBool (Get-Prop $t 'critical'); floatHrs = ConvertTo-Dl1Number (Get-Prop $t 'floatHrs'); dueDate = ConvertTo-Dl1Text (Get-Prop $t 'dueDate')
+            woStatus = ConvertTo-AabText (Get-Prop $t 'woStatus'); crew = ConvertTo-AabText (Get-Prop $t 'crew'); status = ConvertTo-AabText (Get-Prop $t 'status')
+            hubCode = $(if ($hub) { ConvertTo-AabText (Get-Prop $hub 'code') } else { '' }); hubAab = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'AAB') } else { $null }); hubTr = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'TR') } else { $null })
+            hubAlert = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'Alert') } else { $null }); hubOpEvent = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'OpEvent') } else { $null }); hubNptHrs = $(if ($hub) { ConvertTo-Dl1Number (Get-Prop $hub 'nptHrs') } else { $null })
+        }) | Out-Null
+    }
+    $ms = New-Object System.Collections.Generic.List[object]
+    foreach ($m in (ConvertTo-AabList (Get-Prop $pl 'milestones'))) { if ($null -eq $m -or $m -is [string]) { continue }; $ms.Add([ordered]@{ planId = $Post.planId; scopeVersion = $Post.scopeVersion; taskId = ConvertTo-AabText (Get-Prop $m 'taskId'); name = ConvertTo-AabText (Get-Prop $m 'name'); baseline = ConvertTo-Dl1Text (Get-Prop $m 'baseline'); est = ConvertTo-Dl1Text (Get-Prop $m 'est'); actual = ConvertTo-Dl1Text (Get-Prop $m 'actual') }) | Out-Null }
+    $def = New-Object System.Collections.Generic.List[object]
+    foreach ($d in (ConvertTo-AabList (Get-Prop $pl 'deferred'))) { if ($null -eq $d -or $d -is [string]) { continue }; $def.Add([ordered]@{ planId = $Post.planId; scopeVersion = $Post.scopeVersion; taskId = ConvertTo-AabText (Get-Prop $d 'taskId'); sfi = ConvertTo-AabText (Get-Prop $d 'sfi'); location = ConvertTo-AabText (Get-Prop $d 'location'); jobPlan = ConvertTo-AabText (Get-Prop $d 'jobPlan'); woNum = ConvertTo-AabText (Get-Prop $d 'woNum'); pm = ConvertTo-AabText (Get-Prop $d 'pm'); description = ConvertTo-AabText (Get-Prop $d 'description'); dueDate = ConvertTo-Dl1Text (Get-Prop $d 'dueDate'); reason = ConvertTo-AabText (Get-Prop $d 'reason'); deferredBy = ConvertTo-AabText (Get-Prop $d 'deferredBy') }) | Out-Null }
+    $syn = New-Object System.Collections.Generic.List[object]
+    foreach ($x in (ConvertTo-AabList (Get-Prop $pl 'synergi'))) { if ($null -eq $x -or $x -is [string]) { continue }; $syn.Add([ordered]@{ planId = $Post.planId; scopeVersion = $Post.scopeVersion; ref = ConvertTo-AabText (Get-Prop $x 'ref'); source = ConvertTo-AabText (Get-Prop $x 'source'); title = ConvertTo-AabText (Get-Prop $x 'title'); kind = ConvertTo-AabText (Get-Prop $x 'kind'); matchedOn = ConvertTo-AabText (Get-Prop $x 'matchedOn'); linkedTaskIds = (@(ConvertTo-AabList (Get-Prop $x 'linkedTaskIds')) | ForEach-Object { [string]$_ }) -join '; ' }) | Out-Null }
+    $tot = Get-Prop $pl 'totals'; $win = Get-Prop $pl 'window'
+    return [ordered]@{
+        planId = $Post.planId; scopeVersion = $Post.scopeVersion; status = ConvertTo-AabText (Get-Prop $pl 'status'); rig = $Post.rig; rigKey = $Post.rigKey; bopNo = $(if ($Post.bopNo) { $Post.bopNo } else { ConvertTo-AabText (Get-Prop $pl 'bopNo') })
+        windowFrom = $(if ($win) { ConvertTo-Dl1Text (Get-Prop $win 'from') } else { '' }); windowTo = $(if ($win) { ConvertTo-Dl1Text (Get-Prop $win 'to') } else { '' })
+        createdBy = ConvertTo-AabText (Get-Prop $pl 'createdBy'); frozenAt = ConvertTo-Dl1Text (Get-Prop $pl 'frozenAt'); frozenBy = ConvertTo-AabText (Get-Prop $pl 'frozenBy'); changeReason = ConvertTo-AabText (Get-Prop $pl 'changeReason')
+        totalTasks = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'tasks') } else { $tasks.Count }); totalMaintenance = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'maintenance') } else { $null }); totalHours = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'hours') } else { $null })
+        criticalTasks = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'criticalTasks') } else { $null }); scopeCoveragePct = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'scopeCoveragePct') } else { $null }); deferredCount = $def.Count
+        taskCount = $tasks.Count; milestoneCount = $ms.Count; synergiCount = $syn.Count
+        rev = $Post.rev; posted = $Post.posted; file = $Post.file; dryRun = $Post.dryRun; isTest = $Post.isTest
+        tasks = $tasks.ToArray(); milestones = $ms.ToArray(); deferred = $def.ToArray(); synergi = $syn.ToArray()
+    }
+}
+function Get-Dl1ProgressSummary { param($Post, $Plan)
+    $pg = $Post.body
+    $rows = New-Object System.Collections.Generic.List[object]
+    $durByTask = @{}; if ($Plan) { foreach ($t in $Plan.tasks) { $dh = $t.durationHrs; if ($null -eq $dh) { $dh = 0 }; $durByTask[[string]$t.taskId] = [double]$dh } }
+    $wSum = 0.0; $wDone = 0.0; $nDone = 0; $nProg = 0; $n = 0
+    foreach ($t in (ConvertTo-AabList (Get-Prop $pg 'tasks'))) {
+        if ($null -eq $t -or $t -is [string]) { continue }
+        $tid = ConvertTo-AabText (Get-Prop $t 'taskId'); $pct = ConvertTo-Dl1Number (Get-Prop $t 'pct'); if ($null -eq $pct) { $pct = 0 }
+        $st = (ConvertTo-AabText (Get-Prop $t 'status')).ToLowerInvariant()
+        if ($st -eq 'complete' -or $st -eq 'completed' -or $st -eq 'done') { $pct = 100 }
+        $w = 1.0; if ($durByTask.ContainsKey($tid) -and $durByTask[$tid] -gt 0) { $w = $durByTask[$tid] }
+        $wSum += $w; $wDone += $w * ([double]$pct / 100.0); $n++
+        if ($pct -ge 100) { $nDone++ } elseif ($pct -gt 0 -or $st -eq 'in-progress' -or $st -eq 'in progress') { $nProg++ }
+        $rows.Add([ordered]@{ planId = $Post.planId; scopeVersion = $Post.scopeVersion; asOf = ConvertTo-Dl1Text (Get-Prop $pg 'asOf'); taskId = $tid; pct = $pct; status = ConvertTo-AabText (Get-Prop $t 'status'); note = ConvertTo-AabText (Get-Prop $t 'note'); actualStart = ConvertTo-Dl1Text (Get-Prop $t 'actualStart'); actualEnd = ConvertTo-Dl1Text (Get-Prop $t 'actualEnd'); actualHrs = ConvertTo-Dl1Number (Get-Prop $t 'actualHrs') }) | Out-Null
+    }
+    $overall = $null; if ($wSum -gt 0) { $overall = [math]::Round(100.0 * $wDone / $wSum, 1) }
+    return [ordered]@{
+        planId = $Post.planId; scopeVersion = $Post.scopeVersion; rig = $Post.rig; rigKey = $Post.rigKey; bopNo = $Post.bopNo; asOf = ConvertTo-Dl1Text (Get-Prop $pg 'asOf'); shift = ConvertTo-AabText (Get-Prop $pg 'shift')
+        snapshot = ConvertTo-AabBool (Get-Prop $pg 'snapshot'); taskCount = $n; tasksComplete = $nDone; tasksInProgress = $nProg; pctComplete = $overall
+        pdcItemsTicked = (@(ConvertTo-AabList (Get-Prop $pg 'pdcItemsTicked')) | ForEach-Object { [string]$_ }) -join '; '
+        rev = $Post.rev; posted = $Post.posted; file = $Post.file; dryRun = $Post.dryRun; isTest = $Post.isTest; tasks = $rows.ToArray()
+    }
+}
 $helpRaw = New-Object System.Collections.Generic.List[object]
 $helpAckRaw = New-Object System.Collections.Generic.List[object]
 function Read-HelpRequest { param($Json, $Meta, $File)
@@ -1521,6 +1617,7 @@ $PrechargeRigKeys = @{         # config -> rig display name; FALLBACK only, meta
     jupiter = 'West Jupiter'; tellus = 'West Tellus'; carina = 'West Carina'; polaris = 'West Polaris'
     libongos = 'Sonangol Libongos'; quenguela = 'Sonangol Quenguela'; gemini = 'West Gemini'
     capella = 'West Capella'; cam = 'Sevan Louisiana'
+    elara = 'West Elara'; phoenix = 'West Phoenix'; aquarius = 'West Aquarius'; eclipse = 'West Eclipse'   # v2.88
 }
 function Get-PrechargeWellKey { param([string]$Well) if (-not $Well) { return 'well' }; return ($Well -replace '[^A-Za-z0-9._-]', '-') }
 function ConvertTo-PcIso { param($Value)   # ConvertFrom-Json turns ISO dates into [datetime]; keep saved/issued as sortable ISO UTC strings
@@ -1805,6 +1902,44 @@ foreach ($f in $files) {
             modified   = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss')
         }) | Out-Null
         continue
+    }
+
+    # v2.88: DL-1 plan records (plan, plan-progress, plan-closeout, plan-evidence): keyed by planId, never reports.
+    # planning-report falls through to the WCGRRT path below, except that a test post (dryRun or SSCE Equipment) is
+    # listed under dl1.test and kept off the rig's panel.
+    $metaKindD = ([string](Get-Prop $meta 'kind')).ToLowerInvariant()
+    if ($metaKindD -in @('plan','plan-progress','plan-closeout','plan-evidence')) {
+        $dl1Files[$f.Name] = $true
+        $dpost = Read-Dl1Post -Json $json -Meta $meta -File $f -Kind $metaKindD
+        if (-not $dpost) { Add-Problem $f 'dl1-invalid' "a DL-1 $metaKindD post without a planId - not filed"; continue }
+        if ($dpost.isTest) { $dl1Test.Add([ordered]@{ file = $f.Name; kind = $metaKindD; planId = $dpost.planId; scopeVersion = $dpost.scopeVersion; rig = $dpost.rig; posted = $dpost.posted; dryRun = $dpost.dryRun }) | Out-Null }
+        switch ($metaKindD) {
+            'plan' {
+                $sum = Get-Dl1PlanSummary -Post $dpost
+                $dl1Versions.Add([ordered]@{ planId = $sum.planId; scopeVersion = $sum.scopeVersion; status = $sum.status; rig = $sum.rig; rigKey = $sum.rigKey; bopNo = $sum.bopNo; posted = $sum.posted; file = $sum.file; isTest = $sum.isTest; changeReason = $sum.changeReason; frozenAt = $sum.frozenAt; taskCount = $sum.taskCount; deferredCount = $sum.deferredCount }) | Out-Null
+                $prior = $dl1Plans[$dpost.storeKey]
+                if (-not $prior -or ($sum.scopeVersion -gt $prior.scopeVersion) -or ($sum.scopeVersion -eq $prior.scopeVersion -and [string]$sum.posted -gt [string]$prior.posted)) { $dl1Plans[$dpost.storeKey] = $sum }
+            }
+            'plan-progress' {
+                $prior = $dl1Progress[$dpost.storeKey]
+                if (-not $prior -or ([string]$dpost.asOf -gt [string]$prior.asOf) -or ([string]$dpost.asOf -eq [string]$prior.asOf -and [string]$dpost.posted -gt [string]$prior.posted)) { $dl1Progress[$dpost.storeKey] = $dpost }   # summarised after the loop, once the plan is known
+            }
+            'plan-closeout' {
+                $prior = $dl1Closeouts[$dpost.storeKey]
+                if (-not $prior -or [string]$dpost.posted -gt [string]$prior.posted) { $dl1Closeouts[$dpost.storeKey] = [ordered]@{ planId = $dpost.planId; scopeVersion = $dpost.scopeVersion; rig = $dpost.rig; rigKey = $dpost.rigKey; bopNo = $dpost.bopNo; posted = $dpost.posted; file = $dpost.file; isTest = $dpost.isTest; dryRun = $dpost.dryRun; closeout = $dpost.body } }
+            }
+            'plan-evidence' {
+                $names = @(); $bytes = 0L
+                foreach ($ev in (ConvertTo-AabList (Get-Prop $dpost.body 'files'))) { if ($null -eq $ev -or $ev -is [string]) { continue }; $names += [string](Get-Prop $ev 'name'); $b = ConvertTo-Dl1Number (Get-Prop $ev 'bytes'); if ($b) { $bytes += [long]$b } }
+                $dl1Evidence.Add([ordered]@{ planId = $dpost.planId; scopeVersion = $dpost.scopeVersion; taskId = ConvertTo-AabText (Get-Prop $dpost.body 'taskId'); asOf = ConvertTo-Dl1Text (Get-Prop $dpost.body 'asOf'); fileCount = $names.Count; fileNames = ($names -join '; '); bytes = $bytes; posted = $dpost.posted; file = $dpost.file; isTest = $dpost.isTest }) | Out-Null
+            }
+        }
+        continue
+    }
+    $dl1TestReport = $false
+    if ($metaKindD -eq 'planning-report' -and ((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')) {
+        $dl1TestReport = $true
+        $dl1Test.Add([ordered]@{ file = $f.Name; kind = 'planning-report'; planId = ''; scopeVersion = 0; rig = ([string](Get-Prop $meta 'asset')).Trim(); posted = (ConvertTo-StableTimestamp (Get-Prop $json 'exportedAt')); dryRun = (ConvertTo-AabBool (Get-Prop $json 'dryRun')) }) | Out-Null
     }
 
     # v2.71: TSC Help Centre requests and the page's acknowledgements: records, never reports.
@@ -2115,7 +2250,7 @@ foreach ($f in $files) {
             # Keyed rig|bopNo: BOP1 completing must not clear/complete BOP2.
             # Reports predating the explicit boolean (key absent -> $null)
             # are ignored - they say nothing about completion either way.
-            if ($planning -and $assetRaw) {
+            if ($planning -and $assetRaw -and -not $dl1TestReport) {
                 $pcRaw = Get-Prop $planning 'projectComplete'
                 if ($null -ne $pcRaw) {
                     $pcDate = [string](Get-Prop $planning 'reportDate')
@@ -2133,7 +2268,7 @@ foreach ($f in $files) {
                 }
             }
 
-            if ($planning -and $assetRaw -and (Test-PlanningHasContent $planning)) {
+            if ($planning -and $assetRaw -and -not $dl1TestReport -and (Test-PlanningHasContent $planning)) {
                 $repDate = [string](Get-Prop $planning 'reportDate')
                 if (-not $repDate) { $repDate = [string](Get-Prop $meta 'date') }
                 $rigKey = $assetRaw
@@ -3820,11 +3955,33 @@ foreach ($prKey in @($planningReports.Keys)) {
     }
 }
 
+# v2.88: the DL-1 block. Plans keyed by planId (newest scopeVersion), the newest progress snapshot per plan with the
+# duration-weighted percent complete computed here, close-outs, evidence counts, and the test posts listed apart.
+$dl1ProgressSummaries = @{}
+foreach ($planKey in @($dl1Progress.Keys)) { $dl1ProgressSummaries[$planKey] = Get-Dl1ProgressSummary -Post $dl1Progress[$planKey] -Plan $dl1Plans[$planKey] }
+$dl1PlanList = New-Object System.Collections.Generic.List[object]
+foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
+    $pl = $dl1Plans[$planKey]; $pg = $dl1ProgressSummaries[$planKey]
+    $slim = [ordered]@{}; foreach ($k in $pl.Keys) { if ($k -in @('tasks','milestones','deferred','synergi')) { continue }; $slim[$k] = $pl[$k] }
+    $slim['milestones'] = $pl.milestones; $slim['deferred'] = $pl.deferred
+    $slim['progress'] = $(if ($pg) { $s2 = [ordered]@{}; foreach ($k in $pg.Keys) { if ($k -ne 'tasks') { $s2[$k] = $pg[$k] } }; $s2 } else { $null })
+    $slim['closeout'] = $(if ($dl1Closeouts.ContainsKey($planKey)) { $dl1Closeouts[$planKey] } else { $null })
+    $dl1PlanList.Add($slim) | Out-Null
+}
+$dl1Block = @{
+    plans     = $dl1PlanList.ToArray()        # slim: no task rows (they are in the Fabric tables and in the plan file itself)
+    tests     = $dl1Test.ToArray()
+    evidence  = $dl1Evidence.ToArray()
+    counts    = @{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count }
+}
+if ($dl1Plans.Count -gt 0 -or $dl1Test.Count -gt 0) { Write-Host "DL-1: $($dl1Plans.Count) plan(s), $($dl1Progress.Count) with progress, $($dl1Closeouts.Count) closed out, $($dl1Test.Count) test post(s)" -ForegroundColor Green }
+
 $bopPayload = @{
     generatedAt      = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
     snapshots        = $bwmSortedList.ToArray()
     excelSnapshots   = $excelSnapshots.ToArray()
     planningReports  = $planningReports
+    dl1              = $dl1Block             # v2.88
 }
 $bopContent = 'window.BWM_DATA = ' + (ConvertTo-ReportJson $bopPayload) + ";`n"
 $bopDir = Split-Path -Parent $bopOutputFile
@@ -3913,7 +4070,7 @@ elseif ($deployPath) {
             # Restricted TOPSET bodies must never reach the open share; also
             # excluded from $expected below so a copy from before the file
             # became restricted gets cleaned up as stale.
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name) -or $helpFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder; v2.72: Help Centre files live in help-data.js, never the reports folder
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name) -or $helpFiles.ContainsKey($f.Name) -or $dl1Files.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder; v2.72: Help Centre files live in help-data.js, never the reports folder
             $destName = $f.Name + '.js'
             $have = $onServer[$destName]
             if (-not $have -or ($f.LastWriteTime -gt $have.LastWriteTime)) {
@@ -3932,7 +4089,7 @@ elseif ($deployPath) {
         }
         $expected = @{}
         foreach ($f in $files) {
-            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name) -or $helpFiles.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder; v2.72: Help Centre files live in help-data.js, never the reports folder
+            if ($restrictedTopsetFiles.ContainsKey($f.Name) -or $prechargeRequestFiles.ContainsKey($f.Name) -or $oemCopyFiles.ContainsKey($f.Name) -or $aabFiles.ContainsKey($f.Name) -or $helpFiles.ContainsKey($f.Name) -or $dl1Files.ContainsKey($f.Name)) { continue }   # v2.65: AAB files live in aab-data.js, never the reports folder; v2.72: Help Centre files live in help-data.js, never the reports folder
             $expected[$f.Name + '.js'] = $true
         }
         foreach ($old in @($onServer.Values)) {
@@ -4117,6 +4274,31 @@ if ($databaseExportPath -and $exportDue) {
         Export-DatabaseTable -Name 'help_acks' -Rows $helpAcksSorted -KeyCols @('file') -Tables $exportTables
         Export-DatabaseTable -Name 'ssce_requests' -Rows $ssceRequestsArr -KeyCols @('id') -Tables $exportTables
         Export-DatabaseTable -Name 'bwm_snapshots' -Rows $bwmSortedList.ToArray() -KeyCols @('rig','reportDate') -Tables $exportTables
+        # v2.88: the DL-1 plan tables (DL1-PLANNING-TOOL-SACRED-HANDOFF.md s6). Test posts never exported.
+        $plRows = New-Object System.Collections.ArrayList; $ptRows = New-Object System.Collections.ArrayList; $pmRows = New-Object System.Collections.ArrayList
+        $pdRows = New-Object System.Collections.ArrayList; $psRows = New-Object System.Collections.ArrayList; $ppRows = New-Object System.Collections.ArrayList; $pgRows = New-Object System.Collections.ArrayList
+        foreach ($planKey in $dl1Plans.Keys) {
+            $pl = $dl1Plans[$planKey]; if ($pl.isTest) { continue }
+            $r = [ordered]@{}; foreach ($k in $pl.Keys) { if ($k -in @('tasks','milestones','deferred','synergi')) { continue }; $r[$k] = $pl[$k] }
+            [void]$plRows.Add([pscustomobject]$r)
+            foreach ($t in $pl.tasks) { [void]$ptRows.Add([pscustomobject]$t) }
+            foreach ($m in $pl.milestones) { [void]$pmRows.Add([pscustomobject]$m) }
+            foreach ($d in $pl.deferred) { [void]$pdRows.Add([pscustomobject]$d) }
+            foreach ($x in $pl.synergi) { [void]$psRows.Add([pscustomobject]$x) }
+        }
+        foreach ($v in $dl1Versions) { if (-not $v.isTest) { [void]$ppRows.Add([pscustomobject]$v) } }
+        foreach ($planKey in $dl1ProgressSummaries.Keys) {
+            $pg = $dl1ProgressSummaries[$planKey]; if ($pg.isTest) { continue }
+            foreach ($t in $pg.tasks) { [void]$pgRows.Add([pscustomobject]$t) }
+        }
+        Export-DatabaseTable -Name 'plans' -Rows $plRows.ToArray() -KeyCols @('planId','scopeVersion') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_versions' -Rows $ppRows.ToArray() -KeyCols @('planId','scopeVersion') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_tasks' -Rows $ptRows.ToArray() -KeyCols @('planId','scopeVersion','taskId') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_milestones' -Rows $pmRows.ToArray() -KeyCols @('planId','scopeVersion','taskId') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_deferrals' -Rows $pdRows.ToArray() -KeyCols @('planId','scopeVersion','taskId') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_synergi' -Rows $psRows.ToArray() -KeyCols @('planId','scopeVersion','ref') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_progress' -Rows $pgRows.ToArray() -KeyCols @('planId','scopeVersion','asOf','taskId') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_evidence' -Rows @($dl1Evidence | Where-Object { -not $_.isTest }) -KeyCols @('planId','file') -Tables $exportTables
         $manifestTables = New-Object System.Collections.Generic.List[object]
         $exportRows = 0
         foreach ($tn in ($exportTables.Keys | Sort-Object)) {
