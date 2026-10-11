@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.85'
+$ScriptVersion = '2.86'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -3708,7 +3708,7 @@ else {
             $stampSha = [System.Security.Cryptography.SHA256]::Create()
             $approvedHash = [BitConverter]::ToString($stampSha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes(($stampLines -join "`n")))).Replace('-', '').Substring(0, 16)
             $stampSha.Dispose()
-            $cocStamp = '<!-- coc-writeback-stamp: {0}|{1}|{2}|w1 -->' -f $cocSrc.Length, $cocSrc.LastWriteTimeUtc.Ticks, $approvedHash
+            $cocStamp = '<!-- coc-writeback-stamp: {0}|{1}|{2}|w2 -->' -f $cocSrc.Length, $cocSrc.LastWriteTimeUtc.Ticks, $approvedHash
             $cocUpToDate = $false
             if (Test-Path -Path $cocReviewPath) {
                 try {
@@ -3727,50 +3727,52 @@ else {
             }
             else {
             $cocHtml = [System.IO.File]::ReadAllText($cocDashboardPath)
-            $appDataMatch = [regex]::Match($cocHtml, '(<script id="app-data">\s*const APP_DATA = )([\s\S]*?)(;\s*const SFI_GROUPS)')
-            if (-not $appDataMatch.Success) {
-                throw "could not find the embedded APP_DATA block in $cocDashboardPath - is this the right file/version?"
+            # v2.86 (11 Oct 2026): the rebuilt tracker (Manpreet, REV6 line) carries one flat table in
+            # <script id="coc-data" type="application/json"> {cFields, components[][]...}, not the old APP_DATA
+            # folder tree. Shared-capital rows are the components whose vessel is not fleet (vessels[][4] = 0).
+            # Match on asset + OEM part + serial as before; set avail = 'NO' and assignedTo = <siteUnit> (the
+            # tracker's own column names, 'YES'/'NO'/''). The page escapes '<' as \u003c inside the block, so the
+            # rewritten JSON does the same. The older APP_DATA shape is no longer read.
+            $cocDataMatch = [regex]::Match($cocHtml, '(<script id="coc-data" type="application/json">)([\s\S]*?)(</script>)')
+            if (-not $cocDataMatch.Success) {
+                throw "could not find the embedded coc-data block in $cocDashboardPath - is this the rebuilt tracker (REV6 line, 11 Oct 2026 or later)?"
             }
-            # Same dictionary-vs-PSObject split as everywhere else in this
-            # script: on Windows PowerShell 5.1 this JSON is well over the
-            # native ConvertFrom-Json size limit, so it comes back as nested
-            # Dictionary/ArrayList objects, not PSObjects - Get-Prop/Set-Prop
-            # (not dot-notation or Add-Member) throughout this block.
-            $appData = ConvertFrom-ReportJsonText -Raw $appDataMatch.Groups[2].Value
-            $ssceFolder = $null
-            foreach ($folder in (Get-Prop $appData 'folders')) {
-                if ([string](Get-Prop $folder 'id') -eq 'ssce') { $ssceFolder = $folder; break }
+            $cocData = ConvertFrom-ReportJsonText -Raw $cocDataMatch.Groups[2].Value
+            $cFields = @(); foreach ($f in (Get-Prop $cocData 'cFields')) { $cFields += [string]$f }
+            $ixAsset = [array]::IndexOf($cFields, 'asset'); $ixOem = [array]::IndexOf($cFields, 'oem'); $ixSerial = [array]::IndexOf($cFields, 'serial')
+            $ixAvail = [array]::IndexOf($cFields, 'avail'); $ixAssigned = [array]::IndexOf($cFields, 'assignedTo'); $ixVessel = [array]::IndexOf($cFields, 'v')
+            if ($ixAsset -lt 0 -or $ixOem -lt 0 -or $ixSerial -lt 0 -or $ixAvail -lt 0 -or $ixAssigned -lt 0) {
+                throw "coc-data cFields missing one of asset/oem/serial/avail/assignedTo in $cocDashboardPath (has: $($cFields -join ','))"
             }
-            if (-not $ssceFolder) { throw "no 'ssce' folder found in APP_DATA - is this the right file/version?" }
-            $ssceItems = New-Object System.Collections.Generic.List[object]
-            foreach ($bop in (Get-Prop $ssceFolder 'bops')) {
-                foreach ($cat in (Get-Prop $bop 'categories')) {
-                    foreach ($it in (Get-Prop $cat 'items')) { $ssceItems.Add($it) | Out-Null }
-                }
-            }
+            $spareVessels = @{}
+            foreach ($vrow in (Get-Prop $cocData 'vessels')) { if ([string]$vrow[4] -eq '0') { $spareVessels[[string]$vrow[0]] = $true } }
+            $components = Get-Prop $cocData 'components'
 
             $appliedCount = 0
             foreach ($rec in $approved) {
                 $target = [string](Get-Prop $rec.ssceItem 'asset')
                 $targetOem = [string](Get-Prop $rec.ssceItem 'oem')
                 $targetSerial = [string](Get-Prop $rec.ssceItem 'serial')
-                $match = $null
-                foreach ($it in $ssceItems) {
-                    if ([string](Get-Prop $it 'asset') -eq $target -and [string](Get-Prop $it 'oem') -eq $targetOem -and [string](Get-Prop $it 'serial') -eq $targetSerial) {
-                        $match = $it; break
+                # One row per asset per certificate in the rebuilt tracker, so the same asset can be on
+                # several rows: every row that matches is marked, not just the first.
+                $rowsHit = 0
+                foreach ($row in $components) {
+                    if ($ixVessel -ge 0 -and $spareVessels.Count -gt 0 -and -not $spareVessels.ContainsKey([string]$row[$ixVessel])) { continue }
+                    if ([string]$row[$ixAsset] -eq $target -and [string]$row[$ixOem] -eq $targetOem -and [string]$row[$ixSerial] -eq $targetSerial) {
+                        $row[$ixAvail] = 'NO'
+                        $row[$ixAssigned] = [string](Get-Prop $rec.applicant 'siteUnit')
+                        $rowsHit++
                     }
                 }
-                if (-not $match) {
-                    Write-Warning "SSCE COC write-back: approved request $($rec.requestId) - no matching item found for asset '$target' (oem '$targetOem', serial '$targetSerial')"
+                if ($rowsHit -eq 0) {
+                    Write-Warning "SSCE COC write-back: approved request $($rec.requestId) - no matching shared-capital row for asset '$target' (oem '$targetOem', serial '$targetSerial')"
                     continue
                 }
-                Set-Prop $match 'available' $false
-                Set-Prop $match 'assignedTo' ([string](Get-Prop $rec.applicant 'siteUnit'))
                 $appliedCount++
             }
 
-            $newAppData = ConvertTo-ReportJson $appData
-            $newCocHtml = $cocHtml.Substring(0, $appDataMatch.Index) + $appDataMatch.Groups[1].Value + $newAppData + $appDataMatch.Groups[3].Value + $cocHtml.Substring($appDataMatch.Index + $appDataMatch.Length)
+            $newCocData = (ConvertTo-ReportJson $cocData).Replace('<', '\u003c')
+            $newCocHtml = $cocHtml.Substring(0, $cocDataMatch.Index) + $cocDataMatch.Groups[1].Value + $newCocData + $cocDataMatch.Groups[3].Value + $cocHtml.Substring($cocDataMatch.Index + $cocDataMatch.Length)
             # The stamp goes straight after <head> (or at the very top when there is
             # no head tag); a comment there is harmless to the page.
             $headTag = [regex]::Match($newCocHtml, '<head[^>]*>', 'IgnoreCase')
