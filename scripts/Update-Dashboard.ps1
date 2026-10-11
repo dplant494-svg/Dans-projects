@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.88'
+$ScriptVersion = '2.89'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1244,6 +1244,8 @@ $dl1Closeouts = @{}    # planId -> close-out (aar read whole)
 $dl1Evidence = New-Object System.Collections.Generic.List[object]   # one row per file: names and sizes, never the bytes
 $dl1Test = New-Object System.Collections.Generic.List[object]       # the test posts, listed so the Status page and Dan can see them
 $dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
+$dl1PostPlan = @{}     # v2.89: file name -> meta.planid for every ordinary post made under a plan
+$dl1Links = @{}        # v2.89: SSORT 162 'plan-link' records (tools entry 62/64), keyed by linkid; the newest action per link wins (link / unlink)
 function ConvertTo-Dl1Text { param($Value) if ($null -eq $Value) { return '' }; if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }; return [string]$Value }   # PowerShell 7's ConvertFrom-Json turns a full ISO timestamp into [datetime] (a date-only string such as 2026-11-14 stays a string, checked 12 Oct): written back as UTC, the instant unchanged. Windows PowerShell 5.1 (Dan's PC, the server) keeps every string exactly as sent, offset included.
 function ConvertTo-Dl1Number { param($Value) if ($null -eq $Value -or $Value -is [string] -and [string]$Value -eq '') { return $null }; $d = 0.0; if ([double]::TryParse([string]$Value, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$d)) { return $d }; return $null }
 function Read-Dl1Post { param($Json, $Meta, $File, [string]$Kind)
@@ -1917,6 +1919,27 @@ foreach ($f in $files) {
     # planning-report falls through to the WCGRRT path below, except that a test post (dryRun or SSCE Equipment) is
     # listed under dl1.test and kept off the rig's panel.
     $metaKindD = ([string](Get-Prop $meta 'kind')).ToLowerInvariant()
+    # v2.89: SSORT's Link to plan record (entry 64): "this posted record is evidence for this task of this plan". A record,
+    # never a report; joined to the source post by source.file; an unlink with the same linkid withdraws it.
+    if ($metaKindD -eq 'plan-link' -or $f.Name -like 'seadrill-planlink_*') {
+        $dl1Files[$f.Name] = $true
+        $lsrc = Get-Prop $json 'source'
+        $linkId = (ConvertTo-AabText (Get-Prop $json 'linkid')).Trim(); if (-not $linkId) { $linkId = [System.IO.Path]::GetFileNameWithoutExtension($f.Name) }
+        $lsaved = ConvertTo-StableTimestamp (Get-Prop $meta 'saved'); if (-not $lsaved) { $lsaved = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+        $lrec = [ordered]@{
+            linkId = $linkId; planId = (ConvertTo-AabText (Get-Prop $json 'planid')).Trim(); taskId = (ConvertTo-AabText (Get-Prop $json 'taskid')).Trim(); taskName = ConvertTo-AabText (Get-Prop $json 'taskname')
+            section = (ConvertTo-AabText (Get-Prop $json 'section')).Trim(); action = (ConvertTo-AabText (Get-Prop $json 'action')).Trim().ToLowerInvariant()
+            sourceFile = $(if ($lsrc) { ConvertTo-AabText (Get-Prop $lsrc 'file') } else { '' }); sourceType = $(if ($lsrc) { ConvertTo-AabText (Get-Prop $lsrc 'reporttype') } else { '' })
+            testType = $(if ($lsrc) { ConvertTo-AabText (Get-Prop $lsrc 'testtype') } else { '' }); sourceDate = $(if ($lsrc) { ConvertTo-Dl1Text (Get-Prop $lsrc 'date') } else { '' })
+            rig = (ConvertTo-AabText (Get-Prop $meta 'asset')).Trim(); rigKey = (ConvertTo-AabText (Get-Prop $meta 'rigkey')).Trim().ToLowerInvariant(); by = ConvertTo-AabText (Get-Prop $meta 'by'); rev = ConvertTo-AabText (Get-Prop $meta 'rev')
+            saved = $lsaved; file = $f.Name
+        }
+        if (-not $lrec.action) { $lrec.action = 'link' }
+        if (-not $lrec.planId -or -not $lrec.sourceFile) { Add-Problem $f 'dl1-invalid' 'a plan-link record without a planid or a source file - not filed'; continue }
+        $priorL = $dl1Links[$linkId]
+        if (-not $priorL -or [string]$lrec.saved -gt [string]$priorL.saved) { $dl1Links[$linkId] = $lrec }
+        continue
+    }
     if ($metaKindD -in @('plan','plan-progress','plan-closeout','plan-evidence')) {
         $dl1Files[$f.Name] = $true
         $dpost = Read-Dl1Post -Json $json -Meta $meta -File $f -Kind $metaKindD
@@ -1945,6 +1968,9 @@ foreach ($f in $files) {
         }
         continue
     }
+    # v2.89: meta.planid (SSORT 162) on an ordinary post names the plan it was made under; kept per file for the filing.
+    $postPlanId = (ConvertTo-AabText (Get-Prop $meta 'planid')).Trim(); if (-not $postPlanId) { $postPlanId = (ConvertTo-AabText (Get-Prop $meta 'planId')).Trim() }
+    if ($postPlanId) { $dl1PostPlan[$f.Name] = $postPlanId }
     $dl1TestReport = $false
     if ($metaKindD -eq 'planning-report' -and ((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')) {
         $dl1TestReport = $true
@@ -3996,8 +4022,50 @@ foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $slim['closeout'] = $(if ($dl1Closeouts.ContainsKey($planKey)) { $dl1Closeouts[$planKey] } else { $null })
     $dl1PlanList.Add($slim) | Out-Null
 }
+# v2.89: the live links per plan (unlinked ones dropped), and plans-open.json for SSORT's plan picker (entry 61.3 / 64):
+# every plan not closed out, with its sections and tasks, written beside help-open.json (synced) and to dl1\plans-open.json
+# for the IIS server (/sacred/dl1/plans-open.json).
+$dl1LiveLinks = @($dl1Links.Values | Where-Object { $_.action -ne 'unlink' } | Sort-Object -Property @{ Expression = { [string]$_.saved } })
+$dl1LinksByPlan = @{}
+foreach ($lk in $dl1LiveLinks) { if (-not $dl1LinksByPlan.ContainsKey($lk.planId)) { $dl1LinksByPlan[$lk.planId] = New-Object System.Collections.Generic.List[object] }; $dl1LinksByPlan[$lk.planId].Add($lk) | Out-Null }
+foreach ($slim in $dl1PlanList) { $slim['links'] = $(if ($dl1LinksByPlan.ContainsKey($slim.planId)) { $dl1LinksByPlan[$slim.planId].ToArray() } else { @() }); $slim['linkCount'] = @($slim['links']).Count }
+$plansOpen = New-Object System.Collections.Generic.List[object]
+foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
+    $pl = $dl1Plans[$planKey]
+    $isClosed = $dl1Closeouts.ContainsKey($planKey)
+    $secs = [ordered]@{ predeployment = New-Object System.Collections.Generic.List[object]; 'surface-testing' = New-Object System.Collections.Generic.List[object]; maintenance = New-Object System.Collections.Generic.List[object]; skeleton = New-Object System.Collections.Generic.List[object] }
+    foreach ($t in $pl.tasks) {
+        $tt = ([string]$t.type).ToLowerInvariant(); $sec = 'maintenance'
+        if ($tt -eq 'test' -or $tt -eq 'checklist' -or $tt -eq 'predeployment') { $sec = 'predeployment' } elseif ($tt -eq 'surface-test') { $sec = 'surface-testing' } elseif ($tt -eq 'fixed') { $sec = 'skeleton' }
+        $secs[$sec].Add([ordered]@{ taskId = [string]$t.taskId; name = [string]$t.description; type = [string]$t.type; testType = [string](Get-Prop $t 'testType'); woNum = [string]$t.woNum; status = [string]$t.status }) | Out-Null
+    }
+    $secList = New-Object System.Collections.Generic.List[object]
+    $secNames = @{ predeployment = 'Pre-Deployment'; 'surface-testing' = 'Surface Testing'; maintenance = 'Maintenance'; skeleton = 'Rig skeleton' }
+    foreach ($sk in @('predeployment','surface-testing','maintenance','skeleton')) { $secList.Add([ordered]@{ id = $sk; name = $secNames[$sk]; tasks = $secs[$sk].ToArray() }) | Out-Null }
+    $secList.Add([ordered]@{ id = 'daily'; name = 'Daily log'; tasks = @() }) | Out-Null
+    $plansOpen.Add([ordered]@{
+        planId = $pl.planId; rigKey = $pl.rigKey; rig = $pl.rig; bopNo = $pl.bopNo; status = $(if ($isClosed) { 'closed' } else { $pl.status }); scopeVersion = $pl.scopeVersion
+        windowFrom = $pl.windowFrom; windowTo = $pl.windowTo; title = ("{0} {1} - BWM from {2}" -f $pl.rig, $pl.bopNo, $pl.windowFrom); posted = $pl.posted; test = [bool]$pl.isTest
+        sections = $secList.ToArray()
+    }) | Out-Null
+}
+$plansOpenJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $plansOpen.Count; plans = $plansOpen.ToArray() })
+$plansOpenLocal = Join-Path $repoRoot 'dl1\plans-open.json'
+try {
+    $poDir = Split-Path -Parent $plansOpenLocal; if (-not (Test-Path -Path $poDir)) { New-Item -ItemType Directory -Path $poDir -Force | Out-Null }
+    [System.IO.File]::WriteAllText($plansOpenLocal, $plansOpenJson, (New-Object System.Text.UTF8Encoding($false)))
+    if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir)) {
+        $poSynced = Join-Path $helpReceiptDir 'plans-open.json'; $prevPo = ''; if (Test-Path -Path $poSynced) { $prevPo = [System.IO.File]::ReadAllText($poSynced) }
+        $stripPo = { param($t) [regex]::Replace($t, '"generatedAt":"[^"]*"', '') }
+        if ((& $stripPo $prevPo) -ne (& $stripPo $plansOpenJson)) { [System.IO.File]::WriteAllText($poSynced, $plansOpenJson, (New-Object System.Text.UTF8Encoding($false))) }
+    }
+    if ($plansOpen.Count -gt 0 -or $dl1LiveLinks.Count -gt 0) { Write-Host "DL-1: plans-open.json with $($plansOpen.Count) plan(s); $($dl1LiveLinks.Count) live link record(s)" -ForegroundColor Green }
+} catch { Write-Warning "plans-open.json failed (scan unaffected): $($_.Exception.Message)" }
+
 $dl1Block = @{
     plans     = $dl1PlanList.ToArray()        # slim: no task rows (they are in the Fabric tables and in the plan file itself)
+    links     = $dl1LiveLinks                 # v2.89
+    postPlans = $dl1PostPlan                  # v2.89: file -> planid for ordinary posts made under a plan
     tests     = $dl1Test.ToArray()
     evidence  = $dl1Evidence.ToArray()
     counts    = @{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count }
@@ -4066,6 +4134,14 @@ elseif ($deployPath) {
                 Copy-Item -Path $aabOutputFile -Destination $aabDeployTarget -Force
                 Write-Host "Deployed aab-data.js to $aabDeployPath" -ForegroundColor Green
             }
+        }
+        # v2.89: plans-open.json to <share>\dl1 for SSORT's plan picker (/sacred/dl1/plans-open.json).
+        if (Test-Path -Path $plansOpenLocal) {
+            $dl1DeployPath = Join-Path (Split-Path -Parent $deployPath) 'dl1'
+            if ($config.PSObject.Properties['dl1DeployPath'] -and $config.dl1DeployPath) { $dl1DeployPath = [Environment]::ExpandEnvironmentVariables($config.dl1DeployPath) }
+            if (-not (Test-Path -Path $dl1DeployPath)) { New-Item -ItemType Directory -Path $dl1DeployPath -Force | Out-Null }
+            $dl1DeployTarget = Join-Path $dl1DeployPath 'plans-open.json'
+            if ([System.IO.Path]::GetFullPath($dl1DeployTarget) -ne [System.IO.Path]::GetFullPath($plansOpenLocal)) { Copy-Item -Path $plansOpenLocal -Destination $dl1DeployTarget -Force; Write-Host "Deployed plans-open.json to $dl1DeployPath" -ForegroundColor Green }
         }
         # v2.71: help-data.js to the Help Centre folder on the share (helpDeployPath; default <share>\help).
         if (Test-Path -Path $helpOutputFile) {
@@ -4328,6 +4404,7 @@ if ($databaseExportPath -and $exportDue) {
         Export-DatabaseTable -Name 'plan_synergi' -Rows $psRows.ToArray() -KeyCols @('planId','scopeVersion','ref') -Tables $exportTables
         Export-DatabaseTable -Name 'plan_progress' -Rows $pgRows.ToArray() -KeyCols @('planId','scopeVersion','asOf','taskId') -Tables $exportTables
         Export-DatabaseTable -Name 'plan_evidence' -Rows @($dl1Evidence | Where-Object { -not $_.isTest }) -KeyCols @('planId','file') -Tables $exportTables
+        Export-DatabaseTable -Name 'plan_links' -Rows @($dl1LiveLinks | ForEach-Object { [pscustomobject]$_ }) -KeyCols @('linkId') -Tables $exportTables   # v2.89
         $manifestTables = New-Object System.Collections.Generic.List[object]
         $exportRows = 0
         foreach ($tn in ($exportTables.Keys | Sort-Object)) {

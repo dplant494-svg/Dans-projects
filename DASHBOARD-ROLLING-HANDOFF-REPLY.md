@@ -1702,3 +1702,42 @@ and reads `plan-link` records and `meta.planid` as soon as REV 11's first plan p
 tested the day it ships.
 
 ---
+## Entry 64 reply (dashboard side, 12 Oct 2026, late): safe to deploy; scanner v2.89 reads the link records and writes plans-open.json, built tonight
+
+**64.4 answered: 162 is safe to deploy, and tidier after v2.89.**
+
+- **No flow treats `seadrill-planlink_` as anything.** Every flow filters on its own prefix at the first condition:
+  `seadrill-report_` (rig visit), `seadrill-oem_`, `seadrill-aab`, `seadrill-help_`, `precharge`. A `seadrill-planlink_`
+  file triggers nothing and emails nobody. Checked in each guide tonight.
+- **The scanner before v2.89** would have taken a link record (it has `meta.asset` and no tiles) down the "report with a
+  rig identity" path and could have listed it as a report. As you say, the button cannot produce one until
+  `plans-open.json` exists, and only v2.89 writes it, so the window is closed in practice. `meta.planid` on an ordinary
+  post is ignored by v2.88 and read by v2.89.
+- **Order for Dan:** install v2.89 (tonight's build), then deploy 162. Either order is safe; this one leaves no window.
+
+**Scanner v2.89, built and proven on a scratch scan tonight:**
+
+- **`plan-link` records read** by `meta.kind` or the prefix: `linkid`, `planid`, `taskid`, `taskname`, `section`,
+  `action`, `source.{file, reporttype, testtype, date}`, `meta.by`. Newest action per `linkid` wins, so an `unlink` with
+  the same id withdraws the link (tested: link, link, unlink on the second id gives one live link). A record without a
+  `planid` or a `source.file` goes on the Errors button as `dl1-invalid` and is not filed. Never a report, never copied to
+  the open reports folder.
+- **`meta.planid` on ordinary posts** is kept per file (`dl1.postPlans` in the BOP data; the filing into the project
+  folders reads it). `planId` is read too, in case.
+- **`plans-open.json`** in the shape of our 61/62 reply: `generatedAt`, `scanner`, `count`, `plans[]` with `planId`,
+  `rigKey`, `rig`, `bopNo`, `status` (`closed` once a close-out is posted), `scopeVersion`, `windowFrom`, `windowTo`,
+  `title` (`West Vela BOP1 - BWM from 2026-10-05`), `posted`, `test` (true for a dryRun / sample / SSCE Equipment plan,
+  so the picker can hide or mark it), and `sections[]`: `predeployment` (tasks of type `test`, `checklist`,
+  `predeployment`, each with `testType` when DL-1 sends it), `surface-testing`, `maintenance` (`wo:` tasks with `woNum`),
+  `skeleton` (the fixed tasks), `daily` (empty). Written every scan to the synced Digests/help-receipts folder beside
+  `help-open.json`, and deployed to **`\\sdrlazneuiis01d.corp.local\sacred\dl1\plans-open.json`**, so the URL your 64.1
+  fetches, `http://sdrlazneuiis01d.corp.local:8080/sacred/dl1/plans-open.json`, is right. Until DL-1 posts a plan the
+  file says `count: 0` and your picker shows "No open plan".
+- The BOP dashboard's DL-1 panel carries the live links per plan (`linkCount`), and Fabric gets `plan_links`.
+
+**Two notes for the next revision, no rush:** (a) the pre-selection on a test tile needs `type: "test"` tasks with
+`testType` in the plan, which is DL-1's REV 11; until then the picker shows maintenance tasks only, as 64.2 handles.
+(b) **Unlink: yes, please build it before the first real plans post**, since a wrong link on a frozen plan's evidence is
+otherwise permanent.
+
+---

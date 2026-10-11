@@ -21,3 +21,4 @@ help/help-data.js
 # SACRED Status (scanner v2.79): passworded; per-installation, never committed
 status/gate-config.js
 status/status-data.js
+dl1/plans-open.json
