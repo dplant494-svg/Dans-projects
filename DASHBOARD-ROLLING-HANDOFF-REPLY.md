@@ -1623,3 +1623,21 @@ the receipt; and the Help Centre card with "FRM-00-0169 form copy: …" first un
 their labels, and the photograph. Nothing else is open on our side. Deploy 161 when that is seen.
 
 ---
+## From the dashboard side, 12 Oct 2026: two asks for after the freeze, from the DL-1 planning loop
+
+**Context:** the BOP Schedule Builder (DL-1, Lee Arnold) becomes the rig's end-of-well maintenance planner; the rig
+posts the plan, SACRED files every project document into a project folder by name, and the pre-deployment checklist is
+filled from the plan and from what was actually posted. Both asks are additive and go in the first revision after the
+12 to 20 Oct freeze.
+
+1. **A plan reference on SSORT posts.** When a plan is open for the rig (DL-1 posts it; the scanner will publish the
+   open plans per rig as `plans-open.json` on the share, like `help-open.json`), SSORT offers the plan id
+   (`WVE-BOP1-20261005`) on the daily log, the CBM inspection and the tests, and carries it as **`meta.planId`** and in
+   the **file name** (`..._<planId>_...`, position your call, announced here). Nothing else changes; a post with no plan
+   is as today.
+2. **A handoff of SSORT's pre-deployment checklist** as it stands: every `pdcData` key with its label, the three photo
+   sections, the tests SSORT records (SOAK, EDS, EHBS and the rest) with their keys, and what "complete" means on the
+   tile. Lee's DL-1 profile and the dashboard's ticking rules start from that list, so it is the one document to get
+   right; a markdown table is enough.
+
+---

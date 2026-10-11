@@ -238,3 +238,61 @@ tells the rig to freeze; the frozen post is the ready-for-execution notice; edit
 is in our file as a held note and comes back with that entry.
 
 ---
+## Held for the next reply, part 2 (dashboard side, 12 Oct 2026): the project folder, the filing of every post, and the pre-deployment checklist filled from what was actually posted
+
+Dan's answers, 12 Oct, to the eight questions on this. Goes to the DL-1 session with the REV 11 reply; the tools
+session gets its own ask (below).
+
+**The trigger.** The Subsea Supervisor finishes execute-and-defer on the work orders in DL-1, is happy with the scope,
+and presses **Post for review**. That first `plan` post creates everything: the plan on the dashboard, the Teams chat
+named `<planId>`, the email, and **the project folder**. "The ball rolls from then."
+
+**The folder.** A new library on the WellControl site, **Between Wells Maintenance** (Dan creates it; name as he
+likes), one folder per `planId`, with this structure for now (to be broken down further later):
+
+```
+Between Wells Maintenance/
+  WVE-BOP1-20261005/
+    01 Plan and Scope
+    02 Maintenance Evidence
+    03 Testing
+    04 CBM Inspections
+    05 Pre-deployment Checklist
+    06 Precharge
+    07 Photos
+    08 AAR and Close-out
+```
+
+**How a file knows its project: the naming convention.** Every file posted for the project carries the `planId` in its
+name, the way DL-1's own posts do (`YYYYMMDD-HHmm_<Rig>_DL1_<kind>_<BOPn>_v<n>.json`). SSORT gets the plan reference
+on its daily logs, CBMs and tests (the tools session is asked below), so those post to the dashboard as now **and** are
+filed under the project by title. Window matching (rig + plan window) is the fallback for a file with no reference.
+
+**Copies, never moves**, the same as the Digests: PostedReports stays the record; the flow (or the scanner, whichever
+can reach the library) copies each file into the right subfolder by its kind: photos from a plan update into 07,
+CBMs into 04, precharge into 06, the plan posts into 01, PDC posts into 05, close-out and AAR into 08, daily logs and
+maintenance evidence into 02, tests into 03.
+
+**Testing.** Every test has a task and a work-order or task number in the schedule; its evidence is attachments on
+that task (03 Testing). SSORT's own tests (SOAK, EDS, EHBS and the rest) link to the same tasks by the plan reference.
+
+**The pre-deployment checklist, two sources of a tick.** DL-1 ticks a row when its job plan closes (Lee's profile, Q4).
+SACRED can also tick a row from what was actually posted: a CBM for a cavity, a precharge sheet, a SOAK test. The two
+are reconciled on the dashboard and DL-1 may read SACRED's computed state back (read only, the `aab-data.js` pattern)
+to pre-populate its checklist as the project goes. **The full pre-deployment requirement is still to be determined**, in
+addition to the list SSORT holds today; Dan asks SSORT for a handoff of its PDC (`pdcData` keys, the three photo sections,
+the tests it records) so Lee's profile and the ticking rules start from the real list.
+
+**Split of the build:**
+
+| Side | Builds |
+|---|---|
+| Dan | the Between Wells Maintenance library; the Planning table; the flow (click by click) that on a `plan` post creates the folder tree, the chat and the email, and on every later post copies the file into its subfolder |
+| DL-1 (Lee) | nothing new for the folder; the PDC profile; `plan.sourceDate`; later, reading SACRED's PDC state |
+| SSORT / WCGRRT (tools session) | the plan reference on daily logs, CBMs and tests, in the file name and in `meta.planId` (one key, additive); the PDC handoff |
+| SACRED (this session) | the scanner matches every post to a plan (by `meta.planId`, by the name, or by rig + window), writes `plan-files.json` for the flow (which file, which subfolder) and the PDC state per plan; the BOP panel shows the folder link and the ticks |
+
+**Order:** library and folder flow first (nothing else waits on it); the SSORT reference after the freeze; the PDC rules
+once Lee's profile and SSORT's handoff are in.
+
+---
