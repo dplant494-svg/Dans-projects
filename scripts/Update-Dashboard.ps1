@@ -1191,6 +1191,7 @@ $reports = New-Object System.Collections.Generic.List[object]
 $bwmSnapshots = New-Object System.Collections.Generic.List[object]
 $excelSnapshots = New-Object System.Collections.Generic.List[object]
 $planningReports = @{}   # keyed by rig; per-rig Planning Report, newest wins
+$planningReportsByBop = @{}   # v2.88: keyed rig|bopNo, newest per rig and BOP, so BOP1 and BOP2 plans show side by side (DL-1 posts them independently)
 $planningCompletion = @{}   # keyed rig|bopNo; newest EXPLICIT projectComplete value (see the latch fix below)
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
@@ -2272,6 +2273,21 @@ foreach ($f in $files) {
                 $repDate = [string](Get-Prop $planning 'reportDate')
                 if (-not $repDate) { $repDate = [string](Get-Prop $meta 'date') }
                 $rigKey = $assetRaw
+                $prEntry = @{
+                        file           = $f.Name
+                        rig            = $rigKey
+                        reportDate     = $repDate
+                        modified       = $f.LastWriteTime
+                        planning       = $planning
+                        lastRigUpdate  = [string](Get-Prop $meta 'lastRigUpdate')
+                        bopNo          = [string](Get-Prop $meta 'bopNo')
+                        schedule       = [string](Get-Prop $meta 'schedule')
+                        rev            = [string](Get-Prop $meta 'rev')   # v2.88: which tool sent it (WCGRRT REV n, Schedule Builder REV n)
+                        kind           = [string](Get-Prop $meta 'kind')
+                }
+                $bopKey = "$rigKey|$([string](Get-Prop $meta 'bopNo'))"
+                $priorB = $planningReportsByBop[$bopKey]
+                if (-not $priorB -or ($repDate -gt [string]$priorB.reportDate) -or (($repDate -eq [string]$priorB.reportDate) -and ($f.LastWriteTime -gt $priorB.modified))) { $planningReportsByBop[$bopKey] = $prEntry }
                 $prior = $planningReports[$rigKey]
                 if (-not $prior -or ($repDate -gt [string]$prior.reportDate) -or
                     (($repDate -eq [string]$prior.reportDate) -and ($f.LastWriteTime -gt $prior.modified))) {
@@ -3954,6 +3970,10 @@ foreach ($prKey in @($planningReports.Keys)) {
         Set-Prop $pr.planning 'projectComplete' $planningCompletion[$ck].complete
     }
 }
+foreach ($prKey in @($planningReportsByBop.Keys)) {   # v2.88: the same latch on the per-BOP entries
+    $pr = $planningReportsByBop[$prKey]
+    if ($planningCompletion.ContainsKey($prKey)) { Set-Prop $pr.planning 'projectComplete' $planningCompletion[$prKey].complete }
+}
 
 # v2.88: the DL-1 block. Plans keyed by planId (newest scopeVersion), the newest progress snapshot per plan with the
 # duration-weighted percent complete computed here, close-outs, evidence counts, and the test posts listed apart.
@@ -3981,6 +4001,7 @@ $bopPayload = @{
     snapshots        = $bwmSortedList.ToArray()
     excelSnapshots   = $excelSnapshots.ToArray()
     planningReports  = $planningReports
+    planningReportsByBop = $planningReportsByBop   # v2.88
     dl1              = $dl1Block             # v2.88
 }
 $bopContent = 'window.BWM_DATA = ' + (ConvertTo-ReportJson $bopPayload) + ";`n"

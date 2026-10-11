@@ -6,6 +6,8 @@
 <title>BOP Fleet Planning Status</title>
 <script src="xlsx.full.min.js"></script>
 <style>
+  .dl1-panel{border-left:4px solid #0a7}
+  .dl1-panel.dl1-test{opacity:.75;border-left-color:#b00}
   :root {
     --sd-blue:        #002C77;
     --sd-blue-80:     rgba(0,44,119,0.8);
@@ -665,6 +667,8 @@ function tileInnerHtml(pin){
     }
     var proj = PROJECTS[row.rig + '#' + row.bop];
     var projLine = proj ? ('<div class="tile-proj">Maintenance ' + proj.revisions[proj.revisions.length-1].pct.toFixed(0) + '% complete</div>') : '';
+    var dl1 = (DL1 && DL1.plans || []).filter(function(pl){ return pl && !pl.isTest && pl.rig === row.rig && String(pl.bopNo||'').replace(/\D/g,'') === String(row.bop); })[0];
+    if(dl1 && dl1.progress && dl1.progress.pctComplete != null) projLine = '<div class="tile-proj">DL-1 plan ' + Number(dl1.progress.pctComplete).toFixed(0) + '% complete' + (String(dl1.status||'').toLowerCase() === 'frozen' ? '' : ' (scope ' + dl1.status + ')') + '</div>';
     var segs = '';
     for(var i=0;i<STAGE_LABELS.length;i++){ segs += '<span class="' + (i < row.stagesComplete ? 'done' : '') + '" title="' + STAGE_LABELS[i] + '"></span>'; }
     var c = statusColor(row.status); // 6-digit hex, so alpha suffixes below are safe
@@ -853,8 +857,17 @@ function copyBreakinsByKey(key, btn){
   }).catch(function(){ if(btn) btn.textContent = 'Copy failed'; });
 }
 
+// 12 Oct 2026: one panel per BOP when the scanner (v2.88+) gives the per-BOP table; the per-rig entry is the fallback
+// for an older data file. The DL-1 plan panels follow the planning report(s) for the rig.
 function renderPlanningReport(rigName){
-  var pr = PLANNING_REPORTS[rigName];
+  var keys = Object.keys(PLANNING_BY_BOP || {}).filter(function(k){ return k.split('|')[0] === rigName && PLANNING_BY_BOP[k] && PLANNING_BY_BOP[k].planning; }).sort();
+  var html = '';
+  if(keys.length){ html = keys.map(function(k){ return renderOnePlanningReport(rigName, PLANNING_BY_BOP[k]); }).join(''); }
+  else { html = renderOnePlanningReport(rigName, PLANNING_REPORTS[rigName]); }
+  return html + renderDl1Plans(rigName);
+}
+function dl1Stamp(data){ var d = data && data.dl1; if(!d) return '0'; var c = d.counts || {}; return (c.plans||0) + '.' + (c.progress||0) + '.' + (c.closeouts||0) + '.' + (c.tests||0) + '.' + Object.keys(data.planningReportsByBop || {}).length; }
+function renderOnePlanningReport(rigName, pr){
   if(!pr || !pr.planning) return '';
   var p = pr.planning;
   var milestones = (p.milestones || []).filter(function(m){ return m && (m.name||'').trim(); });
@@ -871,6 +884,7 @@ function renderPlanningReport(rigName){
     (bopNo ? ' — ' + bopNo : '') + '</span>' +
     (p.projectComplete ? '<span class="planning-complete-badge">Project Complete</span>' : '') +
     (pr.reportDate ? '<span class="planning-date">' + fmtDate(pr.reportDate) + '</span>' : '') + '</div>';
+  if(pr.rev) html += '<div class="field-line"><span class="lbl">Source:</span> ' + pr.rev + '</div>';
 
   var lastRigUpdate = pr.lastRigUpdate || p.lastRigUpdate;
   if(lastRigUpdate) html += '<div class="field-line"><span class="lbl">Last rig update:</span> ' + fmtDate(lastRigUpdate) + '</div>';
@@ -920,6 +934,65 @@ function renderPlanningReport(rigName){
 
   html += '</div>';
   return html;
+}
+
+// DL-1 (BOP Schedule Builder) plans for a rig: one panel per plan (BOP1 and BOP2 independently), from the scanner's
+// dl1 block (v2.88): scope status and version, window, totals, the latest 12-hour progress snapshot with the
+// duration-weighted percent complete the scanner computes, milestones, deferrals, close-out. A test post (dryRun,
+// sample or SSCE Equipment) is badged TEST and never confused with the rig's real plan.
+function renderDl1Plans(rigName){
+  var plans = (DL1 && DL1.plans || []).filter(function(pl){ return pl && pl.rig === rigName; });
+  if(!plans.length) return '';
+  plans.sort(function(a,b){ return String(a.bopNo||'').localeCompare(String(b.bopNo||'')) || (b.scopeVersion||0) - (a.scopeVersion||0); });
+  return plans.map(function(pl){
+    var pg = pl.progress || null;
+    var status = String(pl.status || '').toLowerCase();
+    var statusLabel = status === 'frozen' ? 'Scope frozen' : (status === 'proposed' ? 'Scope for review' : (status || 'plan'));
+    var closed = pl.closeout ? true : false;
+    var pct = (pg && pg.pctComplete != null) ? Number(pg.pctComplete) : null;
+    var html = '<div class="planning-panel dl1-panel' + (pl.isTest ? ' dl1-test' : '') + '">' +
+      '<div class="planning-head"><span class="planning-title">DL-1 Plan' + (pl.bopNo ? ' — ' + pl.bopNo : '') + '</span>' +
+      (pl.isTest ? '<span class="planning-complete-badge" style="background:#b00">TEST</span>' : '') +
+      (closed ? '<span class="planning-complete-badge">Closed out</span>' : '<span class="planning-complete-badge" style="background:' + (status === 'frozen' ? '#0a7' : '#c80') + '">' + statusLabel + '</span>') +
+      (pl.posted ? '<span class="planning-date">' + fmtDate(String(pl.posted).slice(0,10)) + '</span>' : '') + '</div>';
+    html += '<div class="field-line"><span class="lbl">Plan:</span> ' + pl.planId + ' &middot; scope v' + pl.scopeVersion +
+      (pl.windowFrom ? ' &middot; ' + fmtDate(pl.windowFrom) + ' &rarr; ' + fmtDate(pl.windowTo) : '') +
+      (pl.frozenAt ? ' &middot; frozen ' + fmtDate(String(pl.frozenAt).slice(0,10)) + (pl.frozenBy ? ' by ' + pl.frozenBy : '') : '') + '</div>';
+    if(pl.rev) html += '<div class="field-line"><span class="lbl">Source:</span> ' + pl.rev + '</div>';
+    var stats = [];
+    if(pl.totalTasks != null) stats.push(['Tasks', pl.totalTasks + (pl.totalMaintenance != null ? ' (' + pl.totalMaintenance + ' WOs)' : '')]);
+    if(pl.totalHours != null) stats.push(['Hours', pl.totalHours]);
+    if(pl.criticalTasks != null) stats.push(['Critical', pl.criticalTasks]);
+    if(pl.scopeCoveragePct != null) stats.push(['Coverage', pl.scopeCoveragePct + '%']);
+    stats.push(['Deferred', pl.deferredCount || 0]);
+    if(pl.synergiCount) stats.push(['Synergi lessons', pl.synergiCount]);
+    html += '<div class="planning-stats">' + stats.map(function(s){ return '<div class="planning-stat"><span class="lbl">'+s[0]+'</span><span class="val">'+s[1]+'</span></div>'; }).join('') + '</div>';
+    if(pg){
+      html += '<div class="proj-panel"><div class="proj-row"><span>12-hour progress' + (pg.asOf ? ' (as of ' + String(pg.asOf).replace('T',' ').slice(0,16) + (pg.shift ? ', ' + pg.shift + ' shift' : '') + ')' : '') + '</span><span>' + (pct != null ? pct.toFixed(1) + '%' : '—') + '</span></div>' +
+        '<div class="proj-bar-track"><div class="proj-bar-fill" style="width:' + Math.min(100, pct || 0) + '%"></div></div>' +
+        '<div class="proj-row"><span>' + (pg.tasksComplete||0) + ' complete &middot; ' + (pg.tasksInProgress||0) + ' in progress &middot; ' + (pg.taskCount||0) + ' tracked</span>' +
+        (pg.pdcItemsTicked ? '<span>PDC: ' + pg.pdcItemsTicked + '</span>' : '') + '</div></div>';
+    } else {
+      html += '<div class="notes-line">No 12-hour progress posted yet.</div>';
+    }
+    var ms = (pl.milestones || []).filter(function(m){ return m && (m.name||'').trim(); });
+    if(ms.length){
+      html += '<div class="planning-sublabel">Milestones</div><div class="milestone-list">' + ms.map(function(m){
+        var cls = m.actual ? 'done' : 'pending';
+        var dateLabel = m.actual ? ('actual ' + fmtDate(m.actual)) : (m.est ? ('est ' + fmtDate(m.est)) : (m.baseline ? ('baseline ' + fmtDate(m.baseline)) : ''));
+        return '<div class="milestone-item '+cls+'"><span class="milestone-dot"></span><span class="milestone-label">'+m.name+'</span><span class="milestone-date">'+dateLabel+'</span></div>';
+      }).join('') + '</div>';
+    }
+    var def = pl.deferred || [];
+    if(def.length){
+      html += '<div class="planning-sublabel">Deferred (' + def.length + ')</div><ul class="planning-list">' + def.slice(0, 20).map(function(d){
+        return '<li><strong>' + (d.woNum || d.taskId || '') + ':</strong> ' + (d.description || '') + (d.reason ? ' — ' + d.reason : '') + (d.dueDate ? ' (due ' + fmtDate(d.dueDate) + ')' : '') + '</li>';
+      }).join('') + (def.length > 20 ? '<li>… and ' + (def.length - 20) + ' more</li>' : '') + '</ul>';
+    }
+    if(closed){ html += '<div class="field-line"><span class="lbl">Close-out posted:</span> ' + fmtDate(String(pl.closeout.posted||'').slice(0,10)) + '</div>'; }
+    html += '</div>';
+    return html;
+  }).join('');
 }
 
 // Break-in work: an open-work badge + expandable table (with per-row and
@@ -1187,6 +1260,8 @@ function renderAll(){
     return (d && (!acc || d > acc)) ? d : acc;
   }, null);
   if(planningLatest && (!latest || planningLatest > latest)) latest = planningLatest;
+  var dl1Latest = (DL1 && DL1.plans || []).reduce(function(acc, pl){ var d = pl && pl.progress && pl.progress.asOf ? String(pl.progress.asOf).slice(0,10) : (pl && pl.posted ? String(pl.posted).slice(0,10) : null); return (d && !pl.isTest && (!acc || d > acc)) ? d : acc; }, null);
+  if(dl1Latest && (!latest || dl1Latest > latest)) latest = dl1Latest;
   var footLine = 'Last Updated — ' + fmtDate(latest);
   if(typeof BWM_META !== 'undefined' && BWM_META && BWM_META.week) footLine = BWM_META.week + ' &nbsp;&middot;&nbsp; ' + footLine;
   document.getElementById('lastUpdatedLine').innerHTML = footLine;
@@ -1361,6 +1436,8 @@ var BWM_STAGE_KEYS = ['pt','sc','sm','sf','pc','op','rr','ex','pd','aar']; // mi
 var BWM_META = null;      // {week, reportDate, compiledBy} of the currently loaded snapshot
 var BWM_SNAPSHOTS = {};   // history keyed by week label (in-memory; latest loaded wins the view)
 var PLANNING_REPORTS = {}; // per-rig latest "Planning Report" tile, keyed by rig name
+var PLANNING_BY_BOP = {};  // 12 Oct 2026 (scanner v2.88): the same, keyed 'rig|BOPn', so BOP1 and BOP2 show side by side
+var DL1 = { plans: [], tests: [], evidence: [], counts: {} }; // DL-1 (BOP Schedule Builder) plans: scope, freeze, 12-hour progress, close-out
 
 function parseBwmJson(payload, filename){
   if(!payload || !Array.isArray(payload.tiles)) throw new Error('"' + filename + '" is not a WCGRRT export (no tiles array).');
@@ -1576,10 +1653,13 @@ function populateWeekSelect(parsedList, selectedKey){
 
 function initPipelineData(){
   var data = window.BWM_DATA;
+  if(data){ PLANNING_REPORTS = data.planningReports || {}; PLANNING_BY_BOP = data.planningReportsByBop || {}; DL1 = data.dl1 || DL1; }
   var parsedList = parsePipelineSnapshots();
   if(parsedList){
-    PIPELINE_STAMP = data.generatedAt + ':' + (data.snapshots||[]).length + ':' + (data.excelSnapshots||[]).length + ':' + Object.keys(data.planningReports || {}).length;
+    PIPELINE_STAMP = data.generatedAt + ':' + (data.snapshots||[]).length + ':' + (data.excelSnapshots||[]).length + ':' + Object.keys(data.planningReports || {}).length + ':' + dl1Stamp(data);
     PLANNING_REPORTS = data.planningReports || {};
+    PLANNING_BY_BOP = data.planningReportsByBop || {};
+    DL1 = data.dl1 || DL1;
     loadSnapshot(parsedList[0]);
     populateWeekSelect(parsedList, snapshotKey(parsedList[0]));
   } else {
@@ -1595,10 +1675,12 @@ function pollPipelineData(){
     s.remove();
     var data = window.BWM_DATA;
     if(!data) return;
-    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + (data.excelSnapshots || []).length + ':' + Object.keys(data.planningReports || {}).length;
+    var stamp = data.generatedAt + ':' + (data.snapshots || []).length + ':' + (data.excelSnapshots || []).length + ':' + Object.keys(data.planningReports || {}).length + ':' + dl1Stamp(data);
     if(stamp === PIPELINE_STAMP) return;
     PIPELINE_STAMP = stamp;
     PLANNING_REPORTS = data.planningReports || {};
+    PLANNING_BY_BOP = data.planningReportsByBop || {};
+    DL1 = data.dl1 || DL1;
     var sel = document.getElementById('weekSelect');
     var currentKey = (sel && sel.style.display !== 'none') ? sel.value : null;
     var parsedList = parsePipelineSnapshots();
