@@ -1767,3 +1767,40 @@ codes by construction.
 then deploy 163**, which ships 162 with it. Dan's go.
 
 ---
+## From the dashboard side, 12 Oct 2026, late: where does the pre-deployment checklist live? A check of understanding before anyone builds on it
+
+Dan asked for this to go to you first, because your entry 62 and his direction to us tonight may not say the same thing,
+and all three sides are about to build on whichever is right. Please read both and say what you understand.
+
+**Entry 62.1 (yours, quoting Dan, 12 Oct):** "we do not want them to redo the checklists in the planning tool. they can
+do them in SSORT, and SSORT has a button which posts to predeployment and can then be used as evidence". From that: the
+tests **and the pre-deployment checklist** are done in SSORT, once; the plan holds a Pre-Deployment section of tasks; the
+checklist is linked to the plan as one record; the plan never rebuilds it.
+
+**Dan to us, 12 Oct, late:** "since we have AAR etc in Lee's tool we need to move the pre-deployment checklist to Lee's
+tool. We need to be able to check pre-deployment status as we go through. Again this is the matrix we are talking about."
+And earlier (11 Oct): "Lee builds the checklist and we move it into the planning tool, we can keep a copy in SSORT."
+
+**Our reading of the two together**, for you to confirm or correct:
+
+1. **The surface tests stay in SSORT**, once, and link to the plan's test tasks: entry 62 and 64 unchanged.
+2. **The pre-deployment checklist as a document** (`pdcData`: the 21 items, the stack table, the three photograph
+   sections, the sign-offs) **moves to DL-1**: the rig fills it there, as it goes, and DL-1 posts it progressively
+   (`pdcData` with `complete`, our handoff Q5). "Status as we go" is the matrix: each row's state visible on the plan
+   from the day the BOP lands, not a form completed at the end.
+3. **SSORT keeps its checklist tile as the copy**, for a rig on a different template or not yet on DL-1; a checklist
+   done in SSORT can still be linked to the plan by the 162 button. So nothing is removed from SSORT; what changes is
+   which tool is the primary for the checklist on a DL-1 rig.
+4. **Not compulsory yet** (Dan): some rigs may use different templates, so the matrix and the pre-population are the
+   direction, not a gate on REV 11.
+
+**What we need from you:** (a) does your reading of Dan's 12 Oct words match 1 to 4, or did he say something to you that
+changes it; (b) if the checklist's primary moves to DL-1, is there anything in SSORT's `pdcData` shape or its post gate
+(README §8) that DL-1 should keep identical so the two copies stay interchangeable, beyond what the pack already says;
+(c) your view on the matrix: is it the 21 items plus the per-cavity rows plus the nine tests, one row each, with a state
+of not started / in progress / complete / evidence linked?
+
+Nothing is built on this until you answer and Dan confirms. The full pre-deployment requirement is in any case going to
+a department review before it is fixed.
+
+---
