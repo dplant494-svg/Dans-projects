@@ -296,3 +296,64 @@ the tests it records) so Lee's profile and the ticking rules start from the real
 once Lee's profile and SSORT's handoff are in.
 
 ---
+## Entries 61 and 62 reply (dashboard side, 12 Oct 2026, evening): link, don't copy is right; plans-open.json defined; the three questions answered. To the tools session and to DL-1
+
+Thank you for the pack: read off the live tool rather than from memory, and the four findings in 61.1 are exactly the
+kind of thing nobody would have found later. Filed in the SACRED repo (`tools/received/pdc-handoff-dl1`). §8 is the one
+page DL-1 needs; the key appendix goes into Fabric as the surface-test data dictionary (item 54), with thanks.
+
+**Entry 62, agreed in full.** Tests and the pre-deployment checklist are done once, in SSORT; the plan holds tasks; a
+🔗 Link to plan record (`seadrill-planlink_*`, `meta.kind: "plan-link"`, join key `source.file`) says which record is
+evidence for which task; `meta.planid` (lower case, per Dan's rule) on every SSORT post made while a plan is selected,
+**not in the file name**, so a corrected re-post still replaces. Your recommendation against the name wins: Dan's "the
+file knows its project by the naming convention" is satisfied by `meta.planid` plus the link record, and the 158 lesson
+stands. The eight project folders then hold **copies made by SACRED** from the link records and from `meta.planid`
+(unlinked posts filed by type), refreshed whenever the source file changes, keyed on `source.file`. The scanner does the
+filing (it already keeps a copy of every post on the share); the flow only creates the folder tree on the first `plan`
+post.
+
+### 61.3 and 62.5.1 answered: `plans-open.json`
+
+Written by the scanner on every scan into the same synced folder as `help-open.json` (Digests/help-receipts today; the
+server share from 18 Oct), and published on the IIS server at `/sacred/dl1/plans-open.json` so SSORT can fetch it over
+http like `help-data.js`. Shape (scanner v2.89, to be built against this entry):
+
+```
+{ "generatedAt": "2026-10-12T20:00:00Z", "scanner": "2.89",
+  "plans": [
+    { "planId": "WVE-BOP1-20261005", "rigKey": "vela", "rig": "West Vela", "bopNo": "BOP1",
+      "status": "frozen", "scopeVersion": 2, "windowFrom": "2026-10-05", "windowTo": "2026-10-15",
+      "title": "West Vela BOP1 - BWM from 5 Oct 2026", "posted": "2026-10-11T23:30:00Z",
+      "sections": [
+        { "id": "predeployment",    "name": "Pre-Deployment",   "tasks": [ { "taskId": "ms:...|wo:...", "name": "FUNCTION TEST", "type": "test", "testType": "BOP Function Test" }, ... ] },
+        { "id": "surface-testing",  "name": "Surface Testing",  "tasks": [ ... ] },
+        { "id": "maintenance",      "name": "Maintenance",      "tasks": [ { "taskId": "wo:R10152956", "name": "BWM CASING SHEAR RAM", "type": "maintenance", "woNum": "R10152956" }, ... ] },
+        { "id": "daily",            "name": "Daily log",        "tasks": [] }
+      ] } ] }
+```
+
+- **Picker shows:** `title` (built by the scanner from rig, BOP and window), with `planId` underneath. `status` lets the
+  picker grey a plan that is `closed`.
+- **One plan per stack, yes.** A dual-stack rig has `WVE-BOP1-...` and `WVE-BOP2-...` as two entries; the picker offers
+  both; **a post carries one `planid`**, the stack the work was on.
+- **The plan id never changes during a campaign.** It is `<rig>-<BOP>-<commence date>`; scope revisions move
+  `scopeVersion`, not the id. A post carries the id it was made under, which is also the latest.
+- **Sections and task ids come from DL-1's `plan.tasks[]`** (`taskId`, `type`, `branch`, `group`). The mapping of the
+  nine pre-deployment tests to task ids is DL-1's to define in the plan (a `type: "test"` task with `testType` naming the
+  SSORT test type, so the picker can pre-select); until REV 11 sends them the picker shows the maintenance tasks only.
+
+### 62.4 noted, for DL-1
+
+Nine pre-deployment tests; seven linked from SSORT (function, soak, drawdown, acoustic, ROV, EDS, EHBS), two as
+attachments on the task in the plan (pressure test charts, drift). The acoustic task does not exist on West Vela, West
+Neptune and Sevan Louisiana. The pre-deployment checklist and the daily log link as records too. **DL-1 (Lee): please
+carry these as `type: "test"` tasks in the plan's Pre-Deployment section with `testType` set to SSORT's test name, so the
+link pre-selects, and treat SSORT's §8 "complete" as the posting gate, not the ticking rule.**
+
+### Timing
+
+Nothing built on your side until the structure is agreed (Dan's words). On ours: scanner v2.89 writes `plans-open.json`
+and reads `plan-link` records and `meta.planid` as soon as REV 11's first plan posts, so that SSORT's stage 1 can be
+tested the day it ships.
+
+---
