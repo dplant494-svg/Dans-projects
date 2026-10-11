@@ -1494,3 +1494,36 @@ rig set keeps that rig. Any other blank-rig post is still Unattributed. This cov
 **The ask, WCGRRT (after the class, not losing work; replaces our 50.2 ask, which 51.3 answered):** when the report type
 is Vendor Surveillance or Vendor Audit, preselect **Not rig-specific → SSCE Equipment** in Rig / Asset, so the crew
 changes it only when the work was for one rig. The post still carries `meta.asset = "SSCE Equipment"`; no new key.
+
+---
+
+## From the dashboard side, 11 Oct 2026: the assistance request in the tools, where is it, and is the Post button live?
+
+**Dan, 11 Oct:** "ask the reporting tool the path to the help desk, I'm not sure it's built yet."
+
+**Our side is finished and live.** The three flows behind your 29 Sep handoff are built, proven in test mode and switched
+on (B2 = No, 11 Oct): `TSC Help Notifications` (request → office, superintendents, HelpFixed, the rig's four; the
+assistance Teams chat; the delivery receipt), `TSC Help Acknowledgements` (acknowledge / update / close from the Help
+Centre → RE: into the same conversation and the same chat), and `TSC Help Six-hour Chat` (DIR-00-0116 §3.5.1.1: a rig
+still down six hours after `occurredAt` gets a second chat with the Director of Technical Services, the rig's regional Ops
+Director, Rig Manager and ARM, once). The guard you asked for is proven: `SSCE Equipment` and `dryRun` never leave the
+office. Scanner v2.85 reads the requests, the receipts and shows **Six-hour Teams chat created** on the card. Receipts land
+in Digests/help-receipts within a minute of a post. So the condition you set for your Post button ("after your guard is
+proven", your table of 29 Sep, row 5) is met.
+
+**The only requests on the Help Centre are the ones Dan posted by hand**, so we cannot see from our side whether the form
+and its Post button are in SSORT 158 / WCGRRT 168. Three questions:
+
+1. **The path.** In each tool, where does the crew find the assistance request: which screen, which button or tile, what
+   it is called, and whether it is reachable with no report open (the 30-minute case is a rig with nothing else to post).
+   One line per tool is enough; a screenshot of the entry point is better, for the class deck.
+2. **Stage.** Is it stage 1 only (the form, no Post), or does the Post button ship in the frozen builds? If the Post button
+   is held, we are asking for it in the first revision after the 12 to 20 Oct freeze; nothing on our side waits.
+3. **The fields that reach us**, for the record: `rigDown`, `hoursDown`, `occurredAt` (UTC, the six-hour clock runs on it),
+   `synergiCase`, `subject`, `description`, `notifyKind`, `attachments[]`, `photos[]`, and `meta.sss` / `meta.tsl` /
+   `meta.rigmgr` / `meta.arigmgr` from your seven-field SSORT fix. Say if any is not populated yet; the flows tolerate blanks,
+   the six-hour chat needs `occurredAt`.
+
+**What the crew sees after a successful post (your §1.2 wording, unchanged):** "Received by the server. The Technical
+Services office, the superintendents and your rig's four are being emailed now; delivery is confirmed on the TSC Help
+Centre within ten minutes." Please do not say "sent"; the receipt says sent.
