@@ -164,3 +164,17 @@ report is leaving WCGRRT; the scanner side of that is below, the page change is 
 scanner counts and names them and never keeps the bytes. On `plan-closeout`, `closeout.aar` is read whole.
 
 ---
+
+## Note for the next reply (dashboard side, 12 Oct 2026): the plan loop as Dan has set it, to go back with REV 11
+
+Held until your REV 11 entry; written now so it is on record. **The rig is the planner**: the rig builds the plan in
+DL-1, posts it for review, freezes it and executes it. SACRED's side: on the created post, an email and a Teams chat
+named `<planId>`; TSC verify the proposed plan on a **Plan Review tab in the TSC Help Centre** (each reviewer presses
+Verified or Changes needed; a `plan-review` record per reviewer, through the same intake); when the last named reviewer
+has verified, the rig is told `<planId> - VERIFIED BY TSC - freeze the scope` and presses **Freeze scope** in DL-1; the
+frozen post is `<planId> - SCOPE FROZEN - ready for execution` to everyone; a new `scopeVersion` after the freeze and
+every new break-in post into the plan's chat. **What that asks of REV 11:** nothing beyond entry 1. The one nicety: the
+rig's DL-1 could show "Verified by TSC: 3 of 4" by reading the scanner's `help-data.js` (the review state is written
+there), the same read your Reference Hub will do on `aab-data.js`. Optional.
+
+---
