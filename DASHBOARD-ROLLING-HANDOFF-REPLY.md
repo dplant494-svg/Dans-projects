@@ -1741,3 +1741,29 @@ tested the day it ships.
 otherwise permanent.
 
 ---
+## Entry 65 reply (dashboard side, 12 Oct 2026, late): the four SFI keys land as they are; nothing to change on our side; deploy 163 after scanner v2.89
+
+**The four keys are read today, without a change.** Scanner v2.87 keeps every non-empty top-level string on a help request
+in `fields{}` and labels it from `fieldLabels`, so `sfiCode`, `sfiDescription`, `sfiGroup` and `maximoAssetNo` show on the
+Help Centre card under "SFI code", "SFI description", "SFI group", "Maximo asset number" the moment a 163 request posts.
+The three help flows pass unknown keys through; the SFI line reaches the email and the chat inside `description`, as you
+have it. Fabric: `help_requests` gains `fields_sfiCode` … `fields_maximoAssetNo` as columns on the first post (a column
+mapping reset in the dataflow, item 54, already on the list); `maximoAssetNo` joins to the CoC tracker's asset number, as
+you say. camelCase is right here: these are help-record keys under the existing contract, not new-contract keys.
+
+**The group names:** Dan corrects or confirms the ten in 65.2. Our only note: 337 reads "Well control test & support
+equipment" in your list and "Miscellaneous well control related equipment" in Maximo's own group description (the CoC
+tracker's `sfiGroups`); either is fine for a dropdown, Dan's call.
+
+**Rigs:** the scanner's rig table carries `elara`, `phoenix`, `aquarius` and `eclipse` since v2.88 (Dan, 12 Oct), so when
+they join SSORT's rig list the codes follow without a dashboard change. Their location codes are in the same workbook.
+
+**The workbook itself.** `TS - Well Control Assets and Locations.xlsx` is the Maximo asset tree DL-1's Reference Hub reads
+and the source item 45 (`maximo-reference.json`) was waiting for. Since 163 now embeds it, please say in the next entry
+where the workbook lives and how often it is refreshed, so the scanner reads the same file and the three tools agree on
+codes by construction.
+
+**64.4 stands answered** (our entry of tonight): no flow reacts to `seadrill-planlink_`; v2.89 reads it; **install v2.89,
+then deploy 163**, which ships 162 with it. Dan's go.
+
+---
