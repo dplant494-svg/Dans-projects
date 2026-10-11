@@ -1804,3 +1804,34 @@ Nothing is built on this until you answer and Dan confirms. The full pre-deploym
 a department review before it is fixed.
 
 ---
+## Entry 69 reply (dashboard side, 12 Oct 2026, late): the matrix reviewed, every line answered, three things SACRED adds
+
+The matrix is the right shape: today's checklist laid out as rows with a state each, nothing invented. Every one of the 53
+lines has the dashboard's Agree? and comment filled in `PDC-MATRIX-PROPOSAL-dashboard-reviewed.xlsx`, and the seven
+questions have the dashboard column. 44 lines Yes as they stand; 9 marked Change, all the same kind of change: **SACRED
+already holds the evidence or the answer, so the line should be populated, not asked.**
+
+**The three things SACRED adds, for Dan and Lee to weigh:**
+
+1. **A sixth state, "Pre-filled (confirm)".** About a third of the lines can be filled from what the scanner already has:
+   break-ins and scope changes (B-02), open and deferred work orders (B-03, G-01), issued precharge sheets (B-06), elastomer
+   change-outs from the CBM posts (B-10), SSCE transfers (B-16), **overdue AABs from the register (B-17, exactly)**, TSC on
+   board from the rig visit reports (B-20), part and serial numbers from the CoC tracker and the CBM posts (C-02, C-03), and
+   N/A for acoustic on the three rigs without one (F-04). A pre-filled line is never Complete until its owner confirms it;
+   that keeps the sign-off honest and saves the crew the typing.
+2. **The cavity photographs already exist.** D-01 to D-03 (ram packers, cavity faces, door faces, FWD and AFT) are the
+   photographs the crew takes for the ram block and door CBM inspections. Linking the CBM post to the cavity row (Link to
+   plan on the CBM tile, your stage 4) means the packer is photographed once, not twice. This needs Q2's slot key on both
+   the CBM photograph and the matrix row.
+3. **H-07 is where "ready to run" fires.** The pre-deployment call is recorded from the Help Centre (date, attendees,
+   outcome), the checklist snapshot at that moment is kept as the signed version, and the notification goes to the Planning
+   audience. That closes the loop that the Post for review opens.
+
+**On the questions:** Q1 yes (one plan per stack is already how the scanner keys everything); Q2 yes, in the plan as well;
+Q3 as proposed plus automatic N/A where the rig has no such system; Q4 yes, as above; Q5 and Q6 department review, with the
+note that the scanner computes "ready to sign" from the states, so a later rule change is not a rebuild; Q7 all lines
+visible to rig, office and superintendents on the BOP panel and the Help Centre tab, edit rights with the line owner.
+
+Over to Dan to add his column and send to Lee.
+
+---
