@@ -206,3 +206,29 @@ JOIN dbo.v_plan_progress_latest pr ON pr.planId = l.planId
 LEFT JOIN dbo.plan_tasks t ON t.planId = pr.planId AND t.scopeVersion = l.scopeVersion AND t.taskId = pr.taskId
 GROUP BY l.planId, l.rig, l.bopNo, l.status, l.scopeVersion, pr.asOf;
 GO
+
+-- v2.89 (12 Oct 2026): the live plan-link records (link, don't copy): which SSORT post joins which plan task.
+-- Exported as export_plan_links.csv, key linkId; an unlinked record is dropped from the export, so a load with Replace removes it.
+IF OBJECT_ID('dbo.plan_links','U') IS NULL
+CREATE TABLE dbo.[plan_links] (
+    [linkId] NVARCHAR(200) NOT NULL,
+    [planId] NVARCHAR(200) NULL,
+    [taskId] NVARCHAR(400) NULL,
+    [taskName] NVARCHAR(MAX) NULL,
+    [section] NVARCHAR(400) NULL,
+    [action] NVARCHAR(400) NULL,
+    [sourceFile] NVARCHAR(400) NULL,
+    [sourceType] NVARCHAR(400) NULL,
+    [testType] NVARCHAR(400) NULL,
+    [sourceDate] NVARCHAR(400) NULL,
+    [rig] NVARCHAR(400) NULL,
+    [rigKey] NVARCHAR(400) NULL,
+    [by] NVARCHAR(400) NULL,
+    [rev] NVARCHAR(400) NULL,
+    [saved] NVARCHAR(400) NULL,
+    [file] NVARCHAR(400) NULL,
+    CONSTRAINT PK_plan_links PRIMARY KEY ([linkId])
+);
+GO
+CREATE INDEX [IX_plan_links_plan] ON dbo.[plan_links] ([planId], [taskId]);
+GO
