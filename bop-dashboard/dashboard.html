@@ -448,7 +448,7 @@ var FLEET = [
   {rig:'West Gemini', bop:1, location:'Angola', stackType:'NOV - Single Stack', projectType:'BWM (TMP)', planner:'Bo Sherman', lastUpdated:'2026-07-01', originalDate:'2026-05-15', currentDate:'2026-07-11', synergiCase:'N/A', status:'Deployed', bodyCoC:['U: 6/29/2028','L: 6/29/2028'], challenges:'BOP Tethering project will be completed during BWM period', notes:'Project Planner Kynsey Creel will plan BWM period in conjunction with Tethering project.', stagesComplete:1},
   {rig:'West Capella', bop:1, location:'Malaysia', stackType:'NOV - Single Stack', projectType:'BWM (TMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:'2026-07-08', currentDate:'2026-06-26', synergiCase:'#1850461', status:'On-Deck (Performing Maint.)', bodyCoC:['U: None','M: None','L: None'], challenges:'', notes:'BOP Unlatched 06/27. BOP On Deck 06/29', stagesComplete:8},
   {rig:'West Auriga', bop:1, location:'Brazil', stackType:'NOV - Dual Stack', projectType:'BWM (TMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:'2026-06-02', currentDate:'2026-06-14', synergiCase:'#1841339', status:'On-Deck (Performing Maint.)', bodyCoC:['Data not live in Maximo'], challenges:'', notes:'BOP Unlatched 06/16/2026 @ 06:40pm. BOP on Beams 06/21/2026. Daily reporting ongoing', stagesComplete:8},
-  {rig:'West Carina', bop:1, location:'Brazil', stackType:'NOV - Single Stack', projectType:'BWM (TMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:null, currentDate:null, synergiCase:'N/A', status:'On-Deck (Preservation)', bodyCoC:['Upper single - 02/23/25','Upper Triple - 02/23/25','Lower Triple - 02/23/25'], challenges:'', notes:'Rig to go OOS after current well is complete. No action needed at this time. ETA to destination (Rio de Janeiro - Pilot Station): June 02nd, 2026 @ 06:30 LT', stagesComplete:0},
+  {rig:'West Carina', bop:1, location:'Namibia', stackType:'NOV - Single Stack', projectType:'BWM (TMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:null, currentDate:null, synergiCase:'N/A', status:'On-Deck (Preservation)', bodyCoC:['Upper single - 02/23/25','Upper Triple - 02/23/25','Lower Triple - 02/23/25'], challenges:'', notes:'Rig to go OOS after current well is complete. No action needed at this time. ETA to destination (Rio de Janeiro - Pilot Station): June 02nd, 2026 @ 06:30 LT', stagesComplete:0},
   {rig:'West Jupiter', bop:1, location:'Brazil', stackType:'NOV - Single Stack', projectType:'BWM (TMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:'2026-04-15', currentDate:'2026-11-15', synergiCase:'N/A', status:'Deployed', bodyCoC:['Upper Single - 08/07/25','Upper Triple - 08/07/25','Lower Triple - 08/07/25'], challenges:'', notes:'Planning tool has been prepared and sent for rig team to review. BOP was hopped, current well will last to November. Extending PM pull through end of 2026 to cover the BOP being subsea for this extended duration.', stagesComplete:3},
   {rig:'West Tellus', bop:1, location:'Brazil', stackType:'NOV - Single Stack', projectType:'BWM (TMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:'2026-07-25', currentDate:'2026-07-25', synergiCase:'', status:'Deployed', bodyCoC:['Waiting on new asset numbers to be provided.'], challenges:'', notes:'', stagesComplete:0},
   {rig:'West Saturn', bop:1, location:'Brazil', stackType:'NOV - Dual Stack', projectType:'BWM (OMP)', planner:'Dallas Black', lastUpdated:'2026-07-01', originalDate:'2025-10-01', currentDate:'2025-10-01', synergiCase:'N/A', status:'On-Deck (Performing Maint.)', bodyCoC:['Upper Single - 01/10/26','Upper Triple - 01/10/26','Lower Triple - 01/10/26'], challenges:'', notes:'Weekly updates from Eric Weber and rig team.', stagesComplete:8},
@@ -690,6 +690,7 @@ var REGION_ANCHORS = {
   'GOM':      {lat:25.5, lon:-90.5, name:'Gulf of Mexico'},
   'Angola':   {lat:-9.0, lon:8.0,   name:'Angola'},
   'Brazil':   {lat:-24.5, lon:-40.0, name:'Brazil'},
+  'Namibia':  {lat:-23.5, lon:12.5,  name:'Namibia'},   // 12 Oct 2026 (Dan): West Carina is offshore Namibia now; the BWM tracker's Location column drives the pin
   'Malaysia': {lat:6.5,  lon:112.0, name:'Malaysia'}
 };
 
@@ -705,6 +706,7 @@ var LABEL_LAYOUT = {
   'GOM':      {x:200,  y:80},
   'Brazil':   {x:640,  y:472},
   'Angola':   {x:952,  y:400},
+  'Namibia':  {x:952,  y:640},
   'Malaysia': {x:1450, y:470}
 };
 
