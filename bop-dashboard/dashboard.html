@@ -100,6 +100,49 @@
   }
   .ml-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
+  /* ── Globe View (item 57, 12 Oct 2026): a rotating vector globe drawn on a 2-D canvas from the same
+     WORLD_PATHS the flat map uses — no library, no CDN, nothing for the rigs or the TV to fetch. The flat
+     map stays as the fallback (a slow display, a browser without canvas, printing). ── */
+  .tv-globeview { flex: 1; min-height: 0; padding: 14px 40px 18px; align-items: center; justify-content: center; overflow: hidden; }
+  .tv-globeview.active { display: flex; }
+  .globe-stage {
+    position: relative; width: 1820px; height: 880px; flex-shrink: 0; transform-origin: center center;
+    background: radial-gradient(ellipse at 62% 50%, #0b3f8f 0%, var(--sd-blue) 48%, #001a4d 100%);
+    border-radius: 10px; overflow: hidden;
+  }
+  .globe-stage canvas { position: absolute; left: 0; top: 0; width: 1820px; height: 880px; display: block; }
+  .globe-list { position: absolute; left: 28px; top: 28px; width: 330px; max-height: 824px; overflow: hidden; }
+  .globe-list-title { color: var(--sd-yellow); font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+  .globe-row {
+    display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); border-radius: 6px;
+    padding: 7px 11px; margin-bottom: 6px; cursor: pointer; color: #fff; transition: background .2s, border-color .2s;
+  }
+  .globe-row:hover, .globe-row.facing { background: rgba(255,255,255,0.16); border-color: var(--sd-yellow); }
+  .globe-row .gr-dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff; }
+  .globe-row .gr-rig { font-size: 14px; font-weight: 700; line-height: 1.2; }
+  .globe-row .gr-loc { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: rgba(255,255,255,0.65); font-weight: 700; }
+  .globe-row .gr-pct { font-size: 12px; font-weight: 700; color: var(--sd-yellow); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .globe-note { position: absolute; left: 28px; bottom: 18px; color: rgba(255,255,255,0.6); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+  /* DL-1 Master Plan button: the logo as the button, opening Lee's tool at /sacred/dl1/ (served beside this page). */
+  .dl1-btn {
+    margin-left: auto; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff;
+    background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.35); border-radius: 12px; padding: 6px 16px 6px 8px;
+    transition: background .15s, border-color .15s, transform .15s;
+  }
+  .dl1-btn:hover { background: rgba(255,255,255,0.16); border-color: var(--sd-yellow); transform: translateY(-1px); }
+  .dl1-btn img { height: 54px; width: 54px; display: block; border-radius: 10px; }
+  .dl1-btn b { display: block; font-size: 15px; letter-spacing: .04em; text-transform: uppercase; }
+  .dl1-btn small { display: block; font-size: 11px; color: var(--sd-yellow); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+  .dl1-btn.dl1-soon img { filter: grayscale(.35); opacity: .85; }
+  /* TV motion on the tiles: the spotlight walks the rigs under maintenance every twenty seconds and the
+     DL-1 bar sweeps to its value. */
+  .fleet-tile.spotlight { box-shadow: 0 0 0 3px var(--sd-yellow), 0 12px 30px rgba(0,44,119,0.28); transform: translateY(-2px); }
+  .tile-dl1-bar { height: 7px; border-radius: 4px; background: #e4eaf4; margin-top: 5px; overflow: hidden; }
+  .tile-dl1-bar span { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #0a7, #16a37a); width: var(--pct, 0%); animation: dl1sweep 1.6s cubic-bezier(.2,.7,.2,1) both; }
+  @keyframes dl1sweep { from { width: 0; } to { width: var(--pct, 0%); } }
+  @media (prefers-reduced-motion: reduce) { .tile-dl1-bar span { animation: none; } }
+
   /* ── Rig detail panel (opened by clicking a pin, label, or tile) ── */
   .rig-modal-backdrop {
     position: fixed; inset: 0; background: rgba(4,12,32,0.55); display: none;
@@ -363,12 +406,25 @@
       <h1>BOP Fleet Planning Status</h1>
     </div>
     <div class="view-tabs">
-      <button class="view-tab active" id="tabMap" onclick="showTvPage('map')">Map View</button>
+      <button class="view-tab active" id="tabGlobe" onclick="showTvPage('globe')">Globe</button>
+      <button class="view-tab" id="tabMap" onclick="showTvPage('map')">Map View</button>
       <button class="view-tab" id="tabTiles" onclick="showTvPage('tiles')">Tile View</button>
+    </div>
+    <a class="dl1-btn dl1-soon" id="dl1Btn" href="dl1/" target="_blank" rel="noopener" title="Open the DL-1 Master Plan (Seadrill BOP Schedule Builder)">
+      <img id="dl1BtnLogo" alt="DL-1 Master Plan" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiI+CiAgPGRlZnM+CiAgICA8bGluZWFyR3JhZGllbnQgaWQ9ImJnIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMSI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjMEEzQThDIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDAyQzc3Ii8+PC9saW5lYXJHcmFkaWVudD4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmFyIiB4MT0iMCIgeTE9IjAiIHgyPSIxIiB5Mj0iMCI+PHN0b3Agb2Zmc2V0PSIwIiBzdG9wLWNvbG9yPSIjRkZGRkZGIi8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRENFNkY1Ii8+PC9saW5lYXJHcmFkaWVudD4KICAgIDxmaWx0ZXIgaWQ9Imdsb3ciIHg9Ii01MCUiIHk9Ii01MCUiIHdpZHRoPSIyMDAlIiBoZWlnaHQ9IjIwMCUiPjxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjYiIHJlc3VsdD0iYiIvPjxmZU1lcmdlPjxmZU1lcmdlTm9kZSBpbj0iYiIvPjxmZU1lcmdlTm9kZSBpbj0iU291cmNlR3JhcGhpYyIvPjwvZmVNZXJnZT48L2ZpbHRlcj4KICA8L2RlZnM+CiAgPHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjQ5NiIgaGVpZ2h0PSI0OTYiIHJ4PSI3MiIgZmlsbD0idXJsKCNiZykiLz4KICA8cmVjdCB4PSI4IiB5PSI4IiB3aWR0aD0iNDk2IiBoZWlnaHQ9IjQ5NiIgcng9IjcyIiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDkxREEiIHN0cm9rZS1vcGFjaXR5PSIuNTUiIHN0cm9rZS13aWR0aD0iNiIvPgogIDwhLS0gZ3JpZCAtLT4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS1vcGFjaXR5PSIuMTgiIHN0cm9rZS13aWR0aD0iMyI+CiAgICA8bGluZSB4MT0iOTYiIHkxPSIxNTAiIHgyPSI5NiIgeTI9IjQ0MCIvPjxsaW5lIHgxPSIxNzYiIHkxPSIxNTAiIHgyPSIxNzYiIHkyPSI0NDAiLz48bGluZSB4MT0iMjU2IiB5MT0iMTUwIiB4Mj0iMjU2IiB5Mj0iNDQwIi8+PGxpbmUgeDE9IjMzNiIgeTE9IjE1MCIgeDI9IjMzNiIgeTI9IjQ0MCIvPjxsaW5lIHgxPSI0MTYiIHkxPSIxNTAiIHgyPSI0MTYiIHkyPSI0NDAiLz4KICA8L2c+CiAgPCEtLSBnYW50dCBiYXJzIC0tPgogIDxnIGZpbGw9InVybCgjYmFyKSI+CiAgICA8cmVjdCB4PSI3MiIgeT0iMjY4IiB3aWR0aD0iMTUwIiBoZWlnaHQ9IjM0IiByeD0iOCIvPgogICAgPHJlY3QgeD0iMTUwIiB5PSIzMjAiIHdpZHRoPSIxODAiIGhlaWdodD0iMzQiIHJ4PSI4Ii8+CiAgICA8cmVjdCB4PSIyMzYiIHk9IjM3MiIgd2lkdGg9IjE5NiIgaGVpZ2h0PSIzNCIgcng9IjgiLz4KICA8L2c+CiAgPHJlY3QgeD0iNzIiIHk9IjI2OCIgd2lkdGg9IjYyIiBoZWlnaHQ9IjM0IiByeD0iOCIgZmlsbD0iIzAwOTFEQSIvPgogIDxyZWN0IHg9IjE1MCIgeT0iMzIwIiB3aWR0aD0iNDAiIGhlaWdodD0iMzQiIHJ4PSI4IiBmaWxsPSIjMDA5MURBIi8+CiAgPCEtLSBwcm9ncmVzcyBsaW5lIC0tPgogIDxwb2x5bGluZSBwb2ludHM9IjcyLDI0MCAxNTIsMjIyIDIzMiwxOTYgMzEyLDE1OCAzOTIsOTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI0ZGRDEwMCIgc3Ryb2tlLXdpZHRoPSIxMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+CiAgPGcgZmlsbD0iI0ZGRDEwMCIgc3Ryb2tlPSIjMDAyQzc3IiBzdHJva2Utd2lkdGg9IjMiPgogICAgPHJlY3QgeD0iNTgiIHk9IjIyNiIgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiByeD0iNCIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgNzIgMjQwKSIvPgogICAgPHJlY3QgeD0iMTM4IiB5PSIyMDgiIHdpZHRoPSIyOCIgaGVpZ2h0PSIyOCIgcng9IjQiIHRyYW5zZm9ybT0icm90YXRlKDQ1IDE1MiAyMjIpIi8+CiAgICA8cmVjdCB4PSIyMTgiIHk9IjE4MiIgd2lkdGg9IjI4IiBoZWlnaHQ9IjI4IiByeD0iNCIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgMjMyIDE5NikiLz4KICAgIDxyZWN0IHg9IjI5OCIgeT0iMTQ0IiB3aWR0aD0iMjgiIGhlaWdodD0iMjgiIHJ4PSI0IiB0cmFuc2Zvcm09InJvdGF0ZSg0NSAzMTIgMTU4KSIvPgogIDwvZz4KICA8IS0tIHN0YXIgLS0+CiAgPGcgZmlsdGVyPSJ1cmwoI2dsb3cpIj48cG9seWdvbiBwb2ludHM9IjQyMCw0NCA0MzYsODYgNDgwLDg4IDQ0NSwxMTUgNDU3LDE1OCA0MjAsMTMzIDM4MywxNTggMzk1LDExNSAzNjAsODggNDA0LDg2IiBmaWxsPSIjRkZEMTAwIiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvZz4KICA8IS0tIHdvcmRtYXJrIC0tPgogIDx0ZXh0IHg9IjI1NiIgeT0iNDcwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iTW9udHNlcnJhdCwgJ1NlZ29lIFVJJywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI4MDAiIGZvbnQtc2l6ZT0iNDYiIGZpbGw9IiNGRkZGRkYiIGxldHRlci1zcGFjaW5nPSIyIj5ETC0xPC90ZXh0PgogIDx0ZXh0IHg9IjI1NiIgeT0iNDk4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iTW9udHNlcnJhdCwgJ1NlZ29lIFVJJywgQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtd2VpZ2h0PSI3MDAiIGZvbnQtc2l6ZT0iMTkiIGZpbGw9IiNGRkQxMDAiIGxldHRlci1zcGFjaW5nPSI1Ij5NQVNURVIgUExBTjwvdGV4dD4KPC9zdmc+Cg==">
+      <span><b>DL-1 Master Plan</b><small id="dl1BtnNote">Coming with REV 11</small></span>
+    </a>
+  </div>
+
+  <div class="tv-globeview tv-page active" id="tvPageGlobe">
+    <div class="globe-stage" id="globeStage">
+      <canvas id="globeCanvas" width="1820" height="880"></canvas>
+      <div class="globe-list" id="globeList"></div>
+      <div class="globe-note" id="globeNote">Hover to hold &middot; click a rig for its plan</div>
     </div>
   </div>
 
-  <div class="tv-mapview tv-page active" id="tvPageMap">
+  <div class="tv-mapview tv-page" id="tvPageMap">
     <div class="map-stage" id="mapStage">
       <svg id="mapSvg" viewBox="0 0 1820 880" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
@@ -668,7 +724,7 @@ function tileInnerHtml(pin){
     var proj = PROJECTS[row.rig + '#' + row.bop];
     var projLine = proj ? ('<div class="tile-proj">Maintenance ' + proj.revisions[proj.revisions.length-1].pct.toFixed(0) + '% complete</div>') : '';
     var dl1 = (DL1 && DL1.plans || []).filter(function(pl){ return pl && !pl.isTest && pl.rig === row.rig && String(pl.bopNo||'').replace(/\D/g,'') === String(row.bop); })[0];
-    if(dl1 && dl1.progress && dl1.progress.pctComplete != null) projLine = '<div class="tile-proj">DL-1 plan ' + Number(dl1.progress.pctComplete).toFixed(0) + '% complete' + (String(dl1.status||'').toLowerCase() === 'frozen' ? '' : ' (scope ' + dl1.status + ')') + '</div>';
+    if(dl1 && dl1.progress && dl1.progress.pctComplete != null) projLine = '<div class="tile-proj">DL-1 plan ' + Number(dl1.progress.pctComplete).toFixed(0) + '% complete' + (String(dl1.status||'').toLowerCase() === 'frozen' ? '' : ' (scope ' + dl1.status + ')') + '</div>' + '<div class="tile-dl1-bar"><span style="--pct:' + Math.max(0, Math.min(100, Number(dl1.progress.pctComplete))).toFixed(0) + '%"></span></div>';
     var segs = '';
     for(var i=0;i<STAGE_LABELS.length;i++){ segs += '<span class="' + (i < row.stagesComplete ? 'done' : '') + '" title="' + STAGE_LABELS[i] + '"></span>'; }
     var c = statusColor(row.status); // 6-digit hex, so alpha suffixes below are safe
@@ -1115,17 +1171,22 @@ function renderTvTileCards(fleet){
   var groups = groupByVessel(fleet);
   var html = groups.map(function(g){
     var status = headlineStatus(g.rows);
-    return '<div class="fleet-tile" style="--tile-accent:' + statusColor(status) + '" onclick="openRigModal(\'' + slug(g.rig) + '\')">' + tileInnerHtml({g: g}) + '</div>';
+    return '<div class="fleet-tile" data-maint="' + (status === 'On-Deck (Performing Maint.)' ? '1' : '0') + '" style="--tile-accent:' + statusColor(status) + '" onclick="openRigModal(\'' + slug(g.rig) + '\')">' + tileInnerHtml({g: g}) + '</div>';
   }).join('');
   document.getElementById('tvTileCards').innerHTML = html;
 }
 
 function showTvPage(name){
+  if(name === 'globe' && GLOBE.disabled) name = 'map';
+  document.getElementById('tvPageGlobe').classList.toggle('active', name === 'globe');
   document.getElementById('tvPageMap').classList.toggle('active', name === 'map');
   document.getElementById('tvPageTiles').classList.toggle('active', name === 'tiles');
+  document.getElementById('tabGlobe').classList.toggle('active', name === 'globe');
   document.getElementById('tabMap').classList.toggle('active', name === 'map');
   document.getElementById('tabTiles').classList.toggle('active', name === 'tiles');
   if(name === 'map') fitMapStage();
+  if(name === 'globe'){ fitGlobeStage(); globeStart(); }
+  if(name === 'tiles') tileSpotlightStep();
 }
 
 function renderSparkline(revisions){
@@ -1250,6 +1311,7 @@ function renderAll(){
   GROUPS_BY_SLUG = {};
   groupByVessel(FLEET).forEach(function(g){ GROUPS_BY_SLUG[slug(g.rig)] = g; });
   renderWorldMap(FLEET);
+  renderGlobe(FLEET);
   renderTvTileCards(FLEET);
   applyFilters();
   var latest = FLEET.reduce(function(acc,r){ return (!acc || r.lastUpdated > acc) ? r.lastUpdated : acc; }, null);
@@ -1269,6 +1331,7 @@ function renderAll(){
   document.getElementById('lastUpdatedLine').innerHTML = footLine;
   fitTvCanvas();
   fitMapStage();
+  fitGlobeStage();
 }
 
 // Scales the fixed 1920x1080 TV canvas to fill whatever screen it's on (a native 1920x1080
@@ -1292,7 +1355,15 @@ function fitMapStage(){
   if(!isFinite(scale) || scale <= 0) return;
   stage.style.transform = 'scale(' + scale + ')';
 }
-function refit(){ requestAnimationFrame(function(){ fitTvCanvas(); fitMapStage(); }); }
+function fitGlobeStage(){
+  var wrap = document.querySelector('.tv-globeview');
+  var stage = document.getElementById('globeStage');
+  if(!wrap || !stage) return;
+  var scale = Math.min(wrap.clientWidth / 1820, wrap.clientHeight / 880);
+  if(!isFinite(scale) || scale <= 0) return;
+  stage.style.transform = 'scale(' + scale + ')';
+}
+function refit(){ requestAnimationFrame(function(){ fitTvCanvas(); fitMapStage(); fitGlobeStage(); }); }
 window.addEventListener('resize', refit);
 
 document.getElementById('filterLocation').addEventListener('change', applyFilters);
@@ -1542,6 +1613,275 @@ var setProjectStatus = setupUpload('zoneProject','fileProject','statusProject', 
     reader.readAsArrayBuffer(file);
   });
 });
+
+// ---------- Globe View (item 57, 12 Oct 2026) ----------
+// A rotating vector globe on a 2-D canvas. The land comes from the same WORLD_PATHS the flat map draws
+// (pre-projected equirectangular, so each point is unprojected back to lat/long once); the rigs sit at their
+// regional anchors with the same golden-angle spread as the map until RIG_POSITIONS carries real
+// coordinates (lat/long per rig; Dan supplies, or the scanner reads the daily log's location later).
+// The globe turns slowly, holds while the mouse is over it (and for ten seconds after), pauses when the
+// tab is hidden, and hands over to the flat map if the display cannot keep up.
+var RIG_POSITIONS = {
+  // 'West Vela': {lat: 27.2, lon: -90.4}
+};
+var GLOBE = {
+  R: 392, cx: 1090, cy: 440, lambda: -25, phi: -14,      // view: radius/centre in stage px; lambda = longitude facing us; phi = tilt
+  degPerSec: 3,                                          // one turn every two minutes
+  holdUntil: 0, hovering: false, raf: null, last: 0, pins: [], land: null,
+  slowFrames: 0, disabled: false, facing: null
+};
+
+function globeLand(){
+  if(GLOBE.land) return GLOBE.land;
+  var rings = [];
+  WORLD_PATHS.forEach(function(d){
+    d.split('M').slice(1).forEach(function(sub){
+      var pts = sub.replace(/Z/g, '').split('L');
+      if(pts.length < 3) return;
+      var lon = new Float32Array(pts.length), cl = new Float32Array(pts.length), sl = new Float32Array(pts.length);
+      for(var i = 0; i < pts.length; i++){
+        var xy = pts[i].split(' ');
+        var ln = (+xy[0]) * (MAPV.LON1 - MAPV.LON0) / MAPV.W + MAPV.LON0;
+        var lt = MAPV.LAT1 - (+xy[1]) * (MAPV.LAT1 - MAPV.LAT0) / MAPV.H;
+        lt = Math.max(-89.5, Math.min(89.5, lt));
+        var la = lt * Math.PI / 180;
+        lon[i] = ln * Math.PI / 180; cl[i] = Math.cos(la); sl[i] = Math.sin(la);
+      }
+      rings.push({n: pts.length, lon: lon, cl: cl, sl: sl});
+    });
+  });
+  GLOBE.land = rings;
+  return rings;
+}
+
+// Unit-sphere point (lon/lat in radians) -> {x, y, z} in view space; z > 0 faces the viewer.
+function globeProject(lonR, cosLat, sinLat, sinLam, cosLam, sinPhi, cosPhi){
+  var l = lonR, x = cosLat * Math.sin(l) * cosLam - cosLat * Math.cos(l) * sinLam;
+  var z0 = cosLat * Math.cos(l) * cosLam + cosLat * Math.sin(l) * sinLam;
+  var y = sinLat * cosPhi - z0 * sinPhi;
+  var z = sinLat * sinPhi + z0 * cosPhi;
+  return {x: x, y: y, z: z};
+}
+
+function dl1PctForGroup(g){
+  var best = null;
+  (DL1 && DL1.plans || []).forEach(function(pl){
+    if(!pl || pl.isTest || pl.rig !== g.rig || !pl.progress || pl.progress.pctComplete == null) return;
+    var v = Number(pl.progress.pctComplete);
+    if(best == null || v > best) best = v;
+  });
+  return best;
+}
+
+function renderGlobe(fleet){
+  var groups = groupByVessel(fleet);
+  var byRegion = {};
+  groups.forEach(function(g){ var loc = g.rows[0].location; (byRegion[loc] = byRegion[loc] || []).push(g); });
+  var pins = [];
+  Object.keys(byRegion).forEach(function(region){
+    var anchor = REGION_ANCHORS[region] || {lat: 0, lon: 0, name: region};
+    byRegion[region].forEach(function(g, i){
+      var pos = RIG_POSITIONS[g.rig];
+      var lat, lon;
+      if(pos){ lat = pos.lat; lon = pos.lon; }
+      else { var angle = i * 2.399963, radius = 3.6 * Math.sqrt(i); lat = anchor.lat + radius * Math.sin(angle); lon = anchor.lon + radius * Math.cos(angle); }
+      var status = headlineStatus(g.rows);
+      pins.push({
+        g: g, region: region, lat: lat, lon: lon, status: status, color: statusColor(status),
+        maint: status === 'On-Deck (Performing Maint.)', pct: dl1PctForGroup(g),
+        lonR: lon * Math.PI / 180, cl: Math.cos(lat * Math.PI / 180), sl: Math.sin(lat * Math.PI / 180)
+      });
+    });
+  });
+  GLOBE.pins = pins;
+  var list = document.getElementById('globeList');
+  if(list){
+    list.innerHTML = '<div class="globe-list-title">Fleet &middot; ' + pins.length + ' rigs</div>' + pins.map(function(p, i){
+      var sub = p.pct != null ? ('DL-1 ' + p.pct.toFixed(0) + '%') : statusShort(p.status);
+      return '<div class="globe-row" data-idx="' + i + '" onclick="openRigModal(\'' + slug(p.g.rig) + '\')" onmouseenter="globeFocusPin(' + i + ')">' +
+        '<span class="gr-dot" style="background:' + p.color + '"></span>' +
+        '<span><div class="gr-rig">' + p.g.rig + '</div><div class="gr-loc">' + ((REGION_ANCHORS[p.region] || {name: p.region}).name) + '</div></span>' +
+        '<span class="gr-pct">' + sub + '</span></div>';
+    }).join('');
+  }
+  globeStart();
+}
+
+// Hovering a rig in the list turns the globe to it and holds there.
+function globeFocusPin(i){
+  var p = GLOBE.pins[i]; if(!p) return;
+  GLOBE.lambda = p.lon; GLOBE.holdUntil = performance.now() + 10000;
+}
+
+function globeDraw(now){
+  var cv = document.getElementById('globeCanvas'); if(!cv) return;
+  var ctx = cv.getContext('2d'); if(!ctx){ globeDisable('no canvas'); return; }
+  var R = GLOBE.R, cx = GLOBE.cx, cy = GLOBE.cy;
+  var lam = GLOBE.lambda * Math.PI / 180, phi = GLOBE.phi * Math.PI / 180;
+  var sinLam = Math.sin(lam), cosLam = Math.cos(lam), sinPhi = Math.sin(phi), cosPhi = Math.cos(phi);
+  ctx.clearRect(0, 0, cv.width, cv.height);
+
+  // Atmosphere halo + ocean disc
+  var halo = ctx.createRadialGradient(cx, cy, R * 0.98, cx, cy, R * 1.12);
+  halo.addColorStop(0, 'rgba(0,145,218,0.45)'); halo.addColorStop(1, 'rgba(0,145,218,0)');
+  ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(cx, cy, R * 1.12, 0, Math.PI * 2); ctx.fill();
+  var ocean = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.35, R * 0.1, cx, cy, R);
+  ocean.addColorStop(0, '#0a4aa8'); ocean.addColorStop(0.7, '#073a8a'); ocean.addColorStop(1, '#02225e');
+  ctx.fillStyle = ocean; ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+
+  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+
+  // Graticule every 30 degrees
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1;
+  var step = Math.PI / 36, a, b, pt, prev;
+  for(a = -60; a <= 60; a += 30){ var la = a * Math.PI / 180, cla = Math.cos(la), sla = Math.sin(la); ctx.beginPath(); prev = null;
+    for(b = -Math.PI; b <= Math.PI + 1e-6; b += step){ pt = globeProject(b, cla, sla, sinLam, cosLam, sinPhi, cosPhi);
+      if(pt.z > 0 && prev && prev.z > 0) ctx.lineTo(cx + R * pt.x, cy - R * pt.y); else ctx.moveTo(cx + R * pt.x, cy - R * pt.y); prev = pt; }
+    ctx.stroke(); }
+  for(b = -180; b < 180; b += 30){ var lo = b * Math.PI / 180; ctx.beginPath(); prev = null;
+    for(a = -Math.PI / 2; a <= Math.PI / 2 + 1e-6; a += step){ pt = globeProject(lo, Math.cos(a), Math.sin(a), sinLam, cosLam, sinPhi, cosPhi);
+      if(pt.z > 0 && prev && prev.z > 0) ctx.lineTo(cx + R * pt.x, cy - R * pt.y); else ctx.moveTo(cx + R * pt.x, cy - R * pt.y); prev = pt; }
+    ctx.stroke(); }
+
+  // Land: fill with back-side points pushed to the limb, then stroke only the front-facing edges.
+  var rings = globeLand();
+  ctx.fillStyle = 'rgba(255,255,255,0.13)'; ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 1.1;
+  var fillPath = new Path2D(), strokePath = new Path2D();
+  rings.forEach(function(r){
+    var n = r.n, anyFront = false, sx = new Float32Array(n), sy = new Float32Array(n), front = new Uint8Array(n);
+    for(var i = 0; i < n; i++){
+      var p = globeProject(r.lon[i], r.cl[i], r.sl[i], sinLam, cosLam, sinPhi, cosPhi);
+      if(p.z > 0){ front[i] = 1; anyFront = true; sx[i] = cx + R * p.x; sy[i] = cy - R * p.y; }
+      else { var len = Math.sqrt(p.x * p.x + p.y * p.y) || 1; sx[i] = cx + R * p.x / len; sy[i] = cy - R * p.y / len; }
+    }
+    if(!anyFront) return;
+    fillPath.moveTo(sx[0], sy[0]);
+    for(var j = 1; j < n; j++) fillPath.lineTo(sx[j], sy[j]);
+    fillPath.closePath();
+    for(var k = 0; k < n; k++){ var k2 = (k + 1) % n; if(front[k] && front[k2]){ strokePath.moveTo(sx[k], sy[k]); strokePath.lineTo(sx[k2], sy[k2]); } }
+  });
+  ctx.fill(fillPath, 'evenodd'); ctx.stroke(strokePath);
+
+  // Terminator-style shading on the right edge for depth
+  var shade = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.2, R * 0.6, cx, cy, R * 1.02);
+  shade.addColorStop(0, 'rgba(0,0,0,0)'); shade.addColorStop(1, 'rgba(0,10,40,0.55)');
+  ctx.fillStyle = shade; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+  ctx.restore();
+
+  // Pins and labels
+  var t = now / 1000, visible = [], facing = null, facingZ = 0;
+  GLOBE.pins.forEach(function(p){
+    var q = globeProject(p.lonR, p.cl, p.sl, sinLam, cosLam, sinPhi, cosPhi);
+    p.vis = q.z > 0.02; p.z = q.z; p.sx = cx + R * q.x; p.sy = cy - R * q.y; p.alpha = Math.min(1, q.z * 2.2);
+    if(p.vis){ visible.push(p); if(q.z > facingZ){ facingZ = q.z; facing = p; } }
+  });
+  // Stack labels that collide (same x band) so a region's rigs read as a column.
+  visible.sort(function(a, b){ return a.sy - b.sy; });
+  var placed = [];
+  visible.forEach(function(p){
+    ctx.font = '700 15px "Meta Pro", Arial, sans-serif';
+    var line1 = p.g.rig, line2 = p.pct != null ? ('DL-1 plan ' + p.pct.toFixed(0) + '%') : (statusShort(p.status));
+    ctx.font = '700 15px "Meta Pro", Arial, sans-serif'; var w1 = ctx.measureText(line1).width;
+    ctx.font = '700 11px "Meta Pro", Arial, sans-serif'; var w2 = ctx.measureText(line2).width;
+    var w = Math.max(w1, w2) + 24, h = 44;
+    var lx = p.sx + 18, ly = p.sy - h / 2;
+    if(lx + w > GLOBE.cx + GLOBE.R + 140) lx = p.sx - 18 - w;
+    placed.forEach(function(o){ if(lx < o.x + o.w && lx + w > o.x && ly < o.y + o.h + 6 && ly + h + 6 > o.y) ly = o.y + o.h + 6; });
+    p.lx = lx; p.ly = ly; p.lw = w; p.lh = h; placed.push({x: lx, y: ly, w: w, h: h});
+  });
+  visible.forEach(function(p){
+    ctx.globalAlpha = p.alpha;
+    // leader
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(p.sx, p.sy);
+    var ax = p.lx > p.sx ? p.lx : p.lx + p.lw; ctx.lineTo(ax, p.ly + p.lh / 2); ctx.stroke();
+    // pulse for a rig under maintenance
+    if(p.maint){ var ph = (t % 1.6) / 1.6; ctx.beginPath(); ctx.arc(p.sx, p.sy, 10 + ph * 22, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(226,83,3,' + (0.7 * (1 - ph)) + ')'; ctx.lineWidth = 3; ctx.stroke(); }
+    // pin
+    ctx.beginPath(); ctx.arc(p.sx, p.sy, 9, 0, Math.PI * 2); ctx.fillStyle = p.color; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+    // label
+    ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+    ctx.fillStyle = '#fff'; globeRoundRect(ctx, p.lx, p.ly, p.lw, p.lh, 6); ctx.fill();
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.fillStyle = '#002C77'; ctx.font = '700 15px "Meta Pro", Arial, sans-serif'; ctx.textBaseline = 'alphabetic'; ctx.fillText(p.g.rig, p.lx + 12, p.ly + 19);
+    ctx.fillStyle = p.pct != null ? '#0a7' : '#5a6880'; ctx.font = '700 11px "Meta Pro", Arial, sans-serif'; ctx.fillText((p.pct != null ? 'DL-1 plan ' + p.pct.toFixed(0) + '%' : statusShort(p.status)).toUpperCase(), p.lx + 12, p.ly + 35);
+    ctx.globalAlpha = 1;
+  });
+  if(facing !== GLOBE.facing){
+    GLOBE.facing = facing;
+    var rows = document.querySelectorAll('#globeList .globe-row');
+    for(var r = 0; r < rows.length; r++) rows[r].classList.toggle('facing', !!facing && GLOBE.pins[+rows[r].getAttribute('data-idx')] === facing);
+  }
+}
+function globeRoundRect(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+
+function globeActive(){ var pg = document.getElementById('tvPageGlobe'); return !!pg && pg.classList.contains('active') && !document.hidden && !GLOBE.disabled; }
+
+function globeFrame(now){
+  GLOBE.raf = null;
+  if(!globeActive()) return;
+  var dt = GLOBE.last ? Math.min(0.25, (now - GLOBE.last) / 1000) : 0;
+  // Performance guard: a display that cannot draw a frame in 80 ms for 90 frames running hands over to the map.
+  if(GLOBE.last && (now - GLOBE.last) > 80 && (now - GLOBE.last) < 2000) GLOBE.slowFrames++; else GLOBE.slowFrames = Math.max(0, GLOBE.slowFrames - 2);
+  if(GLOBE.slowFrames > 90){ globeDisable('display too slow'); return; }
+  GLOBE.last = now;
+  var held = GLOBE.hovering || now < GLOBE.holdUntil;
+  if(!held) GLOBE.lambda = ((GLOBE.lambda - GLOBE.degPerSec * dt) + 360) % 360; // the earth turns east, so the longitude facing us moves west
+  globeDraw(now);
+  GLOBE.raf = requestAnimationFrame(globeFrame);
+}
+function globeStart(){ if(!GLOBE.raf && globeActive()){ GLOBE.last = 0; GLOBE.raf = requestAnimationFrame(globeFrame); } }
+function globeDisable(reason){
+  GLOBE.disabled = true;
+  var tab = document.getElementById('tabGlobe'); if(tab) tab.style.display = 'none';
+  showTvPage('map');
+  try { console.warn('Globe view off: ' + reason + ' - showing the map instead.'); } catch(e){}
+}
+
+(function(){
+  var cv = document.getElementById('globeCanvas'); if(!cv) return;
+  if(!cv.getContext || !cv.getContext('2d') || typeof Path2D === 'undefined'){ globeDisable('no canvas'); return; }
+  function toStage(e){ var r = cv.getBoundingClientRect(); return {x: (e.clientX - r.left) * 1820 / r.width, y: (e.clientY - r.top) * 880 / r.height}; }
+  function hit(pt){
+    var pins = GLOBE.pins, best = null, bestD = 1e9;
+    for(var i = 0; i < pins.length; i++){ var p = pins[i]; if(!p.vis) continue;
+      var dx = pt.x - p.sx, dy = pt.y - p.sy, d = dx * dx + dy * dy;
+      if(d <= 14 * 14 && d < bestD){ best = p; bestD = d; } }
+    if(best) return best;
+    for(var j = pins.length - 1; j >= 0; j--){ var q = pins[j]; if(q.vis && pt.x >= q.lx && pt.x <= q.lx + q.lw && pt.y >= q.ly && pt.y <= q.ly + q.lh) return q; }
+    return null;
+  }
+  cv.addEventListener('mouseenter', function(){ GLOBE.hovering = true; });
+  cv.addEventListener('mouseleave', function(){ GLOBE.hovering = false; GLOBE.holdUntil = performance.now() + 10000; });
+  cv.addEventListener('mousemove', function(e){ cv.style.cursor = hit(toStage(e)) ? 'pointer' : 'default'; });
+  cv.addEventListener('click', function(e){ var p = hit(toStage(e)); if(p) openRigModal(slug(p.g.rig)); });
+  cv.addEventListener('touchstart', function(){ GLOBE.holdUntil = performance.now() + 10000; }, {passive: true});
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) globeStart(); });
+  var want = new URLSearchParams(location.search).get('view');
+  if(want === 'map' || want === 'tiles') showTvPage(want);
+})();
+
+// DL-1 Master Plan button: live when Lee's tool is served at dl1/ beside this page (item 51 Q1), else "coming with REV 11".
+(function(){
+  var btn = document.getElementById('dl1Btn'), note = document.getElementById('dl1BtnNote'); if(!btn) return;
+  if(location.protocol === 'file:') return;
+  fetch('dl1/', {method: 'HEAD', cache: 'no-store'}).then(function(res){
+    if(res.ok){ btn.classList.remove('dl1-soon'); note.textContent = 'Seadrill BOP Schedule Builder'; }
+  }).catch(function(){});
+})();
+
+// TV motion on the Tile View: the spotlight walks the rigs under maintenance every twenty seconds.
+var TILE_SPOT = {i: -1, timer: null};
+function tileSpotlightStep(){
+  var tiles = Array.prototype.slice.call(document.querySelectorAll('#tvTileCards .fleet-tile'));
+  tiles.forEach(function(t){ t.classList.remove('spotlight'); });
+  var maint = tiles.filter(function(t){ return t.getAttribute('data-maint') === '1'; });
+  var pool = maint.length ? maint : tiles; if(!pool.length) return;
+  TILE_SPOT.i = (TILE_SPOT.i + 1) % pool.length;
+  var tile = pool[TILE_SPOT.i]; tile.classList.add('spotlight');
+  tile.querySelectorAll('.tile-dl1-bar span').forEach(function(sp){ sp.style.animation = 'none'; void sp.offsetWidth; sp.style.animation = ''; });
+}
+TILE_SPOT.timer = setInterval(function(){ if(!document.hidden && document.getElementById('tvPageTiles').classList.contains('active')) tileSpotlightStep(); }, 20000);
+
 
 renderAll();
 
