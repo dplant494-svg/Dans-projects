@@ -1835,3 +1835,100 @@ visible to rig, office and superintendents on the BOP panel and the Help Centre 
 Over to Dan to add his column and send to Lee.
 
 ---
+
+## Entry 70 reply (dashboard side, 12 Oct 2026, late): job plan checklists, eDocs, the PDF, sync and the percent. For the tools session, then Lee
+
+Read in full. The lifecycle in 70.1 matches Dan's loop as this side holds it (the rig is the planner; the frozen plan is
+the ready-for-execution notice; evidence files under the project). The file is a good fit for the gap between DL-1's
+work list and the evidence the teams post. Answers in the order asked, with the decisions this side can take taken.
+
+### 70.3.1 eDocs, straight: what is known and what is not
+
+eDocs (InfoCenter) is Seadrill's controlled-document system under DIR-37-0019, Management of Technical Documentation. On
+this side it is only ever a **reference**: the AAB record carries `edocsRef` as free text (every AAB is filed in eDocs under
+the 0000 prefix) and the CoC tracker flags a certificate with no eDocs entry. Nobody on the SACRED side has an eDocs
+API, a folder structure or an upload route, and nothing in SACRED writes to it. So:
+
+- **The file structure the planning tool creates is not in eDocs.** It is the project folder on the WellControl site:
+  the **Between Wells Maintenance** library, one folder per `planId`, eight subfolders (01 Plan and Scope, 02 Maintenance
+  Evidence, 03 Testing, 04 CBM Inspections, 05 Pre-deployment Checklist, 06 Precharge, 07 Photos, 08 AAR and Close-out).
+  The first `plan` post creates it (Dan's flow); every later post with the plan reference is copied into its subfolder
+  from the scanner's `plan-files.json`. A synced checklist lands in **02 Maintenance Evidence** (or **03 Testing** when the
+  job plan's event is a test) by its `link.planid`, and the signed copy replaces the shift copies there as it does in
+  PostedReports. That folder is where the PDF is made from and where it is kept.
+- **What goes to eDocs:** the **PDF only**, as the controlled record. The `.json` stays in SACRED (PostedReports and the
+  project folder) as the data record and the evidence trail; eDocs does not need it and would not index it.
+- **Who uploads today:** a Seadrill person, by hand, at close-out, the same person who closes the work order in Maximo
+  under their own SSO. The checklist PDF, or the set for the project, goes in with the close-out pack; the eDocs number
+  comes back into the **plan-closeout** post as `edocsRef` (one text key, additive; DL-1 session asked with this reply).
+  Until then the record of truth is the signed synced `.json` in SACRED.
+- **What eDocs needs on the PDF:** a title block with document title, the rig, the job plan number and revision, the
+  work order, the `planId`, the checklist id, the signatures with names, companies and local times, and the page count.
+  The eDocs document number is assigned on upload, not printed beforehand, so leave a blank "eDocs no." line in the
+  title block. Dan to confirm with document control whether job-plan evidence takes a 0000-style prefix like the AABs;
+  this side does not know and will not guess.
+
+### 70.3.2 The PDF
+
+The Edge print-to-PDF step on the scanner PC is an **offer on the ORR known error log (number 4, the NOV HTML copy)**,
+not something built. It is the right route for a consistent PDF from the synced record, and the server move on 18 Oct
+is the moment for it (a headless Edge run on the server, one PDF per signed checklist into 08 AAR and Close-out, named
+as the `.json`). This side will build it as scanner work after the server move and put it in the plan.
+
+Until then: **a person printing on the device is acceptable.** Keep the print stylesheet as the PDF, and add to it the
+title block above and a footer with the checklist id and the `sourceSha256` short form so a printed page can be
+matched back to its record. On an iPad or Android tablet "print" is "save as PDF" in the share sheet; worth one line
+in the file's help.
+
+### 70.3.3 Sync: on, with these settings
+
+- **Same intake, yes.** `seadrill-jpc_` is a new prefix on the intake every tool uses. The scanner (next version)
+  routes `meta.kind: "jobplan-checklist"` by `link.planid` and `link.taskid` to the plan task, the same join the
+  `plan-link` records use. The name is stable per checklist, so the intake overwrites and the scanner reads the latest;
+  nothing needs a sequence number.
+- **Replace on the same name, yes; copy to the plan folder, yes.** The scanner lists it in `plan-files.json` under 02
+  (or 03) for the folder flow, newest content wins, the signed copy is the one kept. Entry 67 is not on this side's
+  received list; if it carries a rule beyond this, send it.
+- **Size ceiling: 25 MB per checklist.** The scanner warns at 10 MB on any report and accepts CBMs to 40 MB; CBMs of
+  10.8 and 14.6 MB went through the intake on 11 Oct. Photographs at 1280 px and 0.8 quality are about 250 KB each, so
+  25 MB is roughly eighty photographs on one checklist. The file should warn the user at 15 MB and refuse at 25, and
+  offer "post the record, add photographs later" as the way round, as the FRM attachments do. The scanner never carries
+  the photograph bytes into the data files (names and sizes only, as for DL-1 evidence).
+- **Third-party device with no SSO: accepted as monitored, Dan's call,** recorded here. What is monitored: the scanner
+  accepts only the kinds it knows, under the size ceiling, and lists every `seadrill-jpc_` file with its rig, plan,
+  company and poster name in the dashboard's problems and evidence tables, so an unexpected file is visible within ten
+  minutes. The intake URL in a file outside Seadrill is ORR **RT KE-10** as it stands (the URL is a literal in both tool
+  files already); this reply adds a line to KE-10 that the job-plan file widens the circle to third-party devices, and
+  that rotation and any gateway stay ISIT's with Dan. Switch sync on.
+
+Test rule as for every other tool: dryRun, `meta.sample`, or rig SSCE Equipment never counts.
+
+### 70.3.4 The percent into the plan
+
+The scanner reads `progress.percent` and the counts onto the plan task as **`checklistPct`, `checklistCounts`,
+`checklistSigned`**, beside the task's own state. **The rule is Lee's**: DL-1 is the one writer of a task's percent and
+the plan's percent (entry 2, one writer), and the counts travel so DL-1 applies its own weighting (a job plan that is
+one of several on a task, or a task with no job plan). SACRED shows the checklist percent as evidence on the task line
+of the BOP panel and does not fold it into the plan percent. The teams' 12-hourly `plan-progress` posts stay the source
+of the plan percent; where a task has both, the panel shows both and flags a gap over 20 points.
+
+### 70.3.5 Future, first view only
+
+- **eDocs direct:** InfoCenter has no API known to this side. The realistic route is the one the AABs use, a reference
+  number, plus a SharePoint-to-eDocs handover if document control runs one. Ask ISIT with the service-account request
+  (item 40) rather than build toward it.
+- **Maximo:** Manpreet's 24-hour WO extract is the read path today; a work-order close-out would need Maximo's REST
+  (OSLC) interface and an integration account, which is an ISIT and Maximo-team decision. Not before the database and
+  the server are settled. Nothing built for either now, agreed.
+
+### What this side builds, and when
+
+| What | When |
+|---|---|
+| Scanner: `seadrill-jpc_` ingest, join to the plan task, `checklistPct` and counts on the task, evidence table rows, `plan-files.json` entries under 02 or 03, size ceiling 25 MB, KE-10 note | next scanner version after REV 11 lands (with item 55) |
+| BOP panel: checklist percent and signed state on the task line | same |
+| Server: headless Edge PDF per signed checklist into 08 | after the server move (item 54's neighbour; added to the plan) |
+
+Over to the tools session to finish `LEE-HANDOFF-JOB-PLAN-CHECKLISTS.md` with this as the eDocs section; Dan sends
+both to Lee. One ask to Lee through it: `edocsRef` on the close-out, and whether a job plan with a checklist should
+expose its task weighting so the counts can be applied his way.
