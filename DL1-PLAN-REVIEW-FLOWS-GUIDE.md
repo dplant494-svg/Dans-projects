@@ -8,7 +8,7 @@ What the pieces do:
 
 | Piece | Does | Where |
 |---|---|---|
-| **Reviewers** table in the workbook | who must verify a plan, by region (Ronnie for GOM, Angola, Namibia, Malaysia; Joao for Brazil; BOP Controls and Brent for all) | `WCE_Precharge_Notification.xlsx`, sheet Reviewers (copied in from `Reviewers-sheet-FINAL-2026-10-13.xlsx`) |
+| **Reviewers** table in the workbook | who must verify a plan, by region (Ronnie for GOM, Angola, Namibia, Malaysia; Joao for Brazil; BOP Controls and Brent for all), and, with Required = No, who is told for visibility without verifying (13 Oct, Dan); the Rigs table's new `Region` column says which rows apply to a rig | `WCE_Precharge_Notification.xlsx`, sheet Reviewers (copied in from `Reviewers-sheet-FINAL-2026-10-13.xlsx`) |
 | Flow **Plan Reviewers** (hourly) | exports that table to Digests as `plan-reviewers.json` | this guide, Part A |
 | Scanner v2.90 | reads the roster, the plan posts and the reviews; computes "n of m verified" per plan; writes `help\plan-review-data.js` for the tab and `plan-notices.json` to Digests when a plan is verified by all or its testing reaches 90 % | installed with the scanner |
 | Help Centre, **Plans** tab | lists every plan with its scope by section; a reviewer presses Verified or Changes needed; that posts a `seadrill-planreview_*` record through the intake | deployed with the Help Centre |

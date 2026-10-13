@@ -63,7 +63,13 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
    (Select, map `item()?['Email']`); **PlanToList** `join(body('PlanToEmails'), ';')`. The same three for Cc:
    **PlanCcRows** (`Send eq 'Cc'`), **PlanCcEmails**, **PlanCcList**.
    **OfficeRows/OfficeEmails/OfficeList** as in every flow (the test audience).
-   **AllTo** `join(union(split(replace(concat(outputs('RigTen'), ';', outputs('PlanToList')), ';;', ';'), ';'), json('[]')), ';')`
+   **Regional audience (13 Oct, Dan: viewers as well as reviewers).** The Reviewers table carries everyone by region; Required = Yes
+   must verify, Required = No is told but nothing waits on them. The Rigs table gains a `Region` column (GOM, Brazil, Angola,
+   Namibia, Malaysia). Five cards after RigTen: **ReviewerRows** (List rows, table Reviewers, no filter); **Region** (Compose,
+   `toLower(coalesce(first(body('RigRow')?['value'])?['Region'], ''))`); **RegionalRows** (Filter array, From `body('ReviewerRows')?['value']`,
+   advanced `@or(contains(toLower(coalesce(item()?['Region'], '')), 'all'), and(not(empty(outputs('Region'))), contains(toLower(coalesce(item()?['Region'], '')), outputs('Region'))))`);
+   **RegionalEmails** (Select, From `body('RegionalRows')`, Map `item()?['Email']`); **RegionalList** (Compose, `join(body('RegionalEmails'), ';')`).
+   **AllTo** `join(union(split(replace(concat(outputs('RigTen'), ';', outputs('PlanToList'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
    **To** `if(equals(outputs('Guard'), true), outputs('OfficeList'), outputs('AllTo'))`
    **Cc** `if(equals(outputs('Guard'), true), '', outputs('PlanCcList'))`
    **Banner** `if(equals(outputs('Guard'), true), '[TEST MODE] ', '')`
@@ -92,7 +98,7 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
 
 | Case | Subject | Body (first line) |
 |---|---|---|
-| created | `Banner` + `PlanId - PLAN CREATED - RigName Bop - for review` | "A new BOP maintenance plan has been posted for review. Open it: PageLink. Created by `createdBy`, window from `From`." |
+| created | `Banner` + `PlanId - PLAN CREATED - RigName Bop - for review` | "A new BOP maintenance plan has been posted for review. Open it: PageLink. Created by `createdBy`, window from `From`. Review it on the Help Centre Plans tab: http://sdrlazneuiis01d.corp.local:8080/sacred/help/help-centre.html#plans" |
 | updated | `Banner` + `PlanId - PLAN UPDATED v` + `Ver` + ` - RigName Bop` | "The plan has been updated to scope version `Ver`. Reason: `Reason`. Earlier reviews are void; please look again: PageLink." |
 | frozen | `Banner` + `PlanId - SCOPE FROZEN - RigName Bop - execute from From` | "Scope is frozen by `frozenBy`. The plan is ready for execution from `From`. Any break-in work or edit will be posted in this chat." |
 | progress | no email; chat only | Message fx `concat(outputs('Banner'), 'Progress', if(empty(outputs('Pct')), ' update', concat(' ', outputs('Pct'), '%')), ' as of ', coalesce(body('Parse_JSON')?['progress']?['asOf'], ''))`: reads "Progress update" until REV 11 posts `pctComplete`. (One daily digest email to the Planning table is Part E, later.) |
