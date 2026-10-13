@@ -29,7 +29,7 @@ and(contains(toLower(triggerOutputs()?['body/{FilenameWithExtension}']), '_dl1_'
    `YYYYMMDD-HHmm_<Rig>_DL1_<kind>_<BOPn>_v<n>.json`; the plan-link records SSORT posts start `seadrill-planlink_` and do
    not match, so they never notify.)
 3. **Get file content** (SharePoint): Site WellControl, File Identifier = the trigger's **Identifier**.
-4. **Parse JSON**: Content = **File Content**. Schema:
+4. **Parse JSON**: Content = fx `body('Get_file_content')` (the token, never the typed words). Schema:
 ```
 {"type":"object","properties":{"meta":{"type":"object","properties":{"kind":{"type":"string"},"asset":{"type":"string"},"rigkey":{"type":"string"},"rev":{"type":"string"},"by":{"type":"string"},"saved":{"type":"string"},"sample":{}}},"dryRun":{},"planId":{"type":"string"},"scopeVersion":{},"plan":{"type":"object","properties":{"planId":{"type":"string"},"status":{"type":"string"},"scopeVersion":{},"bopNo":{"type":"string"},"window":{"type":"object","properties":{"from":{"type":"string"},"to":{"type":"string"}}},"changeReason":{"type":"string"},"createdBy":{"type":"string"},"frozenBy":{"type":"string"}}},"progress":{"type":"object","properties":{"planId":{"type":"string"},"pctComplete":{},"asOf":{"type":"string"}}},"closeout":{"type":"object","properties":{"planId":{"type":"string"}}}}}
 ```
@@ -71,8 +71,12 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
    **ReceiptRows**: SharePoint **Get files (properties only)**, Site WellControl, Library **Digests**, Folder
    `help-receipts`, Filter Query fx `concat('FileLeafRef eq ''plan-receipt_', outputs('PlanId'), '.json''')`, Top Count 1.
    **Condition HasChat**: `length(body('ReceiptRows')?['value'])` is greater than `0`.
-   - **HasChat = No:** Teams **Create a chat**: Members = **AllTo** with `;` replaced by `,` (fx
-     `replace(outputs('AllTo'), ';', ',')`; in test mode use OfficeList the same way), Title = **PlanId**. Then
+   - **HasChat = No:** first two cards that de-duplicate the members (Teams adds the connection owner itself, so an
+     address that is also on a list makes "Duplicate chat members"): Compose **MembersArr**
+     `union(split(toLower(if(equals(outputs('Guard'), true), outputs('OfficeList'), outputs('AllTo'))), ';'), json('[]'))`;
+     **Filter array** renamed **MembersOk**, From `outputs('MembersArr')`, advanced mode
+     `@and(not(empty(item())), not(equals(item(), 'daniel.plant@seadrill.com')))` (the connection owner's address).
+     Then Teams **Create a chat**: Members fx `join(body('MembersOk'), ',')`, Title fx `outputs('PlanId')`. Then
      SharePoint **Create file**: Site WellControl, Folder `/Digests/help-receipts`, File Name
      `concat('plan-receipt_', outputs('PlanId'), '.json')`, File Content
      `concat('{"planid":"', outputs('PlanId'), '","chatid":"', outputs('Create_a_chat')?['body/id'], '","created":"', utcNow(), '"}')`.
@@ -98,6 +102,8 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
 11. **Save.** Flow checker clean, then Part C.
 
 ## Part C — proving it (test mode, nothing real is sent)
+
+**13 Oct: built by Dan as `Plan Notifications` and proven on the plan sample: Office email, the WVE-BOP1-20261005 chat, the receipt.** The three snags on the way are folded into Part B above (Parse JSON content token, duplicate chat members, the chat title).
 
 1. Drop one of Lee's samples from `tools/received/dl1/sample-files/` (they carry `meta.sample: true`, so the Guard holds
    and the Office gets it with `[TEST MODE]`) into PostedReports: the `plan` sample first.
