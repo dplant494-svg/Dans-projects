@@ -72,7 +72,9 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
    **Two audiences (13 Oct, Dan: the rig's ten are for reporting during execution, not for plan generation or scope freeze).**
    **RigPlan** (Compose): the rig's plan people, TSL, Subsea Supervisor, Rig Manager, ARM, Rig Engineer:
    `join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],'')), ';;', ';'), ';'), json('[]')), ';')`
-   **AllTo** (plan events: created, updated, frozen) `join(union(split(replace(concat(outputs('RigPlan'), ';', outputs('PlanToList'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
+   **SupRows / SupEmails / SupList**: the Superintendents table, the same three cards as the help flow.
+   **AllTo** (plan events: created, updated, frozen; Dan 13 Oct: SSS, TSL, RM, ARM, Rig Engineer, the superintendents and the regional reviewers, no Planning To rows, no duplicates)
+   `join(union(split(replace(concat(outputs('RigPlan'), ';', outputs('SupList'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
    **ExecTo** (execution events: progress, closed) `join(union(split(replace(concat(outputs('RigTen'), ';', outputs('PlanToList')), ';;', ';'), ';'), json('[]')), ';')`
    **To** `if(equals(outputs('Guard'), true), outputs('OfficeList'), if(or(equals(outputs('Event'), 'progress'), equals(outputs('Event'), 'closed')), outputs('ExecTo'), outputs('AllTo')))` (To sits below Event)
    **Cc** `if(equals(outputs('Guard'), true), '', outputs('PlanCcList'))`
