@@ -103,7 +103,7 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
 
 ## Part C — proving it (test mode, nothing real is sent)
 
-**13 Oct: built by Dan as `Plan Notifications` and proven on the plan sample: Office email, the WVE-BOP1-20261005 chat, the receipt; and on the progress sample: a line in the same chat, no email.** The three snags on the way are folded into Part B above (Parse JSON content token, duplicate chat members, the chat title).
+**13 Oct: built by Dan as `Plan Notifications` and proven on the plan sample: Office email, the WVE-BOP1-20261005 chat, the receipt; on the progress sample: a line in the same chat, no email; and on a frozen v2 of the plan sample: the SCOPE FROZEN email and chat line. Snag on the frozen email: a wrong token in the Cc box (the chat id); Cc must be `outputs('Cc')`.** The three snags on the way are folded into Part B above (Parse JSON content token, duplicate chat members, the chat title).
 
 1. Drop one of Lee's samples from `tools/received/dl1/sample-files/` (they carry `meta.sample: true`, so the Guard holds
    and the Office gets it with `[TEST MODE]`) into PostedReports: the `plan` sample first.
