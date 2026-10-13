@@ -95,7 +95,7 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
 | created | `Banner` + `PlanId - PLAN CREATED - RigName Bop - for review` | "A new BOP maintenance plan has been posted for review. Open it: PageLink. Created by `createdBy`, window from `From`." |
 | updated | `Banner` + `PlanId - PLAN UPDATED v` + `Ver` + ` - RigName Bop` | "The plan has been updated to scope version `Ver`. Reason: `Reason`. Earlier reviews are void; please look again: PageLink." |
 | frozen | `Banner` + `PlanId - SCOPE FROZEN - RigName Bop - execute from From` | "Scope is frozen by `frozenBy`. The plan is ready for execution from `From`. Any break-in work or edit will be posted in this chat." |
-| progress | no email; chat only | "Progress `Pct`% as of `asOf`." (One daily digest email to the Planning table is Part E, later.) |
+| progress | no email; chat only | Message fx `concat(outputs('Banner'), 'Progress', if(empty(outputs('Pct')), ' update', concat(' ', outputs('Pct'), '%')), ' as of ', coalesce(body('Parse_JSON')?['progress']?['asOf'], ''))`: reads "Progress update" until REV 11 posts `pctComplete`. (One daily digest email to the Planning table is Part E, later.) |
 | closed | `Banner` + `PlanId - PLAN CLOSED OUT - RigName Bop` | "The plan is closed out. AAR and close-out: PageLink. The project folder is ready for the Project complete step (eDocs)." |
 
     To = **To**, Cc = **Cc** on every email. The default case does nothing.
@@ -103,7 +103,7 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
 
 ## Part C — proving it (test mode, nothing real is sent)
 
-**13 Oct: built by Dan as `Plan Notifications` and proven on the plan sample: Office email, the WVE-BOP1-20261005 chat, the receipt.** The three snags on the way are folded into Part B above (Parse JSON content token, duplicate chat members, the chat title).
+**13 Oct: built by Dan as `Plan Notifications` and proven on the plan sample: Office email, the WVE-BOP1-20261005 chat, the receipt; and on the progress sample: a line in the same chat, no email.** The three snags on the way are folded into Part B above (Parse JSON content token, duplicate chat members, the chat title).
 
 1. Drop one of Lee's samples from `tools/received/dl1/sample-files/` (they carry `meta.sample: true`, so the Guard holds
    and the Office gets it with `[TEST MODE]`) into PostedReports: the `plan` sample first.
