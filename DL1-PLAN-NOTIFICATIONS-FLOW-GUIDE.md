@@ -69,8 +69,12 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
    `toLower(coalesce(first(body('RigRow')?['value'])?['Region'], ''))`); **RegionalRows** (Filter array, From `body('ReviewerRows')?['value']`,
    advanced `@or(contains(toLower(coalesce(item()?['Region'], '')), 'all'), and(not(empty(outputs('Region'))), contains(toLower(coalesce(item()?['Region'], '')), outputs('Region'))))`);
    **RegionalEmails** (Select, From `body('RegionalRows')`, Map `item()?['Email']`); **RegionalList** (Compose, `join(body('RegionalEmails'), ';')`).
-   **AllTo** `join(union(split(replace(concat(outputs('RigTen'), ';', outputs('PlanToList'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
-   **To** `if(equals(outputs('Guard'), true), outputs('OfficeList'), outputs('AllTo'))`
+   **Two audiences (13 Oct, Dan: the rig's ten are for reporting during execution, not for plan generation or scope freeze).**
+   **RigPlan** (Compose): the rig's plan people, TSL, Subsea Supervisor, Rig Manager, ARM, Rig Engineer:
+   `join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],'')), ';;', ';'), ';'), json('[]')), ';')`
+   **AllTo** (plan events: created, updated, frozen) `join(union(split(replace(concat(outputs('RigPlan'), ';', outputs('PlanToList'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
+   **ExecTo** (execution events: progress, closed) `join(union(split(replace(concat(outputs('RigTen'), ';', outputs('PlanToList')), ';;', ';'), ';'), json('[]')), ';')`
+   **To** `if(equals(outputs('Guard'), true), outputs('OfficeList'), if(or(equals(outputs('Event'), 'progress'), equals(outputs('Event'), 'closed')), outputs('ExecTo'), outputs('AllTo')))` (To sits below Event)
    **Cc** `if(equals(outputs('Guard'), true), '', outputs('PlanCcList'))`
    **Banner** `if(equals(outputs('Guard'), true), '[TEST MODE] ', '')`
 9. The chat. The plan's Teams chat is created on the first post and reused for every later one, found through a receipt.
