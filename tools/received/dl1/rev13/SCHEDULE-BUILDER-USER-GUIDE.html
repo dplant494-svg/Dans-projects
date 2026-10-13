@@ -1,0 +1,833 @@
+<title>Argo Navis Field Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+
+<style>
+  /* ---- Light palette: the complete token set lives on bare :root ---- */
+  :root{
+    --paper:#FBFCFE;
+    --surface:#F1F4FA;
+    --surface-2:#E6EBF5;
+    --ink:#0E1726;
+    --ink-soft:#465061;
+    --ink-faint:#6E7889;
+    --rule:#D3DBE9;
+    --blue:#002C77;
+    --blue-bright:#1B4A9C;
+    --yellow:#EDB71E;
+    --danger:#B3261E;
+    --warn:#B45309;
+    --ok:#1A7F3C;
+    --danger-bg:#FCEDEC;
+    --warn-bg:#FDF4E6;
+    --ok-bg:#EDF7F0;
+    --code-bg:#EDF1F8;
+    --shadow:0 1px 2px rgba(14,23,38,.06),0 4px 14px rgba(14,23,38,.05);
+  }
+  /* System-dark (nothing stamped on :root) — guarded so an explicit light choice still wins */
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0B1120;
+      --surface:#141C2E;
+      --surface-2:#1D2739;
+      --ink:#E8EDF6;
+      --ink-soft:#AAB4C6;
+      --ink-faint:#8792A6;
+      --rule:#2A3547;
+      --blue:#9DBAEA;
+      --blue-bright:#7EA6E8;
+      --yellow:#F0C445;
+      --danger:#F2938C;
+      --warn:#E8A857;
+      --ok:#6FCB8E;
+      --danger-bg:#2A1715;
+      --warn-bg:#2A1F10;
+      --ok-bg:#12261A;
+      --code-bg:#111A2B;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+    }
+  }
+  /* Explicit dark choice wins in the other direction */
+  :root[data-theme="dark"]{
+    --paper:#0B1120;
+    --surface:#141C2E;
+    --surface-2:#1D2739;
+    --ink:#E8EDF6;
+    --ink-soft:#AAB4C6;
+    --ink-faint:#8792A6;
+    --rule:#2A3547;
+    --blue:#9DBAEA;
+    --blue-bright:#7EA6E8;
+    --yellow:#F0C445;
+    --danger:#F2938C;
+    --warn:#E8A857;
+    --ok:#6FCB8E;
+    --danger-bg:#2A1715;
+    --warn-bg:#2A1F10;
+    --ok-bg:#12261A;
+    --code-bg:#111A2B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Source Sans 3","Segoe UI",Arial,sans-serif;
+    font-size:17px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px 96px;}
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    border-bottom:3px solid var(--yellow);
+    padding:44px 0 26px;
+    margin-bottom:8px;
+  }
+  .eyebrow{
+    font-family:"Archivo",Arial,sans-serif;
+    font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--blue);margin:0 0 14px;
+  }
+  h1{
+    font-family:"Archivo",Arial,sans-serif;
+    font-weight:700;font-size:clamp(34px,5.4vw,52px);line-height:1.04;
+    letter-spacing:-.02em;margin:0 0 16px;text-wrap:balance;color:var(--ink);
+  }
+  .standfirst{
+    font-size:20px;line-height:1.5;color:var(--ink-soft);
+    max-width:64ch;margin:0;
+  }
+  .standfirst strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- shared type ---------- */
+  h2{
+    font-family:"Archivo",Arial,sans-serif;
+    font-weight:700;font-size:27px;letter-spacing:-.01em;line-height:1.2;
+    margin:0 0 6px;color:var(--ink);text-wrap:balance;
+  }
+  h3{
+    font-family:"Archivo",Arial,sans-serif;
+    font-weight:600;font-size:18px;line-height:1.3;
+    margin:26px 0 8px;color:var(--ink);
+  }
+  p{margin:0 0 14px;max-width:68ch;}
+  .lede{color:var(--ink-soft);max-width:68ch;margin:0 0 20px;}
+  a{color:var(--blue-bright);text-decoration:underline;text-underline-offset:2px;}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--blue-bright);outline-offset:3px;}
+  code{
+    font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:.87em;background:var(--code-bg);color:var(--ink);
+    padding:.12em .38em;border-radius:3px;border:1px solid var(--rule);
+    white-space:nowrap;
+  }
+  strong{font-weight:600;}
+
+  /* ---------- section blocks ---------- */
+  section{padding:38px 0;border-bottom:1px solid var(--rule);}
+  section:last-of-type{border-bottom:none;}
+  .kicker{
+    font-family:"Archivo",Arial,sans-serif;
+    font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 10px;
+  }
+
+  /* ---------- the five steps: numeral rail ---------- */
+  .step{
+    display:grid;
+    grid-template-columns:78px minmax(0,1fr);
+    gap:0 26px;
+    padding:32px 0;
+    border-bottom:1px solid var(--rule);
+  }
+  .step:last-child{border-bottom:none;padding-bottom:8px;}
+  .numeral{
+    font-family:"Archivo",Arial,sans-serif;
+    font-weight:700;font-size:62px;line-height:.82;
+    color:transparent;
+    -webkit-text-stroke:1.5px var(--blue);
+    font-variant-numeric:tabular-nums;
+    user-select:none;
+  }
+  .step-body{min-width:0;}
+  .step-body > :first-child{margin-top:0;}
+
+  /* ---------- callouts ---------- */
+  .callout{
+    border:1px solid var(--rule);
+    border-left:4px solid var(--blue);
+    background:var(--surface);
+    border-radius:0 4px 4px 0;
+    padding:14px 18px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .callout p{margin:0;max-width:none;}
+  .callout p + p{margin-top:10px;}
+  .callout .tag{
+    display:block;
+    font-family:"Archivo",Arial,sans-serif;
+    font-size:10.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+    margin-bottom:6px;color:var(--blue);
+  }
+  .callout.watch{border-left-color:var(--danger);background:var(--danger-bg);}
+  .callout.watch .tag{color:var(--danger);}
+  .callout.why{border-left-color:var(--yellow);background:var(--warn-bg);}
+  .callout.why .tag{color:var(--warn);}
+  .callout.do{border-left-color:var(--ok);background:var(--ok-bg);}
+  .callout.do .tag{color:var(--ok);}
+
+  /* ---------- tables ---------- */
+  .scroller{overflow-x:auto;margin:18px 0;border:1px solid var(--rule);border-radius:4px;background:var(--surface);}
+  table{border-collapse:collapse;width:100%;font-size:15.5px;min-width:520px;}
+  th,td{text-align:left;padding:11px 15px;border-bottom:1px solid var(--rule);vertical-align:top;}
+  thead th{
+    font-family:"Archivo",Arial,sans-serif;
+    font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    /* Both tokens flip together, so this reads correctly in every theme without overrides:
+       dark-blue ground + near-white text in light, light-blue ground + near-black in dark. */
+    color:var(--paper);background:var(--blue);border-bottom:none;white-space:nowrap;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:color-mix(in srgb, var(--surface-2) 55%, transparent);}
+  td code{white-space:normal;}
+  .nowrap{white-space:nowrap;}
+
+  /* ---------- flow diagram ---------- */
+  .flow{
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+    padding:18px;margin:20px 0;
+    background:var(--surface);border:1px solid var(--rule);border-radius:4px;
+    font-family:"IBM Plex Mono",monospace;font-size:13px;
+  }
+  .node{
+    padding:6px 11px;border-radius:3px;
+    border:1px solid var(--blue);color:var(--blue);
+    background:var(--paper);white-space:nowrap;
+  }
+  .node.gate{background:var(--blue);color:var(--paper);border-color:var(--blue);font-weight:600;}
+  .node.par{border-style:dashed;border-color:var(--warn);color:var(--warn);}
+  .arrow{color:var(--ink-faint);font-weight:600;}
+  .par-stack{display:flex;flex-direction:column;gap:5px;}
+
+  /* ---------- command block ---------- */
+  pre{
+    font-family:"IBM Plex Mono",monospace;font-size:13.5px;line-height:1.6;
+    background:var(--code-bg);color:var(--ink);
+    border:1px solid var(--rule);border-left:4px solid var(--blue);
+    border-radius:0 4px 4px 0;
+    padding:14px 16px;margin:14px 0;overflow-x:auto;
+  }
+  pre code{background:none;border:none;padding:0;font-size:inherit;white-space:pre;}
+
+  /* ---------- checklist ---------- */
+  ul,ol{margin:0 0 14px;padding-left:22px;max-width:68ch;}
+  li{margin-bottom:7px;}
+  ul.plain{list-style:none;padding-left:0;}
+  ul.plain li{
+    padding-left:26px;position:relative;
+  }
+  ul.plain li::before{
+    content:"";position:absolute;left:2px;top:.62em;
+    width:9px;height:9px;border:1.5px solid var(--blue);border-radius:2px;
+  }
+
+  /* ---------- field list ---------- */
+  dl{margin:14px 0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px 20px;}
+  dt{font-family:"IBM Plex Mono",monospace;font-size:13.5px;color:var(--blue);white-space:nowrap;padding-top:2px;}
+  dd{margin:0;color:var(--ink-soft);}
+
+  /* ---------- footer ---------- */
+  .footer{
+    margin-top:44px;padding-top:22px;border-top:3px solid var(--yellow);
+    font-size:14.5px;color:var(--ink-faint);
+  }
+  .footer p{max-width:70ch;}
+
+  @media (max-width:640px){
+    body{font-size:16px;}
+    .wrap{padding:0 18px 64px;}
+    .step{grid-template-columns:1fr;gap:0;}
+    .numeral{font-size:44px;margin-bottom:6px;}
+    dl{grid-template-columns:1fr;gap:2px 0;}
+    dt{padding-top:8px;}
+  }
+  @media print{
+    body{background:#fff;color:#000;}
+    .callout,.scroller,.flow,pre{break-inside:avoid;}
+    .step{break-inside:avoid;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;}
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Seadrill Technical Services &middot; Planning &middot; Argo Navis (formerly DL-1 / BOP Schedule Builder)</p>
+    <h1>Argo Navis Field Guide</h1>
+    <p class="standfirst">Everything you need to take a BOP end-of-well maintenance project from a pile of Maximo PMs to a sequenced schedule on the Planning Dashboard. <strong>No prior knowledge assumed.</strong> Work through it in order the first time; after that you'll only need Step&nbsp;5 and the weekly rhythm.</p>
+  </header>
+
+  <section>
+    <p class="kicker">What this thing actually does</p>
+    <h2>It builds the schedule, then tracks it</h2>
+    <p>Everything else in the reporting family <em>reports against</em> a schedule someone already built by hand in P6. This is the one tool that <strong>builds the schedule itself</strong> — it reads the rig's outstanding PMs, works out what order the work has to happen in, stacks up the hours, and gives you dates. Then you report progress against it every cycle and it pushes to the dashboard.</p>
+    <p>Three things go in, one thing comes out:</p>
+    <div class="scroller">
+      <table>
+        <thead>
+          <tr><th>Goes in</th><th>What it gives the tool</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>WO.csv</code><br><span style="color:var(--ink-faint);font-size:.9em;">from <code>\\SEADRILL23339\Well Control Data</code></span></td><td>Every open Well Control work order across the fleet, refreshed 06:00 Houston daily &mdash; the raw scope</td></tr>
+          <tr><td><code>Job Plans and Durations.xlsm</code></td><td>How many hours each job plan takes</td></tr>
+          <tr><td><code>Job Plan Branch&nbsp;&nbsp;Sequence Map.xlsx</code></td><td>The rules: which branch each job belongs to, and in what order</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Out comes a <code>..._Report.json</code> file that lands on the BOP Fleet Planning Dashboard, plus two printable documents — a Scope Freeze pack and a Planning Report.</p>
+    <div class="callout why">
+      <span class="tag">Why the third file matters most</span>
+      <p>The Branch &amp; Sequence Map is the tool's brain. It's a spreadsheet Dan Plant maintains by hand, and it decides whether a job is Lower BOP work, LMRP work, Controls, Offline Ancillary or Testing — and what has to finish before it can start. If a schedule comes out looking wrong, that workbook is usually the reason, not the tool.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Before you touch anything</p>
+    <h2>Getting it open</h2>
+    <p>You need <strong>Chrome or Edge on a desktop or laptop</strong>. Not an iPad — this is a wide-screen tool and always has been.</p>
+    <p>Start the little local server first, then open the tool in your browser:</p>
+    <pre><code>powershell -NoProfile -ExecutionPolicy Bypass -File "Scripts/Serve-Static.ps1" -Root "REV 13" -Port 8966</code></pre>
+    <p>Leave that window alone — it needs to stay running while you work. Then go to <code>http://localhost:8966</code> in your browser. Close the window when you're finished for the day.</p>
+    <div class="callout why">
+      <span class="tag">Why not just double-click the file</span>
+      <p>You can, and the tool will open. But two of the best features stop working: it can't remember your data folder (so you'd pick all three files by hand, every single time), and Sync downloads to your Downloads folder instead of saving straight to the shared reporting folder. Browsers only allow folder access over a proper web address, which is what the server provides.</p>
+    </div>
+    <div class="callout do">
+      <span class="tag">First-time setup, once only</span>
+      <p>On your very first run you'll click three "pick a folder" buttons — two in Step&nbsp;1 (the WO feed share and the rules folder), and one on your first Sync for the shared reporting folder. The tool remembers all three permanently. You never do it again.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">The five steps</p>
+    <h2>Building a schedule from scratch</h2>
+    <p class="lede">The tabs across the top run left to right. You genuinely do need to do them in order the first time, because each one feeds the next.</p>
+
+    <div class="step">
+      <div class="numeral">1</div>
+      <div class="step-body">
+        <h3>Import Data</h3>
+        <div class="callout do">
+          <span class="tag">Not your first report on this job?</span>
+          <p>Then skip this whole page. Hit <strong>Continue Existing Schedule</strong> at the top, pick the JSON file from your last Sync, and it drops you straight into Step&nbsp;5 with everything as you left it. Full explanation in <em>The weekly rhythm</em> below.</p>
+        </div>
+        <p>There are <strong>two folders to connect</strong>, because the three inputs don't live in the same place:</p>
+        <div class="scroller">
+          <table>
+            <thead><tr><th class="nowrap">Button</th><th>Point it at</th><th>What it loads</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="nowrap"><strong>1. WO Feed Folder</strong></td>
+                <td><code>\\SEADRILL23339\Well Control Data</code></td>
+                <td><code>WO.csv</code> — rewritten every morning by Maximo</td>
+              </tr>
+              <tr>
+                <td class="nowrap"><strong>2. Rules Folder</strong></td>
+                <td>the <strong>Job Plans</strong> folder (or the Schedule Builder folder above it — the tool looks one level down)</td>
+                <td><code>Job Plans and Durations.xlsm</code> and <code>Job Plan Branch&nbsp;&nbsp;Sequence Map.xlsx</code> &mdash; plus, if they are there, the <code>Job plan detailed *.xlsx</code> workbooks (the steps of every job plan) and the three Maximo <code>* Job Plan List.xlsx</code> exports (WCE, MPD, Electrical)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Click each one once. Both are remembered permanently and re-scanned automatically every time you open the tool. If you ever keep all three files in one folder, just point both buttons at it.</p>
+        <div class="callout">
+          <span class="tag">Optional extras — the tool works without them</span>
+          <p>Picked up automatically when they sit in either folder, or loaded by hand from links in the Scope Challenge:</p>
+          <dl>
+            <dt>synergi_lessons.json</dt><dd>Synergi lessons learned, matched to your work orders (written daily by the Synergi WCE tool).</dd>
+            <dt>wce_references.json</dt><dd>The WCE Reference Hub's events, alerts, MoCs and eDOCS documents for each Maximo location.</dd>
+            <dt>WCE CoC Tracker</dt><dd><strong>Connects automatically</strong> when the tool opens, from the published tracker (<code>http://sdrlazneuiis01d.corp.local:8080/SSORT/…REV6 1.html</code>), giving each work order the tracker's own certification status and its SSCE spares. Step&nbsp;1 shows "Connected automatically". <strong>↻ 3. CoC Tracker</strong> refreshes it; <strong>📁 Pick SSORT folder</strong> is the fallback if the server can't be reached. (Open the tool through <code>Serve-Static.ps1</code> as above &mdash; it fetches the tracker for the page.)</dd>
+            <dt>ssce-requests-data.js</dt><dd>SSCE requests and their approval from the WCE SSCE Requests dashboard.</dd>
+          </dl>
+          <p>None of these is ever written back to. Each shows the date it was produced; old data is flagged rather than hidden.</p>
+        </div>
+        <div class="callout why">
+          <span class="tag">Why two folders and not one</span>
+          <p>The WO feed is machine-written to a server share. The other two are hand-maintained — Dan Plant edits the Branch Map — so they stay where they're edited. Copying them next to the feed would create a second copy that quietly goes out of date, which is worse than clicking one extra button once.</p>
+        </div>
+        <p>You should end up with three green ticks and a summary confirming all three inputs are loaded. <strong>If <em>Next: Commencement Setup</em> stays greyed out, the panel underneath tells you exactly which input is still missing and which button provides it.</strong></p>
+        <p>After the first time it does this automatically whenever you open the tool. If someone's refreshed a spreadsheet, click <strong>Reload Everything</strong>.</p>
+        <div class="callout">
+          <span class="tag">Fleet backlog — the reason importing comes first</span>
+          <p>Once the feed loads you get two things. First a <strong>scope picker</strong> — the SFI groups in the feed, with a count against each. All are selected by default; untick any you aren't planning. Work is scoped by SFI group rather than by maintenance discipline, so equipment is planned whoever maintains it: 93 of the BOP control-system work orders in SFI 332 are owned by Electrical, and all 132 MPD work orders sit in SFI 339 — all of it comes through just the same.</p>
+          <p>Then a table of <strong>every rig's outstanding backlog</strong> in that scope: how many open work orders each is carrying, and how much of it the Branch Map can actually sequence.</p>
+          <p>That's the whole point of loading data before setting the campaign up — you can see where the work actually is, and whether a rig's schedule will be meaningful, <em>before</em> committing to a rig and a date. A rig showing a low "Sequenceable" percentage will produce a thin schedule whatever dates you give it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="numeral">2</div>
+      <div class="step-body">
+        <h3>Commencement Setup</h3>
+        <p>Now tell it what job this is. Six fields:</p>
+        <dl>
+          <dt>Commencement Date</dt><dd>The moment the BOP lands on the beams. <strong>Every date in the schedule counts forward from here</strong>, so get it right.</dd>
+          <dt>Rig</dt><dd>Each rig shows how many open work orders it has in today's feed. A rig with no Maximo site mapped, or none of its work in the feed, is greyed out and says which.</dd>
+          <dt>BOP</dt><dd>BOP1 or BOP2. <strong>This filters the scope</strong> — you get that stack and its control pods plus shared rig equipment, and nothing belonging to the other stack.</dd>
+          <dt>Type of Pull</dt><dd>BWM (between-well maintenance), HOP, or Unplanned.</dd>
+          <dt>BOP Deployment Date + days</dt><dd>Optional but recommended. When the BOP goes back subsea. <strong>It sets the scope window:</strong> only Maximo work orders due up to the deployment date <strong>plus 21 days</strong> (change the days if you need to) come into the campaign, instead of everything due in the next three months. That gives a shorter, more realistic schedule &mdash; on a West Vela BOP1 test, deployment 15 days after commencement cut the scope from 143 to 108 work orders and from 918 to 719 hours. It also gives Total Float &mdash; how much slack you have before the BOP is wanted back.</dd>
+          <dt>Schedule Name</dt><dd>Fills itself in, e.g. <code>20260901_WAU_BWM_BOP1_Schedule</code>. Read-only, and that's deliberate — the dashboard identifies your project by this name.</dd>
+        </dl>
+        <p>Under the fields you'll see a coverage note that updates as you change rig, BOP or date. It tells you how many work orders are in the feed for that rig, how many belong to the BOP you picked, and <strong>how many will actually appear in Step&nbsp;3</strong> — so the next page never surprises you with a different number.</p>
+        <p>Not every work order comes through. It takes:</p>
+        <ul class="plain">
+          <li>work for <strong>your rig only</strong> (matched on its Maximo Site ID) <strong>and your BOP</strong> (or shared rig equipment), that is due &mdash; or already overdue &mdash; <strong>by the deployment date + 21 days</strong> when you have set one, or otherwise within <strong>3 months and 1 week</strong> of commencement, and</li>
+          <li>every <strong>BWM</strong>-tagged work order, whatever its due date — because those are always done at a BWM.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="numeral">3</div>
+      <div class="step-body">
+        <h3>Scope Challenge</h3>
+        <p>This is the part that needs your judgement rather than the computer's. Every PM inside the scope window arrives ticked <strong>Execute</strong>. Untick anything you're deferring to a later window. That's the whole scope challenge: what's genuinely getting done this time.</p>
+        <div class="callout watch">
+          <span class="tag">The milling question &mdash; every plan</span>
+          <p>Above the task form: <strong>"Was any milling conducted in the previous well or during the current campaign?"</strong> Answer it before building the schedule (the tool stops you until you do). <strong>Yes</strong> means milling debris may have reached the annular and ram packers: press <em>Prefill annular inspection task</em>, set its hours, add it, and note what was milled &mdash; it is carried to the After Action Review.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">Task types: Work, MOC, AAB &mdash; and one task in every plan</span>
+          <p><strong>Add Task</strong> now has a <strong>Type</strong>. A modification is an <strong>MOC</strong> task with its MOC number; an AAB to be conducted is an <strong>AAB</strong> task with its AAB number. <strong>MoCs…</strong> lists the Synergi MoCs raised on this rig (from 90 days before commencement) &mdash; add each real modification with one click. These feed pre-deployment lines B-04 and B-17.</p>
+          <p>Every new plan also carries <strong>SSS-007 BOP handling equipment function test (DIR-37-0165)</strong>, an Offline Ancillary task marked <em>EVERY PLAN</em> that can't be removed. When it reaches 100% it answers pre-deployment line B-19.</p>
+        </div>
+        <div class="callout watch">
+          <span class="tag">"Unassigned", "not on the job plan lists", and the Job plan gaps report</span>
+          <p><strong>Unassigned</strong> means the work order's job plan is <strong>not on the Branch &amp; Sequence Map</strong>, so the tool has no branch, parallel group or order for it and cannot sequence it with Lower BOP, LMRP or Controls. If it is also missing from <em>Job Plans and Durations</em> it shows <strong>0 h</strong>.</p>
+          <p><strong>not on the job plan lists</strong> means the job plan is on none of the three Maximo job plan list exports. That is a gap in the exports, not proof the plan is inactive: the Electrical list holds only 23 plans, so a live plan such as 0900-EE90061 (13 open WOs) is flagged.</p>
+          <p><strong>Job plan gaps</strong> (Step 1 and the toolbar here) lists every job plan used by open work orders that is missing from the Branch Map, Durations, the saved job plans, the Maximo lists or the checklist file, most work orders first, with who fixes each and a CSV download. Tick <em>this rig only</em> to narrow it.</p>
+          <p><b style="color:#9b1c1c;">Excluded on Branch Map</b> marks a job plan Dan has deliberately taken out of the BWM (his Excluded sheet: in-service subsea tests such as the 7-day subsea function test, riser gantry crane work). Its work orders arrive <strong>deferred</strong>; tick Execute only if this campaign really does it. A blue <b style="color:#0b4f8a;">Maximo</b> flag on a duration means the job plan is not in <em>Job Plans and Durations</em>, so the hours are the Maximo job plan's own figure &mdash; confirm it or type over it.</p>
+          <p>A <b style="color:var(--danger);">red "feed is N days old"</b> banner means <code>WO.csv</code> has not refreshed &mdash; the scope and due dates are out of date until it does.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Every active PM is accounted for</span>          <p>Boxes at the top give the count against the scope window: <strong>Active in Maximo</strong> (every open PM for this rig and BOP in your SFI groups), <strong>Captured by the window</strong> (how many to execute, how many deferred), <strong>Not captured</strong> (due after the window) and <strong>Added by hand</strong>.</p>
+          <p>The PMs that are <em>not</em> captured are listed below the scope table (click the orange bar to open it), soonest first, with how many days past the window each one falls. <strong>Tick Execute</strong> on any of them to bring it into this campaign &mdash; it moves into the scope marked <em>ADDED · OUTSIDE WINDOW</em>. Untick it again and it goes back to the list (it is not counted as a deferral, because it was never due in this window). <em>Execute All</em> never pulls the outside list in; those are chosen one at a time.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">The SFI / Location column</span>
+          <p>Each row shows its <strong>SFI group</strong> with the <strong>full Maximo location</strong> underneath — <code>331.LMRP1.700</code>, <code>332.BCS1.120</code>, <code>339.MPD1.300</code>. That's the reference a technician uses to find the equipment, so it's shown in full rather than shortened.</p>
+          <p>An orange discipline label underneath (MECHANICAL, ELECTRICAL, MPD) means the work is maintained outside Well Control. It's still in your scope — SFI decides that — but it tells you whose people you'll need.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Group by Branch or SFI code</span>
+          <p>The <strong>Group by</strong> buttons switch how both the Scope Challenge and the Step&nbsp;4 schedule are organised. Each group heading carries its own counts and hours.</p>
+          <p><strong>Branch</strong> (the default) shows the work the way it will actually be executed — Lower BOP, LMRP, Controls and so on, which is how the engine sequences it.</p>
+          <p><strong>SFI code</strong> splits everything by equipment group instead, so you can review all the riser work together, or check exactly what's in scope for 339. <strong>Discipline</strong> groups it by who does the work. Switching is purely a change of view — it never alters the schedule or the dates.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Discipline — WCE, MPD, Electrical</span>
+          <p>The <strong>Discipline</strong> chips under the toolbar show just one discipline's work orders, with a count on each chip. The discipline comes from the work order's owner group in Maximo &mdash; who Maximo has assigned to do it.</p>
+          <p>Use it to hand each discipline its own list: pick <strong>MPD</strong>, then print the Scope Freeze pack and you get the MPD worklist, with the view named in its header. The same chips appear on the Schedule and Execute pages.</p>
+          <p><strong>It only changes what is listed.</strong> The schedule, the crew levelling and the finish date always include every discipline &mdash; they work the same campaign.</p>
+        </div>
+        <div class="callout watch">
+          <span class="tag">NC column — Maximo Non-Conformity</span>
+          <p>If a work order <strong>won't be completed before its Maximo due date</strong> &mdash; because you are deferring it, or because the schedule finishes it late &mdash; tick <strong>NC</strong> and type the <strong>Maximo NC reference</strong> into the box that appears.</p>
+          <p><strong>The schedule can't be built until every ticked NC has its reference.</strong> Next: Build Schedule, and the Schedule and Execute tabs, stop and take you to the first one missing. A red banner above the table lists them.</p>
+          <p>An orange <b>NC?</b> next to the box is only a prompt: the dates suggest an NC may be needed (already overdue, deferred, or planned to finish after the due date). You decide.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">Cert column — status straight from the WCE CoC Tracker</span>
+          <p>With the CoC Tracker connected (Step&nbsp;1, folder 3), each work order whose asset is in the tracker shows <strong>exactly the status the tracker shows</strong> for it, in the tracker's own colours: <b style="color:#D0021B;">Expired</b>, <b style="color:#E8820C;">Due within 6 months</b>, <b style="color:#B8901A;">Due within 1 year</b>, <b style="color:#7B5EA7;">Due within 18 months</b>, <b style="color:#0091DA;">Valid</b> or <b style="color:#8A97AC;">No date on file</b> (short labels in the column: ≤&nbsp;6&nbsp;mo, ≤&nbsp;1&nbsp;yr and so on). DL-1 reads the tracker's own register and applies its own rules, so the counts agree with the tracker's sidebar.</p>
+          <p>Click the dot for part number, serial number, certificate number and the eDOCS link. Click <b>↗</b> to open <strong>that asset in the CoC Tracker</strong>. It is matched on the Maximo asset number; where an asset has several certified parts, the worst one sets the dot. The note above the table says how old the tracker data is.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">Job Plan link, lessons and references</span>
+          <p>Click any <strong>Job Plan</strong> number to open the saved Maximo job plan &mdash; its steps, labour and materials. This works on every page and in the printed pack.</p>
+          <p>The <strong>Lessons &amp; references</strong> column counts the Synergi events, alerts, HSE events and MoCs, and the eDOCS TB / TR / TP / IR / AAB documents, held against that Maximo location. Click a number to read them. Counts are fleet-wide (all rigs); the drill-down can narrow to your rig.</p>
+          <p><strong>Exact and SFI-level are two separate slices, not two versions of one number.</strong> <em>Exact</em> counts records at this work order's location and everything below it. <em>SFI-level</em> counts records at the locations <em>above</em> it plus SFI-wide records with no location. They never overlap &mdash; add the two rows for the full total. A work order on a whole stack (e.g. <code>331.BOP</code>) has a large Exact count because everything on the stack sits below it.</p>
+          <p><strong>Matched to the Description.</strong> The counts only include records that name the work order's own equipment &mdash; the equipment words in its Description (e.g. <em>ANNULAR</em>, <em>SHEAR RAM</em>, <em>ACCUMULATOR</em>, with common abbreviations such as BSR, MUX or C&amp;K understood). <em>Exact</em> needs one such word in the record; <em>SFI-level</em>, a wider net, needs it in the record's title (or two words). Very common words only count together with another. The list opens with the matched words highlighted, and <strong>Show all n records (unfiltered)</strong> brings back everything under the location if you want it.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">NOV AX procedures &mdash; the correct revision, one click</span>
+          <p>Save a copy of the <strong>Well Control document register</strong> (<code>Seadrill_WellControl_AllVessels_Upload.xlsx</code>) into the <code>Job Plans</code> folder and it loads with the job plans; or use <strong>Load register</strong>. Every NOV AX procedure a job plan calls out &mdash; however it is written (<em>AX050091</em>, <em>AX-061272</em>, <em>AX080453-45 Rev A</em>) &mdash; becomes a link, <em>AX080453 &middot; Rev C &#8599;</em>, that opens the register's <strong>eDOCS</strong> document, which is always the current version.</p>
+          <p>An <strong>AX &times;n</strong> chip in the Job Plan cell lists the procedures for that job; <strong>NOV procedures</strong> on the toolbar lists them for the whole executed scope, and the Scope Freeze pack prints the same table for pre-job preparation.</p>
+          <p>Orange flags mean the job plan text is out of step with the register: <b style="color:#8a5200;">JP cites Rev A &middot; current Rev C</b>, <b style="color:#8a5200;">not in register</b>, or <b style="color:#8a5200;">register eDOCS 11251572</b> beside an eDOCS number the job plan quotes that isn't the register's. Use the linked register document and raise the job plan correction in Maximo.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">Spare parts</span>
+          <p>Where a Maximo job plan carries a <strong>Materials</strong> list, a <strong>Parts n</strong> chip shows it (item number, description, quantity, storeroom). <strong>Spare parts</strong> on the toolbar adds them up for the executed scope &mdash; quantity &times; the number of work orders using that job plan &mdash; with a <strong>Download CSV</strong> for ordering, and the Scope Freeze pack prints it. The note says how many job plans have parts on file; the list grows as Materials are added to the job plans in Maximo.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">The Unit column — which BOP each job belongs to</span>
+          <p><strong>BOP1</strong> or <strong>BOP2</strong> means the job is on that stack or its control pods, and only appears when you have selected that BOP in Step 2.</p>
+          <p><strong>SHARED</strong> means rig equipment serving both — riser, diverter, choke &amp; kill, surface controls. Shared work appears in either campaign, which is why a BOP1 plan legitimately contains riser jobs.</p>
+          <p>A note above the table gives the split, so you can see the isolation is working.</p>
+        </div>
+        <p>You can also fix things inline:</p>
+        <ul>
+          <li><strong>Duration</strong> — overtype it if you know the job plan's figure is wrong.</li>
+          <li><strong>Techs</strong> — how many technicians the job occupies. This drives the crew levelling in Step 4, so it's worth getting roughly right on the big jobs. A <span style="background:#fff8e6;padding:0 3px;">tinted box</span> means there's no figure on file and it's assuming 1.</li>
+          <li><strong>Parallel Group</strong> — change it to move a job into a different bundle of concurrent work.</li>
+          <li><strong>Add Task</strong> — for work with no PM behind it at all (greasing, a one-off inspection). Give it a name, hours and a branch.</li>
+        </ul>
+        <div class="callout">
+          <span class="tag">The SSCE column — 60-month tasks only</span>
+          <p>60-month work is the heavy overhaul scope: annular BOP field overhauls, diverter housing overhauls, pipe ram block inspections. If a certified <strong>SSCE</strong> asset will be available, the job becomes a change-out rather than an in-place overhaul — much quicker.</p>
+          <p>Tick <strong>SSCE</strong> on those rows and the duration switches to the change-out figure held against that job plan. Un-tick it and the original duration comes straight back. The banner tells you how many hours you've saved across the job.</p>
+          <p>The column shows <b>—</b> on anything that isn't a 60-month task, so most rows stay quiet. You'll typically see only a handful per campaign, which is right: 60-month work is five-yearly, so little of it is ever due at once.</p>
+        </div>
+        <div class="callout watch">
+          <span class="tag">Two things to know about SSCE</span>
+          <p><strong>"n/a" means no figure is on record yet.</strong> Ticking the box then leaves the duration alone rather than guessing a saving. Either type the change-out hours into the Duration column, or get the job plan's figure added to the Branch Map's <code>SSCE Change-Out Hours</code> column.</p>
+          <p><strong>A red ▲ means the change-out figure is longer than the overhaul it replaces.</strong> That's either a wrong figure or a job not worth changing out — the tool applies what the data says but flags it, because it would otherwise quietly push your finish date <em>out</em>.</p>
+          <p><strong>Is the SSCE actually approved?</strong> When the SSCE requests data is loaded, the cell shows the request raised for <em>that work order's asset</em> through the COC dashboard: <b style="color:var(--ok);">APPROVED</b>, <b style="color:var(--warn);">REQUESTED</b> (waiting on the WCE SSCE Requests dashboard owner), <b style="color:var(--danger);">DENIED</b>, or <b style="color:var(--danger);">NO REQUEST</b>. Hover for who approved it and when. A ticked change-out without an approved request is a scope risk &mdash; the Scope Freeze pack lists the status beside each one.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Raising an SSCE application</span>
+          <p>When the CoC Tracker holds <strong>SSCE spares</strong> for a work order's asset (Shared Capital items with the same OEM part number), the SSCE cell shows e.g. <em>3 SSCE spares · 2 avail. ›</em>. Click it to see each spare &mdash; asset, serial, its own certification status, and whether it's <b style="color:var(--ok);">Available</b> or <b style="color:var(--danger);">Allocated</b> to another rig.</p>
+          <p><strong>Request SSCE in the CoC Tracker</strong> opens the tracker on that asset. Click the component, then <strong>Request</strong> beside the spare you want: the tracker's own <strong>SSCE Application Form</strong> opens pre-filled with the asset and the spare, and posts it to Central Spares for approval on the WCE SSCE Requests dashboard. The application is raised in one place only &mdash; the tracker &mdash; so there is never a second copy to reconcile.</p>
+        </div>
+        <p>These banners may appear at the top. They mean different things:</p>
+        <div class="scroller">
+          <table>
+            <thead><tr><th class="nowrap">Banner</th><th>What it means</th><th>What to do</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="nowrap"><strong>"could not be matched"</strong></td>
+                <td>The PM's job plan isn't in the Branch Map, so the tool has no duration and no idea where it belongs. These land under <em>Unassigned</em> with <strong>0 hours</strong>.</td>
+                <td>Either add the job plan to the Branch Map and reload, or type a duration and branch in by hand. Don't leave them at 0h — they'd take no time in the schedule.</td>
+              </tr>
+              <tr>
+                <td class="nowrap"><strong>"not active in Maximo"</strong></td>
+                <td>The work order names a job plan that is on none of the three Maximo job plan lists (WCE, MPD, Electrical). The old <em>"not WVE / WJU"</em> badge is gone &mdash; it relied on a patchy column in the Branch Map and flagged perfectly good fleet-wide job plans. Every job plan Maximo puts on a work order is shown and linked as it is.</td>
+                <td>Check the job plan in Maximo before the work is issued. The work order stays in scope &mdash; it's still the job Maximo asked for.</td>
+              </tr>
+              <tr>
+                <td class="nowrap"><strong>"Non-Conformity needs its Maximo NC reference"</strong></td>
+                <td>An NC box is ticked with no reference typed.</td>
+                <td>Type the Maximo NC reference in the NC column. You can't move on to the schedule until you do.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="numeral">4</div>
+      <div class="step-body">
+        <h3>Schedule</h3>
+        <p>Set four durations for the fixed rig activities the PMs don't cover — <strong>Rack Back</strong>, <strong>Split BOP/LMRP</strong>, <strong>Stack Up</strong> and <strong>Drift Test</strong> — then decide the one question that changes the shape of the whole job:</p>
+        <div class="callout">
+          <span class="tag">Resources available to run BOP and LMRP simultaneously?</span>
+          <p><strong>Ticked</strong> — you have separate crews, so Lower BOP and LMRP work run side by side. Shorter job.</p>
+          <p><strong>Unticked</strong> — one crew does both, so LMRP can't start until Lower BOP is finished. Longer job.</p>
+          <p>Controls (pods) always runs alongside either way — that's a different discipline and a different crew.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Crew available per discipline</span>
+          <p>Enter how many technicians each discipline actually has — Lower BOP, LMRP, Controls, Offline Ancillary, Testing. The schedule then <strong>queues work behind the crew</strong> instead of assuming everything can run at once.</p>
+          <p>This matters more than it sounds. Left blank, the tool will cheerfully schedule 18 or more jobs simultaneously, which is a plan no rig can execute. Put real numbers in and the dates become achievable.</p>
+          <p><strong>Leave a field blank (or 0) to mean unlimited</strong> — sensible for Offline Ancillary if that's 3rd-party or ship's crew. Blank everywhere reproduces exactly how earlier revisions behaved.</p>
+        </div>
+        <p>Hit <strong>Generate Schedule</strong>. The tool stacks hours forward continuously — 24/7, no shift gaps, because rig ops run back-to-back 12-hour shifts. The shape it builds:</p>
+        <div class="flow">
+          <span class="node gate">BOP on beams</span>
+          <span class="arrow">&rarr;</span>
+          <span class="node">Rack Back</span>
+          <span class="arrow">&rarr;</span>
+          <span class="node gate">Split</span>
+          <span class="arrow">&rarr;</span>
+          <span class="par-stack">
+            <span class="node par">Lower BOP</span>
+            <span class="node par">LMRP</span>
+            <span class="node par">Controls</span>
+            <span class="node par">Offline Ancillary</span>
+          </span>
+          <span class="arrow">&rarr;</span>
+          <span class="node gate">Stack Up</span>
+          <span class="arrow">&rarr;</span>
+          <span class="node">Testing</span>
+          <span class="arrow">&rarr;</span>
+          <span class="node">Drift Test</span>
+        </div>
+        <p>The dashed branches run concurrently. Stack Up waits for Lower BOP, LMRP <em>and</em> Controls to all finish. Offline Ancillary runs alongside but doesn't hold Stack Up up — that's the point of it.</p>
+        <p>One clever bit worth knowing: if several PMs share the same physical piece of kit — say a BWM, a 3-monthly and a 6-monthly all on the same ram — the tool treats them as <strong>one visit</strong>. They start together and the group finishes when the longest one does, rather than adding all three durations together.</p>
+        <p>The schedule table now carries three extra columns worth understanding:</p>
+        <div class="scroller">
+          <table>
+            <thead><tr><th class="nowrap">Column</th><th>What it tells you</th></tr></thead>
+            <tbody>
+              <tr><td class="nowrap"><strong>Techs</strong></td><td>Technicians the job occupies. 1 unless the Branch Map's <code>Techs Required</code> column says otherwise.</td></tr>
+              <tr><td class="nowrap"><strong>Float (h)</strong></td><td>Spare time before that task starts delaying the gate after it. <strong>0 means critical</strong> — the row is tinted and tagged. A task with 40h float can slip two days without hurting you; a critical one can't slip at all.</td></tr>
+              <tr><td class="nowrap"><strong>Queued</strong></td><td>Hours the task was pushed back purely because the crew was busy. Nothing here means the crew size isn't constraining that job.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Above the table, a per-discipline summary shows crew set against <strong>peak actually used</strong> — the quickest way to see whether a discipline is the bottleneck, and whether one more pair of hands would pull the finish in.</p>
+        <div class="callout why">
+          <span class="tag">Float tells you about sequence, not about crew</span>
+          <p>Float answers "can this slip without moving the end date?". It does <em>not</em> mean the task is free to start earlier — the crew may be fully committed. That's what the Queued column is for. The two are kept separate deliberately, because treating queued time as float would tell you that you have freedom you haven't got.</p>
+        </div>
+        <div class="callout watch">
+          <span class="tag">"Planned to finish after their Maximo due date"</span>
+          <p>If this banner appears, some work you are executing will be finished <em>after</em> its Maximo due date on the current plan. Either go back to the Scope Challenge and raise the NC with its Maximo reference, or re-plan (crew, SSCE, sequence) so it finishes in time.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Before the scope freeze meeting</span>
+          <p>Click <strong>Scope Freeze Document</strong> and print it. You get the schedule layout, the full list of deferred PMs colour-coded by how close to due they are, and a signature block for Planner, Subsea Supervisor/OIM, Technical Superintendent and 3rd Party Verifier. Take it into the meeting and get it signed.</p>
+          <p>It also carries every <strong>Non-Conformity with its Maximo reference</strong>, the <strong>SSCE request status</strong> beside each change-out, and <strong>Certification due within the campaign</strong>: certified parts on the work being executed whose CoC falls due before the planned finish &mdash; the chance to recertify while the kit is already opened up.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="numeral">5</div>
+      <div class="step-body">
+        <h3>Execute &amp; Report</h3>
+        <p>Where you'll live for the rest of the job. <strong>Set the Report Date first</strong> — almost everything on this page is calculated relative to it.</p>
+
+        <h3>Recording progress</h3>
+        <p>In <em>Task &amp; Milestone Actuals</em>, for each task set a status (not started / in progress / complete), the actual dates, and a % complete. Then press <strong>Calculate Project</strong>.</p>
+        <div class="callout">
+          <span class="tag">Calculate Project — the button that does the work</span>
+          <p>Type all your percentages in first, then press it once. Anything at <strong>100%</strong> becomes Complete with its actual finish set to the Report Date. Anything <strong>partial</strong> becomes In Progress and the tool re-forecasts every downstream date from the hours still remaining.</p>
+          <p>It works in one pass rather than recalculating on every keystroke, so nothing jumps around while you're typing.</p>
+        </div>
+        <div class="callout do">
+          <span class="tag">Checklist — the job plan, done on site</span>
+          <p>Every task with a Maximo job plan has a <strong>&#9745; Checklist</strong> button under its % box. It pops up the job plan as a checklist over the plan: mark each step <strong>Done / N/A / Not OK</strong> (N/A and Not OK need a comment), add photographs (several at once, or from an intrinsically safe camera later at a desktop), record materials used, and sign it off &mdash; <em>Performed by</em> and <em>Verified by</em>, Seadrill or third party. Close returns you to the plan.</p>
+          <p><strong>The checklist's % drives the task's % Complete</strong> (Done and N/A count; each step is an equal share), shown read-only as <em>from checklist</em>. A task without a checklist keeps the typed %. Press <strong>Calculate Project</strong> afterwards, as always. A <b style="color:var(--danger);">NOT OK</b> step does not count and asks for a CM / Synergi reference; a signed checklist shows <b style="color:var(--ok);">SIGNED ✔ · evidence linked</b>.</p>
+          <p>While building the scope, clicking a job plan number still opens the read-only job plan with its NOV procedure links and parts. Steps ticked in REV 11 still count until a checklist is started.</p>
+          <p><strong>Setting it up on your PC (once):</strong> run <code>Scripts\Install-JobPlanChecklists.ps1</code>, which copies Dan's checklist file from his pack to your local app-data folder (never OneDrive, because it carries the SACRED address), then restart the local server. If the file is missing, the pop-up says so and points you here. The pop-up always has its own <strong>✕ Close</strong> bar &mdash; Esc or a click outside it closes it too &mdash; and <strong>Open in new tab</strong> if you prefer a full window.</p>
+        </div>
+        <div class="callout watch">
+          <span class="tag">Testing section and the 90% notice</span>
+          <p>A banner shows how far the <strong>Testing section</strong> is (Testing branch plus the Drift Test, by hours) and how many of the nine surface tests have their evidence. At <strong>90%</strong> it says the <strong>pre-deployment call is to be arranged</strong>: teams review the Pre-deployment page and raise concerns ahead of the call. From REV 14 this goes to SACRED, which sends the Teams notice.</p>
+        </div>
+        <div class="callout">
+          <span class="tag">Actual Dur. Taken — fills itself in, type over it when you know better</span>
+          <p>The little label under the box tells you where the number came from:</p>
+          <ul class="plain" style="margin-bottom:0;">
+            <li><strong>forecast</strong> — nothing recorded yet, so it's showing the planned hours.</li>
+            <li><strong>elapsed</strong> — worked out from your actual start and finish dates, for jobs spanning a day or more.</li>
+            <li><strong>manual</strong> — you typed it. This always wins. Type <code>0</code> to hand the cell back to automatic.</li>
+          </ul>
+          <p>Because the start and finish fields hold dates but no clock times, a job that starts and finishes on the <em>same day</em> can't be measured from them — so it shows the forecast hours instead of a misleading zero. Type the real figure over it.</p>
+          <p>Once you've typed real figures, the Report Cycle box above shows <strong>Recorded Hours vs Plan</strong> — counting only the rows you've actually filled in, so the comparison means something.</p>
+        </div>
+        <p>Milestones tick themselves. "LMRP Complete" goes green the moment every LMRP task is marked complete — you don't maintain them by hand. Type a date in yourself only if you want to override it, and your date always wins.</p>
+        <p>Above the actuals you get a timeline with the current critical-path item outlined in red, and a <strong>Next 24 Hours</strong> list — the day-to-day focus list for the rig.</p>
+
+        <h3>Deferrals &amp; Non-Conformities</h3>
+        <p>Below the actuals, one table lists every work order <strong>deferred</strong> out of this campaign and every one raised as a <strong>Non-Conformity</strong>: WO number, job plan, location, discipline, the Maximo due date, the decision (deferred, or executing after its due date) and the <strong>Maximo NC reference</strong>. The same table prints in the Planning Report. A missing reference shows in red as <b style="color:var(--danger);">MISSING</b>.</p>
+
+        <h3>The three logs</h3>
+        <div class="scroller">
+          <table>
+            <thead><tr><th class="nowrap">Log</th><th>Use it for</th></tr></thead>
+            <tbody>
+              <tr><td class="nowrap"><strong>Waiting Time (NPT)</strong></td><td>Hours lost waiting — permit, crane, weather, vendor, parts, rig ops. Log per day, per cause. Totals up by day and by category.</td></tr>
+              <tr><td class="nowrap"><strong>3rd Party</strong></td><td>Vendor personnel on board (with day rates) and project costs (freight, parts, rentals). Leave the off-board date blank for anyone still on board.</td></tr>
+              <tr><td class="nowrap"><strong>Break-in Work</strong></td><td>Unplanned work that appeared mid-job. Auto-numbered <code>BRK-001</code> onwards. Close each one out with a lesson learned when it's done.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout watch">
+          <span class="tag">NPT does not move your dates</span>
+          <p>That's deliberate, not a bug. Real delay already reaches the schedule through your task actuals and percentages — if NPT hours were added on top, the same delay would be counted twice and the finish date would drift too far out. The NPT log is there to <em>report</em> lost time, not to reschedule.</p>
+          <p>For the same reason: if a wait turned into an actual piece of work, raise it as Break-in Work <em>instead of</em> logging NPT for it — not both.</p>
+        </div>
+
+        <h3>Pushing it out</h3>
+        <ul class="plain">
+          <li><strong>Sync to Dashboard</strong> — saves the JSON to the shared reporting folder. This is the one that makes it appear on the dashboard.</li>
+          <li><strong>Download Copy</strong> — same file, to your Downloads. Handy for emailing.</li>
+          <li><strong>Print / Save as PDF</strong> — the human-readable Planning Report, including the NPT and 3rd party tables.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="numeral">6</div>
+      <div class="step-body">
+        <h3>Pre-deployment</h3>
+        <p>The pre-deployment checklist (<strong>FRM-00-0168 Rev 8</strong>) now lives here: Argo Navis holds the primary copy, and SSORT keeps a copy for emergencies only. Fill it in as the campaign goes, not on the day. Before the BOP is deployed, everyone signs it, like a flight checklist.</p>
+        <p>Every line has a <strong>state</strong>, shown by a coloured label:</p>
+        <ul class="plain">
+          <li><strong>Not started</strong> or <strong>In progress</strong> — still open.</li>
+          <li><strong>Pre-filled (confirm)</strong> — the plan already knows the answer (break-ins, the timeline, SSCE requests). It <em>never counts</em> until its owner presses <strong>Confirm</strong>.</li>
+          <li><strong>Complete</strong> or <strong>Evidence linked</strong> — closed.</li>
+          <li><strong>N/A</strong> — closed only once a <strong>reason</strong> and a <strong>rig-management approver</strong> are both entered.</li>
+        </ul>
+        <p>Some lines fill themselves in from the plan:</p>
+        <ul class="plain">
+          <li><strong>B-03</strong> lists the work orders not completed, each needing its approved Maximo NC reference.</li>
+          <li><strong>B-04</strong> lists the MOC tasks.</li>
+          <li><strong>B-19</strong> follows the SSS-007 task.</li>
+          <li>The <strong>nine surface tests</strong> close when their evidence is linked: the SSORT record (FUNCTION, SOAK, DRAWDOWN, ACOUSTIC, ROV, EDS, EHBS) or an attached file (PRESSURE TEST charts, DRIFT record). ACOUSTIC is pre-filled N/A on rigs with no acoustic system.</li>
+        </ul>
+        <p>Photographs go in labelled slots, FWD and AFT for every ram cavity. A slot can also point at the CBM post that already photographed it, as long as that photograph was taken after the last change-out on the cavity.</p>
+        <div class="callout watch">
+          <span class="tag">Signing</span>
+          <p>The checklist can be signed only when <strong>every line is closed</strong>, and never with less than SSORT's own minimum (designation, cavities, packers confirmed Yes, every photo slot). The open lines are listed at the top of the page.</p>
+          <p>Sign-offs go <strong>in order</strong>: TSL, then SS Supervisor, then Rig Manager. These are required. Operations Director, WCE Manager, Head of Well Control Equipment and Regional Superintendent are optional and never hold it up. The order shown is provisional until Dan confirms it.</p>
+          <p>The first signature fixes a fingerprint (SHA-256) of the whole checklist. <strong>If anything changes afterwards, a new revision starts and the signatures already given lapse</strong>; the earlier signed revision is kept. Sign-off is a typed name and date for now.</p>
+        </div>
+        <p>When the three required roles have signed, the page reads <strong>Pre-deployment complete</strong>. The pre-deployment call is a review, not a Q&amp;A: it is recorded by SACRED's Help Centre, with these fields as a fallback.</p>
+        <p>Buttons:</p>
+        <ul class="plain">
+          <li><strong>Export (SSORT keys)</strong> — the checklist in SSORT's own format.</li>
+          <li><strong>Designation</strong> — the BOP's required photograph slots, for SSORT and WCGRRT.</li>
+          <li><strong>Print FRM-00-0168</strong> — the printed form.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">The bit that matters most</p>
+    <h2>The weekly rhythm</h2>
+    <p>You build the schedule <strong>once</strong>. Every report after that is a short visit to Step&nbsp;5. Get this wrong and you'll cause yourself real problems, so it's worth reading twice.</p>
+    <div class="scroller">
+      <table>
+        <thead><tr><th class="nowrap">When</th><th>What you do</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="nowrap"><strong>First time</strong></td>
+            <td>Steps 1&nbsp;&rarr;&nbsp;2&nbsp;&rarr;&nbsp;3&nbsp;&rarr;&nbsp;4&nbsp;&rarr;&nbsp;5, then <strong>Sync</strong>.</td>
+          </tr>
+          <tr>
+            <td class="nowrap"><strong>Every time after</strong></td>
+            <td><strong>Continue Existing Schedule</strong> (top of Step&nbsp;1) &rarr; pick the JSON from your last Sync &rarr; you land in Step&nbsp;5 &rarr; change the Report Date &rarr; update actuals &rarr; <strong>Calculate Project</strong> &rarr; <strong>Sync</strong>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Two things lock permanently the moment you Sync for the first time, and both are on purpose:</p>
+    <ul>
+      <li><strong>The baseline.</strong> Your original finish date is captured and never moves again, so Plan Variance always measures against the plan you committed to — not against a target that quietly slides every week.</li>
+      <li><strong>The filename.</strong> Fixed for the life of the project, so every Sync overwrites the same dashboard record instead of piling up duplicates.</li>
+    </ul>
+    <div class="callout watch">
+      <span class="tag">Never rebuild from Step 1 for a follow-up report</span>
+      <p>If you start again from scratch instead of using Continue, you lose the locked baseline — so variance is measured from the wrong place — and everything already finished gets re-reported as "completed this cycle", because the tool has no memory of the last Sync. Use Continue.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">When something looks wrong</p>
+    <h2>Troubleshooting</h2>
+    <div class="scroller">
+      <table>
+        <thead><tr><th>Symptom</th><th>Almost always because</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>"Connect Data Folder" does nothing, or complains</td>
+            <td>You opened the file directly instead of through the server, or you're in a browser other than Chrome/Edge.</td>
+            <td>Start the server and go to <code>http://localhost:8965</code>. Or use the "Advanced" link in Step&nbsp;1 to load the three files by hand.</td>
+          </tr>
+          <tr>
+            <td>A spreadsheet won't load</td>
+            <td>It's open in Excel, so there's a lock file sitting next to it.</td>
+            <td>Close it in Excel. Watch especially for the Branch Map — Dan edits it, so check with him before assuming it's free.</td>
+          </tr>
+          <tr>
+            <td>Tasks show 0 hours</td>
+            <td>Their job plan isn't in the Branch Map.</td>
+            <td>Add it to the Branch Map and reload, or type a duration in manually in Step&nbsp;3.</td>
+          </tr>
+          <tr>
+            <td>Schedule looks far too short</td>
+            <td>Either most tasks are deferred, or you're on West Jupiter/West Vela where coverage is subsea-only.</td>
+            <td>Check the Execute count in Step&nbsp;3 and re-read the coverage note in Step&nbsp;2.</td>
+          </tr>
+          <tr>
+            <td>Job finishes later than it should</td>
+            <td>The "resources simultaneously" box is unticked, so LMRP is queued behind Lower BOP.</td>
+            <td>Tick it if you really do have two crews, and regenerate.</td>
+          </tr>
+          <tr>
+            <td>Nothing on the dashboard</td>
+            <td>The JSON went somewhere other than the shared reporting folder.</td>
+            <td>Check the folder status line next to the Sync button; reconnect the folder and Sync again.</td>
+          </tr>
+          <tr>
+            <td>Finished work reappears as "completed this cycle"</td>
+            <td>You rebuilt from Step&nbsp;1 instead of using Continue.</td>
+            <td>Go back to your last Sync's JSON and Continue from that.</td>
+          </tr>
+          <tr>
+            <td><strong>"Next: Scope Challenge" stays greyed out</strong></td>
+            <td>Only one of the two folders is connected — most often the WO feed share, with the rules folder still missing.</td>
+            <td>Read the panel under the import cards: it names the missing input and the button that supplies it. Connect the <strong>Rules Folder</strong> (button 2) and point it at the Schedule Builder folder.</td>
+          </tr>
+          <tr>
+            <td>Your rig isn't in the dropdown</td>
+            <td>Either it has no Maximo Site ID mapped in the tool, or it has no work orders in today's feed. The dropdown says which.</td>
+            <td>If it says "no Maximo site mapped", the mapping needs adding. If it says "not in today's feed", there's genuinely no open work for it in the SFI groups you've selected.</td>
+          </tr>
+          <tr>
+            <td>Ticking SSCE changes nothing</td>
+            <td>No change-out duration is on record for that job plan — the cell shows "n/a".</td>
+            <td>Type the hours into the Duration column, or have the figure added to the Branch Map's <code>SSCE Change-Out Hours</code> column.</td>
+          </tr>
+          <tr>
+            <td>The feed won't load first thing in the morning</td>
+            <td>It's being rewritten around 06:00 Houston, and the file is briefly locked.</td>
+            <td>Wait a minute and click <strong>Reload</strong> on the WO Feed Folder. The tool tells you when this is the likely cause.</td>
+          </tr>
+          <tr>
+            <td>3rd party costs missing from the dashboard</td>
+            <td>Nothing you've done — the dashboard can't display them yet.</td>
+            <td>They're saved, they round-trip, and they print. Dashboard support needs building on Dan's side.</td>
+          </tr>
+          <tr>
+            <td><strong>"Next: Build Schedule" bounces back to the Scope Challenge</strong></td>
+            <td>A work order is ticked NC with no Maximo NC reference.</td>
+            <td>The message names the WO numbers. Type the reference into the NC column (red box), or untick NC if it isn't one.</td>
+          </tr>
+          <tr>
+            <td>Ticking steps doesn't move the finish date</td>
+            <td>Steps set the % complete; like a typed %, it isn't applied until you recalculate.</td>
+            <td>Press <strong>Calculate Project</strong>.</td>
+          </tr>
+          <tr>
+            <td>Cert column shows only dashes, or the CoC note says STALE</td>
+            <td>The CoC tracker isn't loaded, or the copy you have is more than 30 days old.</td>
+            <td>Connect the SSORT share with <strong>3. Connect CoC Tracker</strong> in Step&nbsp;1 (remembered from then on), or use <strong>Load CoC Tracker</strong> above the table. STALE means the tracker's own register is more than 30 days old &mdash; it is refreshed in the tracker, not here.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <p class="kicker">Managing expectations</p>
+    <h2>What it deliberately doesn't do</h2>
+    <p>These are decisions, not gaps — so please don't report them as faults:</p>
+    <ul>
+      <li><strong>No P6 import.</strong> The instruction was explicit: this schedule is the single source of truth, so progress is entered here and nowhere else. Nothing is imported from another schedule to reconcile against.</li>
+      <li><strong>Sequencing coverage varies by rig.</strong> Every rig with a Maximo site can be planned, but how much of its work the Branch Map can sequence differs &mdash; check the <em>Sequenceable</em> % in Step&nbsp;1 before trusting a rig's schedule.</li>
+      <li><strong>NPT doesn't drive dates.</strong> Covered above — it would double-count.</li>
+      <li><strong>No full After Action Review register.</strong> Break-in items have an open/close lifecycle with a lesson-learned note, and that's the extent of it.</li>
+      <li><strong>Steps don't re-sequence the schedule.</strong> Ticking job plan steps sets a task's % complete and records milestones; the schedule still plans at work-order level, and step dates are not fed back into the engine.</li>
+      <li><strong>Nothing is written back.</strong> NC references, step ticks, certification lights and SSCE approvals are recorded or read here only &mdash; raise the NC in Maximo, approve the SSCE on its own dashboard, and update the CoC tracker in SACRED as normal.</li>
+      <li><strong>Only PM work orders arrive in the feed.</strong> Corrective and breakdown work isn't in it, so anything unplanned still gets raised by hand as Break-in Work.</li>
+    </ul>
+    <p>Anything on that list needs a conversation with Dan Plant before it changes.</p>
+  </section>
+
+  <div class="footer">
+    <p>Covers <strong>REV 13</strong> (2026-10-12), badged <strong>Argo Navis</strong> (draft branding, pending Seadrill Communications). The version badge is in the tool's banner — check it matches before following this guide. REV 13 renamed the tool Argo Navis and added the Pre-deployment checklist (step 6), the job plan Checklist pop-up, MOC and AAB task types, the SSS-007 task and the milling question in every plan, and the Testing section %; posting to SACRED follows in REV 14. REV 12 aligned the Cert column with the WCE CoC Tracker, linked each asset and SSCE request to it, and fitted the Scope Challenge on one screen; REV 11 added job plan steps, the discipline view, the Maximo-active check, CoC certification lights, SSCE approval status and Non-Conformity references; REV 10 the Job Plan link and the Lessons &amp; references column; REV 9 Synergi lessons. Earlier revisions read per-rig PM spreadsheets instead of the daily WO feed, have no crew levelling, float or SSCE option, set the campaign up before importing the data, and scope by maintenance discipline rather than by SFI group.</p>
+    <p>Deeper detail lives in the project folder: <code>CLAUDE.md</code> for the rules and gotchas, <code>SCHEDULE-BUILDER-BUILD-HANDOVER.md</code> for how it's built inside.</p>
+  </div>
+
+</div>
