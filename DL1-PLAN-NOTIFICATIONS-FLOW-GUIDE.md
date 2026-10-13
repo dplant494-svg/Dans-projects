@@ -70,8 +70,10 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
    advanced `@or(contains(toLower(coalesce(item()?['Region'], '')), 'all'), and(not(empty(outputs('Region'))), contains(toLower(coalesce(item()?['Region'], '')), outputs('Region'))))`);
    **RegionalEmails** (Select, From `body('RegionalRows')`, Map `item()?['Email']`); **RegionalList** (Compose, `join(body('RegionalEmails'), ';')`).
    **Two audiences (13 Oct, Dan: the rig's ten are for reporting during execution, not for plan generation or scope freeze).**
-   **RigPlan** (Compose): the rig's plan people, TSL, Subsea Supervisor, Rig Manager, ARM, Rig Engineer:
-   `join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['TslEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],'')), ';;', ';'), ';'), json('[]')), ';')`
+   **RigPlan** (Compose): the rig's plan people, Subsea Supervisor, TSL, Rig Manager, ARM, Rig Engineer, Electrical Supervisor, MPD Supervisor (Dan, 13 Oct):
+   `join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['TslEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['RigEngineerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ESVEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['MPDEmail'],'')), ';;', ';'), ';'), json('[]')), ';')`
+   **ChatTo** (Compose): the plan chat's members, the rig's plan people and the regional reviewers, superintendents by email only:
+   `join(union(split(replace(concat(outputs('RigPlan'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
    **SupRows / SupEmails / SupList**: the Superintendents table, the same three cards as the help flow.
    **AllTo** (plan events: created, updated, frozen; Dan 13 Oct: SSS, TSL, RM, ARM, Rig Engineer, the superintendents and the regional reviewers, no Planning To rows, no duplicates)
    `join(union(split(replace(concat(outputs('RigPlan'), ';', outputs('SupList'), ';', outputs('RegionalList')), ';;', ';'), ';'), json('[]')), ';')`
@@ -85,7 +87,7 @@ join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['OIMEm
    **Condition HasChat**: `length(body('ReceiptRows')?['value'])` is greater than `0`.
    - **HasChat = No:** first two cards that de-duplicate the members (Teams adds the connection owner itself, so an
      address that is also on a list makes "Duplicate chat members"): Compose **MembersArr**
-     `union(split(toLower(if(equals(outputs('Guard'), true), outputs('OfficeList'), outputs('AllTo'))), ';'), json('[]'))`;
+     `union(split(toLower(if(equals(outputs('Guard'), true), outputs('OfficeList'), outputs('ChatTo'))), ';'), json('[]'))`;
      **Filter array** renamed **MembersOk**, From `outputs('MembersArr')`, advanced mode
      `@and(not(empty(item())), not(equals(item(), 'daniel.plant@seadrill.com')))` (the connection owner's address).
      Then Teams **Create a chat**: Members fx `join(body('MembersOk'), ',')`, Title fx `outputs('PlanId')`. Then
