@@ -1,0 +1,1 @@
+Drop Lee's Argo Navis REV folder files here (the tool page, Argo-Navis-Job-Plan-Checklists.html, supporting files). Deploy-Dashboard.ps1 publishes them AS-IS to <share>\dl1\ (/sacred/dl1/). The scanner writes plans-open.json and data\ into the same folder. Never commit the checklist file: it carries the intake URL.

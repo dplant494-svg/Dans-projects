@@ -118,6 +118,27 @@ if (Test-Path -Path $toolsSrcDir) {
     }
 }
 
+# Argo Navis (Lee's schedule builder, DL-1) served from the server (13 Oct 2026, items 51 and 65): everything Dan
+# drops into C:\TSC-Dashboard\tools\argo-navis\ (Lee's REV folder: the tool page, the job plan checklist file, any
+# supporting files) is published AS-IS to <share>\dl1\ ('dl1DeployPath' from config.json when set), the folder the BOP
+# page's Argo Navis button opens and the scanner's plans-open.json and data\ already live in. Subfolders are copied too.
+$argoSrcDir = Join-Path $repoRoot 'tools\argo-navis'
+if (Test-Path -Path $argoSrcDir) {
+    $argoDeployDir = Join-Path (Split-Path -Parent $DeployPath) 'dl1'
+    if ($config -and $config.PSObject.Properties['dl1DeployPath'] -and $config.dl1DeployPath) { $argoDeployDir = [Environment]::ExpandEnvironmentVariables($config.dl1DeployPath) }
+    $argoFiles = @(Get-ChildItem -Path $argoSrcDir -File -Recurse)
+    if ($argoFiles.Count) {
+        if (-not (Test-Path -Path $argoDeployDir)) { New-Item -ItemType Directory -Path $argoDeployDir -Force | Out-Null }
+        foreach ($af in $argoFiles) {
+            $rel = $af.FullName.Substring($argoSrcDir.Length).TrimStart('\')
+            $dst = Join-Path $argoDeployDir $rel
+            $dstDir = Split-Path -Parent $dst; if (-not (Test-Path -Path $dstDir)) { New-Item -ItemType Directory -Path $dstDir -Force | Out-Null }
+            Copy-Item -Path $af.FullName -Destination $dst -Force
+        }
+        Write-Host "Published $($argoFiles.Count) Argo Navis file(s) from tools\argo-navis to $argoDeployDir" -ForegroundColor Green
+    }
+}
+
 # Precharge Pro (formerly DeepCharge Pro) / BOP Precharge Calculator. 'prechargeDeployPath' names the
 # folder the calculator is served from (the scanner writes its requests\
 # subfolder there). Every page in it is built by the calculator session and
