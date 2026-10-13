@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.90'
+$ScriptVersion = '2.91'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4233,6 +4233,40 @@ $phaseTimes['planning data'] = [math]::Round($phaseClock.Elapsed.TotalSeconds); 
 $deployPath = ''
 if ($config.PSObject.Properties['deployPath'] -and $config.deployPath) {
     $deployPath = [Environment]::ExpandEnvironmentVariables($config.deployPath)
+}
+if ($deployPath) {   # v2.91: the Argo Navis data publish runs even when the scan found no reports (it reads no report)
+    # v2.91 (13 Oct 2026, item 65): publish Argo Navis's inputs beside the tool for a rig to read by URL (the rig is the
+    # planner and cannot reach a Houston share). config 'dl1DataSources' lists files or folders (a folder entry may carry
+    # a 'pattern'); each is copied to <dl1DeployPath>\data\ only when newer than the copy there (the Branch Map is skipped
+    # while its Excel lock file '~$...' exists), and index.json lists what is there (name, bytes, modified, source) so the
+    # tool can show the feed age. Nothing happens until Dan lists the sources, e.g.
+    #   "dl1DataSources": [ "\\\\SEADRILL23339\\Well Control Data\\WO.csv", { "folder": "C:\\...\\Job Plans", "pattern": "*.xlsx" } ]
+    if ($config.PSObject.Properties['dl1DataSources'] -and $config.dl1DataSources) {
+        try {
+            $dl1DataPath = Join-Path $(if ($config.PSObject.Properties['dl1DeployPath'] -and $config.dl1DeployPath) { [Environment]::ExpandEnvironmentVariables($config.dl1DeployPath) } else { Join-Path (Split-Path -Parent $deployPath) 'dl1' }) 'data'
+            if (-not (Test-Path -Path $dl1DataPath)) { New-Item -ItemType Directory -Path $dl1DataPath -Force | Out-Null }
+            $dl1Index = New-Object System.Collections.Generic.List[object]; $dl1Copied = 0; $dl1Skipped = 0
+            foreach ($srcEntry in @($config.dl1DataSources)) {
+                $srcFiles = @()
+                if ($srcEntry -is [string]) { $sp = [Environment]::ExpandEnvironmentVariables($srcEntry); if (Test-Path -Path $sp -PathType Leaf) { $srcFiles = @(Get-Item -Path $sp) } elseif (Test-Path -Path $sp -PathType Container) { $srcFiles = @(Get-ChildItem -Path $sp -File) } else { Write-Warning "dl1DataSources: not found: $sp"; continue } }
+                else { $sf = [Environment]::ExpandEnvironmentVariables([string](Get-Prop $srcEntry 'folder')); $spat = [string](Get-Prop $srcEntry 'pattern'); if (-not $spat) { $spat = '*' }; if (Test-Path -Path $sf -PathType Container) { $srcFiles = @(Get-ChildItem -Path $sf -File -Filter $spat) } else { Write-Warning "dl1DataSources: folder not found: $sf"; continue } }
+                foreach ($sfile in $srcFiles) {
+                    if ($sfile.Name -like '~$*') { continue }
+                    $lock = Join-Path $sfile.DirectoryName ('~$' + $sfile.Name)
+                    if (Test-Path -Path $lock) { $dl1Skipped++; Write-Host "dl1 data: $($sfile.Name) is open in Excel (lock file present), keeping the previous copy" -ForegroundColor Yellow }
+                    else {
+                        $dest = Join-Path $dl1DataPath $sfile.Name
+                        if (-not (Test-Path -Path $dest) -or (Get-Item -Path $dest).LastWriteTimeUtc -lt $sfile.LastWriteTimeUtc -or (Get-Item -Path $dest).Length -ne $sfile.Length) { Copy-Item -Path $sfile.FullName -Destination $dest -Force; $dl1Copied++ }
+                    }
+                    $di = Get-Item -Path (Join-Path $dl1DataPath $sfile.Name) -ErrorAction SilentlyContinue
+                    if ($di) { $dl1Index.Add([ordered]@{ name = $di.Name; bytes = $di.Length; modified = $di.LastWriteTimeUtc.ToString('yyyy-MM-ddTHH:mm:ssZ'); sourceModified = $sfile.LastWriteTimeUtc.ToString('yyyy-MM-ddTHH:mm:ssZ'); source = $sfile.DirectoryName }) | Out-Null }
+                }
+            }
+            $dl1IndexJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $dl1Index.Count; files = $dl1Index.ToArray() })
+            [System.IO.File]::WriteAllText((Join-Path $dl1DataPath 'index.json'), $dl1IndexJson, (New-Object System.Text.UTF8Encoding($false)))
+            Write-Host "dl1 data: $($dl1Index.Count) file(s) indexed, $dl1Copied copied, $dl1Skipped locked, in $dl1DataPath" -ForegroundColor Green
+        } catch { Write-Warning "dl1 data publish failed (scan unaffected): $($_.Exception.Message)" }
+    }
 }
 if ($deployPath -and $reports.Count -eq 0) {
     # Safety: an empty scan usually means the config points at the wrong
