@@ -4055,11 +4055,12 @@ try {
             foreach ($prr in (ConvertTo-AabList $prRows)) {
                 if ($null -eq $prr -or $prr -is [string]) { continue }
                 $pEmail = (ConvertTo-AabText (Get-Prop $prr 'Email')).Trim().ToLowerInvariant(); if (-not $pEmail) { continue }
-                $pRegions = @(((ConvertTo-AabText (Get-Prop $prr 'Region')) -split '[,;/]') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-                if ($pRegions.Count -eq 0) { $pRegions = @('All') }
+                $pRegions = New-Object System.Collections.Generic.List[string]   # plain strings: a pipeline's output on Windows PowerShell carries a PSObject wrapper the JSON serialiser rejects
+                foreach ($rgRaw in (([string](ConvertTo-AabText (Get-Prop $prr 'Region'))) -split '[,;/]')) { $rgT = ([string]$rgRaw).Trim(); if ($rgT) { $pRegions.Add($rgT) | Out-Null } }
+                if ($pRegions.Count -eq 0) { $pRegions.Add('All') | Out-Null }
                 $pReq = (ConvertTo-AabText (Get-Prop $prr 'Required')).Trim().ToLowerInvariant(); if (-not $pReq) { $pReq = 'yes' }
                 $pSec = (ConvertTo-AabText (Get-Prop $prr 'Section')).Trim(); if (-not $pSec) { $pSec = 'All' }
-                $planReviewers.Add([ordered]@{ regions = $pRegions; position = ConvertTo-AabText (Get-Prop $prr 'Position'); name = ConvertTo-AabText (Get-Prop $prr 'Name'); email = $pEmail; section = $pSec; required = ($pReq -in @('yes','y','true','1')) }) | Out-Null
+                $planReviewers.Add([ordered]@{ regions = $pRegions.ToArray(); position = [string](ConvertTo-AabText (Get-Prop $prr 'Position')); name = [string](ConvertTo-AabText (Get-Prop $prr 'Name')); email = [string]$pEmail; section = [string]$pSec; required = [bool]($pReq -in @('yes','y','true','1')) }) | Out-Null
             }
         }
     }
@@ -4095,7 +4096,8 @@ function Get-Dl1ReviewState { param($Plan, $Reviewers, $Reviews, $Region, [bool]
     elseif ($nChg -gt 0) { $state = 'changes' }
     elseif ($all) { $state = 'verified' }
     elseif ($nReq -eq 0) { $state = 'no-reviewers' }
-    return [ordered]@{ state = $state; region = $Region; required = $req.ToArray(); others = $others.ToArray(); requiredCount = $nReq; verifiedCount = $nVer; changesCount = $nChg; allVerified = $all; outstanding = @($req | Where-Object { $_.decision -ne 'verified' } | ForEach-Object { $_.name }) }
+    $outst = New-Object System.Collections.Generic.List[string]; foreach ($rq in $req) { if ($rq.decision -ne 'verified') { $outst.Add([string]$rq.name) | Out-Null } }
+    return [ordered]@{ state = [string]$state; region = [string]$Region; required = $req.ToArray(); others = $others.ToArray(); requiredCount = [int]$nReq; verifiedCount = [int]$nVer; changesCount = [int]$nChg; allVerified = [bool]$all; outstanding = $outst.ToArray() }
 }
 function Get-Dl1TestingPct { param($Plan, $Progress)
     if (-not $Plan -or -not $Progress) { return $null }
@@ -4119,7 +4121,7 @@ foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $slim['milestones'] = $pl.milestones; $slim['deferred'] = $pl.deferred
     $slim['progress'] = $(if ($pg) { $s2 = [ordered]@{}; foreach ($k in $pg.Keys) { if ($k -ne 'tasks') { $s2[$k] = $pg[$k] } }; $s2 } else { $null })
     $slim['closeout'] = $(if ($dl1Closeouts.ContainsKey($planKey)) { $dl1Closeouts[$planKey] } else { $null })
-    $slim['review'] = Get-Dl1ReviewState -Plan $pl -Reviewers $planReviewers -Reviews $dl1Reviews -Region $(if ($rigRegion.ContainsKey([string]$pl.rig)) { $rigRegion[[string]$pl.rig] } else { '' }) -Closed ($dl1Closeouts.ContainsKey($planKey))   # v2.90
+    $slim['review'] = ConvertTo-AabPlain (Get-Dl1ReviewState -Plan $pl -Reviewers $planReviewers -Reviews $dl1Reviews -Region $(if ($rigRegion.ContainsKey([string]$pl.rig)) { $rigRegion[[string]$pl.rig] } else { '' }) -Closed ($dl1Closeouts.ContainsKey($planKey)))   # v2.90; plain for the Windows PowerShell serialiser
     $slim['testingPct'] = Get-Dl1TestingPct -Plan $pl -Progress $dl1Progress[$planKey]   # v2.90: Testing branch plus drift, duration-weighted, from the newest progress post
     $dl1ReviewStates[$planKey] = $slim['review']
     $dl1PlanList.Add($slim) | Out-Null
@@ -4181,7 +4183,7 @@ try {
         $o['linkCount'] = $slim['linkCount']
         $prPlans.Add($o) | Out-Null
     }
-    $prFull = [ordered]@{ generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); scanner = $ScriptVersion; reviewersAt = $planReviewersAt; reviewers = $planReviewers.ToArray(); rigRegions = $rigRegion; plans = $prPlans.ToArray() }
+    $prFull = [ordered]@{ generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); scanner = $ScriptVersion; reviewersAt = [string]$planReviewersAt; reviewers = ConvertTo-AabPlain $planReviewers.ToArray(); rigRegions = ConvertTo-AabPlain $rigRegion; plans = $prPlans.ToArray() }
     $prDir = Split-Path -Parent $planReviewOutputFile; if (-not (Test-Path -Path $prDir)) { New-Item -ItemType Directory -Path $prDir -Force | Out-Null }
     if ($PSVersionTable.PSEdition -eq 'Core') { $prJsonOut = $prFull | ConvertTo-Json -Depth 24 -Compress }
     else { $prJsonOut = ConvertTo-JsonArray @((ConvertTo-AabPlain $prFull)); $prJsonOut = $prJsonOut.Substring(1, $prJsonOut.Length - 2) }
@@ -4208,7 +4210,7 @@ $dl1Block = @{
     postPlans = $dl1PostPlan                  # v2.89: file -> planid for ordinary posts made under a plan
     tests     = $dl1Test.ToArray()
     evidence  = $dl1Evidence.ToArray()
-    reviewers = $planReviewers.ToArray()     # v2.90
+    reviewers = ConvertTo-AabPlain $planReviewers.ToArray()     # v2.90; plain for the Windows PowerShell serialiser
     counts    = @{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count; reviews = $dl1Reviews.Count }
 }
 if ($dl1Plans.Count -gt 0 -or $dl1Test.Count -gt 0) { Write-Host "DL-1: $($dl1Plans.Count) plan(s), $($dl1Progress.Count) with progress, $($dl1Closeouts.Count) closed out, $($dl1Test.Count) test post(s)" -ForegroundColor Green }
