@@ -11,6 +11,7 @@ Remove `<meta name="robots" content="noindex">` at launch, add `sitemap.xml` and
 | What | Where | Replace with |
 |---|---|---|
 | Coach name | done: "Coach Dan Plant" (full name approved 30 Sept) | |
+| Logo | done 13 Oct 2026: nav mark, favicon (`img/favicon.svg`), Apple touch icon, share image (`img/og-image.jpg`). Source files in `../brand/`. | |
 | Domain | done: `roughneck-fitness.com` (Namecheap, 30 Sept 2026) | |
 | `coach@roughneck-fitness.com` | footer, JSON-LD | the real mailbox |
 | Instagram `#` | footer | the handle |
