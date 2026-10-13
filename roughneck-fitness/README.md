@@ -4,7 +4,7 @@ Online fitness coaching and training plans. Personal brand built on a documented
 
 Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a client (portfolio piece); nothing personal crosses over to the studio site.
 
-## Rolling plan (last updated 5 Oct 2026)
+## Rolling plan (last updated 13 Oct 2026)
 
 **Done**: site in `site/` (noindex): story in Dan's words (message only, programme unnamed, Shaun credited with his OK), Coach Dan Plant, domain roughneck-fitness.com, 2024 before photo, dated story grid with day one 2 July 2025, NABBA prep paragraph, hero "Now" panel as a looping training clip, live sobriety counter, three plans (drafts) and one-to-one, apply form, Drinkline pointer, disclaimer. Placeholders in `site/NOTES.md`.
 
@@ -26,6 +26,23 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
     - Before posting "working from the US" on either brand: check with the accountant (residency/domicile record) and that the US visa allows work for his own company while there.
 11. **Online booking for intro calls**: a second call type on the same Cal.com account as Plantworks (one login, one calendar, so a Plantworks call and a Roughneck call can't clash). "Intro call · 20 minutes", Google Meet, booking questions: where you train, goal, current training days. Same rotation rule: block trips with date overrides. Turn it on only when one-to-one opens after qualification; until then the apply form stays the way in. Send the link and it becomes a "Book an intro call" button beside the apply form.
 
+13. **Own client-tracking app and site (decided 13 Oct 2026)**. Dan's call: build his own rather than rent one long-term.
+    - **Start on a rented app for the first clients** (TrueCoach, Trainerize or Everfit, roughly £20–£50 a month). A few months of real clients shows exactly which features matter before anything is built.
+    - **Build it as a web app on roughneck-fitness.com, not an App Store app.** It installs on a phone's home screen like an app (a "PWA"), with no app-store review and no store cut on subscriptions. A native app can come later if clients ask for it.
+    - **First version, client side:** log in; this week's programme with the exercise videos; a weekly check-in (bodyweight, photos, sessions done, energy, sleep, notes); progress charts.
+    - **First version, coach side:** list of clients with who has and hasn't checked in; open a client, see the trend, write feedback, update the programme; Stripe subscription status.
+    - **Suggested build:** Supabase (logins, database, private photo storage) and Stripe subscriptions, front end in the same style as the site. Plantworks builds it.
+    - **Data protection before the first client logs in:** weight, photos, injuries and health notes are *special category* data under UK GDPR. Needs explicit consent at sign-up, a privacy notice, photos stored privately (never public links), a way for clients to download and delete their data, and registration with the ICO (data protection fee, around £50 a year). Progress photos are never used in marketing without separate written consent per photo.
+    - Same rules as the site: nothing in the app says where the coach lives; the programme that got him sober is never named.
+14. **Roughneck clothing, print-on-demand dropshipping (decided 13 Oct 2026)**.
+    - Different from Praetorian on purpose: this is **brand merch for the coaching community**, so print-on-demand fits (no stock, no minimums). Praetorian is a premium label and is made in small runs instead.
+    - **How:** Printful or Printify connected to a small shop (Shopify Starter is the cheapest way to get a cart and checkout), with a "Shop" link on roughneck-fitness.com. Orders go straight to the printer, who ships to the customer.
+    - **First range, small:** heavyweight tee, hoodie, embroidered cap, shaker. Logo plus lines from the ethos: "Do what you're told. Follow the process." Choose premium blanks (heavyweight cotton, embroidered rather than printed caps).
+    - **Order a sample of every product before listing it**, wash it five times, and photograph the sample yourself (better than the printer's mock-ups).
+    - **Margins are thin:** a printed tee costs roughly £12–£18 to make and ship, so it sells at £28–£35. It's for the brand and the community, not the main income. Free tee with the "all three" plans or the first month of one-to-one is a good use of it.
+    - Pick a printer with UK/EU production for UK customers and US production for US ones, so delivery is fast and there are no import charges.
+    - **Tell James.** Dan is helping launch Praetorian (premium men's fitness wear) while starting his own clothing. The two don't compete (merch vs premium label), but say it openly. An option worth raising: Praetorian as Roughneck's kit partner, with Dan training in it on camera.
+
 **How video gets here**: Drive can list files but can't deliver video into a session. Upload clips as assets on a GitHub release in this repo; the session downloads them via the API, cuts them with ffmpeg (`pip install imageio-ffmpeg`), and only small web cuts go into git. Inventory in `assets/from-video/INDEX.md`.
 
 **Decide first**
@@ -39,7 +56,7 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 6. "By my team": don't claim a team that isn't there yet. Launch as one named coach; add coaches when there is demand.
 
 **Build**
-7. Coaching app: TrueCoach, Trainerize or Everfit. All do programmes, check-ins, video form review, and take the monthly payment. About £20–£50 a month. Pick one and learn it during the course.
+7. Coaching app: start on TrueCoach, Trainerize or Everfit (about £20–£50 a month) for the first clients, then move to Roughneck's own web app (item 13).
 8. Site: single page, same engineering as the studio sites. Hero with the transformation, the story, who it's for, programmes, how it works, results, and an **apply** form (not a buy button). Applications come to the inbox; you pick who you take.
 9. Payments: Stripe Payment Links for the self-serve programme, subscription via the coaching app for 1:1.
 
@@ -81,4 +98,5 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 - Instagram handle once claimed.
 
 ## Not now
-- Merchandise, supplements, an app of your own, a podcast. All after the first ten paying clients.
+- Supplements, a podcast. After the first ten paying clients.
+- Merchandise and an app of his own: now on the plan (items 13 and 14, decided 13 Oct 2026).

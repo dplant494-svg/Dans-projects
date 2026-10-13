@@ -5,6 +5,7 @@ Written 10 Oct 2026. Private working document; not served on the site (404 rule 
 **The brand:** understated, smart, high-end men's fitness wear that works in the gym and socially. Lululemon men's is the reference point. Men's first, women's later. CEO James, Houston, Texas. Launching in the USA.
 
 **The model:** not print-on-demand dropshipping. Print-on-demand puts a logo on a stock blank, which is merch, not premium. Instead:
+
 1. Small production runs (50–300 per style per colour) from a low-minimum manufacturer.
 2. Pre-orders on the site before each run ("Drop 01 ships in 6 weeks"), so customers part-fund production.
 3. A 3PL (outsourced warehouse) holds the stock and ships every order. James never packs a box.
