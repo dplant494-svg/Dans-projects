@@ -188,7 +188,7 @@ if (Test-Path -Path $helpSrcDir) {
         $helpDeployDir = [Environment]::ExpandEnvironmentVariables($config.helpDeployPath)
     }
     if (-not (Test-Path -Path $helpDeployDir)) { New-Item -ItemType Directory -Path $helpDeployDir -Force | Out-Null }
-    foreach ($name in @('help-centre.html', 'help-centre.js', 'set-password.html', 'gate-config.js', 'help-data.js')) {
+    foreach ($name in @('help-centre.html', 'help-centre.js', 'set-password.html', 'gate-config.js', 'help-data.js', 'plan-review.js', 'plan-review-data.js')) {   # 13 Oct 2026: the Plans tab and its data (item 53)
         $src = Join-Path $helpSrcDir $name
         if (Test-Path -Path $src) {
             Copy-Item -Path $src -Destination (Join-Path $helpDeployDir $name) -Force

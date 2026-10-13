@@ -924,7 +924,7 @@ function renderPlanningReport(rigName){
   else { html = renderOnePlanningReport(rigName, PLANNING_REPORTS[rigName]); }
   return html + renderDl1Plans(rigName);
 }
-function dl1Stamp(data){ var d = data && data.dl1; if(!d) return '0'; var c = d.counts || {}; return (c.plans||0) + '.' + (c.progress||0) + '.' + (c.closeouts||0) + '.' + (c.tests||0) + '.' + Object.keys(data.planningReportsByBop || {}).length; }
+function dl1Stamp(data){ var d = data && data.dl1; if(!d) return '0'; var c = d.counts || {}; return (c.plans||0) + '.' + (c.progress||0) + '.' + (c.closeouts||0) + '.' + (c.tests||0) + '.' + (c.reviews||0) + '.' + Object.keys(data.planningReportsByBop || {}).length; }
 function renderOnePlanningReport(rigName, pr){
   if(!pr || !pr.planning) return '';
   var p = pr.planning;
@@ -1017,6 +1017,15 @@ function renderDl1Plans(rigName){
       (pl.windowFrom ? ' &middot; ' + fmtDate(pl.windowFrom) + ' &rarr; ' + fmtDate(pl.windowTo) : '') +
       (pl.frozenAt ? ' &middot; frozen ' + fmtDate(String(pl.frozenAt).slice(0,10)) + (pl.frozenBy ? ' by ' + pl.frozenBy : '') : '') + '</div>';
     if(pl.rev) html += '<div class="field-line"><span class="lbl">Source:</span> ' + pl.rev + '</div>';
+    // 13 Oct 2026 (scanner v2.90, item 53): the review state against the regional reviewer roster, from the Help Centre's Plans tab.
+    if(pl.review && pl.review.state && pl.review.state !== 'frozen' && pl.review.state !== 'closed'){
+      var rvw = pl.review, rvTxt = rvw.state === 'verified' ? 'Verified by all (' + rvw.verifiedCount + ' of ' + rvw.requiredCount + ') — planner to freeze the scope' :
+        rvw.state === 'changes' ? 'Changes requested (' + rvw.changesCount + ')' :
+        rvw.state === 'no-reviewers' ? 'No reviewers for this region yet' :
+        rvw.verifiedCount + ' of ' + rvw.requiredCount + ' verified' + ((rvw.outstanding || []).length ? ' · outstanding: ' + rvw.outstanding.join(', ') : '');
+      html += '<div class="field-line"><span class="lbl">Review:</span> ' + rvTxt + ' <a href="../help/help-centre.html#plans" style="font-size:11px">Plans tab</a></div>';
+    }
+    if(pl.testingPct != null) html += '<div class="field-line"><span class="lbl">Testing section:</span> ' + pl.testingPct + '%' + (pl.testingPct >= 90 ? ' · pre-deployment call to be arranged' : '') + '</div>';
     var stats = [];
     if(pl.totalTasks != null) stats.push(['Tasks', pl.totalTasks + (pl.totalMaintenance != null ? ' (' + pl.totalMaintenance + ' WOs)' : '')]);
     if(pl.totalHours != null) stats.push(['Hours', pl.totalHours]);

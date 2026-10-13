@@ -232,3 +232,26 @@ CREATE TABLE dbo.[plan_links] (
 GO
 CREATE INDEX [IX_plan_links_plan] ON dbo.[plan_links] ([planId], [taskId]);
 GO
+
+-- v2.90 (13 Oct 2026): the reviewers' verdicts from the Help Centre's Plans tab, one row per reviewer per scope version
+-- (the newest wins in the export). Exported as export_plan_reviews.csv; test reviews are never exported.
+IF OBJECT_ID('dbo.plan_reviews','U') IS NULL
+CREATE TABLE dbo.[plan_reviews] (
+    [planId] NVARCHAR(200) NOT NULL,
+    [scopeVersion] NVARCHAR(200) NOT NULL,
+    [email] NVARCHAR(400) NOT NULL,
+    [reviewer] NVARCHAR(400) NULL,
+    [position] NVARCHAR(400) NULL,
+    [section] NVARCHAR(400) NULL,
+    [decision] NVARCHAR(400) NULL,
+    [comment] NVARCHAR(MAX) NULL,
+    [at] NVARCHAR(400) NULL,
+    [saved] NVARCHAR(400) NULL,
+    [rig] NVARCHAR(400) NULL,
+    [rigKey] NVARCHAR(400) NULL,
+    [rev] NVARCHAR(400) NULL,
+    [file] NVARCHAR(400) NULL,
+    [isTest] NVARCHAR(400) NULL,
+    CONSTRAINT PK_plan_reviews PRIMARY KEY ([planId], [scopeVersion], [email])
+);
+GO

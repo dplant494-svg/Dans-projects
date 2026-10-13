@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.89'
+$ScriptVersion = '2.90'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1245,6 +1245,7 @@ $dl1Evidence = New-Object System.Collections.Generic.List[object]   # one row pe
 $dl1Test = New-Object System.Collections.Generic.List[object]       # the test posts, listed so the Status page and Dan can see them
 $dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
 $dl1PostPlan = @{}     # v2.89: file name -> meta.planid for every ordinary post made under a plan
+$dl1Reviews = @{}      # v2.90: Help Centre 'plan-review' records (Plans tab), keyed planId|scopeVersion|email; the newest saved per reviewer wins
 $dl1Links = @{}        # v2.89: SSORT 162 'plan-link' records (tools entry 62/64), keyed by linkid; the newest action per link wins (link / unlink)
 function ConvertTo-Dl1Text { param($Value) if ($null -eq $Value) { return '' }; if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }; return [string]$Value }   # PowerShell 7's ConvertFrom-Json turns a full ISO timestamp into [datetime] (a date-only string such as 2026-11-14 stays a string, checked 12 Oct): written back as UTC, the instant unchanged. Windows PowerShell 5.1 (Dan's PC, the server) keeps every string exactly as sent, offset included.
 function ConvertTo-Dl1Number { param($Value) if ($null -eq $Value -or $Value -is [string] -and [string]$Value -eq '') { return $null }; $d = 0.0; if ([double]::TryParse([string]$Value, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$d)) { return $d }; return $null }
@@ -1919,6 +1920,33 @@ foreach ($f in $files) {
     # planning-report falls through to the WCGRRT path below, except that a test post (dryRun or SSCE Equipment) is
     # listed under dl1.test and kept off the rig's panel.
     $metaKindD = ([string](Get-Prop $meta 'kind')).ToLowerInvariant()
+    # v2.90: a reviewer's verdict on a plan version, posted by the Help Centre's Plans tab (item 53): planid, scopeversion,
+    # reviewer {name, email, position, section}, decision verified | changes, comment, at. A record, never a report; one per
+    # reviewer per scope version (the newest saved wins); a test post (dryRun, meta.sample, SSCE Equipment) counts only
+    # against a test plan.
+    if ($metaKindD -eq 'plan-review' -or $f.Name -like 'seadrill-planreview_*') {
+        $dl1Files[$f.Name] = $true
+        $rvw = Get-Prop $json 'reviewer'
+        $rsaved = ConvertTo-StableTimestamp (Get-Prop $meta 'saved'); if (-not $rsaved) { $rsaved = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+        $rAsset = ([string](Get-Prop $meta 'asset')).Trim()
+        $rrec = [ordered]@{
+            planId = (ConvertTo-AabText (Get-Prop $json 'planid')).Trim(); scopeVersion = ConvertTo-Dl1Number (Get-Prop $json 'scopeversion')
+            reviewer = ConvertTo-AabText (Get-Prop $rvw 'name'); email = (ConvertTo-AabText (Get-Prop $rvw 'email')).Trim().ToLowerInvariant()
+            position = ConvertTo-AabText (Get-Prop $rvw 'position'); section = ConvertTo-AabText (Get-Prop $rvw 'section')
+            decision = (ConvertTo-AabText (Get-Prop $json 'decision')).Trim().ToLowerInvariant(); comment = ConvertTo-AabText (Get-Prop $json 'comment')
+            at = ConvertTo-Dl1Text (Get-Prop $json 'at'); saved = $rsaved; rig = $rAsset; rigKey = (ConvertTo-AabText (Get-Prop $meta 'rigkey')).Trim().ToLowerInvariant()
+            rev = ConvertTo-AabText (Get-Prop $meta 'rev'); file = $f.Name
+            isTest = [bool]((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or $rAsset -eq 'SSCE Equipment')
+        }
+        if ($null -eq $rrec.scopeVersion) { $rrec.scopeVersion = 1 }
+        if ($rrec.decision -eq 'verify' -or $rrec.decision -eq 'ok') { $rrec.decision = 'verified' }
+        if ($rrec.decision -like 'change*') { $rrec.decision = 'changes' }
+        if (-not $rrec.planId -or -not $rrec.email -or $rrec.decision -notin @('verified','changes')) { Add-Problem $f 'dl1-invalid' 'a plan-review record without a planid, a reviewer email or a decision (verified / changes) - not filed'; continue }
+        $rKey = "$($rrec.planId)|$([int]$rrec.scopeVersion)|$($rrec.email)|$(if ($rrec.isTest) { 'test' } else { 'live' })"
+        $priorR = $dl1Reviews[$rKey]
+        if (-not $priorR -or [string]$rrec.saved -gt [string]$priorR.saved) { $dl1Reviews[$rKey] = $rrec }
+        continue
+    }
     # v2.89: SSORT's Link to plan record (entry 64): "this posted record is evidence for this task of this plan". A record,
     # never a report; joined to the source post by source.file; an unlink with the same linkid withdraws it.
     if ($metaKindD -eq 'plan-link' -or $f.Name -like 'seadrill-planlink_*') {
@@ -4013,6 +4041,77 @@ foreach ($prKey in @($planningReportsByBop.Keys)) {   # v2.88: the same latch on
 # duration-weighted percent complete computed here, close-outs, evidence counts, and the test posts listed apart.
 $dl1ProgressSummaries = @{}
 foreach ($planKey in @($dl1Progress.Keys)) { $dl1ProgressSummaries[$planKey] = Get-Dl1ProgressSummary -Post $dl1Progress[$planKey] -Plan $dl1Plans[$planKey] }
+# v2.90: the reviewer roster (Dan's Reviewers table, exported hourly by the Reviewers flow to help-receipts as
+# plan-reviewers.json: Region (comma list or All), Position, Name, Email, Section, Required), the rig's region from the
+# newest BWM tracker row, and each plan's review state against the roster (item 53: reviewers are by region).
+$planReviewers = New-Object System.Collections.Generic.List[object]; $planReviewersAt = ''
+try {
+    if ($helpReceiptDir) {
+        $prFile = Join-Path $helpReceiptDir 'plan-reviewers.json'
+        if (Test-Path -Path $prFile) {
+            $prJson = [System.IO.File]::ReadAllText($prFile) | ConvertFrom-Json
+            $planReviewersAt = ConvertTo-StableTimestamp (Get-Prop $prJson 'generatedAt')
+            $prRows = Get-Prop $prJson 'reviewers'; if ($null -eq $prRows) { $prRows = Get-Prop $prJson 'value' }; if ($null -eq $prRows) { $prRows = $prJson }
+            foreach ($prr in (ConvertTo-AabList $prRows)) {
+                if ($null -eq $prr -or $prr -is [string]) { continue }
+                $pEmail = (ConvertTo-AabText (Get-Prop $prr 'Email')).Trim().ToLowerInvariant(); if (-not $pEmail) { continue }
+                $pRegions = @(((ConvertTo-AabText (Get-Prop $prr 'Region')) -split '[,;/]') | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+                if ($pRegions.Count -eq 0) { $pRegions = @('All') }
+                $pReq = (ConvertTo-AabText (Get-Prop $prr 'Required')).Trim().ToLowerInvariant(); if (-not $pReq) { $pReq = 'yes' }
+                $pSec = (ConvertTo-AabText (Get-Prop $prr 'Section')).Trim(); if (-not $pSec) { $pSec = 'All' }
+                $planReviewers.Add([ordered]@{ regions = $pRegions; position = ConvertTo-AabText (Get-Prop $prr 'Position'); name = ConvertTo-AabText (Get-Prop $prr 'Name'); email = $pEmail; section = $pSec; required = ($pReq -in @('yes','y','true','1')) }) | Out-Null
+            }
+        }
+    }
+} catch { Write-Warning "plan-reviewers.json could not be read (plans show no reviewers): $($_.Exception.Message)" }
+$rigRegion = @{}
+try {
+    if ($bwmSortedList.Count -gt 0) {
+        foreach ($brow in (ConvertTo-AabList (Get-Prop $bwmSortedList[0].bwm 'rows'))) { if ($null -eq $brow -or $brow -is [string]) { continue }; $brig = (ConvertTo-AabText (Get-Prop $brow 'rig')).Trim(); $bloc = (ConvertTo-AabText (Get-Prop $brow 'location')).Trim(); if ($brig -and $bloc -and -not $rigRegion.ContainsKey($brig)) { $rigRegion[$brig] = $bloc } }
+    }
+} catch { }
+function Get-Dl1ReviewState { param($Plan, $Reviewers, $Reviews, $Region, [bool]$Closed)
+    $req = New-Object System.Collections.Generic.List[object]; $others = New-Object System.Collections.Generic.List[object]
+    $want = $(if ($Plan.isTest) { 'test' } else { 'live' })
+    $byEmail = @{}
+    foreach ($rk in $Reviews.Keys) { $rr = $Reviews[$rk]; if ($rr.planId -ne $Plan.planId) { continue }; if ([int]$rr.scopeVersion -ne [int]$Plan.scopeVersion) { continue }; if (($(if ($rr.isTest) { 'test' } else { 'live' })) -ne $want) { continue }; $byEmail[$rr.email] = $rr }
+    $nVer = 0; $nChg = 0; $nReq = 0
+    foreach ($rv in $Reviewers) {
+        if (-not $rv.required) { continue }
+        $inRegion = $false; foreach ($rg in $rv.regions) { if ($rg -eq 'All' -or ($Region -and $rg -eq $Region)) { $inRegion = $true } }
+        if (-not $inRegion) { continue }
+        $nReq++
+        $d = $byEmail[$rv.email]
+        $dec = $(if ($d) { $d.decision } else { '' })
+        if ($dec -eq 'verified') { $nVer++ } elseif ($dec -eq 'changes') { $nChg++ }
+        $req.Add([ordered]@{ position = $rv.position; name = $rv.name; email = $rv.email; section = $rv.section; decision = $dec; at = $(if ($d) { $d.at } else { '' }); saved = $(if ($d) { $d.saved } else { '' }); comment = $(if ($d) { $d.comment } else { '' }); reviewer = $(if ($d) { $d.reviewer } else { '' }) }) | Out-Null
+    }
+    $reqEmails = @($req | ForEach-Object { $_.email })
+    foreach ($em in $byEmail.Keys) { if ($em -in $reqEmails) { continue }; $d = $byEmail[$em]; $others.Add([ordered]@{ position = $d.position; name = $d.reviewer; email = $em; section = $d.section; decision = $d.decision; at = $d.at; saved = $d.saved; comment = $d.comment; reviewer = $d.reviewer }) | Out-Null; if ($d.decision -eq 'changes') { $nChg++ } }
+    $all = ($nReq -gt 0 -and $nVer -eq $nReq)
+    $state = 'awaiting'
+    if ($Closed) { $state = 'closed' }
+    elseif (([string]$Plan.status).ToLowerInvariant() -eq 'frozen') { $state = 'frozen' }
+    elseif ($nChg -gt 0) { $state = 'changes' }
+    elseif ($all) { $state = 'verified' }
+    elseif ($nReq -eq 0) { $state = 'no-reviewers' }
+    return [ordered]@{ state = $state; region = $Region; required = $req.ToArray(); others = $others.ToArray(); requiredCount = $nReq; verifiedCount = $nVer; changesCount = $nChg; allVerified = $all; outstanding = @($req | Where-Object { $_.decision -ne 'verified' } | ForEach-Object { $_.name }) }
+}
+function Get-Dl1TestingPct { param($Plan, $Progress)
+    if (-not $Plan -or -not $Progress) { return $null }
+    $pctBy = @{}; foreach ($pr in (ConvertTo-AabList (Get-Prop $Progress.body 'tasks'))) { if ($null -eq $pr -or $pr -is [string]) { continue }; $pv = ConvertTo-Dl1Number (Get-Prop $pr 'pct'); if ($null -eq $pv) { $pv = 0 }; $pst = (ConvertTo-AabText (Get-Prop $pr 'status')).ToLowerInvariant(); if ($pst -in @('complete','completed','done')) { $pv = 100 }; $ptid = ConvertTo-AabText (Get-Prop $pr 'taskId'); $pctBy[[string]$ptid] = [double]$pv }
+    $wSum = 0.0; $wDone = 0.0
+    foreach ($t in $Plan.tasks) {
+        $isTest = (([string]$t.branch).Trim() -eq 'Testing') -or (([string]$t.type).ToLowerInvariant() -in @('test','surface-test')) -or (([string]$t.description) -match '(?i)drift test') -or (([string]$t.taskId) -match '(?i)^drift')
+        if (-not $isTest) { continue }
+        $w = 1.0; if ($t.durationHrs -and [double]$t.durationHrs -gt 0) { $w = [double]$t.durationHrs }
+        $pc = 0.0; if ($pctBy.ContainsKey([string]$t.taskId)) { $pc = $pctBy[[string]$t.taskId] }
+        $wSum += $w; $wDone += $w * ([math]::Min(100.0, $pc) / 100.0)
+    }
+    if ($wSum -le 0) { return $null }
+    return [math]::Round(100.0 * $wDone / $wSum, 1)
+}
+$dl1ReviewStates = @{}
 $dl1PlanList = New-Object System.Collections.Generic.List[object]
 foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $pl = $dl1Plans[$planKey]; $pg = $dl1ProgressSummaries[$planKey]
@@ -4020,6 +4119,9 @@ foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $slim['milestones'] = $pl.milestones; $slim['deferred'] = $pl.deferred
     $slim['progress'] = $(if ($pg) { $s2 = [ordered]@{}; foreach ($k in $pg.Keys) { if ($k -ne 'tasks') { $s2[$k] = $pg[$k] } }; $s2 } else { $null })
     $slim['closeout'] = $(if ($dl1Closeouts.ContainsKey($planKey)) { $dl1Closeouts[$planKey] } else { $null })
+    $slim['review'] = Get-Dl1ReviewState -Plan $pl -Reviewers $planReviewers -Reviews $dl1Reviews -Region $(if ($rigRegion.ContainsKey([string]$pl.rig)) { $rigRegion[[string]$pl.rig] } else { '' }) -Closed ($dl1Closeouts.ContainsKey($planKey))   # v2.90
+    $slim['testingPct'] = Get-Dl1TestingPct -Plan $pl -Progress $dl1Progress[$planKey]   # v2.90: Testing branch plus drift, duration-weighted, from the newest progress post
+    $dl1ReviewStates[$planKey] = $slim['review']
     $dl1PlanList.Add($slim) | Out-Null
 }
 # v2.89: the live links per plan (unlinked ones dropped), and plans-open.json for SSORT's plan picker (entry 61.3 / 64):
@@ -4030,23 +4132,27 @@ $dl1LinksByPlan = @{}
 foreach ($lk in $dl1LiveLinks) { if (-not $dl1LinksByPlan.ContainsKey($lk.planId)) { $dl1LinksByPlan[$lk.planId] = New-Object System.Collections.Generic.List[object] }; $dl1LinksByPlan[$lk.planId].Add($lk) | Out-Null }
 foreach ($slim in $dl1PlanList) { $slim['links'] = $(if ($dl1LinksByPlan.ContainsKey($slim.planId)) { $dl1LinksByPlan[$slim.planId].ToArray() } else { @() }); $slim['linkCount'] = @($slim['links']).Count }
 $plansOpen = New-Object System.Collections.Generic.List[object]
+$planSections = @{}   # v2.90: the sections per plan (store key), reused by the Plans tab data file
 foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $pl = $dl1Plans[$planKey]
     $isClosed = $dl1Closeouts.ContainsKey($planKey)
     $secs = [ordered]@{ predeployment = New-Object System.Collections.Generic.List[object]; 'surface-testing' = New-Object System.Collections.Generic.List[object]; maintenance = New-Object System.Collections.Generic.List[object]; skeleton = New-Object System.Collections.Generic.List[object] }
     foreach ($t in $pl.tasks) {
         $tt = ([string]$t.type).ToLowerInvariant(); $sec = 'maintenance'
-        if ($tt -eq 'test' -or $tt -eq 'checklist' -or $tt -eq 'predeployment') { $sec = 'predeployment' } elseif ($tt -eq 'surface-test') { $sec = 'surface-testing' } elseif ($tt -eq 'fixed') { $sec = 'skeleton' }
+        if ($tt -eq 'test' -or $tt -eq 'checklist' -or $tt -eq 'predeployment') { $sec = 'predeployment' } elseif ($tt -eq 'surface-test' -or ([string]$t.branch).Trim() -eq 'Testing') { $sec = 'surface-testing' }   # v2.90: the Testing branch is the surface-testing section elseif ($tt -eq 'fixed') { $sec = 'skeleton' }
         $secs[$sec].Add([ordered]@{ taskId = [string]$t.taskId; name = [string]$t.description; type = [string]$t.type; testType = [string](Get-Prop $t 'testType'); woNum = [string]$t.woNum; status = [string]$t.status }) | Out-Null
     }
     $secList = New-Object System.Collections.Generic.List[object]
     $secNames = @{ predeployment = 'Pre-Deployment'; 'surface-testing' = 'Surface Testing'; maintenance = 'Maintenance'; skeleton = 'Rig skeleton' }
     foreach ($sk in @('predeployment','surface-testing','maintenance','skeleton')) { $secList.Add([ordered]@{ id = $sk; name = $secNames[$sk]; tasks = $secs[$sk].ToArray() }) | Out-Null }
     $secList.Add([ordered]@{ id = 'daily'; name = 'Daily log'; tasks = @() }) | Out-Null
+    $planSections[$planKey] = $secList.ToArray()
+    $rvs = $dl1ReviewStates[$planKey]
     $plansOpen.Add([ordered]@{
         planId = $pl.planId; rigKey = $pl.rigKey; rig = $pl.rig; bopNo = $pl.bopNo; status = $(if ($isClosed) { 'closed' } else { $pl.status }); scopeVersion = $pl.scopeVersion
         windowFrom = $pl.windowFrom; windowTo = $pl.windowTo; title = ("{0} {1} - BWM from {2}" -f $pl.rig, $pl.bopNo, $pl.windowFrom); posted = $pl.posted; test = [bool]$pl.isTest
         sections = $secList.ToArray()
+        review = $(if ($rvs) { [ordered]@{ state = $rvs.state; verified = $rvs.verifiedCount; required = $rvs.requiredCount; outstanding = $rvs.outstanding } } else { $null })   # v2.90
     }) | Out-Null
 }
 $plansOpenJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $plansOpen.Count; plans = $plansOpen.ToArray() })
@@ -4062,13 +4168,48 @@ try {
     if ($plansOpen.Count -gt 0 -or $dl1LiveLinks.Count -gt 0) { Write-Host "DL-1: plans-open.json with $($plansOpen.Count) plan(s); $($dl1LiveLinks.Count) live link record(s)" -ForegroundColor Green }
 } catch { Write-Warning "plans-open.json failed (scan unaffected): $($_.Exception.Message)" }
 
+# v2.90: help\plan-review-data.js for the Help Centre's Plans tab (item 53): every plan with its sections, progress,
+# review state and the roster; and plan-notices.json beside the receipts for the Plan Notices flow (verified by all,
+# testing at 90 %), rewritten only when the list changes. The flow receipts each notice id once.
+$planReviewOutputFile = Join-Path $repoRoot 'help\plan-review-data.js'
+try {
+    $prPlans = New-Object System.Collections.Generic.List[object]
+    foreach ($slim in $dl1PlanList) {
+        $o = [ordered]@{}; foreach ($k in $slim.Keys) { if ($k -in @('links','postPlans')) { continue }; $o[$k] = $slim[$k] }
+        $sk = $(if ($slim.isTest) { "$($slim.planId)|test" } else { [string]$slim.planId })
+        $o['sections'] = $(if ($planSections.ContainsKey($sk)) { $planSections[$sk] } else { @() })
+        $o['linkCount'] = $slim['linkCount']
+        $prPlans.Add($o) | Out-Null
+    }
+    $prFull = [ordered]@{ generatedAt = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz'); scanner = $ScriptVersion; reviewersAt = $planReviewersAt; reviewers = $planReviewers.ToArray(); rigRegions = $rigRegion; plans = $prPlans.ToArray() }
+    $prDir = Split-Path -Parent $planReviewOutputFile; if (-not (Test-Path -Path $prDir)) { New-Item -ItemType Directory -Path $prDir -Force | Out-Null }
+    if ($PSVersionTable.PSEdition -eq 'Core') { $prJsonOut = $prFull | ConvertTo-Json -Depth 24 -Compress }
+    else { $prJsonOut = ConvertTo-JsonArray @((ConvertTo-AabPlain $prFull)); $prJsonOut = $prJsonOut.Substring(1, $prJsonOut.Length - 2) }
+    [System.IO.File]::WriteAllText($planReviewOutputFile, "window.PLAN_REVIEW_DATA = $prJsonOut;`n", (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "Wrote $($prPlans.Count) plan(s) and $($planReviewers.Count) reviewer(s) to $planReviewOutputFile" -ForegroundColor Green
+    if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir)) {
+        $notices = New-Object System.Collections.Generic.List[object]
+        foreach ($slim in $dl1PlanList) {
+            if ($slim.isTest) { continue }
+            $rv = $slim['review']
+            if ($rv -and $rv.state -eq 'verified') { $notices.Add([ordered]@{ id = "$($slim.planId)|v$($slim.scopeVersion)|verified"; kind = 'verified'; planid = $slim.planId; rig = $slim.rig; rigkey = $slim.rigKey; bop = $slim.bopNo; scopeversion = $slim.scopeVersion; text = "$($slim.planId) - VERIFIED BY ALL ($($rv.verifiedCount) of $($rv.requiredCount)) - freeze the scope in Argo Navis" }) | Out-Null }
+            if ($null -ne $slim['testingPct'] -and [double]$slim['testingPct'] -ge 90 -and -not $slim['closeout']) { $notices.Add([ordered]@{ id = "$($slim.planId)|testing90"; kind = 'testing90'; planid = $slim.planId; rig = $slim.rig; rigkey = $slim.rigKey; bop = $slim.bopNo; scopeversion = $slim.scopeVersion; text = "90% completion notice for $($slim.rig) maintenance plan $($slim.planId): the pre-deployment call is to be arranged; relevant teams to start reviewing the pre-deployment information and voice concerns in this channel" }) | Out-Null }
+        }
+        $ntJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $notices.Count; notices = $notices.ToArray() })
+        $ntFile = Join-Path $helpReceiptDir 'plan-notices.json'; $prevNt = ''; if (Test-Path -Path $ntFile) { $prevNt = [System.IO.File]::ReadAllText($ntFile) }
+        $stripNt = { param($t) [regex]::Replace($t, '"generatedAt":"[^"]*"', '') }
+        if ((& $stripNt $prevNt) -ne (& $stripNt $ntJson)) { [System.IO.File]::WriteAllText($ntFile, $ntJson, (New-Object System.Text.UTF8Encoding($false))); Write-Host "Plan notices written: $($notices.Count) in plan-notices.json" -ForegroundColor Green }
+    }
+} catch { Write-Warning "Plans tab data / notices failed (scan unaffected): $($_.Exception.Message)" }
+
 $dl1Block = @{
     plans     = $dl1PlanList.ToArray()        # slim: no task rows (they are in the Fabric tables and in the plan file itself)
     links     = $dl1LiveLinks                 # v2.89
     postPlans = $dl1PostPlan                  # v2.89: file -> planid for ordinary posts made under a plan
     tests     = $dl1Test.ToArray()
     evidence  = $dl1Evidence.ToArray()
-    counts    = @{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count }
+    reviewers = $planReviewers.ToArray()     # v2.90
+    counts    = @{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count; reviews = $dl1Reviews.Count }
 }
 if ($dl1Plans.Count -gt 0 -or $dl1Test.Count -gt 0) { Write-Host "DL-1: $($dl1Plans.Count) plan(s), $($dl1Progress.Count) with progress, $($dl1Closeouts.Count) closed out, $($dl1Test.Count) test post(s)" -ForegroundColor Green }
 
@@ -4152,6 +4293,10 @@ elseif ($deployPath) {
             if ([System.IO.Path]::GetFullPath($helpDeployTarget) -ne [System.IO.Path]::GetFullPath($helpOutputFile)) {
                 Copy-Item -Path $helpOutputFile -Destination $helpDeployTarget -Force
                 Write-Host "Deployed help-data.js to $helpDeployPath" -ForegroundColor Green
+            }
+            if (Test-Path -Path $planReviewOutputFile) {   # v2.90: the Plans tab data beside it
+                $prDeployTarget = Join-Path $helpDeployPath 'plan-review-data.js'
+                if ([System.IO.Path]::GetFullPath($prDeployTarget) -ne [System.IO.Path]::GetFullPath($planReviewOutputFile)) { Copy-Item -Path $planReviewOutputFile -Destination $prDeployTarget -Force; Write-Host "Deployed plan-review-data.js to $helpDeployPath" -ForegroundColor Green }
             }
         }
 
@@ -4405,6 +4550,7 @@ if ($databaseExportPath -and $exportDue) {
         Export-DatabaseTable -Name 'plan_progress' -Rows $pgRows.ToArray() -KeyCols @('planId','scopeVersion','asOf','taskId') -Tables $exportTables
         Export-DatabaseTable -Name 'plan_evidence' -Rows @($dl1Evidence | Where-Object { -not $_.isTest }) -KeyCols @('planId','file') -Tables $exportTables
         Export-DatabaseTable -Name 'plan_links' -Rows @($dl1LiveLinks | ForEach-Object { [pscustomobject]$_ }) -KeyCols @('linkId') -Tables $exportTables   # v2.89
+        Export-DatabaseTable -Name 'plan_reviews' -Rows @($dl1Reviews.Values | Where-Object { -not $_.isTest } | ForEach-Object { [pscustomobject]$_ }) -KeyCols @('planId','scopeVersion','email') -Tables $exportTables   # v2.90
         $manifestTables = New-Object System.Collections.Generic.List[object]
         $exportRows = 0
         foreach ($tn in ($exportTables.Keys | Sort-Object)) {

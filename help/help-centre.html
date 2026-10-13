@@ -27,6 +27,12 @@
   .card h2 { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--sd-blue); margin: 0 0 10px; }
   .note { font-size: 12px; color: var(--sd-text-light); margin: 0 0 12px; }
   footer { text-align: center; font-size: 11px; color: var(--sd-text-light); padding: 20px; }
+  /* Tabs (13 Oct 2026, item 53): Requests (the assistance-request register) and Plans (Argo Navis plan review). */
+  .tabs { display: flex; gap: 8px; margin: 0 0 14px; }
+  .tab { font: inherit; font-weight: 700; font-size: 13px; padding: 8px 18px; border-radius: 20px; border: 1.5px solid var(--sd-border); background: #fff; color: var(--sd-blue); cursor: pointer; }
+  .tab.active { background: var(--sd-blue); color: #fff; border-color: var(--sd-blue); }
+  .tab .n { display: inline-block; min-width: 18px; padding: 0 6px; border-radius: 9px; background: var(--sd-yellow); color: var(--sd-blue); font-size: 11px; margin-left: 6px; }
+  .page { display: none; } .page.active { display: block; }
 </style>
 </head>
 <body>
@@ -192,20 +198,44 @@
 </header>
 <main>
   <div id="stale" class="banner" hidden></div>
-  <section class="card">
+  <div class="tabs">
+    <button class="tab active" id="tabRequests" type="button" onclick="showHelpTab('requests')">Requests</button>
+    <button class="tab" id="tabPlans" type="button" onclick="showHelpTab('plans')">Plans<span class="n" id="plansOpenCount" hidden></span></button>
+  </div>
+  <section class="card page active" id="pageRequests">
     <h2>Requests</h2>
     <p class="note">Open requests first, rig-down first among them. Each card carries the request as the crew posted it, the flow's delivery receipt, the attachments and the trail. Acknowledge when Technical Services pick it up, post updates as it is worked, close it with a note. Every action is posted as a record and the state updates within ten minutes.</p>
     <div id="help-centre"></div>
   </section>
+  <section class="card page" id="pagePlans">
+    <h2>Plans &middot; Argo Navis review</h2>
+    <p class="note">Every BOP maintenance plan posted from Argo Navis (the schedule builder), its scope by section, its progress, and who has verified it. The required reviewers are by region, from the Reviewers table. Press Verified or Changes needed for your part; when every required reviewer has verified, the planner is told to freeze the scope. Plans are updated every ten minutes by the scanner.</p>
+    <div id="plan-review"></div>
+  </section>
 </main>
-<footer>Technical Services — Well Control Engineering &middot; TSC Help Centre Rev 1 &middot; data from help-data.js, rewritten every ten minutes by the dashboard scanner.</footer>
+<footer>Technical Services — Well Control Engineering &middot; TSC Help Centre Rev 2 (Plans tab 13 Oct 2026) &middot; data from help-data.js and plan-review-data.js, rewritten every ten minutes by the dashboard scanner.</footer>
 <script src="help-data.js"></script>
 <script src="help-centre.js"></script>
+<script src="plan-review-data.js"></script>
+<script src="plan-review.js"></script>
 <script>
+function showHelpTab(name){
+  document.getElementById('pageRequests').classList.toggle('active', name === 'requests');
+  document.getElementById('pagePlans').classList.toggle('active', name === 'plans');
+  document.getElementById('tabRequests').classList.toggle('active', name === 'requests');
+  document.getElementById('tabPlans').classList.toggle('active', name === 'plans');
+  try { location.hash = name === 'plans' ? '#plans' : ''; } catch (e) {}
+}
 (function () {
   var d = window.HELP_DATA;
   if (d && d.generatedAt) { var age = (Date.now() - new Date(d.generatedAt).getTime()) / 3600000; if (age > 2) { var s = document.getElementById('stale'); s.hidden = false; s.textContent = 'This page was published ' + Math.round(age) + ' hours ago. The scanner may have stopped; a recent acknowledgement may not show yet.'; } }
   window.HELP_CENTRE.render(document.getElementById('help-centre'), { canAct: true });
+  if (window.PLAN_REVIEW) {
+    window.PLAN_REVIEW.render(document.getElementById('plan-review'), { canAct: true });
+    var pr = window.PLAN_REVIEW_DATA; var n = pr ? (pr.plans || []).filter(function (p) { return !p.isTest && p.review && (p.review.state === 'awaiting' || p.review.state === 'changes' || p.review.state === 'verified' || p.review.state === 'no-reviewers'); }).length : 0;
+    var badge = document.getElementById('plansOpenCount'); if (n) { badge.textContent = n; badge.hidden = false; }
+  }
+  if (location.hash === '#plans') showHelpTab('plans');
 })();
 </script>
 </body>
