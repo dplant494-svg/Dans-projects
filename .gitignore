@@ -22,3 +22,4 @@ help/help-data.js
 status/gate-config.js
 status/status-data.js
 dl1/plans-open.json
+dl1/plans-status/

@@ -34,6 +34,22 @@ concat('{"generatedAt":"', utcNow(), '","reviewers":', string(body('ReviewerRows
 A change to the table (a new reviewer, a region moved) reaches the tab within an hour and ten minutes with no other
 step.
 
+### Part A addendum (14 Oct evening, scanner v2.95): the Rigs table exported beside the reviewers, 3 cards
+
+The scanner takes a rig's region from its newest BWM post; a rig with no BWM post (West Vela's sample on 14 Oct) had no
+region, so only the "All" reviewers were required. From v2.95 it falls back to the Region column of your Rigs table.
+Three cards on the same flow, after the Create file of step 4:
+
+1. **Add an action**, **List rows present in a table**, rename **RigRows**. Same workbook, Table **Rigs**. No filter.
+2. **Add an action**, **Compose**, rename **RigsJson**. Inputs fx:
+```
+concat('{"generatedAt":"', utcNow(), '","rigs":', string(body('RigRows')?['value']), '}')
+```
+3. **Add an action**, **Create file** (SharePoint): Site **WellControl**, Folder Path **Digests**, then **help-receipts**.
+   File Name `plan-rigs.json`. File Content fx `outputs('RigsJson')`.
+4. **Save**, **Test**, **Manually**, **Run flow**. `plan-rigs.json` appears beside `plan-reviewers.json`. On the next scan
+   the West Vela card shows Region GOM and three required reviewers instead of two.
+
 ## Part B — flow `Plan Notices` (every 15 minutes, about 25 cards, 45 minutes)
 
 The scanner writes `plan-notices.json` beside the receipts: `{ generatedAt, count, notices:[ { id, kind, planid, rig,

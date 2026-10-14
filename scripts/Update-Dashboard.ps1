@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.94'
+$ScriptVersion = '2.95'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1249,6 +1249,7 @@ $dl1Test = New-Object System.Collections.Generic.List[object]       # the test p
 $dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
 $dl1PostPlan = @{}     # v2.89: file name -> meta.planid for every ordinary post made under a plan
 $dl1Reviews = @{}      # v2.90: Help Centre 'plan-review' records (Plans tab), keyed planId|scopeVersion|email; the newest saved per reviewer wins
+$dl1Designations = @{}   # v2.95: Argo Navis 'designation' export per planId (the stack's required rows and photograph slots), newest wins
 $dl1Links = @{}        # v2.89: SSORT 162 'plan-link' records (tools entry 62/64), keyed by linkid; the newest action per link wins (link / unlink)
 function ConvertTo-Dl1Text { param($Value) if ($null -eq $Value) { return '' }; if ($Value -is [datetime]) { return $Value.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }; return [string]$Value }   # PowerShell 7's ConvertFrom-Json turns a full ISO timestamp into [datetime] (a date-only string such as 2026-11-14 stays a string, checked 12 Oct): written back as UTC, the instant unchanged. Windows PowerShell 5.1 (Dan's PC, the server) keeps every string exactly as sent, offset included.
 function ConvertTo-Dl1Number { param($Value) if ($null -eq $Value -or $Value -is [string] -and [string]$Value -eq '') { return $null }; $d = 0.0; if ([double]::TryParse([string]$Value, [System.Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$d)) { return $d }; return $null }
@@ -1885,6 +1886,33 @@ foreach ($f in $files) {
     }
 
     $meta = Get-Prop $json 'meta'
+    # v2.95 (Lee's Entry 2, 2.4): the BOP designation set Argo Navis exports (and REV 14 posts with the first plan):
+    # { kind:"designation", planId, rig, bop, mfr, cav, status, rows[], photoSlots[] }. A record, never a report; one
+    # per plan, the newest file wins; served beside the plan's status file for SSORT and WCGRRT. Recognised by its
+    # top-level kind or by meta.reporttype 'BOP Designation' (the meta block was asked for on 14 Oct).
+    $dsgKind = ([string](Get-Prop $json 'kind')).Trim().ToLowerInvariant()
+    $dsgRt = ''; if ($null -ne $meta) { $dsgRt = ([string](Get-Prop $meta 'reporttype')).Trim().ToLowerInvariant() }
+    if ($dsgKind -in @('designation', 'bop-designation') -or $dsgRt -eq 'bop designation') {
+        $dsgPlan = (ConvertTo-AabText (Get-Prop $json 'planId')).Trim(); if (-not $dsgPlan) { $dsgPlan = (ConvertTo-AabText (Get-Prop $json 'planid')).Trim() }
+        if (-not $dsgPlan -and $null -ne $meta) { $dsgPlan = (ConvertTo-AabText (Get-Prop $meta 'planid')).Trim() }
+        if (-not $dsgPlan) { Add-Problem $f 'dl1-invalid' 'a BOP designation export without a planId - not filed'; $skipped++; continue }
+        $dsgAt = ConvertTo-StableTimestamp (Get-Prop $json 'generatedAt'); if (-not $dsgAt) { $dsgAt = $f.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+        $dsgPrior = $dl1Designations[$dsgPlan]
+        if (-not $dsgPrior -or ([string]$dsgAt -gt [string]$dsgPrior['generatedat'])) {
+            $dsgRows = New-Object System.Collections.Generic.List[object]
+            foreach ($dr in (ConvertTo-AabList (Get-Prop $json 'rows'))) { if ($null -eq $dr -or $dr -is [string]) { continue }; $dsgRows.Add([ordered]@{ pos = [string](ConvertTo-AabText (Get-Prop $dr 'pos')); spec = [string](ConvertTo-AabText (Get-Prop $dr 'spec')) }) | Out-Null }
+            $dsgSlots = New-Object System.Collections.Generic.List[object]
+            foreach ($ds in (ConvertTo-AabList (Get-Prop $json 'photoSlots'))) { if ($null -eq $ds -or $ds -is [string]) { continue }; $dsgSlots.Add([ordered]@{ section = [string](ConvertTo-AabText (Get-Prop $ds 'section')); slot = [string](ConvertTo-AabText (Get-Prop $ds 'slot')) }) | Out-Null }
+            $dl1Designations[$dsgPlan] = [ordered]@{
+                planid = [string]$dsgPlan; rig = [string](ConvertTo-AabText (Get-Prop $json 'rig')); bop = [string](ConvertTo-AabText (Get-Prop $json 'bop'))
+                mfr = [string](ConvertTo-AabText (Get-Prop $json 'mfr')); cav = ConvertTo-Dl1Number (Get-Prop $json 'cav'); status = [string](ConvertTo-AabText (Get-Prop $json 'status'))
+                tool = [string](ConvertTo-AabText (Get-Prop $json 'tool')); rev = [string](ConvertTo-AabText (Get-Prop $json 'rev')); generatedat = [string]$dsgAt
+                hasmeta = ($null -ne $meta); file = $f.Name; rows = $dsgRows.ToArray(); photoslots = $dsgSlots.ToArray()
+            }
+        }
+        $dl1Files[$f.Name] = $true
+        continue
+    }
     if ($null -eq $meta) {
         Write-Warning "Skipping $($f.Name): no 'meta' block - not a TSC Rig Reporting Tool export?"
         Add-Problem $f 'unrecognised' "no 'meta' block - not a report export"
@@ -4495,6 +4523,30 @@ function Get-Dl1ReviewState { param($Plan, $Reviewers, $Reviews, $Region, [bool]
     $outst = New-Object System.Collections.Generic.List[string]; foreach ($rq in $req) { if ($rq.decision -ne 'verified') { $outst.Add([string]$rq.name) | Out-Null } }
     return [ordered]@{ state = [string]$state; region = [string]$Region; required = $req.ToArray(); others = $others.ToArray(); requiredCount = [int]$nReq; verifiedCount = [int]$nVer; changesCount = [int]$nChg; allVerified = [bool]$all; outstanding = $outst.ToArray() }
 }
+# v2.95: rig region fallback from Dan's Rigs table (Region column), exported by the Plan Reviewers flow as plan-rigs.json
+# beside plan-reviewers.json ({ generatedAt, rigs: [ { RigKey, RigName, Region, ... } ] }). A rig with no BWM post on
+# the tracker (West Vela's sample plan on 14 Oct) otherwise has no region, and only the "All" reviewers are required.
+$rigRegionSource = @{}
+foreach ($rk in @($rigRegion.Keys)) { $rigRegionSource[$rk] = 'bwm' }
+try {
+    if ($helpReceiptDir) {
+        $prgFile = Join-Path $helpReceiptDir 'plan-rigs.json'
+        if (Test-Path -Path $prgFile) {
+            $prgJson = [System.IO.File]::ReadAllText($prgFile) | ConvertFrom-Json
+            $prgRows = Get-Prop $prgJson 'rigs'; if ($null -eq $prgRows) { $prgRows = Get-Prop $prgJson 'value' }; if ($null -eq $prgRows) { $prgRows = $prgJson }
+            foreach ($prg in (ConvertTo-AabList $prgRows)) {
+                if ($null -eq $prg -or $prg -is [string]) { continue }
+                $gRegion = ([string](ConvertTo-AabText (Get-Prop $prg 'Region'))).Trim(); if (-not $gRegion) { continue }
+                $gName = ([string](ConvertTo-AabText (Get-Prop $prg 'RigName'))).Trim(); if (-not $gName) { $gName = ([string](ConvertTo-AabText (Get-Prop $prg 'Rig'))).Trim() }
+                $gKey = ([string](ConvertTo-AabText (Get-Prop $prg 'RigKey'))).Trim().ToLowerInvariant()
+                if (-not $gName -and $gKey -and $AabRigCodes.Contains($gKey)) { $gName = [string]$AabRigCodes[$gKey] }
+                if ($gName -and -not $rigRegion.ContainsKey($gName)) { $rigRegion[$gName] = $gRegion; $rigRegionSource[$gName] = 'rigs-table' }
+                if ($gKey -and $AabRigCodes.Contains($gKey)) { $gCode = [string]$AabRigCodes[$gKey]; if (-not $rigRegion.ContainsKey($gCode)) { $rigRegion[$gCode] = $gRegion; $rigRegionSource[$gCode] = 'rigs-table' } }
+            }
+        }
+    }
+} catch { Write-Warning "plan-rigs.json could not be read (rig regions from the BWM tracker only): $($_.Exception.Message)" }
+
 function Get-Dl1TestingPct { param($Plan, $Progress)
     if (-not $Plan -or -not $Progress) { return $null }
     $pctBy = @{}; foreach ($pr in (ConvertTo-AabList (Get-Prop $Progress.body 'tasks'))) { if ($null -eq $pr -or $pr -is [string]) { continue }; $pv = ConvertTo-Dl1Number (Get-Prop $pr 'pct'); if ($null -eq $pv) { $pv = 0 }; $pst = (ConvertTo-AabText (Get-Prop $pr 'status')).ToLowerInvariant(); if ($pst -in @('complete','completed','done')) { $pv = 100 }; $ptid = ConvertTo-AabText (Get-Prop $pr 'taskId'); $pctBy[[string]$ptid] = [double]$pv }
@@ -4599,6 +4651,98 @@ try {
         if ((& $stripNt $prevNt) -ne (& $stripNt $ntJson)) { [System.IO.File]::WriteAllText($ntFile, $ntJson, (New-Object System.Text.UTF8Encoding($false))); Write-Host "Plan notices written: $($notices.Count) in plan-notices.json" -ForegroundColor Green }
     }
 } catch { Write-Warning "Plans tab data / notices failed (scan unaffected): $($_.Exception.Message)" }
+
+# ---------------------------------------------------------------------------
+# v2.95 (14 Oct 2026, Lee's Entry 2 question 2, plan item 70): one read-back file per plan for Argo Navis, SSORT and
+# WCGRRT, served at /sacred/dl1/plans-status/<planId>.json (a test plan: <planId>.test.json). Everything SACRED holds
+# about the plan that the tool cannot know on its own: the review state, the plan-link records per task, the ordinary
+# posts made under the plan, the pre-fills (precharge sheet issued, CBM posts and rig visits in the window, the rig's
+# AAB states) and the BOP designation when Argo Navis has exported one (also served as designation_<planId>.json).
+# Keys lower case, additive, absent when nothing is known. Written locally under dl1\plans-status and deployed with
+# plans-open.json. Checklist states (from JPC posts) and the H-07 call record join when those records exist.
+# ---------------------------------------------------------------------------
+$planStatusLocalDir = Join-Path $repoRoot 'dl1\plans-status'
+$planStatusCount = 0
+try {
+    if (-not (Test-Path -Path $planStatusLocalDir)) { New-Item -ItemType Directory -Path $planStatusLocalDir -Force | Out-Null }
+    # reports by rig for the window pre-fills (file, type, date)
+    $reportsByRig = @{}
+    foreach ($rr in $reports) { $rrig = [string]$rr.rig; if (-not $rrig) { continue }; if (-not $reportsByRig.ContainsKey($rrig)) { $reportsByRig[$rrig] = New-Object System.Collections.Generic.List[object] }; $reportsByRig[$rrig].Add($rr) | Out-Null }
+    $reportByFile = @{}; foreach ($rr in $reports) { $reportByFile[[string]$rr.file] = $rr }
+    $linksByPlanAll = @{}
+    foreach ($lk in $dl1LiveLinks) { $lp = [string]$lk.planId; if (-not $linksByPlanAll.ContainsKey($lp)) { $linksByPlanAll[$lp] = New-Object System.Collections.Generic.List[object] }; $linksByPlanAll[$lp].Add($lk) | Out-Null }
+    $postsByPlan = @{}
+    foreach ($pf in @($dl1PostPlan.Keys)) { $pp = [string]$dl1PostPlan[$pf]; if (-not $postsByPlan.ContainsKey($pp)) { $postsByPlan[$pp] = New-Object System.Collections.Generic.List[string] }; $postsByPlan[$pp].Add([string]$pf) | Out-Null }
+    $wantedStatusFiles = @{}
+    foreach ($planKey in @($dl1Plans.Keys)) {
+        $pl = $dl1Plans[$planKey]
+        $spid = [string]$pl.planId; if (-not $spid) { continue }
+        $isTestPlan = [bool]$pl.isTest
+        $winFrom = [string]$pl.windowFrom; $winTo = [string]$pl.windowTo
+        $sinceDate = $winFrom; if (-not $sinceDate) { $sinceDate = (Get-Date).AddDays(-60).ToString('yyyy-MM-dd') }
+        $rv = $dl1ReviewStates[$planKey]
+        $reviewOut = $null
+        if ($rv) {
+            $reqOut = New-Object System.Collections.Generic.List[object]
+            foreach ($rq in @($rv.required)) { $reqOut.Add([ordered]@{ position = [string]$rq.position; name = [string]$rq.name; section = [string]$rq.section; decision = [string]$rq.decision; at = [string]$rq.at; comment = [string]$rq.comment }) | Out-Null }
+            $reviewOut = [ordered]@{ state = [string]$rv.state; region = [string]$rv.region; verifiedcount = [int]$rv.verifiedCount; requiredcount = [int]$rv.requiredCount; changescount = [int]$rv.changesCount; outstanding = @($rv.outstanding | ForEach-Object { [string]$_ }); required = $reqOut.ToArray() }
+        }
+        $linksOut = New-Object System.Collections.Generic.List[object]
+        if ($linksByPlanAll.ContainsKey($spid)) { foreach ($lk in $linksByPlanAll[$spid]) { $linksOut.Add([ordered]@{ taskid = [string]$lk.taskId; taskname = [string]$lk.taskName; section = [string]$lk.section; file = [string]$lk.sourceFile; reporttype = [string]$lk.sourceType; testtype = [string]$lk.testType; date = [string]$lk.sourceDate; saved = [string]$lk.saved; by = [string]$lk.by }) | Out-Null } }
+        $postsOut = New-Object System.Collections.Generic.List[object]
+        if ($postsByPlan.ContainsKey($spid)) { foreach ($pf in $postsByPlan[$spid]) { $rr = $reportByFile[$pf]; if ($rr) { $postsOut.Add([ordered]@{ file = [string]$pf; reporttype = [string]$rr.reporttype; date = [string]$rr.reportDate; rev = [string]$rr.rev }) | Out-Null } else { $postsOut.Add([ordered]@{ file = [string]$pf }) | Out-Null } } }
+        # pre-fills
+        $pcOut = [ordered]@{ issued = $false; savedat = '' }
+        $pRigKey = ([string]$pl.rigKey).ToLowerInvariant()
+        if ($pRigKey) { foreach ($mk in @($prechargeIssued.Keys)) { if (-not ([string]$mk).StartsWith($pRigKey + '|')) { continue }; foreach ($is in $prechargeIssued[$mk]) { $isv = [string](Get-Prop $is 'saved'); if ($isv -and $isv.Substring(0, [math]::Min(10, $isv.Length)) -ge $sinceDate) { if (-not $pcOut.issued -or $isv -gt [string]$pcOut.savedat) { $pcOut.issued = $true; $pcOut.savedat = $isv } } } } }
+        $cbmOut = New-Object System.Collections.Generic.List[object]; $visitOut = New-Object System.Collections.Generic.List[object]
+        $pRig = [string]$pl.rig
+        if ($pRig -and $reportsByRig.ContainsKey($pRig)) {
+            foreach ($rr in $reportsByRig[$pRig]) {
+                $rd = [string]$rr.reportDate; if (-not $rd) { $rd = [string]$rr.date }
+                if ($rd -and $rd.Substring(0, [math]::Min(10, $rd.Length)) -lt $sinceDate) { continue }
+                if ($winTo -and $rd -and $rd.Substring(0, [math]::Min(10, $rd.Length)) -gt $winTo) { continue }
+                $rt = [string]$rr.reporttype
+                if ($rt -eq 'CBM Inspection') { $cbmOut.Add([ordered]@{ file = [string]$rr.file; equipment = [string]$rr.cbmEquipment; date = $rd }) | Out-Null }
+                elseif ($rt -eq 'Rig Visit') { $visitOut.Add([ordered]@{ file = [string]$rr.file; type = [string]$rr.type; date = $rd; wce = [string]$rr.wce }) | Out-Null }
+            }
+        }
+        $aabOut = New-Object System.Collections.Generic.List[object]
+        if ($pRigKey) { foreach ($as in $aabStatus) { if (([string]$as.rigKey).ToLowerInvariant() -ne $pRigKey) { continue }; $aabOut.Add([ordered]@{ aabnumber = [string]$as.aabNumber; revision = [int]$as.revision; title = [string]$as.title; status = [string]$as.status; duedate = [string]$as.dueDate; acknowledgedat = [string]$as.acknowledgedAt; closedat = [string]$as.closedAt }) | Out-Null } }
+        $statusDoc = [ordered]@{
+            planid = $spid; generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion
+            scopeversion = [int]$pl.scopeVersion; status = [string]$pl.status; rig = $pRig; rigkey = $pRigKey; bop = [string]$pl.bopNo; istest = $isTestPlan
+            windowfrom = $winFrom; windowto = $winTo; planfile = [string]$pl.file; posted = [string]$pl.posted
+            review = $reviewOut
+            links = $linksOut.ToArray()
+            posts = $postsOut.ToArray()
+            prefills = [ordered]@{ precharge = $pcOut; cbm = $cbmOut.ToArray(); aab = $aabOut.ToArray(); visits = $visitOut.ToArray() }
+        }
+        if ($dl1ProgressSummaries.ContainsKey($planKey) -and $dl1ProgressSummaries[$planKey]) { $pgs = $dl1ProgressSummaries[$planKey]; $statusDoc['progress'] = [ordered]@{ asof = [string](Get-Prop $pgs 'asOf'); pctcomplete = (Get-Prop $pgs 'pctComplete'); posted = [string](Get-Prop $pgs 'posted') } }
+        if ($dl1Closeouts.ContainsKey($planKey)) { $statusDoc['closedout'] = $true }
+        if ($dl1Designations.ContainsKey($spid)) { $statusDoc['designation'] = $dl1Designations[$spid] }
+        $statusName = $spid + $(if ($isTestPlan) { '.test' } else { '' }) + '.json'
+        $statusJson = ConvertTo-PlainJson $statusDoc
+        $statusPath = Join-Path $planStatusLocalDir $statusName
+        $prevStatus = ''; if (Test-Path -Path $statusPath) { $prevStatus = [System.IO.File]::ReadAllText($statusPath) }
+        $stripGen = { param($t) [regex]::Replace($t, '"generatedat":"[^"]*"', '') }
+        if ((& $stripGen $prevStatus) -ne (& $stripGen $statusJson)) { [System.IO.File]::WriteAllText($statusPath, $statusJson, (New-Object System.Text.UTF8Encoding($false))) }
+        $wantedStatusFiles[$statusName] = $true
+        $planStatusCount++
+    }
+    # the designation on its own, for SSORT and WCGRRT (01 Plan and Scope, once the plan folder exists)
+    foreach ($dpid in @($dl1Designations.Keys)) {
+        $dName = 'designation_' + $dpid + '.json'
+        $dJson = ConvertTo-PlainJson $dl1Designations[$dpid]
+        $dPath = Join-Path $planStatusLocalDir $dName
+        $prevD = ''; if (Test-Path -Path $dPath) { $prevD = [System.IO.File]::ReadAllText($dPath) }
+        if ($prevD -ne $dJson) { [System.IO.File]::WriteAllText($dPath, $dJson, (New-Object System.Text.UTF8Encoding($false))) }
+        $wantedStatusFiles[$dName] = $true
+    }
+    # files for plans no longer in the store are removed locally (the deploy mirrors the folder)
+    foreach ($sf in @(Get-ChildItem -Path $planStatusLocalDir -File -Filter '*.json')) { if (-not $wantedStatusFiles.ContainsKey($sf.Name)) { Remove-Item -Path $sf.FullName -Force } }
+    if ($planStatusCount -gt 0 -or $dl1Designations.Count -gt 0) { Write-Host "DL-1: $planStatusCount plan status file(s), $($dl1Designations.Count) designation(s) in dl1\plans-status" -ForegroundColor Green }
+} catch { Write-Warning "Plan status files failed (scan unaffected): $($_.Exception.Message)" }
 
 # v2.94 (14 Oct 2026): the whole block goes through ConvertTo-AabPlain, not just reviewers and review. The first
 # real plan through v2.93 on Dan's PC failed at the Windows PowerShell serialiser ("circular reference ...
@@ -4720,6 +4864,22 @@ elseif ($deployPath) {
             if (-not (Test-Path -Path $dl1DeployPath)) { New-Item -ItemType Directory -Path $dl1DeployPath -Force | Out-Null }
             $dl1DeployTarget = Join-Path $dl1DeployPath 'plans-open.json'
             if ([System.IO.Path]::GetFullPath($dl1DeployTarget) -ne [System.IO.Path]::GetFullPath($plansOpenLocal)) { Copy-Item -Path $plansOpenLocal -Destination $dl1DeployTarget -Force; Write-Host "Deployed plans-open.json to $dl1DeployPath" -ForegroundColor Green }
+            # v2.95: plans-status\ mirrored beside plans-open.json (/sacred/dl1/plans-status/<planId>.json)
+            try {
+                $psSrc = Join-Path $repoRoot 'dl1\plans-status'
+                if (Test-Path -Path $psSrc) {
+                    $psDst = Join-Path $dl1DeployPath 'plans-status'
+                    if (-not (Test-Path -Path $psDst)) { New-Item -ItemType Directory -Path $psDst -Force | Out-Null }
+                    $psCopied = 0; $psWanted = @{}
+                    foreach ($psf in @(Get-ChildItem -Path $psSrc -File -Filter '*.json')) {
+                        $psWanted[$psf.Name] = $true
+                        $psTarget = Join-Path $psDst $psf.Name
+                        if (-not (Test-Path -Path $psTarget) -or ((Get-Item -Path $psTarget).Length -ne $psf.Length) -or ((Get-Item -Path $psTarget).LastWriteTimeUtc -lt $psf.LastWriteTimeUtc)) { Copy-Item -Path $psf.FullName -Destination $psTarget -Force; $psCopied++ }
+                    }
+                    foreach ($old in @(Get-ChildItem -Path $psDst -File -Filter '*.json')) { if (-not $psWanted.ContainsKey($old.Name)) { Remove-Item -Path $old.FullName -Force } }
+                    if ($psCopied -gt 0) { Write-Host "Deployed $psCopied plan status file(s) to $psDst" -ForegroundColor Green }
+                }
+            } catch { Write-Warning "plans-status deploy failed (scan unaffected): $($_.Exception.Message)" }
         }
         # v2.71: help-data.js to the Help Centre folder on the share (helpDeployPath; default <share>\help).
         if (Test-Path -Path $helpOutputFile) {
