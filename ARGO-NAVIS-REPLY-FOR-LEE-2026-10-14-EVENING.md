@@ -136,3 +136,22 @@ post. A "Changes requested" state shows the reviewer's comment beside the Post f
 
 **Why it matters:** the notifications and the reviewers' Plans tab are live today. Without the holds a planner can freeze
 and execute a plan nobody has verified, and the loop records it as if the review never happened.
+
+## Added 14 Oct, later: the BOP ready date, front and centre (REV 14), from Dan
+
+The one date that matters on a plan is when the BOP is ready to deploy, because that is when the drilling team expects
+it; past that date the rig is on downtime. Dan asks that the tool make it impossible to miss:
+
+1. **BOP ready date in large type and a vibrant colour** at the top of the schedule while it is being built. It
+   recalculates every time Calculate project is pressed, so adding, removing, deferring or re-sequencing tasks moves the
+   date in front of the planner's eyes.
+2. **Beside it, the need date** (when drilling is ready for the BOP; the planning report already carries `needDate` and
+   `float`, both empty today, so this is the field to fill) and the float in days between the two. Green when the ready
+   date is inside the need date, amber inside two days, red when it is past, with the downtime days shown.
+3. **A simulate mode.** Posting progress is only allowed once the scope is frozen, but a planner should be able to walk
+   the plan to completion on screen before freezing: mark tasks done or deferred, slide durations, and watch the ready
+   date move. Nothing posts in that mode and it is clearly labelled as a simulation, with a reset back to the real
+   schedule.
+4. **Both dates in the posts.** `planningData.bopReadyDate` and `planningData.needDate` (additive) on every plan and
+   progress post, so the dashboard's BOP panel shows the same two dates and the float, and the plan chat's progress line
+   can carry "BOP ready 15 Oct, need date 17 Oct, float 2 days".
