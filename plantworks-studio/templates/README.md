@@ -9,6 +9,6 @@ Word documents to duplicate, fill in and save as PDF. Orange text is a placehold
 | `brief-checklist.md` | Ten questions to cover in the first meeting, and what to paste here afterwards. |
 | `Plantworks-Proposal-EN.docx` | Two-page proposal sent after the first conversation: what we heard, what we'll build, what's included, timeline, price, what we need, next step. |
 
-Invoice numbering: `PW-YYYY-NNN`, one sequence for both languages. Payment terms match the site: half on brief, half on launch, Care monthly in advance, 14 days.
+Invoice numbering: `PW-YYYY-NNN`, one sequence for both languages. Payment terms match the site: half invoiced on brief, half on launch, Care monthly in advance. **Every invoice is payable within 14 days** (decided 14 Oct 2026), including the launch invoice: the site goes live, then the balance is paid within 14 days.
 
 `build-templates.js` regenerates all three with the `docx` npm package (`node build-templates.js <outdir>`), for when the company details or prices change.

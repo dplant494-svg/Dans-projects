@@ -105,7 +105,7 @@ const EN = {
   vatNote: 'VAT: Plantworks Studio Ltd is not VAT registered. For business customers in Spain and the EU, this supply of services is subject to the reverse charge; the customer accounts for VAT in their own country (Article 196, Council Directive 2006/112/EC). Delete this note for UK and private customers.',
   payBank: 'Pay by bank transfer', bank: [['Account name:', 'Plantworks Studio Ltd'], ['IBAN (EUR):', '[GB00 XXXX 0000 0000 0000 00]'], ['BIC:', '[XXXXGB00]'], ['Sort code / account (GBP):', '[00-00-00 / 00000000]'], ['Reference:', '[invoice number]']],
   payCard: 'Pay by card', cardNote: 'Card, Apple Pay or Google Pay. Care plans are billed monthly by card.',
-  terms: 'Terms', termsText: 'Payment within 14 days of the invoice date. Half of the build price is due on brief and half on launch. Care is billed monthly in advance and can be cancelled any month. Files and domain remain the client’s.',
+  terms: 'Terms', termsText: 'Every invoice is payable within 14 days of its date. Half of the build price is invoiced when the brief is agreed and half on launch. Care is billed monthly in advance and can be cancelled any month. Files and domain remain the client’s.',
   footer: 'Plantworks Studio Ltd · Registered in England and Wales · Thank you for your business',
 };
 const ES = {
@@ -120,7 +120,7 @@ const ES = {
   vatNote: 'IVA: operación no sujeta en el Reino Unido. Inversión del sujeto pasivo: el destinatario, empresario o profesional establecido en España, es el sujeto pasivo del IVA (art. 84.Uno.2º Ley 37/1992; art. 196 Directiva 2006/112/CE). Borrar esta nota para clientes particulares.',
   payBank: 'Pago por transferencia', bank: [['Titular:', 'Plantworks Studio Ltd'], ['IBAN (EUR):', '[GB00 XXXX 0000 0000 0000 00]'], ['BIC:', '[XXXXGB00]'], ['Concepto:', '[número de factura]']],
   payCard: 'Pago con tarjeta', cardNote: 'Tarjeta, Apple Pay o Google Pay. El mantenimiento se cobra cada mes con tarjeta.',
-  terms: 'Condiciones', termsText: 'Pago a 14 días desde la fecha de emisión. La mitad del precio de la web se abona al inicio y la otra mitad a la publicación. El mantenimiento se factura por adelantado cada mes y se puede cancelar en cualquier momento. Los archivos y el dominio son del cliente.',
+  terms: 'Condiciones', termsText: 'Cada factura se paga en un plazo de 14 días desde su fecha. La mitad del precio de la web se factura al inicio y la otra mitad a la publicación. El mantenimiento se factura por adelantado cada mes y se puede cancelar en cualquier momento. Los archivos y el dominio son del cliente.',
   footer: 'Plantworks Studio Ltd · Sociedad registrada en Inglaterra y Gales · Gracias por su confianza',
 };
 // Spanish number format uses "1.650,00 €" — patch the ES amounts
