@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.92'
+$ScriptVersion = '2.93'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4326,7 +4326,24 @@ else {
                 # v2.92: the whole data block from the extract, with the page's own refs tables.
                 $cocSourceName = '{0} ({1})' -f $cocExtract.Name, $cocExtract.LastWriteTime.ToString('dd MMM yyyy HH:mm')
                 $cocBuilt = Convert-CocExtract -Path $cocExtract.FullName -Refs (Get-Prop $cocData 'refs') -SourceName $cocSourceName
-                if ($cocBuilt) { $cocData = $cocBuilt }
+                if ($cocBuilt) {
+                    # v2.93: a partial export never replaces what the rigs have. The extract on the share on 14 Oct
+                    # had the riser register complete but a quarter of the WCE components, no Choke and Kill rows
+                    # and one rig missing; it rebuilt the tracker with half the fleet. Fleet components (not the
+                    # carried-over shared capital) must be at least 80% of the template's, else the template's
+                    # data stands and the warning says what was short.
+                    $tplFleet = 0; $tplCkm = 0; $tplSpare = @{}
+                    foreach ($vrow in @(Get-Prop $cocData 'vessels')) { if ([string]$vrow[4] -eq '0') { $tplSpare[[string]$vrow[0]] = $true } }
+                    foreach ($crow in @(Get-Prop $cocData 'components')) { if (-not $tplSpare.ContainsKey([string]$crow[0])) { $tplFleet++; if ([string]$crow[1] -eq 'ckm') { $tplCkm++ } } }
+                    $newFleet = 0; $newCkm = 0; $newSpare = @{}
+                    foreach ($vrow in $cocBuilt['vessels']) { if ([string]$vrow[4] -eq '0') { $newSpare[[string]$vrow[0]] = $true } }
+                    foreach ($crow in $cocBuilt['components']) { if (-not $newSpare.ContainsKey([string]$crow[0])) { $newFleet++; if ([string]$crow[1] -eq 'ckm') { $newCkm++ } } }
+                    if ($tplFleet -gt 0 -and $newFleet -lt [math]::Floor($tplFleet * 0.8)) {
+                        Write-Warning "CoC extract $($cocExtract.Name) looks incomplete: $newFleet fleet components ($newCkm Choke and Kill) against $tplFleet ($tplCkm) in the tracker it would replace - NOT used; the tracker keeps its current data until a full export lands (ask Manpreet for all three reports, WCE Component, CKM Component and Riser Asset, for every site)"
+                        $cocBuilt = $null
+                    }
+                    else { $cocData = $cocBuilt }
+                }
                 else { Write-Warning "CoC extract $($cocExtract.Name) could not be used - the tracker keeps the template's data this run" }
             }
             $cFields = @(); foreach ($f in (Get-Prop $cocData 'cFields')) { $cFields += [string]$f }
