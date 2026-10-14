@@ -1,0 +1,228 @@
+{
+  "kind": "bop-designation",
+  "tool": "Argo Navis",
+  "rev": "REV 13",
+  "generatedAt": "2026-10-14T14:08:26.612Z",
+  "planId": "WVE-BOP1-20261005",
+  "rig": "West Vela",
+  "bop": "BOP1",
+  "mfr": "",
+  "cav": 7,
+  "status": "",
+  "rows": [
+    {
+      "pos": "UA",
+      "spec": ""
+    },
+    {
+      "pos": "RC",
+      "spec": ""
+    },
+    {
+      "pos": "LA",
+      "spec": ""
+    },
+    {
+      "pos": "UBSR",
+      "spec": ""
+    },
+    {
+      "pos": "CSR",
+      "spec": ""
+    },
+    {
+      "pos": "LBSR",
+      "spec": ""
+    },
+    {
+      "pos": "UPR",
+      "spec": ""
+    },
+    {
+      "pos": "MPR",
+      "spec": ""
+    },
+    {
+      "pos": "LPR",
+      "spec": ""
+    },
+    {
+      "pos": "TPR",
+      "spec": ""
+    },
+    {
+      "pos": "WHC",
+      "spec": ""
+    }
+  ],
+  "photoSlots": [
+    {
+      "section": "ph_rams",
+      "slot": "UBSR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "UBSR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "CSR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "CSR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LBSR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LBSR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "UPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "UPR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "MPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "MPR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LPR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "TPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "TPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UBSR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UBSR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "CSR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "CSR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LBSR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LBSR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "MPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "MPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "TPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "TPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UBSR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UBSR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "CSR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "CSR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LBSR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LBSR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "MPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "MPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "TPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "TPR — AFT"
+    }
+  ]
+}

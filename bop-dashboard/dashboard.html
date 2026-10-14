@@ -1026,6 +1026,13 @@ function renderDl1Plans(rigName){
       html += '<div class="field-line"><span class="lbl">Review:</span> ' + rvTxt + ' <a href="../help/help-centre.html#plans" style="font-size:11px">Plans tab</a></div>';
     }
     if(pl.testingPct != null) html += '<div class="field-line"><span class="lbl">Testing section:</span> ' + pl.testingPct + '%' + (pl.testingPct >= 90 ? ' · pre-deployment call to be arranged' : '') + '</div>';
+    // 14 Oct 2026 (scanner v2.99, Argo Navis REV 14): the BOP ready date against the need date, the float in days; red past the need date.
+    if(pl.bopReadyDate){
+      var rd = String(pl.bopReadyDate).slice(0,10), nd = pl.needDate ? String(pl.needDate).slice(0,10) : '', txt = 'BOP ready ' + fmtDate(rd), col = '';
+      if(nd){ var fl = Math.round((new Date(nd) - new Date(rd)) / 86400000); txt += ' · need date ' + fmtDate(nd) + ' · ' + (fl >= 0 ? 'float ' + fl + ' d' : (-fl) + ' d past, rig downtime'); col = fl < 0 ? '#c8102e' : (fl <= 2 ? '#b26a00' : '#2e7d32'); }
+      html += '<div class="field-line"><span class="lbl">Deployment:</span> <b style="color:' + (col || 'inherit') + '">' + txt + '</b></div>';
+    }
+    if(pl.frozenOverride && pl.frozenOverride.reason) html += '<div class="field-line" style="color:#c8102e"><span class="lbl">Frozen without full verification:</span> ' + (pl.frozenOverride.by || '') + ' — ' + pl.frozenOverride.reason + '</div>';
     var stats = [];
     if(pl.totalTasks != null) stats.push(['Tasks', pl.totalTasks + (pl.totalMaintenance != null ? ' (' + pl.totalMaintenance + ' WOs)' : '')]);
     if(pl.totalHours != null) stats.push(['Hours', pl.totalHours]);

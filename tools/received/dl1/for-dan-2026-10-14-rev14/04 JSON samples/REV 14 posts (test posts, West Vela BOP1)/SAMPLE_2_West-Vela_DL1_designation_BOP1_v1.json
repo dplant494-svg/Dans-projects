@@ -1,0 +1,238 @@
+{
+  "version": 3,
+  "exportedAt": "2026-10-14T16:25:40-05:00",
+  "dryRun": true,
+  "meta": {
+    "reporttype": "BOP Designation",
+    "planid": "WVE-BOP1-20261005",
+    "asset": "West Vela",
+    "bopNo": "BOP1",
+    "rigkey": "vela"
+  },
+  "kind": "bop-designation",
+  "tool": "Argo Navis",
+  "rev": "REV 14",
+  "generatedAt": "2026-10-14T21:25:40.815Z",
+  "planId": "WVE-BOP1-20261005",
+  "rig": "West Vela",
+  "bop": "BOP1",
+  "mfr": "",
+  "cav": 7,
+  "status": "",
+  "rows": [
+    {
+      "pos": "UA",
+      "spec": ""
+    },
+    {
+      "pos": "RC",
+      "spec": ""
+    },
+    {
+      "pos": "LA",
+      "spec": ""
+    },
+    {
+      "pos": "UBSR",
+      "spec": ""
+    },
+    {
+      "pos": "CSR",
+      "spec": ""
+    },
+    {
+      "pos": "LBSR",
+      "spec": ""
+    },
+    {
+      "pos": "UPR",
+      "spec": ""
+    },
+    {
+      "pos": "MPR",
+      "spec": ""
+    },
+    {
+      "pos": "LPR",
+      "spec": ""
+    },
+    {
+      "pos": "TPR",
+      "spec": ""
+    },
+    {
+      "pos": "WHC",
+      "spec": ""
+    }
+  ],
+  "photoSlots": [
+    {
+      "section": "ph_rams",
+      "slot": "UBSR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "UBSR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "CSR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "CSR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LBSR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LBSR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "UPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "UPR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "MPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "MPR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "LPR — AFT"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "TPR — FWD"
+    },
+    {
+      "section": "ph_rams",
+      "slot": "TPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UBSR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UBSR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "CSR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "CSR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LBSR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LBSR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "UPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "MPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "MPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "LPR — AFT"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "TPR — FWD"
+    },
+    {
+      "section": "ph_cavities",
+      "slot": "TPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UBSR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UBSR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "CSR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "CSR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LBSR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LBSR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "UPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "MPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "MPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "LPR — AFT"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "TPR — FWD"
+    },
+    {
+      "section": "ph_doors",
+      "slot": "TPR — AFT"
+    }
+  ]
+}

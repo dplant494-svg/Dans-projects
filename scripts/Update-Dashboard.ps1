@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.98'
+$ScriptVersion = '2.99'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1267,10 +1267,15 @@ function Read-Dl1Post { param($Json, $Meta, $File, [string]$Kind)
     if (-not $planId) { return $null }
     $sv = ConvertTo-Dl1Number (Get-Prop $body 'scopeVersion'); if ($null -eq $sv) { $sv = 0 }
     $posted = ConvertTo-StableTimestamp (Get-Prop $Meta 'saved'); if (-not $posted) { $posted = ConvertTo-StableTimestamp (Get-Prop $Json 'exportedAt') }; if (-not $posted) { $posted = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss') }
+    $pData = Get-Prop $Json 'planningData'
+    if ($null -eq $pData) { foreach ($tl in (ConvertTo-AabList (Get-Prop $Json 'tiles'))) { if ($null -eq $tl -or $tl -is [string]) { continue }; $pd0 = Get-Prop $tl 'planningData'; if ($null -ne $pd0) { $pData = $pd0; break } } }
     return [ordered]@{
         file = $File.Name; kind = $Kind; planId = $planId; scopeVersion = [int]$sv; rig = $rig; rigKey = $rigKey
         bopNo = (ConvertTo-AabText (Get-Prop $Meta 'bopNo')).Trim(); rev = (ConvertTo-AabText (Get-Prop $Meta 'rev')).Trim(); tool = (ConvertTo-AabText (Get-Prop $Meta 'tool')).Trim()
         posted = $posted; modified = $File.LastWriteTime.ToString('yyyy-MM-ddTHH:mm:ss'); dryRun = [bool]$dry; isTest = [bool]$isTest; body = $body
+        # v2.99 (REV 14): planningData on the post's tile carries testingPct (0-100), bopReadyDate and needDate; read once here
+        testingPct = $(if ($pData) { ConvertTo-Dl1Number (Get-Prop $pData 'testingPct') } else { $null })
+        bopReadyDate = $(if ($pData) { ConvertTo-Dl1Text (Get-Prop $pData 'bopReadyDate') } else { '' }); needDate = $(if ($pData) { ConvertTo-Dl1Text (Get-Prop $pData 'needDate') } else { '' })
         storeKey = $(if ($isTest) { $planId + '|test' } else { $planId })   # a test post is kept apart and can never replace a real plan
         asOf = ConvertTo-Dl1Text (Get-Prop $body 'asOf')
     }
@@ -1308,6 +1313,9 @@ function Get-Dl1PlanSummary { param($Post)
         planId = $Post.planId; scopeVersion = $Post.scopeVersion; status = ConvertTo-AabText (Get-Prop $pl 'status'); rig = $Post.rig; rigKey = $Post.rigKey; bopNo = $(if ($Post.bopNo) { $Post.bopNo } else { ConvertTo-AabText (Get-Prop $pl 'bopNo') })
         windowFrom = $(if ($win) { ConvertTo-Dl1Text (Get-Prop $win 'from') } else { '' }); windowTo = $(if ($win) { ConvertTo-Dl1Text (Get-Prop $win 'to') } else { '' })
         createdBy = ConvertTo-AabText (Get-Prop $pl 'createdBy'); frozenAt = ConvertTo-Dl1Text (Get-Prop $pl 'frozenAt'); frozenBy = ConvertTo-AabText (Get-Prop $pl 'frozenBy'); changeReason = ConvertTo-AabText (Get-Prop $pl 'changeReason')
+        # v2.99 (REV 14): the BOP ready date and the need date (drilling ready for the BOP), from plan{} or planningData{}
+        bopReadyDate = $(if ($Post.bopReadyDate) { $Post.bopReadyDate } else { ConvertTo-Dl1Text (Get-Prop $pl 'bopReadyDate') }); needDate = $(if ($Post.needDate) { $Post.needDate } else { ConvertTo-Dl1Text (Get-Prop $pl 'needDate') })
+        frozenOverride = $(if (Get-Prop $pl 'frozenOverride') { ConvertTo-AabPlain (Get-Prop $pl 'frozenOverride') } else { $null })
         totalTasks = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'tasks') } else { $tasks.Count }); totalMaintenance = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'maintenance') } else { $null }); totalHours = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'hours') } else { $null })
         criticalTasks = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'criticalTasks') } else { $null }); scopeCoveragePct = $(if ($tot) { ConvertTo-Dl1Number (Get-Prop $tot 'scopeCoveragePct') } else { $null }); deferredCount = $def.Count
         taskCount = $tasks.Count; milestoneCount = $ms.Count; synergiCount = $syn.Count
@@ -2014,7 +2022,11 @@ foreach ($f in $files) {
                 $sum = Get-Dl1PlanSummary -Post $dpost
                 $dl1Versions.Add([ordered]@{ planId = $sum.planId; scopeVersion = $sum.scopeVersion; status = $sum.status; rig = $sum.rig; rigKey = $sum.rigKey; bopNo = $sum.bopNo; posted = $sum.posted; file = $sum.file; isTest = $sum.isTest; changeReason = $sum.changeReason; frozenAt = $sum.frozenAt; taskCount = $sum.taskCount; deferredCount = $sum.deferredCount }) | Out-Null
                 $prior = $dl1Plans[$dpost.storeKey]
-                if (-not $prior -or ($sum.scopeVersion -gt $prior.scopeVersion) -or ($sum.scopeVersion -eq $prior.scopeVersion -and [string]$sum.posted -gt [string]$prior.posted)) { $dl1Plans[$dpost.storeKey] = $sum }
+                # v2.99: REV 14 freezes under the SAME scope version the reviewers verified (Lee's choice 1, 14 Oct), and a
+                # frozen post can carry the same exportedAt as the proposed one it follows (the samples do); on a tie the
+                # higher status wins (frozen over proposed), never the other way round.
+                $stRank = { param($st) switch (([string]$st).ToLowerInvariant()) { 'frozen' { 2 } 'closed' { 3 } default { 1 } } }
+                if (-not $prior -or ($sum.scopeVersion -gt $prior.scopeVersion) -or ($sum.scopeVersion -eq $prior.scopeVersion -and (([string]$sum.posted -gt [string]$prior.posted) -or ([string]$sum.posted -eq [string]$prior.posted -and (& $stRank $sum.status) -gt (& $stRank $prior.status))))) { $dl1Plans[$dpost.storeKey] = $sum }
             }
             'plan-progress' {
                 $prior = $dl1Progress[$dpost.storeKey]
@@ -4523,7 +4535,11 @@ function Get-Dl1ReviewState { param($Plan, $Reviewers, $Reviews, $Region, [bool]
     elseif ($all) { $state = 'verified' }
     elseif ($nReq -eq 0) { $state = 'no-reviewers' }
     $outst = New-Object System.Collections.Generic.List[string]; foreach ($rq in $req) { if ($rq.decision -ne 'verified') { $outst.Add([string]$rq.name) | Out-Null } }
-    return [ordered]@{ state = [string]$state; region = [string]$Region; required = $req.ToArray(); others = $others.ToArray(); requiredCount = [int]$nReq; verifiedCount = [int]$nVer; changesCount = [int]$nChg; allVerified = [bool]$all; outstanding = $outst.ToArray() }
+    # v2.99 (Lee's choice 3): every reviewer's words, so Argo Navis can show them beside Post for review
+    $cmts = New-Object System.Collections.Generic.List[object]
+    foreach ($rq in $req) { if ([string]$rq.comment) { $cmts.Add([ordered]@{ by = [string]$rq.name; position = [string]$rq.position; decision = [string]$rq.decision; text = [string]$rq.comment; at = [string]$rq.at }) | Out-Null } }
+    foreach ($ot in $others) { if ([string]$ot.comment) { $cmts.Add([ordered]@{ by = [string]$ot.name; position = [string]$ot.position; decision = [string]$ot.decision; text = [string]$ot.comment; at = [string]$ot.at }) | Out-Null } }
+    return [ordered]@{ state = [string]$state; region = [string]$Region; required = $req.ToArray(); others = $others.ToArray(); requiredCount = [int]$nReq; verifiedCount = [int]$nVer; changesCount = [int]$nChg; allVerified = [bool]$all; outstanding = $outst.ToArray(); comments = $cmts.ToArray() }
 }
 # v2.95: rig region fallback from Dan's Rigs table (Region column), exported by the Plan Reviewers flow as plan-rigs.json
 # beside plan-reviewers.json ({ generatedAt, rigs: [ { RigKey, RigName, Region, ... } ] }). A rig with no BWM post on
@@ -4564,6 +4580,7 @@ function Get-Dl1TestingPct { param($Plan, $Progress)
     return [math]::Round(100.0 * $wDone / $wSum, 1)
 }
 $dl1ReviewStates = @{}
+$slimByKey = @{}   # v2.99
 $dl1PlanList = New-Object System.Collections.Generic.List[object]
 foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $pl = $dl1Plans[$planKey]; $pg = $dl1ProgressSummaries[$planKey]
@@ -4573,7 +4590,15 @@ foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
     $slim['closeout'] = $(if ($dl1Closeouts.ContainsKey($planKey)) { $dl1Closeouts[$planKey] } else { $null })
     $slim['review'] = ConvertTo-AabPlain (Get-Dl1ReviewState -Plan $pl -Reviewers $planReviewers -Reviews $dl1Reviews -Region $(if ($rigRegion.ContainsKey([string]$pl.rig)) { $rigRegion[[string]$pl.rig] } else { '' }) -Closed ($dl1Closeouts.ContainsKey($planKey)))   # v2.90; plain for the Windows PowerShell serialiser
     $slim['testingPct'] = Get-Dl1TestingPct -Plan $pl -Progress $dl1Progress[$planKey]   # v2.90: Testing branch plus drift, duration-weighted, from the newest progress post
+    # v2.99 (REV 14, Lee's choice 4): the tool posts planningData.testingPct on progress and plan posts; when present it is
+    # the figure (one writer), the scanner's own computation stays as the fallback for older posts.
+    $toolTesting = $null
+    if ($dl1Progress.ContainsKey($planKey) -and $dl1Progress[$planKey] -and $null -ne $dl1Progress[$planKey].testingPct) { $toolTesting = $dl1Progress[$planKey].testingPct }
+    if ($null -ne $toolTesting) { $slim['testingPct'] = [double]$toolTesting; $slim['testingPctSource'] = 'tool' } elseif ($null -ne $slim['testingPct']) { $slim['testingPctSource'] = 'scanner' }
+    # the ready date and the need date: the newest progress post wins over the plan post
+    if ($dl1Progress.ContainsKey($planKey) -and $dl1Progress[$planKey]) { $pgp = $dl1Progress[$planKey]; if ($pgp.bopReadyDate) { $slim['bopReadyDate'] = [string]$pgp.bopReadyDate }; if ($pgp.needDate) { $slim['needDate'] = [string]$pgp.needDate } }
     $dl1ReviewStates[$planKey] = $slim['review']
+    $slimByKey[$planKey] = $slim
     $dl1PlanList.Add($slim) | Out-Null
 }
 # v2.89: the live links per plan (unlinked ones dropped), and plans-open.json for SSORT's plan picker (entry 61.3 / 64):
@@ -4604,7 +4629,9 @@ foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
         planId = $pl.planId; rigKey = $pl.rigKey; rig = $pl.rig; bopNo = $pl.bopNo; status = $(if ($isClosed) { 'closed' } else { $pl.status }); scopeVersion = $pl.scopeVersion
         windowFrom = $pl.windowFrom; windowTo = $pl.windowTo; title = ("{0} {1} - BWM from {2}" -f $pl.rig, $pl.bopNo, $pl.windowFrom); posted = $pl.posted; test = [bool]$pl.isTest
         sections = $secList.ToArray()
-        review = $(if ($rvs) { [ordered]@{ state = $rvs.state; verified = $rvs.verifiedCount; required = $rvs.requiredCount; outstanding = $rvs.outstanding } } else { $null })   # v2.90
+        review = $(if ($rvs) { [ordered]@{ state = $rvs.state; verified = $rvs.verifiedCount; required = $rvs.requiredCount; outstanding = $rvs.outstanding; comments = $rvs.comments } } else { $null })   # v2.90; comments v2.99
+        bopReadyDate = $(if ($slimByKey.ContainsKey($planKey)) { [string]$slimByKey[$planKey]['bopReadyDate'] } else { [string]$pl.bopReadyDate }); needDate = $(if ($slimByKey.ContainsKey($planKey)) { [string]$slimByKey[$planKey]['needDate'] } else { [string]$pl.needDate })
+        testingPct = $(if ($slimByKey.ContainsKey($planKey)) { $slimByKey[$planKey]['testingPct'] } else { $null })
     }) | Out-Null
 }
 $plansOpenJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $plansOpen.Count; plans = $plansOpen.ToArray() })
@@ -4687,7 +4714,7 @@ try {
         if ($rv) {
             $reqOut = New-Object System.Collections.Generic.List[object]
             foreach ($rq in @($rv.required)) { $reqOut.Add([ordered]@{ position = [string]$rq.position; name = [string]$rq.name; section = [string]$rq.section; decision = [string]$rq.decision; at = [string]$rq.at; comment = [string]$rq.comment }) | Out-Null }
-            $reviewOut = [ordered]@{ state = [string]$rv.state; region = [string]$rv.region; verifiedcount = [int]$rv.verifiedCount; requiredcount = [int]$rv.requiredCount; changescount = [int]$rv.changesCount; outstanding = @($rv.outstanding | ForEach-Object { [string]$_ }); required = $reqOut.ToArray() }
+            $reviewOut = [ordered]@{ state = [string]$rv.state; region = [string]$rv.region; verifiedcount = [int]$rv.verifiedCount; requiredcount = [int]$rv.requiredCount; changescount = [int]$rv.changesCount; outstanding = @($rv.outstanding | ForEach-Object { [string]$_ }); required = $reqOut.ToArray(); comments = (ConvertTo-AabPlain $rv.comments) }
         }
         $linksOut = New-Object System.Collections.Generic.List[object]
         if ($linksByPlanAll.ContainsKey($spid)) { foreach ($lk in $linksByPlanAll[$spid]) { $linksOut.Add([ordered]@{ taskid = [string]$lk.taskId; taskname = [string]$lk.taskName; section = [string]$lk.section; file = [string]$lk.sourceFile; reporttype = [string]$lk.sourceType; testtype = [string]$lk.testType; date = [string]$lk.sourceDate; saved = [string]$lk.saved; by = [string]$lk.by }) | Out-Null } }
@@ -4715,6 +4742,8 @@ try {
             planid = $spid; generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion
             scopeversion = [int]$pl.scopeVersion; status = [string]$pl.status; rig = $pRig; rigkey = $pRigKey; bop = [string]$pl.bopNo; istest = $isTestPlan
             windowfrom = $winFrom; windowto = $winTo; planfile = [string]$pl.file; posted = [string]$pl.posted
+            bopreadydate = $(if ($slimByKey.ContainsKey($planKey)) { [string]$slimByKey[$planKey]['bopReadyDate'] } else { [string]$pl.bopReadyDate }); needdate = $(if ($slimByKey.ContainsKey($planKey)) { [string]$slimByKey[$planKey]['needDate'] } else { [string]$pl.needDate })
+            testingpct = $(if ($slimByKey.ContainsKey($planKey)) { $slimByKey[$planKey]['testingPct'] } else { $null })
             review = $reviewOut
             links = $linksOut.ToArray()
             posts = $postsOut.ToArray()

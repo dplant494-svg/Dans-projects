@@ -1,0 +1,1213 @@
+{
+  "version": 3,
+  "exportedAt": "2026-10-14T16:25:40-05:00",
+  "dryRun": true,
+  "meta": {
+    "asset": "West Vela",
+    "discipline": "Planning",
+    "planningOnly": true,
+    "schedule": "20261005_WVE_BWM_BOP1_Schedule",
+    "bopNo": "BOP1",
+    "projType": "BWM — Between Well Maintenance",
+    "origFinish": "2026-10-14",
+    "curFinish": "2026-10-14",
+    "needDate": "2026-10-17",
+    "float": "(+) 3 Days",
+    "maintStart": "2026-10-05",
+    "maintDay": "Day 10 of 30",
+    "planVar": "(+) 0 Days",
+    "origDurHrs": 715.5,
+    "date": "2026-10-05",
+    "lastRigUpdate": "2026-10-05",
+    "rigkey": "vela",
+    "rev": "Argo Navis REV 14",
+    "kind": "plan-progress",
+    "planid": "WVE-BOP1-20261005"
+  },
+  "tiles": [
+    {
+      "planningData": {
+        "reportDate": "2026-10-05",
+        "dataDate": "2026-10-05",
+        "pctComplete": "13%",
+        "criticalPath": "Testing — BWM BOP CONTROL SYSTEM SURFACE LEAK OFF SOAK TEST",
+        "simops": "",
+        "comments": "",
+        "lastRigUpdate": "2026-10-05",
+        "projectComplete": false,
+        "milestones": [
+          {
+            "name": "BOP Landed on Beams",
+            "baseline": "2026-10-05",
+            "est": "2026-10-05",
+            "actual": "2026-10-05"
+          },
+          {
+            "name": "Rack Back to Well Center Complete",
+            "baseline": "2026-10-05",
+            "est": "2026-10-05",
+            "actual": "2026-10-05"
+          },
+          {
+            "name": "Split BOP and LMRP Complete",
+            "baseline": "2026-10-05",
+            "est": "2026-10-05",
+            "actual": "2026-10-05"
+          },
+          {
+            "name": "Lower Stack Complete",
+            "baseline": "2026-10-07",
+            "est": "2026-10-07",
+            "actual": ""
+          },
+          {
+            "name": "LMRP Complete",
+            "baseline": "2026-10-06",
+            "est": "2026-10-06",
+            "actual": ""
+          },
+          {
+            "name": "BOP Controls Complete",
+            "baseline": "2026-10-12",
+            "est": "2026-10-12",
+            "actual": ""
+          },
+          {
+            "name": "Stack Up Complete",
+            "baseline": "2026-10-12",
+            "est": "2026-10-12",
+            "actual": ""
+          },
+          {
+            "name": "Offline Ancillary Complete",
+            "baseline": "2026-10-11",
+            "est": "2026-10-11",
+            "actual": ""
+          },
+          {
+            "name": "Testing Complete",
+            "baseline": "2026-10-14",
+            "est": "2026-10-14",
+            "actual": ""
+          },
+          {
+            "name": "Offline Maintenance / Pre-Deployment Testing Complete",
+            "baseline": "2026-10-14",
+            "est": "2026-10-14",
+            "actual": ""
+          }
+        ],
+        "done": [
+          {
+            "id": "rackback",
+            "desc": "Rack Back to Well Center",
+            "pct": "100%"
+          },
+          {
+            "id": "split",
+            "desc": "Split BOP and LMRP",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0202",
+            "desc": "BWM CASING SHEAR RAM",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0204",
+            "desc": "BWM PIPE AND TEST RAMS",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RG0201",
+            "desc": "BWM HYDRAULIC SPRING ASSIST HB GATE VALVES INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UA0201",
+            "desc": "BWM ANNULAR BOP INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0207",
+            "desc": "BWM CHECK VALVE AND ISOLATION VALVE FUNCTIONALITY/INTEGRITY TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BT0205",
+            "desc": "BWM PRE-CHARGE POD PILOT ACCUMULATORS",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0206",
+            "desc": "BWM HYDRAULIC SHUTTLE VALVE FUNCTIONALITY TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0105",
+            "desc": "BWM BOP CONTROL HOSES AND PIPING",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0007",
+            "desc": "BWM MPD INTEGRATED RISER JOINT SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0009",
+            "desc": "12M MPD INTEGRATED RISER JOINT INSPECTION",
+            "pct": "100%"
+          }
+        ],
+        "next": [],
+        "breakins": [],
+        "scopeCoveragePct": 99,
+        "scopeIndicative": false,
+        "criticalChainLength": 29,
+        "crews": {
+          "Lower BOP": 0,
+          "LMRP": 0,
+          "Controls": 0,
+          "Offline Ancillary": 0,
+          "Testing": 0
+        },
+        "tasksQueuedByCrew": 0,
+        "nptHours": "0 Hrs",
+        "nptTotalHrs": 0,
+        "nptByCategory": {},
+        "nptLog": [],
+        "thirdParty": {
+          "currency": "USD",
+          "personnelOnBoard": 0,
+          "personnelCost": 0,
+          "otherCost": 0,
+          "costTotal": 0,
+          "personnel": [],
+          "costs": []
+        },
+        "bopReadyDate": "2026-10-14T07:30:00-05:00",
+        "needDate": "2026-10-17",
+        "testingPct": 0
+      }
+    }
+  ],
+  "criticalRows": [],
+  "actionRows": [],
+  "progress": {
+    "planId": "WVE-BOP1-20261005",
+    "scopeVersion": 1,
+    "asOf": "2026-10-14T16:25:40-05:00",
+    "shift": "day",
+    "snapshot": true,
+    "pctComplete": "13%",
+    "bopReadyDate": "2026-10-14T07:30:00-05:00",
+    "needDate": "2026-10-17",
+    "tasks": [
+      {
+        "taskId": "rackback",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "split",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152956",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152958",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153094",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152640",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153318",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153211",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153317",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153319",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249811",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152405",
+        "pct": 100,
+        "status": "complete",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152460",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152655",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152880",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152940",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153046",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153732",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "tpl:sss-007",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152186",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153321",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152959",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152105",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153212",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153322",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153323",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153719",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152106",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152960",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250179",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153676",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153882",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152040",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153093",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10233256",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153100",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249916",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153006",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153007",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152881",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249908",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249917",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152051",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152955",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249815",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152448",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152449",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152957",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249918",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152034",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152036",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152104",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249919",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249995",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152584",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249816",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249921",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152447",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152633",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249922",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152450",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152635",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249923",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153599",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153316",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152634",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249924",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153320",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153532",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152637",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153221",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249818",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250171",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152590",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152638",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152986",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249965",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250032",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250170",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250117",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153210",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153213",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152054",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152055",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152107",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152939",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152240",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152243",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250162",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152053",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10249996",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250153",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152549",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250173",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153345",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250156",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250114",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:C10250118",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153005",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153017",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "stackup",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153018",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153096",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153097",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153098",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153325",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153327",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10152581",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153328",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "wo:R10153315",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      },
+      {
+        "taskId": "drift",
+        "pct": 0,
+        "status": "not-started",
+        "note": "",
+        "actualStart": "",
+        "actualEnd": "",
+        "actualHrs": 0
+      }
+    ],
+    "evidence": [],
+    "pdcItemsTicked": [
+      "B-04",
+      "G-02"
+    ],
+    "breakins": []
+  }
+}

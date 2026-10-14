@@ -1,0 +1,369 @@
+<title>Argo Navis QA/QC</title>
+<style>
+/* Layout: one reading column for the plan, full-width scrolling tables for the catalogue and punch list */
+:root{
+  --bg:#f6f8fb; --surface:#ffffff; --fg:#1b2433; --muted:#5a6880; --line:#d9e0ea;
+  --brand:#002C77; --brand-ink:#ffffff; --accent:#EDB71E;
+  --ok:#1f7a3d; --ok-bg:#e6f4ea; --warn:#8a5200; --warn-bg:#fff3e0; --bad:#b3261e; --bad-bg:#fde8e6; --ext:#4b5a78; --ext-bg:#e9edf5;
+  --font:Arial, "Helvetica Neue", Helvetica, sans-serif; --mono:Consolas, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1420; --surface:#151d2c; --fg:#e4e9f2; --muted:#9aa7bd; --line:#2a3550;
+  --brand:#7fa6ff; --brand-ink:#0e1420; --accent:#EDB71E;
+  --ok:#7fd49a; --ok-bg:#16301f; --warn:#ffc46b; --warn-bg:#33240c; --bad:#ff8a80; --bad-bg:#3a1714; --ext:#b9c4da; --ext-bg:#232d42; color-scheme:dark; } }
+:root[data-theme="dark"]{
+  --bg:#0e1420; --surface:#151d2c; --fg:#e4e9f2; --muted:#9aa7bd; --line:#2a3550;
+  --brand:#7fa6ff; --brand-ink:#0e1420; --accent:#EDB71E;
+  --ok:#7fd49a; --ok-bg:#16301f; --warn:#ffc46b; --warn-bg:#33240c; --bad:#ff8a80; --bad-bg:#3a1714; --ext:#b9c4da; --ext-bg:#232d42; color-scheme:dark; }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.55 var(--font);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 64px}
+header.doc{border-bottom:3px solid var(--accent);padding-bottom:18px;margin-bottom:8px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{color:var(--brand);font-size:30px;line-height:1.2;margin:6px 0 8px;text-wrap:balance}
+h2{color:var(--brand);font-size:21px;margin:40px 0 10px;text-wrap:balance;scroll-margin-top:12px}
+h3{color:var(--brand);font-size:16px;margin:24px 0 6px}
+p,li{max-width:76ch}
+.meta{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:13px;color:var(--muted)}
+.meta b{color:var(--fg)}
+code{font-family:var(--mono);font-size:.88em;background:var(--ext-bg);padding:0 4px;border-radius:3px;overflow-wrap:anywhere}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin:16px 0 0}
+nav.toc a{color:var(--brand);text-decoration:none;border-bottom:1px solid var(--line)}
+nav.toc a:hover{border-color:var(--brand)}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0 4px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px}
+.tile .n{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--brand)}
+.tile .l{font-size:12px;color:var(--muted)}
+.tile.a .n{color:var(--bad)}
+.callout{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);padding:12px 16px;border-radius:4px;margin:14px 0}
+.callout p{margin:6px 0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface);margin:10px 0}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{background:var(--brand);color:var(--brand-ink);text-align:left;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:8px 10px;white-space:nowrap;position:sticky;top:0}
+td{border-top:1px solid var(--line);padding:8px 10px;vertical-align:top}
+td.id{font-family:var(--mono);font-size:12px;white-space:nowrap;font-weight:700}
+td.ev{font-size:12px;color:var(--muted);min-width:180px}
+tr.grp td{background:var(--ext-bg);font-weight:700;color:var(--brand);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.pill{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap}
+.s-v{background:var(--ok-bg);color:var(--ok)} .s-p{background:var(--warn-bg);color:var(--warn)} .s-n{background:var(--bad-bg);color:var(--bad)} .s-o{background:var(--ext-bg);color:var(--ext)}
+.p-A{background:var(--bad-bg);color:var(--bad)} .p-B{background:var(--warn-bg);color:var(--warn)} .p-C{background:var(--ext-bg);color:var(--ext)} .p-D{background:var(--ext-bg);color:var(--ext)}
+.m{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 4px;font-size:13px}
+.filters button{font:inherit;font-size:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:4px 10px;border-radius:14px;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.filters button:focus-visible,.filters select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.filters select{font:inherit;font-size:12px;padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--surface);color:var(--fg)}
+.count{color:var(--muted);font-size:12px;margin-left:auto}
+.gates{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.gate{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
+.gate .g{font-family:var(--mono);font-weight:700;color:var(--brand)}
+.gate h4{margin:2px 0 6px;font-size:14px}
+.gate ul{margin:0;padding-left:18px;font-size:13px}
+.gate .who{font-size:12px;color:var(--muted);margin-top:8px}
+footer{margin-top:48px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:640px){ h1{font-size:24px} .wrap{padding-inline:16px} }
+</style>
+
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">Seadrill · Well Control Equipment · Technical Services Planning</div>
+  <h1>Argo Navis (DL-1 / BOP Schedule Builder) QA/QC Requirements and Verification Punch List</h1>
+  <div class="meta">
+    <span><b>Build in scope:</b> REV 13 Argo Navis (pre-launch, local), carrying forward to REV 14 (SACRED posting)</span>
+    <span><b>Shipped build:</b> REV 9</span>
+    <span><b>Prepared:</b> 11 Oct 2026, updated 12 Oct for REV 13, for Lee Arnold</span>
+    <span><b>Status:</b> Draft for review</span>
+  </div>
+  <nav class="toc" aria-label="Contents">
+    <a href="#purpose">1 Purpose</a><a href="#principles">2 Quality rules</a><a href="#gates">3 Release gates</a>
+    <a href="#reqs">4 Requirements</a><a href="#suite">5 Test suite</a><a href="#punch">6 Punch list</a><a href="#signoff">7 Sign-off</a>
+  </nav>
+</header>
+
+<div class="tiles" id="tiles"></div>
+
+<h2 id="purpose">1. Purpose and scope</h2>
+<p>This document sets out what has to be true of DL-1 before a REV is released, how each requirement is verified, and where the evidence stands today. It covers the tool itself: data import, scope, the scheduling engine, execution reporting, the read-only integrations, the dashboard payload, saved jobs, the user interface, security, compatibility and configuration control. Data quality in the source systems (Maximo job plans, the Branch Map, the document register) is listed separately because the tool can only flag it.</p>
+<p>The status column is measured, not assumed. <span class="pill s-v">Verified</span> means an automated check passed on real inputs and the evidence is named. <span class="pill s-p">Partial</span> means it was verified in an earlier REV, or only part of it is tested, and it is not in the current repeatable suite. <span class="pill s-n">Not verified</span> means no test exists. <span class="pill s-o">Open</span> means it depends on someone outside the tool.</p>
+<div class="callout">
+  <p><b>Update 12 Oct: the suite is now reproducible.</b> The test pages, runner and golden inputs (SHA-256 manifest) live in <code>Schedule Builder\Tests\</code>, and <code>Run-AllTests.ps1</code> runs everything from the project folder and writes a dated result to <code>Tests\results\</code> (QA-01 to QA-04 closed). <b>Still open:</b> the git repository holds one commit from 22 Aug (REV 1–3) and REV 4–13 are untracked (QA-12), and REV 14 posting carries the remaining priority-A security and acceptance items.</p>
+</div>
+
+<h2 id="principles">2. Quality rules that apply to every REV</h2>
+<p>These come from the project's own record (<code>CLAUDE.md</code>, Dan Plant's REV 3 handover and the handoff contract). They are the acceptance rules a reviewer applies to any change.</p>
+<ol>
+  <li><b>Verify against real inputs.</b> Use the real Maximo feed and workbooks, not synthetic fixtures. A fixture is acceptable only where the real file does not exist yet (the SSCE approvals file), and the status says so.</li>
+  <li><b>The regression baseline must reproduce exactly</b> after any change: WO.csv of 2026-09-25, West Vela BOP1, commence 2026-10-05, crews blank gives 143 tasks, 148 items, 917.5 h, finish 2026-10-15 07:30, 31 critical, 95% coverage. A read-only REV must also leave <code>planningData</code> byte-identical.</li>
+  <li><b>The dashboard payload is additive-only.</b> No field is renamed, removed or retyped.</li>
+  <li><b>Key everything on the task id</b> (<code>wo:&lt;WONUM&gt;</code>), never on the job plan code, which is not unique per task.</li>
+  <li><b>Never edit a shipped REV.</b> Each release gets its own REV folder and badge. Earlier REVs are the rollback.</li>
+  <li><b>Read-only towards every other system.</b> DL-1 reads Maximo, SACRED, the CoC Tracker, the WCE Hub, Synergi and eDOCS, and writes to none of them. REV 13's posting to SACRED is the single exception, and it is gated.</li>
+  <li><b>Nothing fails silently.</b> A missing input, a stale file, a low coverage figure or a mismatch is shown on screen, never dropped quietly.</li>
+  <li><b>No credentials in the tool or its files.</b> Sign-in is always done by the user.</li>
+</ol>
+
+<h2 id="gates">3. Release gates</h2>
+<p>A REV moves through five gates in order. A gate is passed only when every requirement it covers is <span class="pill s-v">Verified</span> or has a written waiver from Lee Arnold.</p>
+<div class="gates">
+  <div class="gate"><div class="g">G1</div><h4>Build complete</h4><ul><li>New REV folder; badge and date bumped</li><li>Changed code marked with the REV</li><li>CLAUDE.md entry written</li></ul><div class="who">Developer (DL-1 build session)</div></div>
+  <div class="gate"><div class="g">G2</div><h4>Verification</h4><ul><li>Full suite green from the project folder</li><li>Regression baseline and engine invariants</li><li>Payload schema diff against the shipped REV</li><li>Dated results file archived</li></ul><div class="who">Developer; reviewed by Lee Arnold</div></div>
+  <div class="gate"><div class="g">G3</div><h4>Integration</h4><ul><li>CoC Tracker live connection</li><li>SACRED scanner accepts samples (dry run)</li><li>Egress capture shows only approved hosts</li></ul><div class="who">Dan Plant / SACRED; Lee Arnold</div></div>
+  <div class="gate"><div class="g">G4</div><h4>User acceptance</h4><ul><li>Rig planner builds a real campaign</li><li>Compared with the P6/OMP schedule</li><li>Edge on a rig laptop, over Starlink</li></ul><div class="who">Rig planner; Lee Arnold signs</div></div>
+  <div class="gate"><div class="g">G5</div><h4>Release</h4><ul><li>Lee's go-ahead to publish</li><li>Release record: location, SHA-256, previous REV</li><li>User guide republished</li></ul><div class="who">Lee Arnold</div></div>
+</div>
+
+<h2 id="reqs">4. Requirements catalogue and verification status</h2>
+<p>Method: <span class="m">T</span> automated test · <span class="m">I</span> inspection or review · <span class="m">D</span> demonstration or user acceptance · <span class="m">A</span> analysis. Evidence names the test page (in <code>%TEMP%\sbcap</code> today) or the REV in which it was last proven.</p>
+<div class="filters" role="group" aria-label="Filter requirements by status">
+  <span>Show:</span>
+  <button type="button" data-rf="all" aria-pressed="true">All</button>
+  <button type="button" data-rf="v" aria-pressed="false">Verified</button>
+  <button type="button" data-rf="p" aria-pressed="false">Partial</button>
+  <button type="button" data-rf="n" aria-pressed="false">Not verified</button>
+  <button type="button" data-rf="o" aria-pressed="false">Open</button>
+  <span class="count" id="rcount"></span>
+</div>
+<div class="tbl"><table id="rtable"><thead><tr><th>ID</th><th>Requirement</th><th>Acceptance criterion</th><th>Method</th><th>Status</th><th>Evidence / gap</th></tr></thead><tbody></tbody></table></div>
+
+<h2 id="suite">5. Test suite inventory</h2>
+<p>All tests drive the real tool in headless Chrome with an isolated profile. Because <code>APP</code> is declared <code>const</code>, each test injects its script into the tool's own frame, stubs <code>print</code>, <code>open</code>, <code>alert</code> and <code>prompt</code>, and fires real <code>change</code> events.</p>
+<div class="tbl"><table>
+<thead><tr><th>Test page</th><th>Covers</th><th>Last result</th><th>Location</th></tr></thead>
+<tbody>
+<tr><td class="id">_rev12test.html</td><td>REV 11 vs REV 12 regression and byte-identical <code>planningData</code>; layout at 1460 px; CoC Tracker load and tier parity with the rendered tracker page; Cert and SSCE cells and deep links; file classification; NC gate; badge</td><td><span class="pill s-p">1 known false fail</span> C1000381 (tracker search also matches certificate numbers)</td><td>Tests\pages</td></tr>
+<tr><td class="id">_layout12.html</td><td>Scope Challenge fit at 1366, 1440, 1460, 1536 and 1920 px with text-level overflow check</td><td><span class="pill s-v">Pass</span> 11 Oct</td><td>Tests\pages</td></tr>
+<tr><td class="id">_deploy12.html</td><td>Deployment-date scope window, margins 0/21/60, Step 2 = Step 3 counts, deploy-before-commence refusal</td><td><span class="pill s-v">Pass</span> 11 Oct</td><td>Tests\pages</td></tr>
+<tr><td class="id">_outside12.html</td><td>All active PMs visible; captured vs not-captured counts; Execute tick in and out; Defer All; save and restore of <code>outTasks</code></td><td><span class="pill s-v">Pass</span> 11 Oct</td><td>Tests\pages</td></tr>
+<tr><td class="id">_ax12.html</td><td>Document register (xlsx and csv), AX reference parsing across 839 job plans, revision / missing / eDOCS-mismatch flags, parts parsing and roll-up, Scope Freeze sections</td><td><span class="pill s-v">Pass</span> 11 Oct</td><td>Tests\pages</td></tr>
+<tr><td class="id">_rev11test.html</td><td>Job plan steps (839 plans, 5,652 steps), discipline view, Maximo-active lists, CoC xlsx/json, SSCE request fixtures, NC gate</td><td><span class="pill s-v">Pass</span> 11 Oct</td><td>Tests\pages</td></tr>
+<tr><td class="id">_cap*.html</td><td>Screenshot captures for the user guide and reviews (evidence, not tests)</td><td>n/a</td><td>Tests\pages</td></tr>
+<tr><td class="id">_regress.html</td><td>Regression baseline and payload schema against the previous REV and REV 9 (additive-only, §9 minimum); <code>flags=noTemplate</code> and <code>expect=</code> runs for REV 13</td><td><span class="pill s-v">Pass</span> 12 Oct</td><td>Tests\pages</td></tr><tr><td class="id">_rev13test.html</td><td>Argo Navis REV 13: branding, plan structure, testing %, pre-deployment checklist (states, SSORT keys, signing, revisions, save / restore, REV 12 files) and the live JPC pop-up round trip</td><td><span class="pill s-v">Pass</span> 12 Oct</td><td>Tests\pages</td></tr><tr><td class="id">Run-AllTests.ps1</td><td>Checks the golden manifest, stages a run folder, runs every page, writes Tests\results\&lt;date&gt;_REVn.txt; a page that never reports is a FAIL</td><td>n/a</td><td>Tests</td></tr>
+</tbody></table></div>
+<p><b>Not covered by any current test:</b> engine invariants under crew levelling, the other rig scenarios, saved-job files from real rigs, time zones and daylight saving, the feed header check, network egress, Edge, performance, and the visual print layout. Each is a punch item below. (The payload schema and a REV 12-shaped saved file are now covered.)</p>
+
+<h2 id="punch">6. Punch list</h2>
+<p>Priority <span class="pill p-A">A</span> must close before the REV 13 dry run. <span class="pill p-B">B</span> must close before fleet rollout. <span class="pill p-C">C</span> is improvement. <span class="pill p-D">DQ</span> items are source-data corrections owned outside the tool; DL-1 already flags them.</p>
+<div class="filters" role="group" aria-label="Filter punch list">
+  <span>Priority:</span>
+  <button type="button" data-pf="all" aria-pressed="true">All</button>
+  <button type="button" data-pf="A" aria-pressed="false">A</button>
+  <button type="button" data-pf="B" aria-pressed="false">B</button>
+  <button type="button" data-pf="C" aria-pressed="false">C</button>
+  <button type="button" data-pf="D" aria-pressed="false">DQ</button>
+  <label for="owner" style="margin-left:8px">Owner:</label>
+  <select id="owner"><option value="">Everyone</option></select>
+  <span class="count" id="pcount"></span>
+</div>
+<div class="tbl"><table id="ptable"><thead><tr><th>ID</th><th>Pri.</th><th>Gate</th><th>Action</th><th>Owner</th><th>Closed when</th><th>Closes</th><th>Status</th></tr></thead><tbody></tbody></table></div>
+
+<h2 id="signoff">7. Sign-off</h2>
+<div class="tbl"><table>
+<thead><tr><th>Gate</th><th>Approver</th><th>Evidence required</th><th>Signed / date</th></tr></thead>
+<tbody>
+<tr><td class="id">G2</td><td>Lee Arnold</td><td>Dated suite results from <code>Tests\results\</code>; baseline table; schema diff report</td><td></td></tr>
+<tr><td class="id">G3</td><td>Dan Plant (SACRED)</td><td>Scanner dry-run receipt for each <code>kind</code>; egress capture; tracker live status</td><td></td></tr>
+<tr><td class="id">G4</td><td>Rig planner, then Lee Arnold</td><td>UAT script with results; comparison with the P6/OMP schedule; discrepancy log</td><td></td></tr>
+<tr><td class="id">G5</td><td>Lee Arnold</td><td>Release record (location, SHA-256, previous REV, date); user guide version</td><td></td></tr>
+</tbody></table></div>
+
+<footer>Sources: Schedule Builder <code>CLAUDE.md</code> (REV 4–12 record), <code>SCHEDULE-BUILDER-BUILD-HANDOVER.md</code> §6–7, <code>SCHEDULE-BUILDER-HANDOFF-CONTRACT.md</code> §8–9, DL-1 reply to SACRED (Q9, Q13, Q19, Q23, Q24), the REV 12 source, and test runs of 11 Oct 2026. Seadrill internal.</footer>
+</div>
+
+<script>
+const R = [
+ ['g','Data import'],
+ ['DI-01','WO.csv is decoded strict UTF-8 first, then Windows-1252; non-breaking spaces normalised.','The 2026-09-25 feed parses to 2,631 rows with no replacement characters.','T','p','Proven REV 8 (27 Sep). Not asserted in the current suite.'],
+ ['DI-02','CSV parser handles commas and line breaks inside quoted fields.','Parsed row count equals the Maximo export row count.','T','p','Proven REV 5. Not asserted in the current suite.'],
+ ['DI-03','Required feed columns are present; known renames are accepted (DESCRIPTION_1 → ASSET_DESCRIPTION); a missing column raises a visible warning.','A feed with a renamed or missing column shows a banner naming it.','T','n','field() returns an empty string for a missing column, so a rename fails silently today. QA-09.'],
+ ['DI-04','The Branch Map is never read or regenerated while its Excel lock file exists.','Procedure followed; script checks for ~$ file.','I','p','Procedural only; the regeneration script does not check.'],
+ ['DI-05','xlsx shared strings are read with an XML parser; rows mapped by their r= number.','12 detail workbooks give 839 job plans and 5,652 steps.','T','v','_rev11test, 11 Oct.'],
+ ['DI-06','Folder scans look one level deep; a file in the chosen folder beats a subfolder copy; the PENDING tracker copy is never picked.','Classification test plus Archive\\ precedence test.','T','p','PENDING skip verified in _rev12test. One-level precedence last proven REV 5.'],
+ ['DI-07','Optional inputs never block the import gate; the gate names each missing required input.','Gate text lists missing inputs; optional ones absent still allow Next.','T','p','Proven REV 5 and REV 9; not in current suite.'],
+ ['DI-08','Document register is read by header text from xlsx or csv.','48 AX procedures among 1,651 documents; csv and xlsx give the same AX map.','T','v','_ax12, 11 Oct.'],
+ ['DI-09','Job plan Materials are parsed; the total row is excluded.','175 job plans, 1,077 lines; 0900-UP0247 = 2148385 ×4 and 1905212 ×4.','T','v','_ax12, 11 Oct.'],
+ ['DI-10','Every input shows its age and is flagged when stale.','CoC > 30 days, Hub > 36 h and a failed Synergi sync are flagged; the feed date is shown.','T','p','Rules exist for CoC, Hub and Synergi. The AX register has no staleness rule. QA-21.'],
+ ['g','Scope'],
+ ['SC-01','Rig identity comes only from SITEID via SITE_TO_RIG; an unmapped rig builds zero tasks.','Every built task’s siteId equals the selected rig.','T','p','Proven REV 5. Assertion not in current suite. QA-05.'],
+ ['SC-02','SFI scope is 314, 331–337 and 339, with 338 carried; 312 stays excluded; a saved sfiScope is intersected with the allowed set.','A job saved with 312 restores without it.','T','p','Proven REV 8. Not in current suite.'],
+ ['SC-03','BOP1/BOP2 isolation: no task from the other stack; shared equipment included in either.','Zero other-stack tasks on WVE BOP1 and BOP2; 47 + 99 + 47 reconciliation style check on the golden feed.','T','p','Proven REV 6 on the 4 Sep feed. QA-05, QA-06.'],
+ ['SC-04','One scope-window rule serves Step 2 and Step 3; overdue and BWM work always in; deployment before commencement refused.','WVE BOP1 deploy 20 Oct + 21 d: 143 → 108 tasks, 917.5 → 718.5 h; blank date reproduces the baseline.','T','v','_deploy12, 11 Oct.'],
+ ['SC-05','Every active PM is visible; out-of-window PMs held apart and unticked.','Active = captured + not captured (261 = 108 + 153).','T','v','_outside12, 11 Oct.'],
+ ['SC-06','Out-of-window PMs change nothing until ticked in; unticking returns them to the outside list.','Payload unchanged with the list loaded; toggles round-trip.','T','v','_outside12, 11 Oct.'],
+ ['SC-07','The discipline view filters what is listed, never what is planned.','planningData identical across All, WCE, MPD and Electrical views.','T','v','_rev11test, 11 Oct.'],
+ ['SC-08','A ticked Non-Conformity needs a Maximo NC reference before the schedule is built; restore is not gated.','Next is blocked until the reference is typed; a saved file with a missing reference still opens and shows MISSING.','T','v','_rev12test §6, 11 Oct. Reference format not yet defined. QA-25.'],
+ ['g','Scheduling engine'],
+ ['EN-01','Tasks are keyed on wo:<WONUM>, never on the job plan code.','Two WOs on one job plan get independent finish times.','T','p','Fixed REV 1; no explicit duplicate-job-plan assertion. QA-05.'],
+ ['EN-02','The regression baseline reproduces exactly.','143 / 148 / 917.5 h / 2026-10-15 07:30 / 31 critical / 95%; planningData byte-identical for read-only REVs.','T','v','_rev12test, 11 Oct (REV 11 = REV 12).'],
+ ['EN-03','Crew levelling: blank crew means unlimited; peak techs never exceed crew except flagged over-crew tasks; total hours unchanged; actuals never moved.','Assertions pass with crews blank, 4/3/2/6/3 and 1/1/1/2/1.','T','p','Proven REV 6 only. QA-05.'],
+ ['EN-04','Float and critical path: zero float if and only if critical; no negative float; queue delay kept separate from float.','Assertions pass on all scenarios.','T','p','Proven REV 6 only. QA-05.'],
+ ['EN-05','Coverage below 80% turns the banner red, watermarks both printed documents INDICATIVE ONLY and asks before sync.','West Jupiter BOP1 (48%) shows all three.','T','p','Proven REV 6. QA-06, QA-19.'],
+ ['EN-06','SSCE change-out swaps to the per-job-plan figure; unticking restores exactly; a longer change-out is flagged.','Tick and untick restore baseDurationHrs; red ▲ on a longer figure.','T','p','Proven REV 5.'],
+ ['EN-07','Baselines exist for several rigs on the frozen feed.','WVE BOP1/BOP2, WAU BOP1, WJU BOP1, WSA BOP2 recorded and reproduced.','T','n','Older baselines used feeds of 1 and 4 Sep that are not held. QA-06.'],
+ ['EN-08','Regrouping by Branch, SFI or Discipline never alters the schedule.','Tasks, hours, finish and critical identical either side of a regroup.','T','p','Proven REV 8. QA-05.'],
+ ['g','Execute and reporting'],
+ ['ER-01','Job plan steps are keyed by Task ID, equal-weighted, and set % complete; Calculate Project applies them.','Ticks give the expected % and survive save and restore.','T','v','_rev11test, 11 Oct.'],
+ ['ER-02','Actual duration shows its source (manual, elapsed, forecast); plan-vs-actual uses typed figures only.','Same-day job reads forecast, not 0 h.','T','p','Proven REV 5.'],
+ ['ER-03','NPT is recorded but not fed into the engine.','Adding NPT does not move the finish.','I','v','Design decision REV 4; confirmed by inspection.'],
+ ['ER-04','Deferrals and NCs appear in Execute, the Planning Report and the Scope Freeze pack.','Sections present with WO, due date and NC reference.','T','v','_rev11test, 11 Oct.'],
+ ['ER-05','The sync snapshot rolls forward before the state is saved, so a continued file never re-reports items.','Second sync after Continue reports no repeated done[] items.','T','p','Fixed REV 3; not re-tested since.'],
+ ['ER-06','Printed packs carry every section and print cleanly.','Scope Freeze and Planning Report contain all sections; A4 and Letter landscape layout checked.','T + I','p','Section content asserted for AX and parts; visual print not checked. QA-19.'],
+ ['g','Read-only integrations'],
+ ['IN-01','CoC Tracker status matches the tracker exactly.','Sidebar counts identical; every sampled asset shows the same tier.','T','v','_rev12test, 11 Oct: 298 / 156 / 219 / 101 identical; 103 of 103 assets after QA-03 fixed the C1000381 test artefact (12 Oct).'],
+ ['IN-02','CoC joins on Maximo ASSETNUM.','1,035 of 2,345 open in-scope WOs join.','T','v','_rev12test, 11 Oct.'],
+ ['IN-03','The tracker connects automatically: same origin direct, else local route then direct, else the SSORT folder; no CORS console errors.','Live start reads 3,968 components with no clicks.','T + D','v','Browser pane on localhost:8965, 11 Oct.'],
+ ['IN-04','SSCE spares match the tracker drawer; Request opens the tracker’s own form; DL-1 holds no posting credential.','25 of 25 spare lists identical.','T','v','_rev12test, 11 Oct.'],
+ ['IN-05','SSCE approval status is read from SACRED’s approvals file.','APPROVED / REQUESTED / DENIED / NO REQUEST correct against the real file.','T','o','Fixtures only; the real file shape is unconfirmed. QA-13.'],
+ ['IN-06','Hub references: Exact and SFI-level are disjoint and add to the total.','No record counted in both rows.','T','p','Exclusion is in code and explained on screen; not asserted as a test.'],
+ ['IN-07','Synergi lessons match directly on job plan, location or WO only.','Matched counts unchanged with and without lessons on the baseline.','T','v','Proven REV 9; regression identical since.'],
+ ['IN-08','NOV AX references link to the register’s eDOCS document and flag revision, missing and eDOCS mismatches.','92 refs in 25 job plans; 84 OK; 2 revision conflicts; 5 not in register; 9 eDOCS mismatches.','T','v','_ax12, 11 Oct.'],
+ ['IN-09','The parts roll-up is quantity × executing WOs, with a CSV download.','Roll-up equals the per-WO sum; CSV opens in Excel with the same rows.','T','p','Roll-up verified; CSV download not tested. QA-26.'],
+ ['IN-10','DL-1 writes to no other system.','Network capture during a full run shows no POST/PUT; inspection of fetch calls.','T + I','p','Inspection only. QA-15.'],
+ ['g','Dashboard payload'],
+ ['PL-01','The payload is additive-only against the shipped REV.','Every key path and type in REV 9’s sync file exists unchanged in the new REV’s.','T','v','_regress.html, 12 Oct: REV 9 and REV 12 vs REV 13, 64 paths, none removed or retyped; scheduleBuilderState additive only.'],
+ ['PL-02','Contract §9 minimum: meta.discipline "Planning", planningOnly true, schedule, bopNo, finish dates, milestones, done[], next[]; version 3.','Schema check passes.','T','v','_regress.html §3, 12 Oct.'],
+ ['PL-03','Read-only REVs leave planningData byte-identical.','Byte comparison on the baseline scenario.','T','v','REV 10, 11 and 12 all identical.'],
+ ['PL-04','REV 14 additions: planVariance, reportingDay, projectComplete, taskId, kind, rigkey, rev, dryRun, ISO 8601 times with offset, unique file names.','Generated posts match the agreed samples field for field.','T','n','Not started (REV 14; posting moved from REV 13 on 12 Oct).'],
+ ['PL-05','SACRED’s scanner accepts every kind of post.','Dry-run receipt for plan, plan-progress, planning-report, plan-closeout and plan-evidence.','D','o','SACRED to run. QA-11.'],
+ ['g','Saved jobs'],
+ ['PS-01','Save and restore round-trip the whole job, including steps, NC, outTasks, discipline view and SFI scope.','Restored state serialises identically to the saved one.','T','p','Parts tested per feature; no whole-state round-trip assertion. QA-07.'],
+ ['PS-02','Job files saved by earlier REVs open without error.','Files from REV 9, 11 and 12 restore in REV 12 and REV 13.','T','n','No saved-job fixtures are held. QA-07.'],
+ ['PS-03','A restored job keeps its saved tasks; the scope window applies only on a fresh Commencement Setup.','Restore with a changed window keeps the saved task list.','T','p','Designed and described; not asserted.'],
+ ['g','User interface'],
+ ['UI-01','The Scope Challenge fits one screen with Lessons & References fully visible.','No overflow at 1366, 1440, 1460, 1536 and 1920 px.','T','v','_layout12, 11 Oct.'],
+ ['UI-02','Brand: Seadrill Blue, Arial, DL-1 logo; status colours stay conventional.','Visual review.','I','v','Reviewed 11 Oct.'],
+ ['UI-03','The badge and title show the REV and date.','"DL-1 Master Plan · REV 12 · 2026-10-11".','T','v','_rev12test, 11 Oct.'],
+ ['UI-04','An unsupported browser is told what to use.','Without folder access the user is pointed to Chrome or Edge and manual loading.','I','v','Present in code.'],
+ ['UI-05','No console errors in any run.','Every suite reports errors: NONE.','T','v','All suites, 11 Oct.'],
+ ['g','Security and data handling'],
+ ['SE-01','No credentials in the tool or its files; sign-in is always by the user.','Search of source and project files finds none.','I','v','Inspection, 11 Oct.'],
+ ['SE-02','Only approved hosts are contacted: the CoC Tracker server (read), and links to infocenter.seadrill.com and seadrill.synergilife.dnv.com.','Static scan and network capture show no other host.','T + I','p','Static scan of REV 12 found only these hosts. Network capture not done. QA-15.'],
+ ['SE-03','The local server’s tracker route fetches one fixed URL and is not an open proxy.','Any other path or query returns no upstream content.','I + T','p','Inspection only.'],
+ ['SE-04','The SACRED posting URL is embedded at build time only and never stored in project files, shares or chats.','Search of the project, share and handoff documents finds zero copies.','I','o','REV 14. QA-11. The JPC file embeds the intake URL, so it is kept out of OneDrive and staged in %TEMP% for tests only.'],
+ ['SE-05','Personal data in posts is approved: third-party names and costs, NPT free text.','Lee’s decision recorded; payload matches it.','A','o','DL-1 reply Q19. QA-10.'],
+ ['SE-06','Open workbooks owned by users are only ever read, never saved.','Procedure followed.','I','v','Followed 11 Oct (read-only copy of the register).'],
+ ['g','Compatibility and performance'],
+ ['CP-01','Runs on current Chrome and Edge on Windows 11.','Full suite passes in both.','T','p','Chrome only. QA-16.'],
+ ['CP-02','Results are correct in every rig time zone and across daylight-saving changes.','Same wall-clock schedule in Houston, São Paulo, Luanda, Oslo and Singapore; a window across 25 Oct (EU) and 1 Nov (US) DST ends.','T','n','Not tested. The WVE window with deployment 20 Oct + 21 d crosses both. QA-08.'],
+ ['CP-03','Import and planning are fast enough on a rig laptop.','Target agreed and met (proposed: full import under 30 s).','D','n','Not measured. QA-17.'],
+ ['CP-04','Works offline with no external libraries.','No CDN or package references.','I','v','Zero dependencies by convention.'],
+ ['g','Configuration management'],
+ ['CM-01','Each release has its own REV folder; shipped REVs are never edited.','Folder and badge per REV.','I','v','REV 1–12 folders present.'],
+ ['CM-02','All REVs, scripts and tests are under version control and tagged.','git log shows a commit and tag per REV.','I','n','One commit (REV 1–3, 22 Aug); REV 4–12 untracked. QA-12.'],
+ ['CM-03','The test suite and golden data live in the project and re-run.','A single command reproduces all results.','T','v','Tests\\Run-AllTests.ps1 with golden\\2026-09-25 and its SHA-256 manifest, 12 Oct.'],
+ ['CM-04','Documentation is updated with each REV.','CLAUDE.md, user guide, handoff entry current.','I','p','CLAUDE.md and guide current; two explainer pages predate REV 10. QA-24.'],
+ ['CM-05','Each deployment is recorded and can be rolled back.','Release record with location, SHA-256 and previous REV.','I','n','QA-22.'],
+ ['CM-06','Each REV diff is independently reviewed before release.','Review record per REV.','I','n','QA-23.'],
+ ['g','Argo Navis REV 13: plan structure, pre-deployment, job plan checklists'],
+ ['AN-01','Plan id is deterministic (RIGCODE-BOPn-yyyymmdd) and survives save, restore and REV 12 files.','WVE-BOP1-20261005 before and after restore; derived for a REV 12 file.','T','v','_rev13test, 12 Oct.'],
+ ['AN-02','The nine surface tests carry SSORT’s exact testType strings and never enter the engine.','Strings equal entry 64; no test task in the schedule; ACOUSTIC pre-filled N/A on WVE/WNE/SLO, closed only when confirmed.','T','v','_rev13test, 12 Oct.'],
+ ['AN-03','The SSS-007 template task is in every new plan and the engine is otherwise unchanged.','With it held back REV 13 = REV 12 = REV 9 byte-identical; with it +1 item, +4 h, same finish.','T','v','_regress.html noTemplate and expect runs, 12 Oct.'],
+ ['AN-04','The milling scope-challenge line must be answered before the schedule is built.','Build Schedule blocked until Yes/No; Yes prompts the annular inspection.','T','v','_rev13test, 12 Oct.'],
+ ['AN-05','Pre-deployment states: Pre-filled never counts; N/A needs reason and rig-management approver.','State machine asserted line by line.','T','v','_rev13test, 12 Oct.'],
+ ['AN-06','Ready to sign = every non-optional line closed plus SSORT’s post gate; optional sign-offs never block.','Packers No blocks; complete after three required roles.','T','v','_rev13test, 12 Oct.'],
+ ['AN-07','Signatures freeze what was signed: SHA-256 at the first signature; a later change cuts a new revision and lapses signatures, keeping history.','Rev 2 after an edit; rev 1 kept with its 3 signatures and hash.','T','v','_rev13test, 12 Oct.'],
+ ['AN-08','The checklist exports in SSORT’s exact keys for one stack, with a slot field on photos.','Key sets equal for 5, 6, 7 cavities; spec gives 242 for dual 7.','T','v','_rev13test, 12 Oct.'],
+ ['AN-09','The job plan checklist pop-up drives the task % only from its own window’s messages, and nothing can post from tests.','Live JPC REV 4: 2 steps Done = 50 %; foreign message ignored; Close and resume work; fetch stubbed.','T','v','_rev13test, 12 Oct.'],
+ ['AN-10','Pre-deployment sign-off by authenticated identity (entry 68.2.6) before the checklist becomes compulsory.','Power Automate Approvals or a signed-in page records each signer.','D','o','Typed names for now (Dan, 12 Oct). QA-34.'],
+ ['AN-11','Photographs and evidence reach SACRED within its size limits.','Agreed transport (pdcData vs plan-evidence posts) proven in dry run.','D','o','REV 14. QA-31.'],
+ ['AN-12','The checklist pop-up can always be closed and explains a missing file.','Own ✕ Close bar, Esc, backdrop click; missing-file message; 10 s no-response notice; live round trip via the local app-data route.','T + D','v','_rev13fix and live Browser pane, 13 Oct (fixed a stalled-server bug: unread pre-check body).'],
+ ['AN-13','A job plan gap report lists every job plan missing from a source the tool needs, with who fixes it.','Reconciles with REV 11 (16 plans / 84 WOs not on the lists) and with the 26 Sep CSV (48 of 48).','T','v','_rev13fix, 13 Oct; Job_Plan_Gap_Report_2026-10-13.xlsx.'],
+ ['AN-14','Lessons & References count only records matched to the WO Description, with the unfiltered list one click away.','West Vela BOP1: Exact −65 %, SFI-level −84 %; core equipment records kept (annular 115 of 134).','T + I','v','_rev13fix calibration, 13 Oct.'],
+ ['AN-15','A stale Maximo feed is shown in red on Steps 1–3.','Feed older than 2 days shows the banner.','T','v','_rev13fix, 13 Oct.'],
+ ['g','REV 14: posting, review holds, BOP ready date (14 Oct)'],
+ ['PO-01','Posts follow the intake contract: POST, Content-Type application/json, {FileName, ContentType, FileContent: base64 of UTF-8}; 202 counts as accepted; never no-cors.','Captured POST decodes to the plan with "— ·" intact; real POST to the local test intake answers 202 and decodes.','T','v','_rev14test and Run-ServerTest -Cur 14, 14 Oct.'],
+ ['PO-02','The intake address is read at run time from argo-config.json beside the tool and held in memory only; never in the build, the project, the Continue file, browser storage or the page.','Dummy address absent from the saved state, APP, the DOM and the post log; deploy script refuses a build with an intake URL or sig=.','T + I','v','_rev14test M; Build-DeployPackage.ps1.'],
+ ['PO-03','Without a config (a PC, file://) every post button saves the exact post file, and the plan state does not advance.','Post for review on file:// downloads the v1 file; status stays draft v0.','T','v','_rev14test B.'],
+ ['PO-04','A failed post shows the HTTP status and the reply, keeps both in the post log, and saves the file locally.','A stubbed 500 with a JSON body.','T','v','_rev14test L.'],
+ ['PO-05','Scope versions: Post for review posts v n+1 only when the scope is new or changed; any scope edit shows "changed since v n".','Second press disabled; an untick re-enables it and posts v2.','T','v','_rev14test D.'],
+ ['PO-06','Hold 1: Freeze needs this plan and this scope version verified in plans-open.json; it posts the same version, status frozen; an override needs a name and a reason and posts frozenOverride.','Unverified, verified-for-v1 and partial states hold; v2 verified freezes at v2; override posts by/reason.','T','v','_rev14test E, K. Assumption (same version) stated to Dan.'],
+ ['PO-07','After the freeze the scope is locked (execute, defer, durations, groups, SSCE, add / remove tasks); break-ins and actuals stay open.','Each guarded function refused; a break-in added.','T','v','_rev14test F.'],
+ ['PO-08','Hold 2: progress posts only after the freeze, as plan-progress + planning-report from one press.','Refused before the freeze; two files after it.','T','v','_rev14test E, I.'],
+ ['PO-09','Close-out only when every task is complete and every deferred WO has a reason; carries edocsRef and projectComplete.','Gate lists the problems; post carries both.','T','v','_rev14test J.'],
+ ['PO-10','The BOP designation carries meta {reporttype, planid, asset, bopNo, rigkey} and posts once with the first plan after C-01 is set.','Designation posted with v2 after cavities set; not before.','T','v','_rev14test C, D.'],
+ ['PO-11','Read-back accepts verified/required and verifiedCount/requiredCount (number or list) and shows the reviewers’ comments.','Both shapes and a comment list render in the plan bar.','T','v','_rev14test E; Run-ServerTest staged files.'],
+ ['PO-12','The BOP ready date, need date and float are shown large on Schedule, Execute and Pre-deployment and as a chip in the plan bar; green / amber (within 2 days) / red with downtime days; bopReadyDate and needDate in planningData.','Three need dates give green, amber, red; payload keys present.','T','v','_rev14test G, _layout14.'],
+ ['PO-13','Simulate never posts, syncs or downloads, and Reset restores the real plan byte for byte.','Four refusals; state JSON identical after reset.','T','v','_rev14test H.'],
+ ['PO-14','On the SACRED server one status strip replaces the connect rows: green loaded, amber stale, red naming what is missing; manual rows on request.','File test of all three states; http test amber on the 25 Sep feed.','T','v','_rev14test N, _server14.'],
+ ['PO-15','The first live post reaches SACRED’s Plans tab as a test post.','Lee posts West Vela BOP1 (dryRun) once Dan has placed argo-config.json.','D','o','Waiting on Dan: QA-41.']
+];
+const P = [
+ ['QA-01','A','G2','Move the test pages, staged-input loader, Run-Harness.ps1 and XlsxDom.ps1 from %TEMP% and the session scratchpad into Schedule Builder\\Tests\\, and add Run-AllTests.ps1 that runs every page and writes a dated result file to Tests\\results\\.','DL-1 developer','Run-AllTests.ps1 run from the project folder on a clean Chrome profile reproduces every 11 Oct result.','CM-03'],
+ ['QA-02','A','G2','Freeze the golden input set in Tests\\golden\\2026-09-25\\ with a SHA-256 manifest: WO.csv, Job Plans and Durations.xlsm, the Branch Map, the 12 detail workbooks, the three job plan lists, a snapshot of the CoC Tracker page, wce_references.json and the AllVessels register copy.','DL-1 developer','Manifest checked at the start of every run; a changed file stops the run.','CM-03, EN-07'],
+ ['QA-03','A','G2','Fix the C1000381 false fail: compare tracker results on the asset column only, because the tracker search also matches certificate numbers.','DL-1 developer','_rev12test reports 103 of 103 with no FAIL lines.','IN-01'],
+ ['QA-04','A','G2','Add a payload schema test: flatten the full sync file (meta, tiles, scheduleBuilderState) to key paths and types and compare with REV 9’s; check the contract §9 minimum fields.','DL-1 developer','No path removed or retyped against REV 9; §9 fields present; report archived.','PL-01, PL-02'],
+ ['QA-05','A','G2','Add engine invariant assertions: siteId = rig; no other-stack task; two WOs on one job plan scheduled independently; peak techs ≤ crew except over-crew; levelling keeps total hours; zero float ⇔ critical; no negative float; regrouping changes nothing.','DL-1 developer','All invariants pass on every QA-06 scenario.','SC-01, SC-03, EN-01, EN-03, EN-04, EN-08'],
+ ['QA-06','A','G2','Re-baseline the scenarios on the golden feed: WVE BOP1 and BOP2, WAU BOP1, WJU BOP1 (coverage below 80%), WSA BOP2, each with crews blank and with 4/3/2/6/3. Record the table in CLAUDE.md.','DL-1 developer; Lee approves the table','Baseline table approved and reproduced by Run-AllTests.ps1.','EN-05, EN-07'],
+ ['QA-07','A','G2','Create saved-job fixtures from REV 9, 11 and 12 on the golden scenario, and collect real saved files from rigs using REV 9. Test whole-state round trip and opening in each newer REV.','DL-1 developer; Lee to collect rig files','Every fixture opens with no error and re-saves to the same state.','PS-01, PS-02'],
+ ['QA-08','A','G2','Run the regression under browser time-zone overrides (America/Chicago, America/Sao_Paulo, Africa/Luanda, Europe/Oslo, Asia/Singapore), including a campaign window across 25 Oct and 1 Nov 2026. Agree with SACRED first whether plans run in rig local time (reply Q23).','DL-1 developer; Dan Plant for Q23','Identical tasks, hours and wall-clock dates in every zone, or a documented rule.','CP-02'],
+ ['QA-09','A','G2','Add a feed header check that names any missing or renamed required column on screen; test with a copy of the feed with one column renamed and one removed.','DL-1 developer','Both fixtures show a banner; the real feed shows none.','DI-03'],
+ ['QA-10','A','G3','Decide what personal data may be posted to SACRED: third-party personnel names and costs, and NPT free text (reply Q19).','Lee Arnold','Decision recorded in the handoff; REV 13 payload matches it.','SE-05'],
+ ['QA-11','A','G3','REV 13 security and acceptance: confirm the posting URL appears in no project file, share or handoff; no credential held; post button disabled while posting; plain failure message; dry run on SSCE Equipment over Starlink; scanner receipt for each kind.','DL-1 developer; Dan Plant','Search finds zero copies; dry-run receipts for all five kinds archived.','SE-04, PL-04, PL-05'],
+ ['QA-12','A','G1','Bring version control up to date: commit REV 4–12, Scripts, CLAUDE.md and Tests with a tag per REV, and agree what data stays out (zips, workbooks). The repository sits in OneDrive, so confirm that is acceptable or move it.','Lee Arnold to decide; DL-1 developer to commit','git log shows one tagged commit per REV.','CM-02'],
+ ['QA-13','B','G3','Confirm the SSCE approvals file against SACRED’s real ssce-requests-data.js (reply Q24 items 7–8) and adjust the status reader if needed.','Dan Plant to supply; DL-1 developer to verify','Statuses match SACRED’s approvals dashboard for every request in the file.','IN-05'],
+ ['QA-14','B','G2','Make Build-BranchSequenceMap.ps1 preserve the Techs Required and SSCE Change-Out Hours columns (it keeps only colour, Predecessor and Notes today). Check for the Excel lock file before running.','Dan Plant (script owner) or DL-1 developer with his agreement','Regenerating a copy keeps both columns cell for cell.','EN-03, EN-06'],
+ ['QA-15','B','G3','Capture network traffic during a full suite run and assert the only hosts are the local server and the CoC Tracker server, with no POST or PUT.','DL-1 developer','Capture report archived with the G3 evidence.','SE-02, SE-03, IN-10'],
+ ['QA-16','B','G4','Run the suite in Edge, then a smoke test on a rig laptop: offline, over Starlink, and reading the share path.','Lee Arnold with a rig planner','Edge suite green; smoke checklist signed.','CP-01'],
+ ['QA-17','B','G4','Measure import and planning time and memory on a rig laptop; agree a target.','Lee Arnold','Target recorded and met.','CP-03'],
+ ['QA-18','B','G4','User acceptance: a rig planner builds a real upcoming campaign in DL-1 and compares it with the P6/OMP schedule (for example the West Vela BOP1 OMP of 29 Jul 2026), logging every difference with its cause.','Rig planner; Lee Arnold signs','UAT script complete; each difference explained as data, rule or defect.','G4'],
+ ['QA-19','B','G2','Visually check both printed packs on A4 and Letter landscape, including the INDICATIVE ONLY watermark on a scenario below 80% coverage.','DL-1 developer; Lee reviews','PDF prints archived; no clipped or overlapping sections.','ER-06, EN-05'],
+ ['QA-20','B','G3','Plan for the CoC Tracker’s next file name (REV 7): the URL is set in two places (the tool and Serve-Static.ps1). Test a 404 from the tracker: the status line must say it is not live and fall back to the SSORT folder.','DL-1 developer; tracker owner to give notice of renames','Simulated 404 shows the message and the fallback loads.','IN-03'],
+ ['QA-21','B','G2','Give the AX document register a staleness rule (show its age; flag after an agreed number of days) and name who refreshes the copy in Job Plans\\ and how often.','Lee Arnold to set the rule; DL-1 developer to build','Status line shows age and STALE past the limit.','DI-10'],
+ ['QA-22','B','G5','Write the release procedure and keep a release record: what was published where (share, SSORT), its SHA-256, the previous REV for rollback, and who approved.','Lee Arnold','First record written for the REV 13 release.','CM-05'],
+ ['QA-23','B','G2','Independent review of the REV 9 → REV 12 changes before REV 13 goes live, ideally by Dan Plant as the original author.','Dan Plant','Review notes recorded and any findings closed.','CM-06'],
+ ['QA-24','C','G5','Refresh How_Schedule_Builder_Works.html (24 Sep), Schedule_Builder_and_the_Dashboard.html (26 Sep) and the executive overview deck (14 Sep), which predate REV 10–12.','DL-1 developer','Each states REV 12 behaviour or is retired.','CM-04'],
+ ['QA-25','C','G2','Obtain the Maximo NC reference format and validate it on entry (today it only has to be non-blank).','Lee Arnold with the Maximo administrator','Invalid formats rejected with a clear message.','SC-08'],
+ ['QA-26','C','G2','Test the parts CSV download and that the parts list follows the discipline view.','DL-1 developer','CSV rows equal the panel rows in every view.','IN-09'],
+ ['QA-27','D','—','Correct the Maximo job plans DL-1 flags: 9 stale eDOCS numbers (AX050066 in UB0201/0205/0209/0212; AX080453 in UB0213/0230; AX080263 in BT0210; AX080443 in UP0205; AX080417 in UP0224), AX080453 cited at Rev A where the register holds Rev C, 5 AX numbers not in the register (AX010347, AX040101, AX050094, AX080152, AX080154), and AX080544 with no eDOCS reference.','Maximo job plan owners','DL-1 shows no orange AX flags on those job plans.','IN-08'],
+ ['QA-28','D','—','Raise Branch Map coverage for sites 2318 (West Jupiter, 48%), 2309 and 2280, and add the 19 job plans missing from the map.','Dan Plant','Coverage at or above 80% for each rig planned.','EN-05'],
+ ['QA-29','D','—','Resolve the 84 in-scope WOs on 16 job plans that are not on the Maximo active job plan lists.','Maximo planners','"Not active in Maximo" badges cleared or justified.','—'],
+ ['QA-30','D','—','Add Materials to job plans: only 6 of 98 executed West Vela BOP1 job plans carry parts today.','Maximo job plan owners','Parts on file for every executed job plan that consumes parts.','IN-09'],
+ ['QA-31','A','G3','Agree how photographs and attachments reach SACRED: pdcData carries up to 56 photos; the DL-1 reply noted bodies of several hundred KB fail, while JPC syncs up to 25 MB. Decide pdcData vs one plan-evidence post per slot (Entry 2 draft, 2.6.1).','Dan Plant / dashboard; DL-1 developer','Agreed shape proven in a dry run on SSCE Equipment.','AN-11'],
+ ['QA-32','A','G3','Agree the read-back file REV 14 reads (plan-link evidence state, checklist states, the H-07 call and acknowledgements, SACRED pre-fills), e.g. plans-status/<planId>.json (Entry 2 draft, 2.6.2).','Dashboard session','File shape agreed and read in a REV 14 test.','IN-10'],
+ ['QA-33','B','G5','Host the JPC file beside Argo Navis on the IIS server and set JPC_URL’s default to it; confirm it never lands in OneDrive (it embeds the intake URL).','Dan Plant; DL-1 developer','Pop-up opens from the hosted copy on a rig laptop.','AN-09'],
+ ['QA-34','B','G4','Decide the identity behind pre-deployment sign-off (entry 68.2.6: Power Automate Approvals or a signed-in page) before the checklist becomes compulsory; typed names until then.','Lee Arnold with Dan Plant','Decision recorded; approach built or scheduled.','AN-10'],
+ ['QA-35','A','G2','Replace the placeholder sign-off order (TSL → SS Supervisor → Rig Manager) with Dan’s order (Q5); it is one table, PDC_SIGNOFF_ORDER.','Dan Plant; DL-1 developer','Order in the tool matches Dan’s; _rev13test updated.','AN-06'],
+ ['QA-36','B','—','Send the Maximo data request (CM work orders, status dates, NC records, AAB states, asset part / serial / install date per position, MOC link, PMNUM, job plan revision) to Manpreet. Draft: Argo-Navis_Maximo-Data-Request_DRAFT.md.','Lee Arnold, then Dan Plant','Request sent; first extract received and B-03 / G-01 / B-15 / B-17 computed from it.','AN-05'],
+ ['QA-37','C','G2','Make the REV-specific test pages build-agnostic (they hard-code rev11 / rev12) so every page runs against the build under test.','DL-1 developer','Run-AllTests.ps1 runs every page against the current REV.','CM-03'],
+ ['QA-38','A','—','The daily Maximo WO feed has stopped: \\\\SEADRILL23339\\Well Control Data\\WO.csv is still the 25 Sep extract on 13 Oct. Restore the 06:00 Houston job.','Manpreet / extract owner; Lee to raise','WO.csv dated today; the red feed banner clears.','AN-15'],
+ ['QA-39','D','—','Correct the job plan gaps: 48 plans not on the Branch Map (269 WOs), 36 without durations (182), 18 without a saved detailed export, 16 not on the list exports, 18 not in the checklist file. Job_Plan_Gap_Report_2026-10-13.xlsx.','Dan Plant (Branch Map, Durations, JPC); Maximo planners (exports)','Gap report empty or justified line by line.','AN-13'],
+ ['QA-40','D','—','Widen the Electrical job plan list export: it holds 23 plans, so live generic electrical plans (0900-EE90061, 0900-EF90051 …) read as not on the lists.','Maximo administrator','The Electrical list covers every electrical plan used on WCE / MPD equipment.','AN-13'],
+ ['QA-41','A','—','Place argo-config.json (intake address, dryRun:true) beside index.html on the SACRED server, deploy REV 14, and run the first test post end to end.','Dan Plant; Lee for the post','The test plan appears on SACRED’s Plans tab; the HTTP status of the first post is recorded.','PO-15'],
+ ['QA-42','B','—','Add the reviewers’ comments to review in plans-open.json (review.comments), so "Changes requested" shows why inside Argo Navis.','Dan Plant (scanner)','A Changes needed press shows its comment in the plan bar.','PO-11'],
+ ['QA-43','B','—','Confirm that Freeze keeps the verified scope version (no +1 on the frozen post).','Dan Plant','Written confirmation, or a REV 15 change.','PO-06']
+];
+const PSTATUS = { 'QA-01':'Done 12 Oct', 'QA-02':'Done 12 Oct', 'QA-03':'Done 12 Oct', 'QA-04':'Done 12 Oct' };
+const SL = { v:['Verified','s-v'], p:['Partial','s-p'], n:['Not verified','s-n'], o:['Open','s-o'] };
+const PL = { A:'A', B:'B', C:'C', D:'DQ' };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let rf = 'all', pf = 'all', ow = '';
+function drawR(){
+  let h = '', grp = null, buf = [], n = 0;
+  const flush = () => { if (buf.length) h += '<tr class="grp"><td colspan="6">' + esc(grp) + '</td></tr>' + buf.join(''); buf = []; };
+  R.forEach(r => {
+    if (r[0] === 'g'){ flush(); grp = r[1]; return; }
+    if (rf !== 'all' && r[4] !== rf) return; n++;
+    buf.push('<tr><td class="id">' + r[0] + '</td><td>' + esc(r[1]) + '</td><td>' + esc(r[2]) + '</td><td class="m">' + esc(r[3]) + '</td><td><span class="pill ' + SL[r[4]][1] + '">' + SL[r[4]][0] + '</span></td><td class="ev">' + esc(r[5]) + '</td></tr>');
+  });
+  flush();
+  document.querySelector('#rtable tbody').innerHTML = h;
+  document.getElementById('rcount').textContent = n + ' of ' + R.filter(r => r[0] !== 'g').length + ' requirements';
+}
+function drawP(){
+  const rows = P.filter(p => (pf === 'all' || p[1] === pf) && (!ow || p[4].includes(ow)));
+  document.querySelector('#ptable tbody').innerHTML = rows.map(p => '<tr><td class="id">' + p[0] + '</td><td><span class="pill p-' + p[1] + '">' + PL[p[1]] + '</span></td><td class="m">' + esc(p[2]) + '</td><td>' + esc(p[3]) + '</td><td>' + esc(p[4]) + '</td><td>' + esc(p[5]) + '</td><td class="ev">' + esc(p[6]) + '</td><td>' + (PSTATUS[p[0]] ? '<span class="pill s-v">' + esc(PSTATUS[p[0]]) + '</span>' : '<span class="pill s-o">Open</span>') + '</td></tr>').join('');
+  document.getElementById('pcount').textContent = rows.length + ' of ' + P.length + ' items';
+}
+function tiles(){
+  const req = R.filter(r => r[0] !== 'g'), c = k => req.filter(r => r[4] === k).length, pc = k => P.filter(p => p[1] === k).length;
+  const openA = P.filter(p => p[1] === 'A' && !PSTATUS[p[0]]).length;
+  const t = [[req.length,'Requirements',''],[c('v'),'Verified',''],[c('p') + c('n'),'Partial or not verified',''],[c('o'),'Open, external',''],[openA,'Priority-A items open','a'],[Object.keys(PSTATUS).length + ' / ' + P.length,'Punch items closed','']];
+  document.getElementById('tiles').innerHTML = t.map(x => '<div class="tile ' + x[2] + '"><div class="n">' + x[0] + '</div><div class="l">' + x[1] + '</div></div>').join('');
+}
+const owners = ['DL-1 developer','Lee Arnold','Dan Plant','Rig planner','Maximo'];
+const sel = document.getElementById('owner');
+owners.forEach(o => { const e = document.createElement('option'); e.value = o; e.textContent = o === 'Maximo' ? 'Maximo owners' : o; sel.appendChild(e); });
+sel.addEventListener('change', () => { ow = sel.value; drawP(); });
+document.querySelectorAll('[data-rf]').forEach(b => b.addEventListener('click', () => { rf = b.dataset.rf; document.querySelectorAll('[data-rf]').forEach(x => x.setAttribute('aria-pressed', x === b)); drawR(); }));
+document.querySelectorAll('[data-pf]').forEach(b => b.addEventListener('click', () => { pf = b.dataset.pf; document.querySelectorAll('[data-pf]').forEach(x => x.setAttribute('aria-pressed', x === b)); drawP(); }));
+tiles(); drawR(); drawP();
+</script>
