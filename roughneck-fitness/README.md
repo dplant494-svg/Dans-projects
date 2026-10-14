@@ -15,7 +15,16 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
 4. **Email for `coach@roughneck-fitness.com`**: a second mailbox on the Namecheap Private Email plan, or a forwarder to info@plantworksstudio.com for now.
 5. **Shaun's programming shape**: split, days a week, rep ranges, progression, diet approach. The three plans get rewritten to follow his system instead of the generic drafts. A photo of one of Dan's real weekly programmes would do.
 6. **Review the three plans** as the qualified person and mark them up.
-7. **Netlify project**: create it from GitHub, base and publish directory `roughneck-fitness/site`, branch `claude/new-business-venture-7pxnxz`, form detection on before first deploy, then add the domain and the two Namecheap DNS records.
+7. **Netlify project (put it online)**. About 30 minutes. Same as The Fifth Quarter, minus the mistakes we hit there.
+    1. Netlify → Add new project → Import from GitHub → `Dans-projects`. Branch `claude/new-business-venture-7pxnxz`. **Base directory and publish directory: `roughneck-fitness/site`.** Build command: leave empty.
+    2. **Before the first deploy:** Project configuration → Forms → **enable form detection** (the apply form needs it).
+    3. Deploy. Check the `.netlify.app` address works.
+    4. **Project configuration → Access & security → Visitor access → set to no protection.** (The Fifth Quarter came up "This site is private" because this was on.)
+    5. Forms → Notifications → email new applications to Dan's inbox.
+    6. Domain management → add `roughneck-fitness.com` and `www.roughneck-fitness.com`. Note the project's `.netlify.app` name.
+    7. **Namecheap → Domain List → roughneck-fitness.com → Manage → Advanced DNS:** delete the parking records Namecheap adds (URL Redirect and the `www` CNAME to `parkingpage.namecheap.com`), then add: `A Record`, host `@`, value `75.2.60.5`; `CNAME Record`, host `www`, value `<project>.netlify.app`. Leave any MX/TXT (email) records alone.
+    8. Wait for DNS (minutes to an hour). Netlify issues HTTPS itself. Test both addresses with the padlock, then send a test application through the form.
+    9. **The site stays `noindex` (hidden from Google) until launch:** the plans signed off, prices confirmed, Level 3 under way. At launch: remove the noindex line, add `robots.txt` and `sitemap.xml`, submit to Search Console.
 8. **More video**: upload the September DJI clips you rate to the GitHub release `videos-sept-2026` (Releases → edit → attach). They get cut into Instagram clips the same way.
 9. **Prices**: confirm £39 / £89 / £199 or change them.
 10. **Level 3 PT**: course provider and expected finish date, so the one-to-one tier can show an opening month.
@@ -36,7 +45,16 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
     - Same rules as the site: nothing in the app says where the coach lives; the programme that got him sober is never named.
 14. **Roughneck clothing, print-on-demand dropshipping (decided 13 Oct 2026)**.
     - Different from Praetorian on purpose: this is **brand merch for the coaching community**, so print-on-demand fits (no stock, no minimums). Praetorian is a premium label and is made in small runs instead.
-    - **How:** Printful or Printify connected to a small shop (Shopify Starter is the cheapest way to get a cart and checkout), with a "Shop" link on roughneck-fitness.com. Orders go straight to the printer, who ships to the customer.
+    - **Drop 01 mockups:** `brand/merch/drop-01-mockups.png`. Hoodie with the slogan on the back, tee (mark front, ethos back), cap (orange mark), shaker. Rebuild with `brand/merch/build-mockups.js`.
+    - **Setting up the shop, step by step:**
+      1. **Samples first.** Make a Printful account (free), upload the logo files from `brand/`, and order one of each Drop 01 item to yourself (Printful gives a sample discount). Wash, wear, photograph. Only list what passes.
+      2. **Shopify Basic** (about £25 a month, or £19 a month paid yearly, plus VAT; Shopify often runs £1-a-month for the first three months). Store name Roughneck Fitness. The cheaper Starter plan only gives product links and a checkout, not a proper shop page, so it isn't worth it here.
+      3. In Shopify → Apps → install **Printful** and connect it. Create the products in Printful with the print files; they sync to Shopify with prices and photos. Printful prints and ships each order; Shopify takes the payment.
+      4. Shopify settings: Shopify Payments (cards, Apple Pay) and PayPal; shipping rates from Printful; policies (returns for faulty or wrong items only, since every item is made to order); the brand colours and fonts on the theme (Plantworks does this).
+      5. **Address:** Shopify → Settings → Domains → connect existing domain `shop.roughneck-fitness.com`. In Namecheap Advanced DNS add `CNAME`, host `shop`, value `shops.myshopify.com`. The main site stays on Netlify.
+      6. Plantworks adds a **Shop** link to the site's menu and footer pointing at `shop.roughneck-fitness.com`.
+      7. No-monthly-fee alternative if sales start slow: **Fourthwall** (creator shop with print-on-demand built in; they take their cut from the product price). Check its current terms before choosing.
+      8. Print files: Plantworks exports print-ready files (the slogan back print, chest mark, cap embroidery file) from `brand/` once the products are chosen.
     - **First range, small:** heavyweight tee, hoodie, embroidered cap, shaker. Logo plus lines from the ethos: "Do what you're told. Follow the process." Choose premium blanks (heavyweight cotton, embroidered rather than printed caps).
     - **Order a sample of every product before listing it**, wash it five times, and photograph the sample yourself (better than the printer's mock-ups).
     - **Margins are thin:** a printed tee costs roughly £12–£18 to make and ship, so it sells at £28–£35. It's for the brand and the community, not the main income. Free tee with the "all three" plans or the first month of one-to-one is a good use of it.
