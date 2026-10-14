@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.93'
+$ScriptVersion = '2.94'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4600,15 +4600,20 @@ try {
     }
 } catch { Write-Warning "Plans tab data / notices failed (scan unaffected): $($_.Exception.Message)" }
 
-$dl1Block = @{
+# v2.94 (14 Oct 2026): the whole block goes through ConvertTo-AabPlain, not just reviewers and review. The first
+# real plan through v2.93 on Dan's PC failed at the Windows PowerShell serialiser ("circular reference ...
+# PSMethod"): a value somewhere in the slim plan records still carried a PSObject wrapper, which the
+# JavaScriptSerializer reflects instead of reading. The plain copy unwraps every dictionary, list and
+# string before anything reaches it; the block is small (no task rows), so the copy costs nothing.
+$dl1Block = ConvertTo-AabPlain ([ordered]@{
     plans     = $dl1PlanList.ToArray()        # slim: no task rows (they are in the Fabric tables and in the plan file itself)
-    links     = $dl1LiveLinks                 # v2.89
+    links     = @($dl1LiveLinks)              # v2.89
     postPlans = $dl1PostPlan                  # v2.89: file -> planid for ordinary posts made under a plan
     tests     = $dl1Test.ToArray()
     evidence  = $dl1Evidence.ToArray()
-    reviewers = ConvertTo-AabPlain $planReviewers.ToArray()     # v2.90; plain for the Windows PowerShell serialiser
-    counts    = @{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count; reviews = $dl1Reviews.Count }
-}
+    reviewers = $planReviewers.ToArray()      # v2.90
+    counts    = [ordered]@{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count; reviews = $dl1Reviews.Count }
+})
 if ($dl1Plans.Count -gt 0 -or $dl1Test.Count -gt 0) { Write-Host "DL-1: $($dl1Plans.Count) plan(s), $($dl1Progress.Count) with progress, $($dl1Closeouts.Count) closed out, $($dl1Test.Count) test post(s)" -ForegroundColor Green }
 
 $bopPayload = @{
