@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.97'
+$ScriptVersion = '2.98'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4755,6 +4755,83 @@ try {
 # Between Wells Maintenance library and copy each file once. Written beside the receipts, only when it changes.
 # Copies, never moves: PostedReports stays the record. A test plan files under "<planId> TEST".
 # ---------------------------------------------------------------------------
+# v2.98 (plan item 72, stage 1): every photograph inside a filed post written out as an image file, so the project
+# folder holds pictures, not text. Generic: the whole record is walked and every data:image/... string becomes a file,
+# named by its position and by any caption, slot, name or label beside it. Written under Digests\plan-renders\<folder>\
+# 07 Photos\ (synced to SharePoint) and listed in plan-files.json, so the Plan Files flow copies them into 07 with no
+# new cards. A marker per record (source size and time) stops the big files being re-read every run.
+function ConvertTo-PhotoSlug { param([string]$Text)
+    $t = [regex]::Replace(([string]$Text).Trim(), '[^A-Za-z0-9]+', '-').Trim('-')
+    if ($t.Length -gt 60) { $t = $t.Substring(0, 60).Trim('-') }
+    return $t
+}
+function Find-RecordPhotos { param($Node, [string]$Path, $Found, [string]$Label)
+    if ($null -eq $Node) { return }
+    if ($Node -is [System.Management.Automation.PSObject] -and -not ($Node.PSObject.BaseObject -is [System.Management.Automation.PSCustomObject])) { $Node = $Node.PSObject.BaseObject }
+    if ($Node -is [string]) {
+        if ($Node.StartsWith('data:image/', [System.StringComparison]::OrdinalIgnoreCase)) {
+            $comma = $Node.IndexOf(','); if ($comma -lt 0) { return }
+            $head = $Node.Substring(5, $comma - 5)   # image/jpeg;base64
+            $mime = ($head -split ';')[0].ToLowerInvariant()
+            $ext = switch ($mime) { 'image/jpeg' { 'jpg' } 'image/jpg' { 'jpg' } 'image/png' { 'png' } 'image/gif' { 'gif' } 'image/webp' { 'webp' } 'image/heic' { 'heic' } default { 'img' } }
+            $Found.Add([ordered]@{ path = $Path; label = $Label; ext = $ext; data = $Node.Substring($comma + 1) }) | Out-Null
+        }
+        return
+    }
+    if ($Node -is [bool] -or $Node -is [ValueType]) { return }
+    if ($Node -is [System.Collections.IDictionary]) {
+        $lbl = ''
+        foreach ($lk in @('slot', 'caption', 'label', 'name', 'title', 'itemKey', 'section')) { if ($Node.Contains($lk)) { $lv = [string]$Node[$lk]; if ($lv -and -not $lv.StartsWith('data:')) { $lbl = $lv; break } } }
+        if (-not $lbl) { $lbl = $Label }
+        foreach ($k in @($Node.Keys)) { Find-RecordPhotos -Node $Node[$k] -Path ($Path + '/' + [string]$k) -Found $Found -Label $lbl }
+        return
+    }
+    if ($Node -is [System.Collections.IEnumerable]) {
+        $i = 0; foreach ($x in $Node) { Find-RecordPhotos -Node $x -Path ($Path + '/' + $i) -Found $Found -Label $Label; $i++ }
+        return
+    }
+    if ($Node.PSObject.Properties.Count -gt 0) {
+        $lbl = ''
+        foreach ($lk in @('slot', 'caption', 'label', 'name', 'title', 'itemKey', 'section')) { $pp = $Node.PSObject.Properties[$lk]; if ($pp) { $lv = [string]$pp.Value; if ($lv -and -not $lv.StartsWith('data:')) { $lbl = $lv; break } } }
+        if (-not $lbl) { $lbl = $Label }
+        foreach ($pp in $Node.PSObject.Properties) { if ($pp.MemberType -eq 'NoteProperty' -or $pp.MemberType -eq 'Property') { Find-RecordPhotos -Node $pp.Value -Path ($Path + '/' + $pp.Name) -Found $Found -Label $lbl } }
+    }
+}
+function Export-RecordPhotos { param([string]$SourcePath, [string]$OutDir)
+    # Returns the list of image file names written (or already present) for this record, from its marker when current.
+    $src = Get-Item -Path $SourcePath
+    $base = [System.IO.Path]::GetFileNameWithoutExtension($src.Name)
+    $marker = Join-Path $OutDir ($base + '.photos.json')
+    $stamp = '{0}|{1}' -f $src.Length, $src.LastWriteTimeUtc.Ticks
+    if (Test-Path -Path $marker) {
+        try {
+            $mk = [System.IO.File]::ReadAllText($marker) | ConvertFrom-Json
+            if ([string](Get-Prop $mk 'stamp') -eq $stamp) { $names = New-Object System.Collections.Generic.List[string]; foreach ($n in (ConvertTo-AabList (Get-Prop $mk 'files'))) { if ($n) { $names.Add([string]$n) } }; return ,$names.ToArray() }
+        } catch { }
+    }
+    $json = Read-ReportJson -Path $src.FullName
+    $found = New-Object System.Collections.Generic.List[object]
+    Find-RecordPhotos -Node $json -Path '' -Found $found -Label ''
+    if (-not (Test-Path -Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir -Force | Out-Null }
+    $written = New-Object System.Collections.Generic.List[string]
+    $n = 0
+    foreach ($ph in $found) {
+        $n++
+        $slug = ConvertTo-PhotoSlug $ph.label
+        $name = $base + '_' + ('{0:D3}' -f $n) + $(if ($slug) { '_' + $slug } else { '' }) + '.' + $ph.ext
+        if ($name.Length -gt 180) { $name = $base.Substring(0, [math]::Min(100, $base.Length)) + '_' + ('{0:D3}' -f $n) + '.' + $ph.ext }
+        $dest = Join-Path $OutDir $name
+        try {
+            $bytes = [Convert]::FromBase64String($ph.data)
+            if ($bytes.Length -lt 64) { continue }
+            if (-not (Test-Path -Path $dest) -or ((Get-Item -Path $dest).Length -ne $bytes.Length)) { [System.IO.File]::WriteAllBytes($dest, $bytes) }
+            $written.Add($name)
+        } catch { Write-Warning "photo $n in $($src.Name) could not be decoded ($($_.Exception.Message))" }
+    }
+    $mkJson = ConvertTo-PlainJson ([ordered]@{ source = $src.Name; stamp = $stamp; count = $written.Count; files = $written.ToArray(); at = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') })
+    [System.IO.File]::WriteAllText($marker, $mkJson, (New-Object System.Text.UTF8Encoding($false)))
+    return ,$written.ToArray()
+}
 function Get-PlanFileSubfolder { param([string]$Kind, [string]$ReportType)
     $k = ([string]$Kind).ToLowerInvariant(); $rt = [string]$ReportType
     if ($k -in @('plan', 'planning-report', 'plan-review', 'designation', 'bop-designation', 'plan-progress')) { return '01 Plan and Scope' }
@@ -4797,7 +4874,7 @@ try {
             & $addFile ([string]$pl.file) 'plan' '' ([string]$pl.posted)
             if ($dl1Progress.ContainsKey($planKey) -and $dl1Progress[$planKey]) { & $addFile ([string]$dl1Progress[$planKey].file) 'plan-progress' '' ([string]$dl1Progress[$planKey].posted) }
             if ($dl1Closeouts.ContainsKey($planKey)) { & $addFile ([string]$dl1Closeouts[$planKey].file) 'plan-closeout' '' ([string]$dl1Closeouts[$planKey].posted) }
-            foreach ($rk in @($dl1Reviews.Keys)) { $rr = $dl1Reviews[$rk]; if ([string]$rr.planId -ne $ppid) { continue }; if (([bool]$rr.isTest) -ne $isTestP) { continue }; & $addFile ([string]$rr.file) 'plan-review' '' ([string]$rr.saved) }
+            foreach ($rk in @($dl1Reviews.Keys | Sort-Object)) { $rr = $dl1Reviews[$rk]; if ([string]$rr.planId -ne $ppid) { continue }; if (([bool]$rr.isTest) -ne $isTestP) { continue }; & $addFile ([string]$rr.file) 'plan-review' '' ([string]$rr.saved) }
             foreach ($lk in $dl1LiveLinks) {
                 if ([string]$lk.planId -ne $ppid) { continue }
                 & $addFile ([string]$lk.file) 'plan-link' '' ([string]$lk.saved)
@@ -4805,12 +4882,29 @@ try {
                 if ($src -and $reportByFile2.ContainsKey($src) -and -not $srt) { $srt = [string]$reportByFile2[$src].reporttype }
                 & $addFile $src 'post' $srt ([string]$lk.sourceDate)
             }
-            foreach ($pf in @($dl1PostPlan.Keys)) {
+            foreach ($pf in @($dl1PostPlan.Keys | Sort-Object)) {
                 if ([string]$dl1PostPlan[$pf] -ne $ppid) { continue }
                 $rt2 = ''; $pd2 = ''; if ($reportByFile2.ContainsKey($pf)) { $rt2 = [string]$reportByFile2[$pf].reporttype; $pd2 = [string]$reportByFile2[$pf].reportDate }
                 & $addFile ([string]$pf) 'post' $rt2 $pd2
             }
             if ($dl1Designations.ContainsKey($ppid)) { & $addFile ([string]$dl1Designations[$ppid].file) 'designation' '' ([string]$dl1Designations[$ppid].generatedat) }
+            # v2.98: the photographs inside every filed record, as files under Digests\plan-renders\<folder>\07 Photos
+            $pfFolder = $ppid + $(if ($isTestP) { ' TEST' } else { '' })
+            $renderRoot = Join-Path (Split-Path -Parent $helpReceiptDir) 'plan-renders'
+            $photoDir = Join-Path (Join-Path $renderRoot $pfFolder) '07 Photos'
+            $photoEntries = New-Object System.Collections.Generic.List[object]
+            foreach ($pfe in @($pfFiles.ToArray())) {
+                $lp = [string]$pfe.localpath; if (-not $lp -or -not (Test-Path -Path $lp)) { continue }
+                if ([string]$pfe.kind -in @('plan-review', 'plan-link', 'designation')) { continue }   # records that never carry photographs
+                try {
+                    $names = Export-RecordPhotos -SourcePath $lp -OutDir $photoDir
+                    foreach ($nm in @($names)) {
+                        if (-not $nm) { continue }
+                        $photoEntries.Add([ordered]@{ file = [string]$nm; kind = 'photo'; reporttype = [string]$pfe.reporttype; subfolder = '07 Photos'; posted = [string]$pfe.posted; path = ('/Digests/plan-renders/' + $pfFolder + '/07 Photos/' + $nm); localpath = (Join-Path $photoDir $nm); fromrecord = [string]$pfe.file }) | Out-Null
+                    }
+                } catch { Write-Warning "photographs for $($pfe.file) could not be written (filing unaffected): $($_.Exception.Message)" }
+            }
+            foreach ($pe in $photoEntries) { $pfFiles.Add($pe) | Out-Null }
             $pfPlans.Add([ordered]@{
                 planid = $ppid; folder = $ppid + $(if ($isTestP) { ' TEST' } else { '' }); istest = $isTestP
                 rig = [string]$pl.rig; rigkey = [string]$pl.rigKey; bop = [string]$pl.bopNo; scopeversion = [int]$pl.scopeVersion; status = [string]$pl.status
