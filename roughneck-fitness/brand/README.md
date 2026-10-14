@@ -19,7 +19,10 @@ Logo redrawn 13 Oct 2026 from the brand board made in ChatGPT (the "R" built fro
 - Headings Barlow Condensed (heavy, uppercase); body Barlow. Both free from Google Fonts. Same as the site.
 - Orange is the accent, never the main colour of a page or garment.
 
-## Taglines
+## Slogan
+**Train smarter and harder.** (Dan's, 14 Oct 2026: a play on "work smarter, not harder". Smart programming *and* hard work, not one instead of the other.) Used on the site (hero line, footer, share text) and the share image. On clothing it works as a back print or sleeve line.
+
+## Other lines
 - Use: **"Do what you're told. Follow the process."** (the coaching ethos, credited to Shaun's system).
 - Fine: "Same plan. Different day. Better you."
 - Don't use: "Discipline builds freedom". It's too close to "Discipline Equals Freedom", Jocko Willink's book and merch line.
