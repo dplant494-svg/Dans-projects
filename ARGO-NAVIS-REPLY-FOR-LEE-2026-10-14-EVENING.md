@@ -87,3 +87,20 @@ Dan reviewed the 36 proposed rows the same evening: **all 36 accepted as propose
 ones. Record in `BRANCH-MAP-ADDITIONS-DECISIONS-2026-10-14.md`. Dan pastes columns A to L into the map on the share; from
 then on your Unassigned count for in-scope work should drop to the two plans still without a saved job plan
 (0900-UR0007, 0900-UR90021).
+
+## Added 14 Oct, later: REV 13 live on the server, and one ask for REV 14 from Dan
+
+Dan deployed REV 13 at 17:39 and opened it from the planning dashboard's Argo Navis button. All three inputs connected
+automatically: the WO feed (WO.csv of 25 Sep, Synergi lessons, WCE Reference Hub), the rules (Job Plans and Durations,
+the Branch Map with the 36 new rows, the saved workbooks, the Maximo lists) and the CoC Tracker direct from SSORT
+(3,968 components, register of 30 Sep). The Houston PC question is closed.
+
+**Dan's ask for REV 14, the Step 1 to 3 block.** Since the inputs load on their own from the server, replace the three
+connect rows with one status strip when the page is served over http and `data/index.json` answers:
+
+- green **Maximo data loaded**: one line with WO.csv's date, the rules files' index date and the CoC Tracker's register
+  date, and one Reload button;
+- red **Maximo data not loaded**, naming which of the three is missing;
+- amber when the feed is stale (the existing stale-feed rule), so a crew sees it before planning on old work orders;
+- the folder pickers hidden on the server, behind a small "Connect folders manually" link for a PC working off the
+  shares; on `file://` the page stays as it is today.
