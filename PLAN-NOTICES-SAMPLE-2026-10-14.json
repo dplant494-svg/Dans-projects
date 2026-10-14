@@ -1,0 +1,17 @@
+{
+ "generatedAt": "2026-10-14T18:00:00Z",
+ "scanner": "2.94",
+ "count": 1,
+ "notices": [
+  {
+   "id": "WVE-BOP1-20261005|v1|verified",
+   "kind": "verified",
+   "planid": "WVE-BOP1-20261005",
+   "rig": "West Vela",
+   "rigkey": "vela",
+   "bop": "BOP1",
+   "scopeversion": 1,
+   "text": "WVE-BOP1-20261005 - VERIFIED BY ALL (2 of 2) - freeze the scope in Argo Navis"
+  }
+ ]
+}
