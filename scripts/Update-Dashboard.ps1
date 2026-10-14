@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.96'
+$ScriptVersion = '2.97'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1866,7 +1866,9 @@ $preReadSeconds = $scanClock.Elapsed.TotalSeconds   # v2.80: finding the files, 
 $phaseClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.53: where a full scan's time goes
 $digestSeconds = 0.0
 $parseSeconds = 0.0
+$fileFullPath = @{}   # v2.97: file name -> full path, for plan-files.json (the project folder copies)
 foreach ($f in $files) {
+    $fileFullPath[$f.Name] = $f.FullName
     $fromCache = $false
     try {
         $parseSw = [System.Diagnostics.Stopwatch]::StartNew()
@@ -4743,6 +4745,86 @@ try {
     foreach ($sf in @(Get-ChildItem -Path $planStatusLocalDir -File -Filter '*.json')) { if (-not $wantedStatusFiles.ContainsKey($sf.Name)) { Remove-Item -Path $sf.FullName -Force } }
     if ($planStatusCount -gt 0 -or $dl1Designations.Count -gt 0) { Write-Host "DL-1: $planStatusCount plan status file(s), $($dl1Designations.Count) designation(s) in dl1\plans-status" -ForegroundColor Green }
 } catch { Write-Warning "Plan status files failed (scan unaffected): $($_.Exception.Message)" }
+
+# ---------------------------------------------------------------------------
+# v2.97 (14 Oct 2026, plan item 55): plan-files.json, the filing list for the project folder. One entry per plan with
+# every post SACRED can tie to it by reference (never by guess): the plan posts themselves, progress, close-out,
+# reviews, plan-link records and the posts they point at, ordinary posts carrying meta.planid, the designation. Each
+# file names the subfolder it belongs in (01 Plan and Scope ... 08 AAR and Close-out) and its SharePoint path when it
+# sits in PostedReports, so the Plan Files flow (DL1-PLAN-FILES-FLOW-GUIDE.md) can create the folder tree under the
+# Between Wells Maintenance library and copy each file once. Written beside the receipts, only when it changes.
+# Copies, never moves: PostedReports stays the record. A test plan files under "<planId> TEST".
+# ---------------------------------------------------------------------------
+function Get-PlanFileSubfolder { param([string]$Kind, [string]$ReportType)
+    $k = ([string]$Kind).ToLowerInvariant(); $rt = [string]$ReportType
+    if ($k -in @('plan', 'planning-report', 'plan-review', 'designation', 'bop-designation', 'plan-progress')) { return '01 Plan and Scope' }
+    if ($k -eq 'plan-closeout') { return '08 AAR and Close-out' }
+    if ($k -eq 'plan-evidence') { return '07 Photos' }
+    if ($rt -eq 'CBM Inspection') { return '04 CBM Inspections' }
+    if ($rt -eq 'Pre-Deployment Checklist') { return '05 Pre-deployment Checklist' }
+    if ($rt -eq 'Precharge' -or $rt -like '*Precharge*') { return '06 Precharge' }
+    if ($rt -eq 'Surface BOP Testing' -or $rt -like '*Test*') { return '03 Testing' }
+    if ($rt -eq 'Planning Report' -or $rt -eq 'BWM Weekly Planning') { return '01 Plan and Scope' }
+    return '02 Maintenance Evidence'
+}
+function Get-PlanFileSharePointPath { param([string]$Name)
+    # The intake writes to the PostedReports library; a file under a report folder whose path contains 'PostedReports'
+    # is addressed as /PostedReports/<relative path>. Anything else carries its local path only.
+    if (-not $fileFullPath.ContainsKey($Name)) { return '' }
+    $full = [string]$fileFullPath[$Name]
+    $ix = $full.IndexOf('PostedReports', [System.StringComparison]::OrdinalIgnoreCase)
+    if ($ix -lt 0) { return '' }
+    $rel = $full.Substring($ix + 'PostedReports'.Length).TrimStart('\', '/').Replace('\', '/')
+    return '/PostedReports/' + $rel
+}
+try {
+    if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir)) {
+        $pfPlans = New-Object System.Collections.Generic.List[object]
+        $reportByFile2 = @{}; foreach ($rr in $reports) { $reportByFile2[[string]$rr.file] = $rr }
+        $pfTotal = 0
+        foreach ($planKey in @($dl1Plans.Keys | Sort-Object)) {
+            $pl = $dl1Plans[$planKey]; $ppid = [string]$pl.planId; if (-not $ppid) { continue }
+            $isTestP = [bool]$pl.isTest
+            $seen = @{}; $pfFiles = New-Object System.Collections.Generic.List[object]
+            $addFile = {
+                param([string]$name, [string]$kind, [string]$rtype, [string]$posted)
+                if (-not $name -or $seen.ContainsKey($name)) { return }
+                $seen[$name] = $true
+                $sub = Get-PlanFileSubfolder -Kind $kind -ReportType $rtype
+                $lp = ''; if ($fileFullPath.ContainsKey($name)) { $lp = [string]$fileFullPath[$name] }
+                $pfFiles.Add([ordered]@{ file = $name; kind = $kind; reporttype = $rtype; subfolder = $sub; posted = $posted; path = (Get-PlanFileSharePointPath -Name $name); localpath = $lp }) | Out-Null
+            }
+            & $addFile ([string]$pl.file) 'plan' '' ([string]$pl.posted)
+            if ($dl1Progress.ContainsKey($planKey) -and $dl1Progress[$planKey]) { & $addFile ([string]$dl1Progress[$planKey].file) 'plan-progress' '' ([string]$dl1Progress[$planKey].posted) }
+            if ($dl1Closeouts.ContainsKey($planKey)) { & $addFile ([string]$dl1Closeouts[$planKey].file) 'plan-closeout' '' ([string]$dl1Closeouts[$planKey].posted) }
+            foreach ($rk in @($dl1Reviews.Keys)) { $rr = $dl1Reviews[$rk]; if ([string]$rr.planId -ne $ppid) { continue }; if (([bool]$rr.isTest) -ne $isTestP) { continue }; & $addFile ([string]$rr.file) 'plan-review' '' ([string]$rr.saved) }
+            foreach ($lk in $dl1LiveLinks) {
+                if ([string]$lk.planId -ne $ppid) { continue }
+                & $addFile ([string]$lk.file) 'plan-link' '' ([string]$lk.saved)
+                $src = [string]$lk.sourceFile; $srt = [string]$lk.sourceType
+                if ($src -and $reportByFile2.ContainsKey($src) -and -not $srt) { $srt = [string]$reportByFile2[$src].reporttype }
+                & $addFile $src 'post' $srt ([string]$lk.sourceDate)
+            }
+            foreach ($pf in @($dl1PostPlan.Keys)) {
+                if ([string]$dl1PostPlan[$pf] -ne $ppid) { continue }
+                $rt2 = ''; $pd2 = ''; if ($reportByFile2.ContainsKey($pf)) { $rt2 = [string]$reportByFile2[$pf].reporttype; $pd2 = [string]$reportByFile2[$pf].reportDate }
+                & $addFile ([string]$pf) 'post' $rt2 $pd2
+            }
+            if ($dl1Designations.ContainsKey($ppid)) { & $addFile ([string]$dl1Designations[$ppid].file) 'designation' '' ([string]$dl1Designations[$ppid].generatedat) }
+            $pfPlans.Add([ordered]@{
+                planid = $ppid; folder = $ppid + $(if ($isTestP) { ' TEST' } else { '' }); istest = $isTestP
+                rig = [string]$pl.rig; rigkey = [string]$pl.rigKey; bop = [string]$pl.bopNo; scopeversion = [int]$pl.scopeVersion; status = [string]$pl.status
+                subfolders = @('01 Plan and Scope', '02 Maintenance Evidence', '03 Testing', '04 CBM Inspections', '05 Pre-deployment Checklist', '06 Precharge', '07 Photos', '08 AAR and Close-out')
+                files = $pfFiles.ToArray()
+            }) | Out-Null
+            $pfTotal += $pfFiles.Count
+        }
+        $pfJson = ConvertTo-PlainJson ([ordered]@{ generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $pfPlans.Count; files = $pfTotal; plans = $pfPlans.ToArray() })
+        $pfFile = Join-Path $helpReceiptDir 'plan-files.json'; $prevPf = ''; if (Test-Path -Path $pfFile) { $prevPf = [System.IO.File]::ReadAllText($pfFile) }
+        $stripPf = { param($t) [regex]::Replace($t, '"generatedat":"[^"]*"', '') }
+        if ((& $stripPf $prevPf) -ne (& $stripPf $pfJson)) { [System.IO.File]::WriteAllText($pfFile, $pfJson, (New-Object System.Text.UTF8Encoding($false))); Write-Host "DL-1: plan-files.json written: $($pfPlans.Count) plan(s), $pfTotal file(s) to file" -ForegroundColor Green }
+    }
+} catch { Write-Warning "plan-files.json failed (scan unaffected): $($_.Exception.Message)" }
 
 # v2.94 (14 Oct 2026): the whole block goes through ConvertTo-AabPlain, not just reviewers and review. The first
 # real plan through v2.93 on Dan's PC failed at the Windows PowerShell serialiser ("circular reference ...
