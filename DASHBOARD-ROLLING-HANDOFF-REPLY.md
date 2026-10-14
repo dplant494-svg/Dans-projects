@@ -1932,3 +1932,31 @@ of the plan percent; where a task has both, the panel shows both and flags a gap
 Over to the tools session to finish `LEE-HANDOFF-JOB-PLAN-CHECKLISTS.md` with this as the eDocs section; Dan sends
 both to Lee. One ask to Lee through it: `edocsRef` on the close-out, and whether a job plan with a checklist should
 expose its task weighting so the counts can be applied his way.
+
+## Entries 71 to 76 reply (dashboard side, 14 Oct 2026): offline tablets on the plan, Rev 9 keys already render, the server question, two checks
+
+Received 14 Oct in `PLAN-OFFLINE-TABLETS.zip` with the ORR return, the Day 1 pack of 13 Oct and the PDC Rev 9 handoff for
+Lee; all filed. In order:
+
+- **76 (SSORT 165, the `pdc_r9_*` keys).** Nothing to build: the checklist viewer on the reports dashboard renders the
+  `pdcData` map generically (entry 10's design), so the ten keys already show under "Checklist fields" with their names
+  spelled out, and `pdc_r9_rov_ph` shows as a photograph grid with the other general photo arrays. Checked on the viewer
+  code 14 Oct. They count toward the 40 MB ceiling as every pdc photo does. The same five lines go to Lee in the
+  Argo Navis handoff of 14 Oct from this side as well (C-05, R-01 to R-04), pointing at your zip for the keys.
+- **75 (offline tablets).** On the SACRED plan as item 67, with the six stages and the ISIT request. **The 18 October
+  move is not the server moving: it is the scanner moving onto `sdrlazneuiis01d`**, which stays where it is with the
+  same name. So HTTPS is an IIS binding on that server, ISIT's to add at any time, and Dan's request stands as written
+  (question 1 answered: the host name stays). Stage 6 (the Argo Navis checklists) is Lee's file, hosted beside Argo Navis
+  on the same server, so it inherits the binding.
+- **74.2 (blank posts from the removed Post Report).** Scanner v2.92 lists any `seadrill-report_*` post with an empty
+  `meta.reporttype` and no tiles in the problems table as `blank-post` and keeps it off the Reports list, so Dan sees the
+  count on the Status page rather than hunting. None can arrive from 164 on; whatever exists is listed once.
+- **73.2 (daily-log overwrite).** Yes, the dashboard would show only the last entry for a date and shift until the month
+  post: the index dedups on rig, date, shift and equipment, but the intake has already replaced the file by then. The
+  fix is the name (73.3), after the class. Nothing changes here.
+- **72 (Day 1 pack on 165 / 169).** The trainee workbook and the trainer's script are built on the workshop build day
+  (SACRED item 59) from the 13 Oct pack, now filed; the 165 badge and the Rev 9 section are in. The badge-date wording
+  (72.3) is yours after the class.
+- **71.1.** Count corrected on this side (27 commented, 26 as proposed; the Decision column was always the record).
+  Optional sign-offs left out of "ready to sign", and the same rule noted for the scanner's pre-deployment-complete
+  logic when it is built (item 55). 71.3: Q6 yes and Lee's title recorded.
