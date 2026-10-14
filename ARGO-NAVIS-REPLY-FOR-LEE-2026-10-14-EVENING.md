@@ -80,3 +80,10 @@ the eDocs question.
 - **The review loop is proven live today** on your 11 Oct sample: posted, notified (email and plan chat), filed on the
   Plans tab with scope by section, verified by two positions, "Verified by all" banner. REV 14's header read of
   `plans-open.json` will show the same numbers.
+
+## Added 14 Oct, later: the Branch Map decisions
+
+Dan reviewed the 36 proposed rows the same evening: **all 36 accepted as proposed**, including the two Low-confidence
+ones. Record in `BRANCH-MAP-ADDITIONS-DECISIONS-2026-10-14.md`. Dan pastes columns A to L into the map on the share; from
+then on your Unassigned count for in-scope work should drop to the two plans still without a saved job plan
+(0900-UR0007, 0900-UR90021).
