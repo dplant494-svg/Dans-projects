@@ -23,8 +23,11 @@
     (ssce-decision_*.json, downloaded by requests-dashboard/requests-dashboard.html),
     merges them by requestId into requests-dashboard/ssce-requests-data.js,
     writes a pending-notifications feed for an eventual Power Automate flow,
-    and - only once 'cocDashboardPath' is set in config.json - regenerates a
-    REVIEW COPY of the COC dashboard with approved items marked unavailable.
+    and - only once 'cocDashboardPath' is set in config.json - regenerates the
+    COC tracker with approved items marked unavailable. v2.92: when 'cocExtractPath'
+    names Manpreet's Maximo extract (CSV) the tracker's data block is rebuilt from
+    it first, with the page's own import rules; 'cocPublishPath' is the file the
+    rigs open (without it the result stays a PENDING_REVIEW copy beside the template).
     See SSCE-REQUESTS-INTEGRATION-CONTRACT.md for the full data contract.
 
     Run it once by hand to test, then schedule it with Register-DashboardTask.ps1.
@@ -60,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.91'
+$ScriptVersion = '2.92'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1446,7 +1449,10 @@ function ConvertTo-PlainJsonString { param([string]$Text)
 }
 function ConvertTo-AabPlain { param($Value)
     if ($null -eq $Value) { return $null }
-    if ($Value -is [System.Management.Automation.PSObject] -and -not ($Value.BaseObject -is [System.Management.Automation.PSCustomObject])) { $Value = $Value.BaseObject }
+    # v2.92: the wrapper's base object is $Value.PSObject.BaseObject ($Value.BaseObject is null on a
+    # PSCustomObject, which emptied every PowerShell 7 object passed here; Windows PowerShell 5.1's
+    # dictionaries never took this branch).
+    if ($Value -is [System.Management.Automation.PSObject] -and -not ($Value.PSObject.BaseObject -is [System.Management.Automation.PSCustomObject])) { $Value = $Value.PSObject.BaseObject }
     if ($Value -is [string] -or $Value -is [bool] -or $Value -is [ValueType]) { return $Value }
     if ($Value -is [System.Collections.IDictionary]) {
         $h = [ordered]@{}
@@ -2253,6 +2259,16 @@ foreach ($f in $files) {
     # real readings counts as recognized here even when asset/checks.rig are
     # both blank - that case is handled as its own, more specific skip
     # below, not lumped in with "not a recognized export" at all.
+    # v2.92 (rolling handoff entry 74.2): the Daily Log tab's old end-of-trip Post Report (removed in
+    # SSORT 164) posted the whole workspace with nothing on it - a seadrill-report_<rig>_<date>.json
+    # with meta.reporttype "" and no tiles. Listed once under Problems as 'blank-post' and kept off the
+    # Reports list; none can arrive from 164 on.
+    if ($tileCount -eq 0 -and $f.Name -like 'seadrill-report_*' -and -not ([string](Get-Prop $meta 'reporttype')).Trim() -and $criticalItems.Count -eq 0 -and $actionItems.Count -eq 0 -and -not $checksHasValues) {
+        Write-Warning "Skipping $($f.Name): a blank post (no report type, no tiles) from the Daily Log tab's removed Post Report (SSORT 164)"
+        Add-Problem $f 'blank-post' "blank post - no report type and no tiles (the Daily Log tab's end-of-trip Post Report, removed in SSORT 164); nothing to show, kept off the Reports list"
+        $skipped++
+        continue
+    }
     if ($tileCount -eq 0 -and -not $assetRaw -and $criticalItems.Count -eq 0 -and $actionItems.Count -eq 0 -and -not $checksHasValues) {
         Write-Warning "Skipping $($f.Name): has a 'meta' block but no tiles, rig identity, or critical/action rows - not a recognized report export"
         Add-Problem $f 'unrecognised' "has a 'meta' block but no tiles, rig identity or rows - not a recognised report export"
@@ -3894,9 +3910,346 @@ if ($prechargeRequests.Count -gt 0 -or $prechargeDeployPath) {
 }
 
 $phaseTimes['precharge inbox'] = [math]::Round($phaseClock.Elapsed.TotalSeconds); $phaseClock.Restart()
+# ---------------------------------------------------------------------------
+# v2.92 (14 Oct 2026, plan item 66): the CoC Tracker rebuilt from Manpreet's Maximo extract
+# on every run. The tracker page (Manpreet, REV6 line) carries its data in
+# <script id="coc-data"> and its own import rules in JavaScript (buildRawFromMaximo):
+# this is that function, line for line, in PowerShell, so the scanner produces
+# the same block the tracker's "Update from Excel" button would, without a hand.
+#   - column mapping by header alias (MAXIMO_FIELDS), the row kind from REPORT
+#     (riser / ckm / wce), category and section from the tracker's own refs
+#     tables (vessel+asset first, SFI second, else the Maximo CATEGORY text);
+#   - dates cleaned like the page (ISO, d/m/y, '12 Mar 2026', Excel serials;
+#     loose text kept as written so a typo never becomes an expiry);
+#   - one row per vessel|asset|kind: the newest certificate (expiry, then issue,
+#     then has-cert) kept, the superseded ones hung off it as history, exact
+#     duplicates dropped;
+#   - the shared-capital register (refs.spares) carried over unless the export
+#     now has that asset; for a 0960 row in both, the export's row wins but its
+#     SSCE availability (avail, assignedTo) is kept from the register when the
+#     export has none, so an allocation is never lost to a refresh;
+#   - vessels from the refs config (name, site, programme, fleet flag).
+# Returns the ordered data block (same keys as the page's serializeDb; refs passed
+# through as read from the page) or $null with a warning when the file is not a
+# Maximo extract.
+# ---------------------------------------------------------------------------
+$script:CocCFields = @('v','src','sec','catId','cat','certType','sfi','asset','uid','desc','model','oem','serial','interval','last','due','cert','edocs','grp','notes','avail','assignedTo','hist')
+$script:CocRKeys = @('Riser Asset #','Description','Asset Status','Asset Location (SFI)','Rotating Item','Condition Code','Tag Number','Serial Number','Riser Joint Type','Riser OEM / Make','Physical Location','Total Used Days','Current Used Days','Latest Certification Date','Joint Length (FT)','Wall Thickness (IN)','Buoyancy Depth Rating (FT)','Buoyancy Color','Site')
+$script:CocRiserPick = @{ 'Riser Asset #' = 'asset'; 'Description' = 'desc'; 'Asset Status' = 'mstatus'; 'Asset Location (SFI)' = 'sfi'; 'Rotating Item' = 'item'; 'Condition Code' = 'cond'; 'Tag Number' = 'tag'; 'Serial Number' = 'serial'; 'Riser Joint Type' = 'rjtype'; 'Riser OEM / Make' = 'oemmake'; 'Physical Location' = 'physloc'; 'Total Used Days' = 'totused'; 'Current Used Days' = 'curused'; 'Latest Certification Date' = 'certdate'; 'Joint Length (FT)' = 'jointlen'; 'Wall Thickness (IN)' = 'wall'; 'Buoyancy Depth Rating (FT)' = 'buoydepth'; 'Buoyancy Color' = 'buoycolor'; 'Site' = 'site2' }
+$script:CocMaximoFields = [ordered]@{
+    report = @('report'); v = @('siteid'); vname = @('name'); mcat = @('category'); sfi = @('location')
+    asset = @('assetnum'); desc = @('description'); mstatus = @('status'); item = @('itemnum')
+    cond = @('conditioncode'); tag = @('assettag'); serial = @('serialnum'); rjtype = @('sdrjtype')
+    oemmake = @('sdoemmake'); physloc = @('sdphysloc'); totused = @('sdtotusedday'); curused = @('sdcurusedday')
+    certdate = @('sdlatestcertdate'); jointlen = @('sdriserjointlen'); wall = @('sdwallthickness')
+    buoydepth = @('sdbuoydepth'); buoycolor = @('sdbuoycolor'); site2 = @('siteid1'); uid = @('assetuid')
+    model = @('sdmodelnum'); oem = @('sdcatalogcode'); interval = @('27', 'interval')
+    last = @('issueddate'); due = @('expiredate'); cert = @('certnum'); edocs = @('edocs')
+    grp = @('sdsfi'); grpName = @('sfigroup')
+}
+function ConvertTo-CocNormKey { param([string]$Text) return ([regex]::Replace(([string]$Text).ToLowerInvariant(), '[^a-z0-9]', '')) }
+function ConvertTo-CocTidy { param([string]$Text) return ([regex]::Replace(([string]$Text).Replace([char]0x00A0, ' '), '\s+', ' ')).Trim() }
+function ConvertTo-CocSlug { param([string]$Text)
+    $s = ([string]$Text).ToLowerInvariant().Replace('&', ' and ')
+    $s = [regex]::Replace($s, '[^a-z0-9]+', '_')
+    return ([regex]::Replace($s, '^_+|_+$', ''))
+}
+function ConvertTo-CocIsoIfReal { param([int]$Y, [int]$M, [int]$D)
+    if ($M -lt 1 -or $M -gt 12 -or $D -lt 1 -or $D -gt 31) { return $null }
+    try { $dt = New-Object DateTime($Y, $M, $D); return $dt.ToString('yyyy-MM-dd') } catch { return $null }
+}
+$script:CocReTime = New-Object System.Text.RegularExpressions.Regex('^(.*?)[ T]\d{1,2}:\d{2}(:\d{2})?(\.\d+)?$')
+$script:CocReIso = New-Object System.Text.RegularExpressions.Regex('^(\d{4})[-/](\d{1,2})[-/](\d{1,2})$')
+function ConvertTo-CocCleanDate { param([string]$Value)
+    $s = ([string]$Value).Trim()
+    if (-not $s) { return '' }
+    $wt = $script:CocReTime.Match($s)
+    if ($wt.Success) { $s = $wt.Groups[1].Value.Trim() }
+    $m = $script:CocReIso.Match($s)
+    if ($m.Success) { $r = ConvertTo-CocIsoIfReal ([int]$m.Groups[1].Value) ([int]$m.Groups[2].Value) ([int]$m.Groups[3].Value); if ($r) { return $r } else { return $s } }
+    $m = [regex]::Match($s, '^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$')
+    if ($m.Success) { $r = ConvertTo-CocIsoIfReal ([int]$m.Groups[3].Value) ([int]$m.Groups[2].Value) ([int]$m.Groups[1].Value); if ($r) { return $r } else { return $s } }
+    $m = [regex]::Match($s, '^(\d{1,2})[\s-]([A-Za-z]{3,9})\.?[\s-](\d{4})$')
+    if ($m.Success) {
+        $months = @('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec')
+        $mi = [array]::IndexOf($months, $m.Groups[2].Value.Substring(0, 3).ToLowerInvariant())
+        if ($mi -ge 0) { $r = ConvertTo-CocIsoIfReal ([int]$m.Groups[3].Value) ($mi + 1) ([int]$m.Groups[1].Value); if ($r) { return $r } else { return $s } }
+    }
+    if ($s -match '^\d{5}(\.\d+)?$') {
+        $n = [double]::Parse($s, [System.Globalization.CultureInfo]::InvariantCulture)
+        if ($n -gt 20000 -and $n -lt 80000) { return (New-Object DateTime(1899, 12, 30)).AddDays([math]::Floor($n)).ToString('yyyy-MM-dd') }
+    }
+    return $s
+}
+# The extract as rows of string[]: UTF-8 first, Windows-1252 when the bytes are not
+# UTF-8 (Maximo exports arrive either way). Quoted fields may hold commas, quotes
+# ("") and line breaks; TextFieldParser (.NET, present on Windows PowerShell 5.1)
+# handles all three, with a plain character walk as the fallback.
+function Read-CocCsvRows { param([string]$Path)
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    $text = $null
+    try { $text = (New-Object System.Text.UTF8Encoding($false, $true)).GetString($bytes) }
+    catch {
+        try { $text = [System.Text.Encoding]::GetEncoding(1252).GetString($bytes) } catch { $text = [System.Text.Encoding]::Default.GetString($bytes) }
+    }
+    if ($text.Length -gt 0 -and [int]$text[0] -eq 0xFEFF) { $text = $text.Substring(1) }
+    $rows = New-Object System.Collections.Generic.List[object]
+    $parsed = $false
+    try {
+        Add-Type -AssemblyName Microsoft.VisualBasic -ErrorAction Stop
+        $reader = New-Object System.IO.StringReader($text)
+        $tfp = New-Object Microsoft.VisualBasic.FileIO.TextFieldParser($reader)
+        $tfp.TextFieldType = [Microsoft.VisualBasic.FileIO.FieldType]::Delimited
+        $tfp.SetDelimiters(',')
+        $tfp.HasFieldsEnclosedInQuotes = $true
+        $tfp.TrimWhiteSpace = $false
+        while (-not $tfp.EndOfData) { $fields = $tfp.ReadFields(); $rows.Add([string[]]$fields) | Out-Null }
+        $tfp.Close()
+        $parsed = $true
+    } catch { $parsed = $false; $rows.Clear() }
+    if (-not $parsed) {
+        $row = New-Object System.Collections.Generic.List[string]
+        $cell = New-Object System.Text.StringBuilder
+        $q = $false
+        $n = $text.Length
+        for ($i = 0; $i -lt $n; $i++) {
+            $ch = $text[$i]
+            if ($q) {
+                if ($ch -eq '"') { if ($i + 1 -lt $n -and $text[$i + 1] -eq '"') { [void]$cell.Append('"'); $i++ } else { $q = $false } }
+                else { [void]$cell.Append($ch) }
+            }
+            elseif ($ch -eq '"') { $q = $true }
+            elseif ($ch -eq ',') { $row.Add($cell.ToString()); [void]$cell.Clear() }
+            elseif ($ch -eq "`n") { $row.Add($cell.ToString()); [void]$cell.Clear(); $rows.Add($row.ToArray()) | Out-Null; $row.Clear() }
+            elseif ($ch -ne "`r") { [void]$cell.Append($ch) }
+        }
+        if ($cell.Length -gt 0 -or $row.Count -gt 0) { $row.Add($cell.ToString()); $rows.Add($row.ToArray()) | Out-Null }
+    }
+    return ,$rows.ToArray()
+}
+function Convert-CocExtract { param([string]$Path, $Refs, [string]$SourceName)
+    $rows = Read-CocCsvRows -Path $Path
+    if ($rows.Count -lt 2) { Write-Warning "CoC extract $Path has no data rows"; return $null }
+    $header = [string[]]$rows[0]
+    $norm = New-Object System.Collections.Generic.List[string]
+    foreach ($hc in $header) { $norm.Add((ConvertTo-CocNormKey $hc)) }
+    if ($norm.IndexOf('report') -lt 0 -or $norm.IndexOf('assetnum') -lt 0 -or $norm.IndexOf('assetuid') -lt 0) {
+        Write-Warning "CoC extract $Path is not a Maximo extract (needs REPORT, ASSETNUM and ASSETUID columns; has: $($header -join ', '))"
+        return $null
+    }
+    $H = @{}
+    foreach ($fk in @($script:CocMaximoFields.Keys)) {
+        foreach ($alias in $script:CocMaximoFields[$fk]) { $ix = $norm.IndexOf([string]$alias); if ($ix -ge 0) { $H[[string]$fk] = $ix; break } }
+    }
+    $byAsset = @{}; $bySfi = @{}
+    foreach ($a in @(Get-Prop $Refs 'asset')) { if ($a -and $a.Count -ge 4) { $byAsset[([string]$a[0] + '|' + [string]$a[1])] = $a } }
+    foreach ($a in @(Get-Prop $Refs 'sfi')) { if ($a -and $a.Count -ge 3) { $bySfi[[string]$a[0]] = $a } }
+    $cf = $script:CocCFields
+    $IDX = @{}; for ($i = 0; $i -lt $cf.Count; $i++) { $IDX[$cf[$i]] = $i }
+
+    $components = New-Object System.Collections.Generic.List[object]
+    $riser = New-Object System.Collections.Generic.List[object]
+    $vnames = [ordered]@{}
+    $sfiGroups = [ordered]@{}
+    $stats = @{ wce = 0; ckm = 0; riser = 0; skipped = 0; noRef = 0; spares = 0; superseded = 0; exactDupes = 0; collapsed = 0; kept = 0 }
+    $wsRe = New-Object System.Text.RegularExpressions.Regex('\s+')
+    $hKeys = @($H.Keys)
+    for ($ri = 1; $ri -lt $rows.Count; $ri++) {
+        $r = [string[]]$rows[$ri]
+        # Every mapped column tidied once per row (NBSP to space, whitespace collapsed, trimmed).
+        $rv = @{}
+        foreach ($fk in $hKeys) {
+            $ci = $H[$fk]
+            if ($ci -lt $r.Count) { $rv[$fk] = $wsRe.Replace(([string]$r[$ci]).Replace([char]0x00A0, ' '), ' ').Trim() } else { $rv[$fk] = '' }
+        }
+        foreach ($fk in @($script:CocMaximoFields.Keys)) { if (-not $rv.ContainsKey([string]$fk)) { $rv[[string]$fk] = '' } }
+        $v = $rv['v']
+        if (-not $v) {
+            $any = $false; foreach ($x in $r) { if (([string]$x).Trim()) { $any = $true; break } }
+            if ($any) { $stats.skipped++ }
+            continue
+        }
+        $rep = $rv['report'].ToLowerInvariant()
+        $kind = 'wce'
+        if ($rep -match 'riser') { $kind = 'riser' } elseif ($rep -match 'ckm|choke') { $kind = 'ckm' }
+        $name = $rv['vname']
+        if ($name -and -not $vnames.Contains($v)) { $vnames[$v] = $name }
+        $grp = $rv['grp']; $grpName = $rv['grpName']
+        if ($grp -and $grpName -and -not $sfiGroups.Contains($grp)) { $sfiGroups[$grp] = $grpName }
+        $uid = $rv['uid']
+        if ($kind -eq 'riser') {
+            $row = [System.Collections.Generic.List[object]]::new()
+            $row.Add($v); $row.Add($uid)
+            foreach ($k in $script:CocRKeys) {
+                $val = $rv[[string]$script:CocRiserPick[$k]]
+                if ($k -eq 'Latest Certification Date' -and $val) { $val = ConvertTo-CocCleanDate $val }
+                $row.Add([string]$val)
+            }
+            $riser.Add($row.ToArray())
+            $stats.riser++
+            continue
+        }
+        $sfi = $rv['sfi']
+        $asset = $rv['asset']
+        $ref = $null
+        if ($byAsset.ContainsKey($v + '|' + $asset)) { $ref = $byAsset[$v + '|' + $asset] } elseif ($sfi -and $bySfi.ContainsKey($sfi)) { $ref = $bySfi[$sfi] }
+        $catId = ''; $cat = ''; $sec = ''
+        if ($ref) {
+            $off = 1; if ($ref.Count -eq 5) { $off = 2 }
+            $catId = [string]$ref[$off]; $cat = [string]$ref[$off + 1]
+            if ($ref.Count -gt $off + 2) { $sec = [string]$ref[$off + 2] }
+        }
+        else {
+            $cat = $rv['mcat']
+            if (-not $cat) { $cat = $grpName }
+            if (-not $cat) { $cat = 'Uncategorised' }
+            $catId = ConvertTo-CocSlug $cat
+            $stats.noRef++
+        }
+        $mstatus = $rv['mstatus']
+        $notes = ''; if ($mstatus) { $notes = 'Maximo status: ' + $mstatus }
+        $secOut = $sec; if ($kind -eq 'ckm') { $secOut = '' }
+        $o = [object[]]::new($cf.Count)
+        $o[$IDX.v] = $v; $o[$IDX.src] = $kind; $o[$IDX.sec] = $secOut; $o[$IDX.catId] = $catId; $o[$IDX.cat] = $cat
+        $o[$IDX.certType] = ''; $o[$IDX.sfi] = $sfi; $o[$IDX.asset] = $asset; $o[$IDX.uid] = $uid; $o[$IDX.desc] = $rv['desc']
+        $o[$IDX.model] = $rv['model']; $o[$IDX.oem] = $rv['oem']; $o[$IDX.serial] = $rv['serial']; $o[$IDX.interval] = $rv['interval']
+        $o[$IDX.last] = (ConvertTo-CocCleanDate $rv['last']); $o[$IDX.due] = (ConvertTo-CocCleanDate $rv['due'])
+        $o[$IDX.cert] = $rv['cert']; $o[$IDX.edocs] = $rv['edocs']; $o[$IDX.grp] = $grp; $o[$IDX.notes] = $notes
+        $o[$IDX.avail] = ''; $o[$IDX.assignedTo] = ''; $o[$IDX.hist] = ''
+        $components.Add($o)
+        if ($kind -eq 'ckm') { $stats.ckm++ } else { $stats.wce++ }
+    }
+
+    # One row per asset: the newest certificate kept, the rest as history.
+    $groups = [ordered]@{}
+    foreach ($row in $components) {
+        $k = [string]$row[$IDX.v] + '|' + [string]$row[$IDX.asset] + '|' + [string]$row[$IDX.src]
+        if (-not $groups.Contains($k)) { $groups[$k] = [System.Collections.Generic.List[object]]::new() }
+        $groups[$k].Add($row)
+    }
+    $collapsed = New-Object System.Collections.Generic.List[object]
+    foreach ($k in @($groups.Keys)) {
+        $group = $groups[$k]
+        if ($group.Count -eq 1) { $collapsed.Add($group[0]) | Out-Null; continue }
+        # Sort key: expiry, issue, has-cert, then the file position inverted, so an ordinal
+        # sort read backwards is "newest first, ties in file order" (the page's stable sort).
+        # The position rides inside the key: PowerShell does not reorder a second array
+        # passed to Array.Sort(keys, items), so the rows are picked back out by position.
+        $keyList = [System.Collections.Generic.List[string]]::new()
+        for ($gi = 0; $gi -lt $group.Count; $gi++) {
+            $gr = $group[$gi]
+            $certFlag = '0'; if ([string]$gr[$IDX.cert]) { $certFlag = '1' }
+            # A certificate with no expiry (or no issue date) ranks below any dated one: the page
+            # sorts with localeCompare, where a blank is lowest too; ordinal needs it said.
+            $kDue = [string]$gr[$IDX.due]; if (-not $kDue) { $kDue = '0000-00-00' }
+            $kLast = [string]$gr[$IDX.last]; if (-not $kLast) { $kLast = '0000-00-00' }
+            $keyList.Add(($kDue + '|' + $kLast + '|' + $certFlag + '|' + ('{0:D7}' -f (9999999 - $gi))))
+        }
+        $keyList.Sort([StringComparer]::Ordinal)
+        $items = [object[]]::new($group.Count)
+        for ($gi = 0; $gi -lt $keyList.Count; $gi++) {
+            $kk = $keyList[$keyList.Count - 1 - $gi]
+            $pos = 9999999 - [int]$kk.Substring($kk.Length - 7)
+            $items[$gi] = $group[$pos]
+        }
+        $keep = [object[]]$items[0].Clone()
+        $sigOf = { param($rr) return ([string]$rr[$IDX.cert] + '|' + [string]$rr[$IDX.last] + '|' + [string]$rr[$IDX.due] + '|' + [string]$rr[$IDX.edocs]) }
+        $seen = @{}; $seen[(& $sigOf $keep)] = $true
+        $hist = New-Object System.Collections.Generic.List[object]
+        for ($gi = 1; $gi -lt $items.Count; $gi++) {
+            $rr = $items[$gi]
+            $sig = & $sigOf $rr
+            if ($seen.ContainsKey($sig)) { $stats.exactDupes++; continue }
+            $seen[$sig] = $true
+            $hist.Add(([object[]]@([string]$rr[$IDX.cert], [string]$rr[$IDX.last], [string]$rr[$IDX.due], [string]$rr[$IDX.edocs]))) | Out-Null
+        }
+        $keep[$IDX.hist] = $hist.ToArray()
+        $stats.superseded += $hist.Count
+        $collapsed.Add($keep) | Out-Null
+    }
+    $stats.collapsed = $components.Count - $collapsed.Count
+    $components = $collapsed
+
+    # Shared-capital register carried over; a 0960 asset the export now carries keeps
+    # its SSCE allocation from the register when the export row has none.
+    $present = @{}
+    foreach ($c in $components) { $present[([string]$c[$IDX.v] + '|' + [string]$c[$IDX.asset])] = $c }
+    foreach ($srow in @(Get-Prop $Refs 'spares')) {
+        if (-not $srow -or $srow.Count -lt $cf.Count) { continue }
+        $key = [string]$srow[0] + '|' + [string]$srow[$IDX.asset]
+        if ($present.ContainsKey($key)) {
+            $c = $present[$key]
+            if (-not [string]$c[$IDX.avail] -and [string]$srow[$IDX.avail]) { $c[$IDX.avail] = [string]$srow[$IDX.avail]; $c[$IDX.assignedTo] = [string]$srow[$IDX.assignedTo]; $stats.kept++ }
+            continue
+        }
+        $copy = [object[]]::new($cf.Count)
+        for ($ci = 0; $ci -lt $cf.Count; $ci++) { $copy[$ci] = ConvertTo-AabPlain $srow[$ci]; if ($null -eq $copy[$ci]) { $copy[$ci] = '' } }
+        $components.Add($copy) | Out-Null
+        $stats.spares++
+        if ([string]$copy[1] -eq 'ckm') { $stats.ckm++ } else { $stats.wce++ }
+    }
+
+    # Vessels: every site in the export plus the register's, configured from refs.vessels.
+    $ids = New-Object System.Collections.Generic.List[string]
+    foreach ($k in @($vnames.Keys)) { if (-not $ids.Contains([string]$k)) { $ids.Add([string]$k) } }
+    foreach ($srow in @(Get-Prop $Refs 'spares')) { if ($srow -and $srow.Count -gt 0) { $sv = [string]$srow[0]; if (-not $ids.Contains($sv)) { $ids.Add($sv) } } }
+    $ids.Sort([StringComparer]::Ordinal)
+    $refVessels = @{}
+    foreach ($vr in @(Get-Prop $Refs 'vessels')) { if ($vr -and $vr.Count -ge 5) { $refVessels[[string]$vr[0]] = $vr } }
+    $vessels = New-Object System.Collections.Generic.List[object]
+    foreach ($id in $ids) {
+        $cfg = $null; if ($refVessels.ContainsKey($id)) { $cfg = $refVessels[$id] }
+        $vn = $id; if ($cfg -and [string]$cfg[1]) { $vn = [string]$cfg[1] } elseif ($vnames.Contains($id)) { $vn = [string]$vnames[$id] }
+        $site = $id; if ($cfg -and [string]$cfg[2]) { $site = [string]$cfg[2] }
+        $prog = 'sched'; if ($cfg -and [string]$cfg[3] -eq 'cbm') { $prog = 'cbm' }
+        $fleet = 1; if ($cfg) { $fleet = [int]$cfg[4] }
+        $vessels.Add(([object[]]@($id, $vn, $site, $prog, $fleet))) | Out-Null
+    }
+
+    $nCkm = 0; foreach ($c in $components) { if ([string]$c[1] -eq 'ckm') { $nCkm++ } }
+    $msg = "CoC extract: $($components.Count - $nCkm) WCE + $nCkm C&K components ($($stats.spares) shared-capital carried over, $($stats.kept) allocation(s) kept), $($stats.riser) riser assets, $($vessels.Count) vessels"
+    if ($stats.collapsed) { $msg += "; $($stats.collapsed) extra certificate row(s) collapsed ($($stats.superseded) as history, $($stats.exactDupes) exact duplicate(s) dropped)" }
+    if ($stats.noRef) { $msg += "; $($stats.noRef) component(s) with no category mapping (Maximo CATEGORY used)" }
+    if ($stats.skipped) { $msg += "; $($stats.skipped) row(s) ignored - no SITEID" }
+    Write-Host $msg -ForegroundColor Green
+
+    $rFields = New-Object System.Collections.Generic.List[string]
+    $rFields.Add('v'); $rFields.Add('uid'); foreach ($k in $script:CocRKeys) { $rFields.Add($k) }
+    $sfiOut = [ordered]@{}; foreach ($k in @($sfiGroups.Keys)) { $sfiOut[[string]$k] = [string]$sfiGroups[$k] }
+    return [ordered]@{
+        generated  = (Get-Date).ToString('dd MMMM yyyy', [System.Globalization.CultureInfo]::GetCultureInfo('en-GB'))
+        source     = [string]$SourceName
+        sfiGroups  = $sfiOut
+        refs       = $Refs
+        vessels    = $vessels.ToArray()
+        cFields    = [object[]]$cf
+        components = $components.ToArray()
+        rFields    = $rFields.ToArray()
+        riser      = $riser.ToArray()
+    }
+}
+
 $cocDashboardPath = ''
 if ($config.PSObject.Properties['cocDashboardPath'] -and $config.cocDashboardPath) {
     $cocDashboardPath = [Environment]::ExpandEnvironmentVariables($config.cocDashboardPath)
+}
+# v2.92: 'cocExtractPath' is Manpreet's Maximo extract (CSV) on the feed share; when set and present, the
+# tracker's data block is rebuilt from it (Convert-CocExtract above) before the SSCE write-back is applied.
+# 'cocPublishPath' is where the finished tracker is written - the file the rigs open on the server. When it
+# is not set the result still goes to the PENDING_REVIEW copy beside the template, as before v2.92, so
+# nothing is published until Dan names the live file. The template (cocDashboardPath) is never written:
+# Manpreet's next REV drops in there and the scanner takes its page and refs from then on.
+$cocExtractPath = ''
+if ($config.PSObject.Properties['cocExtractPath'] -and $config.cocExtractPath) {
+    $cocExtractPath = [Environment]::ExpandEnvironmentVariables($config.cocExtractPath)
+}
+$cocPublishPath = ''
+if ($config.PSObject.Properties['cocPublishPath'] -and $config.cocPublishPath) {
+    $cocPublishPath = [Environment]::ExpandEnvironmentVariables($config.cocPublishPath)
+}
+if ($cocPublishPath -and $cocDashboardPath -and ([System.IO.Path]::GetFullPath($cocPublishPath).TrimEnd('\\') -ieq [System.IO.Path]::GetFullPath($cocDashboardPath).TrimEnd('\\'))) {
+    Write-Warning "cocPublishPath is the same file as cocDashboardPath - the template is never overwritten, so the tracker goes to the PENDING_REVIEW copy instead; keep Manpreet's file as the template and point cocPublishPath at the file the rigs open"
+    $cocPublishPath = ''
 }
 if (-not $cocDashboardPath) {
     Write-Warning "SSCE COC write-back skipped: 'cocDashboardPath' not set in config.json"
@@ -3909,16 +4262,27 @@ else {
         $approvedList = New-Object System.Collections.Generic.List[object]
         $ssceRequestsArr | Where-Object { $_.decision -eq 'approved' } | ForEach-Object { $approvedList.Add($_) | Out-Null }
         $approved = $approvedList.ToArray()
-        if ($approved.Count -eq 0) {
-            Write-Host "SSCE COC write-back: no approved requests to apply" -ForegroundColor Yellow
+        $cocExtract = $null
+        if ($cocExtractPath) {
+            if (Test-Path -Path $cocExtractPath) {
+                $cocExtract = Get-Item -Path $cocExtractPath
+                if (Test-Path -Path (Join-Path (Split-Path -Parent $cocExtractPath) ('~$' + (Split-Path -Leaf $cocExtractPath)))) {
+                    Write-Host "CoC extract $($cocExtract.Name) is open in Excel (lock file present) - the tracker keeps the last build this run" -ForegroundColor Yellow
+                    $cocExtract = $null
+                }
+            }
+            else { Write-Warning "CoC extract not found (the tracker keeps its last data): $cocExtractPath" }
+        }
+        if ($approved.Count -eq 0 -and -not $cocExtract) {
+            Write-Host "SSCE COC write-back: no approved requests to apply and no CoC extract - nothing to rebuild" -ForegroundColor Yellow
         }
         else {
-            # v2.56: the review copy carries a stamp of the COC dashboard it was made
-            # from (size + last write) and of the approved list applied to it. When
-            # both still match, nothing is re-read, re-parsed or rewritten: this
-            # block cost 143 s of every full scan on Dan's PC with one approved item.
+            # v2.56: the output carries a stamp of the template it was made from (size + last write), of
+            # the approved list applied to it and (v2.92) of the extract. When all still match, nothing
+            # is re-read, re-parsed or rewritten: this block cost 143 s of every full scan on Dan's PC.
             $cocSrc = Get-Item -Path $cocDashboardPath
-            $cocReviewPath = Join-Path (Split-Path -Parent $cocDashboardPath) 'Seadrill_WCE_COC_Dashboard_PENDING_REVIEW.html'
+            $cocOutPath = $cocPublishPath
+            if (-not $cocOutPath) { $cocOutPath = Join-Path (Split-Path -Parent $cocDashboardPath) 'Seadrill_WCE_COC_Dashboard_PENDING_REVIEW.html' }
             $stampLines = New-Object System.Collections.Generic.List[string]
             foreach ($rec in $approved) {
                 $stampLines.Add(('{0}|{1}|{2}|{3}|{4}' -f [string]$rec.requestId, [string](Get-Prop $rec.ssceItem 'asset'), [string](Get-Prop $rec.ssceItem 'oem'), [string](Get-Prop $rec.ssceItem 'serial'), [string](Get-Prop $rec.applicant 'siteUnit')))
@@ -3927,13 +4291,14 @@ else {
             $stampSha = [System.Security.Cryptography.SHA256]::Create()
             $approvedHash = [BitConverter]::ToString($stampSha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes(($stampLines -join "`n")))).Replace('-', '').Substring(0, 16)
             $stampSha.Dispose()
-            $cocStamp = '<!-- coc-writeback-stamp: {0}|{1}|{2}|w2 -->' -f $cocSrc.Length, $cocSrc.LastWriteTimeUtc.Ticks, $approvedHash
+            $extractStamp = 'none'
+            if ($cocExtract) { $extractStamp = '{0}|{1}' -f $cocExtract.Length, $cocExtract.LastWriteTimeUtc.Ticks }
+            $cocStamp = '<!-- coc-writeback-stamp: {0}|{1}|{2}|{3}|w3 -->' -f $cocSrc.Length, $cocSrc.LastWriteTimeUtc.Ticks, $approvedHash, $extractStamp
             $cocUpToDate = $false
-            if (Test-Path -Path $cocReviewPath) {
+            if (Test-Path -Path $cocOutPath) {
                 try {
-                    # Only the first few KB of the review copy: it is a multi-megabyte
-                    # page on a network share.
-                    $sr = New-Object System.IO.StreamReader($cocReviewPath, [System.Text.Encoding]::UTF8)
+                    # Only the first few KB of the output: it is a multi-megabyte page on a network share.
+                    $sr = New-Object System.IO.StreamReader($cocOutPath, [System.Text.Encoding]::UTF8)
                     $buf = New-Object char[] 4096
                     $n = $sr.Read($buf, 0, $buf.Length)
                     $sr.Close()
@@ -3942,7 +4307,7 @@ else {
                 } catch { $cocUpToDate = $false }
             }
             if ($cocUpToDate) {
-                Write-Host "SSCE COC write-back: review copy already current for $($approved.Count) approved request(s) - nothing rewritten" -ForegroundColor Green
+                Write-Host "CoC tracker: $cocOutPath already current ($($approved.Count) approved request(s), extract $extractStamp) - nothing rewritten" -ForegroundColor Green
             }
             else {
             $cocHtml = [System.IO.File]::ReadAllText($cocDashboardPath)
@@ -3950,13 +4315,20 @@ else {
             # <script id="coc-data" type="application/json"> {cFields, components[][]...}, not the old APP_DATA
             # folder tree. Shared-capital rows are the components whose vessel is not fleet (vessels[][4] = 0).
             # Match on asset + OEM part + serial as before; set avail = 'NO' and assignedTo = <siteUnit> (the
-            # tracker's own column names, 'YES'/'NO'/''). The page escapes '<' as \u003c inside the block, so the
+            # tracker's own column names, 'YES'/'NO'/''). The page escapes '<' as < inside the block, so the
             # rewritten JSON does the same. The older APP_DATA shape is no longer read.
             $cocDataMatch = [regex]::Match($cocHtml, '(<script id="coc-data" type="application/json">)([\s\S]*?)(</script>)')
             if (-not $cocDataMatch.Success) {
                 throw "could not find the embedded coc-data block in $cocDashboardPath - is this the rebuilt tracker (REV6 line, 11 Oct 2026 or later)?"
             }
             $cocData = ConvertFrom-ReportJsonText -Raw $cocDataMatch.Groups[2].Value
+            if ($cocExtract) {
+                # v2.92: the whole data block from the extract, with the page's own refs tables.
+                $cocSourceName = '{0} ({1})' -f $cocExtract.Name, $cocExtract.LastWriteTime.ToString('dd MMM yyyy HH:mm')
+                $cocBuilt = Convert-CocExtract -Path $cocExtract.FullName -Refs (Get-Prop $cocData 'refs') -SourceName $cocSourceName
+                if ($cocBuilt) { $cocData = $cocBuilt }
+                else { Write-Warning "CoC extract $($cocExtract.Name) could not be used - the tracker keeps the template's data this run" }
+            }
             $cFields = @(); foreach ($f in (Get-Prop $cocData 'cFields')) { $cFields += [string]$f }
             $ixAsset = [array]::IndexOf($cFields, 'asset'); $ixOem = [array]::IndexOf($cFields, 'oem'); $ixSerial = [array]::IndexOf($cFields, 'serial')
             $ixAvail = [array]::IndexOf($cFields, 'avail'); $ixAssigned = [array]::IndexOf($cFields, 'assignedTo'); $ixVessel = [array]::IndexOf($cFields, 'v')
@@ -3990,20 +4362,27 @@ else {
                 $appliedCount++
             }
 
-            $newCocData = (ConvertTo-ReportJson $cocData).Replace('<', '\u003c')
+            $newCocData = (ConvertTo-ReportJson $cocData).Replace('<', '<')
             $newCocHtml = $cocHtml.Substring(0, $cocDataMatch.Index) + $cocDataMatch.Groups[1].Value + $newCocData + $cocDataMatch.Groups[3].Value + $cocHtml.Substring($cocDataMatch.Index + $cocDataMatch.Length)
             # The stamp goes straight after <head> (or at the very top when there is
             # no head tag); a comment there is harmless to the page.
             $headTag = [regex]::Match($newCocHtml, '<head[^>]*>', 'IgnoreCase')
             if ($headTag.Success) { $newCocHtml = $newCocHtml.Insert($headTag.Index + $headTag.Length, $cocStamp) } else { $newCocHtml = $cocStamp + $newCocHtml }
-            [System.IO.File]::WriteAllText($cocReviewPath, $newCocHtml, (New-Object System.Text.UTF8Encoding($false)))
-            Write-Host "SSCE COC write-back: $appliedCount item(s) marked unavailable in review copy $cocReviewPath" -ForegroundColor Green
+            # Written beside the target and swapped in, so a rig opening the page mid-write never gets half a file.
+            $cocOutDir = Split-Path -Parent $cocOutPath
+            if ($cocOutDir -and -not (Test-Path -Path $cocOutDir)) { New-Item -ItemType Directory -Path $cocOutDir -Force | Out-Null }
+            $cocTmpPath = $cocOutPath + '.tmp'
+            [System.IO.File]::WriteAllText($cocTmpPath, $newCocHtml, (New-Object System.Text.UTF8Encoding($false)))
+            Move-Item -Path $cocTmpPath -Destination $cocOutPath -Force
+            $cocWhat = "$appliedCount approved SSCE item(s) marked unavailable"
+            if ($cocExtract -and $cocBuilt) { $cocWhat = "data rebuilt from $($cocExtract.Name) ($($cocExtract.LastWriteTime.ToString('dd MMM yyyy HH:mm'))), $cocWhat" }
+            Write-Host "CoC tracker written: $cocOutPath - $cocWhat" -ForegroundColor Green
             }
         }
     }
     catch {
         $scanRetryNeeded = $true
-        Write-Warning "SSCE COC write-back failed (scan unaffected): $($_.Exception.Message)"
+        Write-Warning "CoC tracker rebuild / SSCE write-back failed (scan unaffected): $($_.Exception.Message)"
     }
 }
 
