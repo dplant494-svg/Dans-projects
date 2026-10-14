@@ -104,3 +104,35 @@ connect rows with one status strip when the page is served over http and `data/i
 - amber when the feed is stale (the existing stale-feed rule), so a crew sees it before planning on old work orders;
 - the folder pickers hidden on the server, behind a small "Connect folders manually" link for a PC working off the
   shares; on `file://` the page stays as it is today.
+
+## Added 14 Oct, later: the review stages inside the tool (REV 14), from Dan
+
+Dan reviewed REV 13 against the review loop proven today and found it has no way to send a plan into the loop and no
+hold points between the stages: the outputs are downloads (Download Copy, Scope Freeze Document, Export in SSORT keys,
+Designation). We know posting is REV 14; this is the shape it needs so the tool and the loop match. Five buttons, two
+holds, one read-back.
+
+**Buttons, on the plan header, in this order:**
+
+1. **Post for review.** Posts `_DL1_plan_` (scope version n). Enabled once the Scope Challenge is answered and the
+   schedule is built. Each press after a change posts the next scope version.
+2. **Freeze scope.** Posts the plan with `status: "frozen"`. **Hold 1:** disabled until `plans-open.json` shows this
+   plan and scope version as `verified` (every required reviewer verified). An override exists for the planner, with a
+   typed reason that travels in the post (`frozenOverride: { by, reason }`) so the dashboard shows it in red.
+3. **Post progress.** Posts `_DL1_plan-progress_` (12-hourly or on demand). **Hold 2:** disabled until the scope is
+   frozen, so nothing executes against an unverified scope.
+4. **Post close-out.** Posts `_DL1_plan-closeout_` with `edocsRef`. Enabled once every executed task is complete or
+   deferred with a reason.
+5. **Export** stays as it is for the files that are read by other tools (designation, SSORT keys), but the designation
+   also posts with the first plan, as 2.4 says.
+
+**What a change does:** editing the scope after Post for review marks the plan "changed since v n" and re-enables Post
+for review for v n+1; the reviews start again on the new version (the scanner already keys reviews by scope version).
+Editing after Freeze is not allowed except through break-in work, which is a progress post, not a scope change.
+
+**Read-back:** the header shows the state from `plans-open.json` (awaiting / changes requested with the comments /
+verified / frozen / closed), "n of m verified" and who is outstanding, refreshed on Reload Everything and on each
+post. A "Changes requested" state shows the reviewer's comment beside the Post for review button.
+
+**Why it matters:** the notifications and the reviewers' Plans tab are live today. Without the holds a planner can freeze
+and execute a plan nobody has verified, and the loop records it as if the review never happened.
