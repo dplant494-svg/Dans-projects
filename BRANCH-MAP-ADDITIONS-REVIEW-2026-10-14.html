@@ -1,0 +1,388 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Branch Map additions review</title>
+<style>
+body{font-family:Segoe UI,Arial,sans-serif;margin:0;background:#f4f6fa;color:#14213d}
+header{background:#14213d;color:#fff;padding:14px 20px} header h1{margin:0;font-size:18px} header p{margin:4px 0 0;font-size:13px;color:#cfd8e6}
+main{padding:16px 20px} .bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:14px}
+button{background:#0e7c86;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-size:14px;cursor:pointer} button.alt{background:#3a4a63}
+table{border-collapse:collapse;width:100%;background:#fff;font-size:13px} th,td{border:1px solid #d5dce6;padding:6px 8px;vertical-align:top;text-align:left}
+th{background:#eef2f7;position:sticky;top:0} .num{text-align:right} .muted{color:#5b6b82} .small{font-size:12px}
+.tick label{display:block;white-space:nowrap} .conf{font-weight:600} tr.c-medium .conf{color:#b26a00} tr.c-low .conf{color:#c8102e}
+input.note{width:100%;box-sizing:border-box;padding:4px} #out{width:100%;height:160px;font-family:Consolas,monospace;font-size:12px;margin-top:12px}
+.count{font-weight:600}
+</style></head><body>
+<header><h1>Branch &amp; Sequence Map: 36 proposed rows for Dan's review</h1><p>From Argo Navis (Lee), 13 Oct 2026. Nothing in the Branch Map is changed by this page. Accept is pre-ticked; change the ones you disagree with, add a note, then press Copy decisions and paste the text into a message. 30 High, 4 Medium, 2 Low confidence.</p></header>
+<main>
+<div class="bar"><span class="count" id="cnt"></span><button onclick="copyOut()">Copy decisions</button><button class="alt" onclick="dl()">Download CSV</button><label><input type="checkbox" id="onlyChanged" onchange="render()"> Show only Change / Not this in the text</label></div>
+<table><thead><tr><th>Decision</th><th>Job plan</th><th>Event</th><th>Branch / Parallel group</th><th>Seq rank</th><th>Predecessors</th><th>Confidence and basis</th><th>Where it is used</th><th>Your note</th></tr></thead>
+<tbody><tr data-jp="0900-UB90122" class="c-high">
+<td class="tick"><label><input type="radio" name="d0" value="accept" checked> Accept</label><label><input type="radio" name="d0" value="change"> Change</label><label><input type="radio" name="d0" value="reject"> Not this</label></td>
+<td><b>0900-UB90122</b><br><span class="muted">12M NXT BOP BODY INSPECTION</span></td>
+<td></td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">79</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 73% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB90021 (33% match)</span><br><span class="muted small">Modelled on 0900-UB90021 (60M RAM BODY INSPECTION)</span></td>
+<td class="small">14 WOs<br>West Tellus; West Jupiter<br><span class="muted">331.BOP.360, 331.BOP.370, 331.BOP.340, 331.BOP.350, 331.BOP.310, 331.BOP.330, 331.BOP.320</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UB90129" class="c-high">
+<td class="tick"><label><input type="radio" name="d1" value="accept" checked> Accept</label><label><input type="radio" name="d1" value="change"> Change</label><label><input type="radio" name="d1" value="reject"> Not this</label></td>
+<td><b>0900-UB90129</b><br><span class="muted">BWM RAM BLOCKS INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">33</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 91% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB0214 (67% match)</span><br><span class="muted small">Modelled on 0900-UB0214 (12M PIPE RAM BLOCK INSPECTION)</span></td>
+<td class="small">14 WOs<br>West Jupiter<br><span class="muted">331.BOP.314, 331.BOP.324, 331.BOP.334, 331.BOP.344, 331.BOP.354, 331.BOP.364, 331.BOP.375, 331.BOP.315, 331.BOP.335, 331.BOP.325, 331.BOP.345, 331.BOP.355, 331.BOP.365, 331.BOP.374</span><br>Maximo 3 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-IF0003" class="c-high">
+<td class="tick"><label><input type="radio" name="d2" value="accept" checked> Accept</label><label><input type="radio" name="d2" value="change"> Change</label><label><input type="radio" name="d2" value="reject"> Not this</label></td>
+<td><b>0900-IF0003</b><br><span class="muted">12M LOCAL CONTROL PANEL INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Utility Systems</span></td>
+<td class="num">1</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 89% of mapped work there is Offline Ancillary / Utility Systems; nearest plan by description 0900-IU0001 (0% match)</span><br><span class="muted small">Modelled on 0900-IU0001 (12M TEST MANDREL FOR BOP - NDE INSPECTION)</span></td>
+<td class="small">13 WOs<br>West Polaris; West Vela; West Neptune; West Jupiter; West Carina; Sevan Louisiana<br><span class="muted">339.MPD.500, 339.MPD.1250, 339.MPD.1210, 339.MPD.1240, 337.MWC</span><br>Maximo 1.5 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-EE90061" class="c-low">
+<td class="tick"><label><input type="radio" name="d3" value="accept" checked> Accept</label><label><input type="radio" name="d3" value="change"> Change</label><label><input type="radio" name="d3" value="reject"> Not this</label></td>
+<td><b>0900-EE90061</b><br><span class="muted">12M GENERAL INSTRUMENTATION ELECTRICAL INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Utility Systems</span></td>
+<td class="num">1</td>
+<td></td>
+<td><span class="conf">Low</span><br><span class="muted small">same location: 40% of mapped work there is Offline Ancillary / Utility Systems; nearest plan by description 0900-IU0001 (0% match)</span><br><span class="muted small">Modelled on 0900-IU0001 (12M TEST MANDREL FOR BOP - NDE INSPECTION)</span></td>
+<td class="small">13 WOs<br>West Polaris; West Capella; West Gemini; West Neptune; West Jupiter; West Carina<br><span class="muted">339.MPD.500, 339.MPD.1100, 336.MGS, 337.MWC</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-EF90051" class="c-high">
+<td class="tick"><label><input type="radio" name="d4" value="accept" checked> Accept</label><label><input type="radio" name="d4" value="change"> Change</label><label><input type="radio" name="d4" value="reject"> Not this</label></td>
+<td><b>0900-EF90051</b><br><span class="muted">12M MOTOR AND STARTER ELECTRICAL INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Utility Systems</span></td>
+<td class="num">1</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 73% of mapped work there is Offline Ancillary / Utility Systems; nearest plan by description 0900-IU0001 (0% match)</span><br><span class="muted small">Modelled on 0900-IU0001 (12M TEST MANDREL FOR BOP - NDE INSPECTION)</span></td>
+<td class="small">13 WOs<br>West Gemini; West Vela; West Neptune; West Jupiter; West Carina<br><span class="muted">337.MWC, 339.MPD.1100, 332.BCSS.210, 332.BCSS.220, 332.BCSS.340, 332.BCSS.350, 332.BCSS.360</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-EE5006" class="c-high">
+<td class="tick"><label><input type="radio" name="d5" value="accept" checked> Accept</label><label><input type="radio" name="d5" value="change"> Change</label><label><input type="radio" name="d5" value="reject"> Not this</label></td>
+<td><b>0900-EE5006</b><br><span class="muted">12M INSTRUMENTATION ELECTRICAL INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Riser System</span></td>
+<td class="num">3</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Riser System; nearest plan by description 0900-BR0201 (0% match)</span><br><span class="muted small">Modelled on 0900-BR0201 (BWM NOV TENSION RING ASSEMBLY INSPECTION)</span></td>
+<td class="small">12 WOs<br>Sonangol Quenguela; West Auriga; West Vela; West Tellus; West Jupiter; West Saturn<br><span class="muted">335.RIS.650, 335.RIS.660</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UB90125" class="c-high">
+<td class="tick"><label><input type="radio" name="d6" value="accept" checked> Accept</label><label><input type="radio" name="d6" value="change"> Change</label><label><input type="radio" name="d6" value="reject"> Not this</label></td>
+<td><b>0900-UB90125</b><br><span class="muted">12M POSLOCK DOOR INSPECTION</span></td>
+<td></td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">28</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 91% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB0209 (25% match)</span><br><span class="muted small">Modelled on 0900-UB0209 (24M SHEAR RAM POSLOCK SERVICE)</span></td>
+<td class="small">12 WOs<br>West Tellus; West Jupiter<br><span class="muted">331.BOP.333, 331.BOP.313, 331.BOP.332, 331.BOP.312, 331.BOP.323, 331.BOP.322</span><br>Maximo 6 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-RG90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d7" value="accept" checked> Accept</label><label><input type="radio" name="d7" value="change"> Change</label><label><input type="radio" name="d7" value="reject"> Not this</label></td>
+<td><b>0900-RG90021</b><br><span class="muted">BWM FAILSAFE VALVES INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">2</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-RG0201 (14% match)</span><br><span class="muted small">Modelled on 0900-RG0201 (BWM HYDRAULIC SPRING ASSIST HB GATE VALVE INSPECTION)</span></td>
+<td class="small">9 WOs<br>West Jupiter<br><span class="muted">331.BOP.510, 331.LMRP.320, 331.LMRP.330, 335.RIS.510, 331.BOP.560, 331.BOP.550, 331.BOP.530, 331.LMRP.310, 331.BOP.540</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UC90022" class="c-high">
+<td class="tick"><label><input type="radio" name="d8" value="accept" checked> Accept</label><label><input type="radio" name="d8" value="change"> Change</label><label><input type="radio" name="d8" value="reject"> Not this</label></td>
+<td><b>0900-UC90022</b><br><span class="muted">12M C&amp;K MINI CONNECTORS INSPECTION</span></td>
+<td></td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">90</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UC0117 (40% match)</span><br><span class="muted small">Modelled on 0900-UC0117 (30M MINI COLLET CONNECTOR OVERHAUL)</span></td>
+<td class="small">8 WOs<br>West Tellus; West Jupiter<br><span class="muted">331.BOP.120, 331.LMRP.420, 331.LMRP.410, 331.BOP.130</span><br>Maximo 4 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UB90126" class="c-medium">
+<td class="tick"><label><input type="radio" name="d9" value="accept" checked> Accept</label><label><input type="radio" name="d9" value="change"> Change</label><label><input type="radio" name="d9" value="reject"> Not this</label></td>
+<td><b>0900-UB90126</b><br><span class="muted">BWM ULTRALOCK DOOR INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">80</td>
+<td></td>
+<td><span class="conf">Medium</span><br><span class="muted small">same location: 57% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB90128 (67% match)</span><br><span class="muted small">Modelled on 0900-UB90128 (12M ULTRALOCK DOOR FUNCTION &amp; CHAMBER TEST)</span></td>
+<td class="small">8 WOs<br>West Jupiter<br><span class="muted">331.BOP.363, 331.BOP.352, 331.BOP.373, 331.BOP.362, 331.BOP.342, 331.BOP.353, 331.BOP.372, 331.BOP.343</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UB90121" class="c-high">
+<td class="tick"><label><input type="radio" name="d10" value="accept" checked> Accept</label><label><input type="radio" name="d10" value="change"> Change</label><label><input type="radio" name="d10" value="reject"> Not this</label></td>
+<td><b>0900-UB90121</b><br><span class="muted">BWM NXT BOP BODY INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">79</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 73% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB90021 (33% match)</span><br><span class="muted small">Modelled on 0900-UB90021 (60M RAM BODY INSPECTION)</span></td>
+<td class="small">7 WOs<br>West Jupiter<br><span class="muted">331.BOP.310, 331.BOP.320, 331.BOP.330, 331.BOP.340, 331.BOP.350, 331.BOP.360, 331.BOP.370</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UB90022" class="c-high">
+<td class="tick"><label><input type="radio" name="d11" value="accept" checked> Accept</label><label><input type="radio" name="d11" value="change"> Change</label><label><input type="radio" name="d11" value="reject"> Not this</label></td>
+<td><b>0900-UB90022</b><br><span class="muted">12M RAM BLOCKS NDE INSPECTION</span></td>
+<td></td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">81</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 79% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB90220 (60% match)</span><br><span class="muted small">Modelled on 0900-UB90220 (12M LFS-5 SHEAR RAM BLOCKS NDE INSPECTION)</span></td>
+<td class="small">6 WOs<br>West Tellus<br><span class="muted">331.BOP.335, 331.BOP.314, 331.BOP.334, 331.BOP.315, 331.BOP.324, 331.BOP.325</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UB90124" class="c-high">
+<td class="tick"><label><input type="radio" name="d12" value="accept" checked> Accept</label><label><input type="radio" name="d12" value="change"> Change</label><label><input type="radio" name="d12" value="reject"> Not this</label></td>
+<td><b>0900-UB90124</b><br><span class="muted">BWM POSLOCK DOOR INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">28</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 91% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UB0209 (25% match)</span><br><span class="muted small">Modelled on 0900-UB0209 (24M SHEAR RAM POSLOCK SERVICE)</span></td>
+<td class="small">6 WOs<br>West Jupiter<br><span class="muted">331.BOP.312, 331.BOP.313, 331.BOP.322, 331.BOP.332, 331.BOP.333, 331.BOP.323</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-IA5000" class="c-medium">
+<td class="tick"><label><input type="radio" name="d13" value="accept" checked> Accept</label><label><input type="radio" name="d13" value="change"> Change</label><label><input type="radio" name="d13" value="reject"> Not this</label></td>
+<td><b>0900-IA5000</b><br><span class="muted">12M PLC ELECTRICAL INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">MPD</span></td>
+<td class="num">21</td>
+<td></td>
+<td><span class="conf">Medium</span><br><span class="muted small">same location: 55% of mapped work there is Offline Ancillary / MPD; nearest plan by description 0900-CV85001 (0% match)</span><br><span class="muted small">Modelled on 0900-CV85001 (12M GLYCOL INJECTION UNIT ELECTRICAL INSPECTION)</span></td>
+<td class="small">5 WOs<br>West Capella; West Neptune; West Saturn; West Carina<br><span class="muted">339.MPD.1100, 314.WLT</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UA90022" class="c-high">
+<td class="tick"><label><input type="radio" name="d14" value="accept" checked> Accept</label><label><input type="radio" name="d14" value="change"> Change</label><label><input type="radio" name="d14" value="reject"> Not this</label></td>
+<td><b>0900-UA90022</b><br><span class="muted">12M SBOP INSPECTION</span></td>
+<td></td>
+<td>LMRP<br><span class="muted">Annulars</span></td>
+<td class="num">6</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is LMRP / Annulars; nearest plan by description 0900-UA0201 (0% match)</span><br><span class="muted small">Modelled on 0900-UA0201 (BWM ANNULAR BOP INSPECTION)</span></td>
+<td class="small">4 WOs<br>West Tellus; West Jupiter<br><span class="muted">331.LMRP.600, 331.LMRP.700</span><br>Maximo 4 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UC90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d15" value="accept" checked> Accept</label><label><input type="radio" name="d15" value="change"> Change</label><label><input type="radio" name="d15" value="reject"> Not this</label></td>
+<td><b>0900-UC90021</b><br><span class="muted">BWM C&amp;K MINI CONNECTORS INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">90</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-UC0117 (40% match)</span><br><span class="muted small">Modelled on 0900-UC0117 (30M MINI COLLET CONNECTOR OVERHAUL)</span></td>
+<td class="small">4 WOs<br>West Jupiter<br><span class="muted">331.BOP.120, 331.BOP.130, 331.LMRP.410, 331.LMRP.420</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-EB5000" class="c-high">
+<td class="tick"><label><input type="radio" name="d16" value="accept" checked> Accept</label><label><input type="radio" name="d16" value="change"> Change</label><label><input type="radio" name="d16" value="reject"> Not this</label></td>
+<td><b>0900-EB5000</b><br><span class="muted">12M BATTERY CHARGER / UPS ELECTRICAL INSPECTION</span></td>
+<td></td>
+<td>Controls<br><span class="muted">Control System</span></td>
+<td class="num">92</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Controls / Control System; nearest plan by description 0900-EB0101 (33% match)</span><br><span class="muted small">Modelled on 0900-EB0101 (BWM BOP UPS ELECTRICAL INSPECTION)</span></td>
+<td class="small">4 WOs<br>West Jupiter; West Carina<br><span class="muted">332.BCSS.811, 332.BCSS.812</span><br>Maximo 1.5 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-RH90121" class="c-high">
+<td class="tick"><label><input type="radio" name="d17" value="accept" checked> Accept</label><label><input type="radio" name="d17" value="change"> Change</label><label><input type="radio" name="d17" value="reject"> Not this</label></td>
+<td><b>0900-RH90121</b><br><span class="muted">BWM SPOOLS &amp; BLOCKS INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">6</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 84% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-RH0202 (25% match)</span><br><span class="muted small">Modelled on 0900-RH0202 (BWM BOP SUBSEA CHOKE AND KILL SPOOL INSPECTION)</span></td>
+<td class="small">3 WOs<br>West Jupiter<br><span class="muted">331.BOP.610, 331.BOP.620, 331.LMRP.500</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-EB90055" class="c-high">
+<td class="tick"><label><input type="radio" name="d18" value="accept" checked> Accept</label><label><input type="radio" name="d18" value="change"> Change</label><label><input type="radio" name="d18" value="reject"> Not this</label></td>
+<td><b>0900-EB90055</b><br><span class="muted">60M UPS ELECTRICAL INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">MPD</span></td>
+<td class="num">21</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / MPD; nearest plan by description 0900-CV85001 (0% match)</span><br><span class="muted small">Modelled on 0900-CV85001 (12M GLYCOL INJECTION UNIT ELECTRICAL INSPECTION)</span></td>
+<td class="small">2 WOs<br>Sonangol Quenguela; West Carina<br><span class="muted">332.BCSS.810, 339.MPD.1220</span><br>Maximo 2.5 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-IA90061" class="c-medium">
+<td class="tick"><label><input type="radio" name="d19" value="accept" checked> Accept</label><label><input type="radio" name="d19" value="change"> Change</label><label><input type="radio" name="d19" value="reject"> Not this</label></td>
+<td><b>0900-IA90061</b><br><span class="muted">6M INSTRUMENT (PLC / PC) CABINET INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">MPD</span></td>
+<td class="num">21</td>
+<td></td>
+<td><span class="conf">Medium</span><br><span class="muted small">same equipment group: 87% of mapped work there is Offline Ancillary / MPD; nearest plan by description 0900-CV85001 (0% match)</span><br><span class="muted small">Modelled on 0900-CV85001 (12M GLYCOL INJECTION UNIT ELECTRICAL INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Polaris; West Vela<br><span class="muted">339.MPD.1230</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-CV90121" class="c-high">
+<td class="tick"><label><input type="radio" name="d20" value="accept" checked> Accept</label><label><input type="radio" name="d20" value="change"> Change</label><label><input type="radio" name="d20" value="reject"> Not this</label></td>
+<td><b>0900-CV90121</b><br><span class="muted">BWM MPD UMBILICAL INSPECTION</span></td>
+<td>BWM</td>
+<td>Offline Ancillary<br><span class="muted">MPD</span></td>
+<td class="num">14</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / MPD; nearest plan by description 0900-CV0032 (67% match)</span><br><span class="muted small">Modelled on 0900-CV0032 (BWM MPD UMBILICAL REEL INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Polaris; West Neptune<br><span class="muted">339.MPD.410</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-BE90024" class="c-high">
+<td class="tick"><label><input type="radio" name="d21" value="accept" checked> Accept</label><label><input type="radio" name="d21" value="change"> Change</label><label><input type="radio" name="d21" value="reject"> Not this</label></td>
+<td><b>0900-BE90024</b><br><span class="muted">BWM DIVERTER ASSEMBLY INSPECTION</span></td>
+<td>BWM</td>
+<td>Offline Ancillary<br><span class="muted">Diverter</span></td>
+<td class="num">3</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 71% of mapped work there is Offline Ancillary / Diverter; nearest plan by description 0900-BE0206 (100% match)</span><br><span class="muted small">Modelled on 0900-BE0206 (12M DIVERTER ASSEMBLY (21 1/4&quot; Shaffer) SERVICE)</span></td>
+<td class="small">2 WOs<br>West Capella; West Tellus<br><span class="muted">334.DIV.300</span><br>Maximo 4 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-EB5002" class="c-high">
+<td class="tick"><label><input type="radio" name="d22" value="accept" checked> Accept</label><label><input type="radio" name="d22" value="change"> Change</label><label><input type="radio" name="d22" value="reject"> Not this</label></td>
+<td><b>0900-EB5002</b><br><span class="muted">12M BATTERY CAPACITY/DRAW DOWN ELECTRICAL TEST</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">MPD</span></td>
+<td class="num">21</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / MPD; nearest plan by description 0900-CV85001 (0% match)</span><br><span class="muted small">Modelled on 0900-CV85001 (12M GLYCOL INJECTION UNIT ELECTRICAL INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Auriga; West Vela<br><span class="muted">339.MPD.1220</span><br>Maximo 3 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UR90122" class="c-high">
+<td class="tick"><label><input type="radio" name="d23" value="accept" checked> Accept</label><label><input type="radio" name="d23" value="change"> Change</label><label><input type="radio" name="d23" value="reject"> Not this</label></td>
+<td><b>0900-UR90122</b><br><span class="muted">12M RISER ADAPTER INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Riser System</span></td>
+<td class="num">37</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Riser System; nearest plan by description 0900-UR0202 (100% match)</span><br><span class="muted small">Modelled on 0900-UR0202 (BWM RISER ADAPTER INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Tellus; West Jupiter<br><span class="muted">335.RIS.410</span><br>Maximo 4 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-DP90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d24" value="accept" checked> Accept</label><label><input type="radio" name="d24" value="change"> Change</label><label><input type="radio" name="d24" value="reject"> Not this</label></td>
+<td><b>0900-DP90021</b><br><span class="muted">BWM NOV SHAFFER HYDRAULIC RISER RUNNING TOOL INSPECTION</span></td>
+<td>BWM</td>
+<td>Offline Ancillary<br><span class="muted">Riser System</span></td>
+<td class="num">74</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Riser System; nearest plan by description 0900-DP0205 (100% match)</span><br><span class="muted small">Modelled on 0900-DP0205 (12M NOV SHAFFER HYDRAULIC RISER RUNNING TOOL INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Tellus<br><span class="muted">335.RIS.650, 335.RIS.660</span><br>Maximo 3 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-DP90022" class="c-high">
+<td class="tick"><label><input type="radio" name="d25" value="accept" checked> Accept</label><label><input type="radio" name="d25" value="change"> Change</label><label><input type="radio" name="d25" value="reject"> Not this</label></td>
+<td><b>0900-DP90022</b><br><span class="muted">12M NOV SHAFFER HYDRAULIC RISER RUNNING TOOL NDT</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Riser System</span></td>
+<td class="num">74</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Riser System; nearest plan by description 0900-DP0205 (80% match)</span><br><span class="muted small">Modelled on 0900-DP0205 (12M NOV SHAFFER HYDRAULIC RISER RUNNING TOOL INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Tellus<br><span class="muted">335.RIS.650, 335.RIS.660</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UA90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d26" value="accept" checked> Accept</label><label><input type="radio" name="d26" value="change"> Change</label><label><input type="radio" name="d26" value="reject"> Not this</label></td>
+<td><b>0900-UA90021</b><br><span class="muted">BWM SBOP INSPECTION</span></td>
+<td>BWM</td>
+<td>LMRP<br><span class="muted">Annulars</span></td>
+<td class="num">6</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is LMRP / Annulars; nearest plan by description 0900-UA0201 (0% match)</span><br><span class="muted small">Modelled on 0900-UA0201 (BWM ANNULAR BOP INSPECTION)</span></td>
+<td class="small">2 WOs<br>West Jupiter<br><span class="muted">331.LMRP.600, 331.LMRP.700</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-RR90171" class="c-medium">
+<td class="tick"><label><input type="radio" name="d27" value="accept" checked> Accept</label><label><input type="radio" name="d27" value="change"> Change</label><label><input type="radio" name="d27" value="reject"> Not this</label></td>
+<td><b>0900-RR90171</b><br><span class="muted">12M BX TITAN VALVE MECHANICAL SERVICE</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Choke and Kill</span></td>
+<td class="num">25</td>
+<td></td>
+<td><span class="conf">Medium</span><br><span class="muted small">same location: 53% of mapped work there is Offline Ancillary / Choke and Kill; nearest plan by description 0900-RG0802 (20% match)</span><br><span class="muted small">Modelled on 0900-RG0802 (60M CHOKE VALVES  OVERHAUL)</span></td>
+<td class="small">1 WOs<br>Sonangol Quenguela<br><span class="muted">336.CK</span><br>Maximo 12 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-XX90021" class="c-low">
+<td class="tick"><label><input type="radio" name="d28" value="accept" checked> Accept</label><label><input type="radio" name="d28" value="change"> Change</label><label><input type="radio" name="d28" value="reject"> Not this</label></td>
+<td><b>0900-XX90021</b><br><span class="muted">OIL SAMPLING - 3.PARTY ANALYSIS ONSHORE</span></td>
+<td></td>
+<td>Controls<br><span class="muted">Control System</span></td>
+<td class="num">135</td>
+<td></td>
+<td><span class="conf">Low</span><br><span class="muted small">no mapped plan shares its locations - placed by description only; review</span><br><span class="muted small">Modelled on 0900-XX0101 (1M BOP FLUID SAMPLING INSPECTION)</span></td>
+<td class="small">1 WOs<br>West Elara<br><span class="muted">314.TEN</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-WW90022" class="c-high">
+<td class="tick"><label><input type="radio" name="d29" value="accept" checked> Accept</label><label><input type="radio" name="d29" value="change"> Change</label><label><input type="radio" name="d29" value="reject"> Not this</label></td>
+<td><b>0900-WW90022</b><br><span class="muted">12M NOV SHAFFER HYD. SPIDER GIMBAL AND CONTROL PANEL INSPECTION</span></td>
+<td></td>
+<td>Controls<br><span class="muted">Control System</span></td>
+<td class="num">133</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Controls / Control System; nearest plan by description 0900-WW0202 (100% match)</span><br><span class="muted small">Modelled on 0900-WW0202 (12M NOV SHAFFER HYD. SPIDER GIMBAL AND CONTROL PANEL SERVICE)</span></td>
+<td class="small">1 WOs<br>West Tellus<br><span class="muted">335.RIS.600</span><br>Maximo 6 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-BE90022" class="c-high">
+<td class="tick"><label><input type="radio" name="d30" value="accept" checked> Accept</label><label><input type="radio" name="d30" value="change"> Change</label><label><input type="radio" name="d30" value="reject"> Not this</label></td>
+<td><b>0900-BE90022</b><br><span class="muted">12M DIVERTER HOUSING INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Diverter</span></td>
+<td class="num">23</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Diverter; nearest plan by description 0900-BE0203 (100% match)</span><br><span class="muted small">Modelled on 0900-BE0203 (BWM DIVERTER HOUSING INSPECTION)</span></td>
+<td class="small">1 WOs<br>West Tellus<br><span class="muted">334.DIV.200</span><br>Maximo 4 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-BE90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d31" value="accept" checked> Accept</label><label><input type="radio" name="d31" value="change"> Change</label><label><input type="radio" name="d31" value="reject"> Not this</label></td>
+<td><b>0900-BE90021</b><br><span class="muted">BWM DIVERTER HOUSING INSPECTION</span></td>
+<td>BWM</td>
+<td>Offline Ancillary<br><span class="muted">Diverter</span></td>
+<td class="num">23</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Diverter; nearest plan by description 0900-BE0203 (100% match)</span><br><span class="muted small">Modelled on 0900-BE0203 (BWM DIVERTER HOUSING INSPECTION)</span></td>
+<td class="small">1 WOs<br>West Tellus<br><span class="muted">334.DIV.200</span><br>Maximo 4 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-WW90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d32" value="accept" checked> Accept</label><label><input type="radio" name="d32" value="change"> Change</label><label><input type="radio" name="d32" value="reject"> Not this</label></td>
+<td><b>0900-WW90021</b><br><span class="muted">BWM NOV SHAFFER HYD. SPIDER GIMBAL AND CONTROL PANEL INSPECTION</span></td>
+<td>BWM</td>
+<td>Controls<br><span class="muted">Control System</span></td>
+<td class="num">133</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Controls / Control System; nearest plan by description 0900-WW0202 (100% match)</span><br><span class="muted small">Modelled on 0900-WW0202 (12M NOV SHAFFER HYD. SPIDER GIMBAL AND CONTROL PANEL SERVICE)</span></td>
+<td class="small">1 WOs<br>West Tellus<br><span class="muted">335.RIS.600</span><br>Maximo 3 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UE90021" class="c-high">
+<td class="tick"><label><input type="radio" name="d33" value="accept" checked> Accept</label><label><input type="radio" name="d33" value="change"> Change</label><label><input type="radio" name="d33" value="reject"> Not this</label></td>
+<td><b>0900-UE90021</b><br><span class="muted">BWM BOP MANDREL INSPECTION</span></td>
+<td>BWM</td>
+<td>Lower BOP<br><span class="muted">Lower BOP General</span></td>
+<td class="num">2</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Lower BOP / Lower BOP General; nearest plan by description 0900-RG0201 (0% match)</span><br><span class="muted small">Modelled on 0900-RG0201 (BWM HYDRAULIC SPRING ASSIST HB GATE VALVE INSPECTION)</span></td>
+<td class="small">1 WOs<br>West Jupiter<br><span class="muted">331.BOP.110</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-UR90121" class="c-high">
+<td class="tick"><label><input type="radio" name="d34" value="accept" checked> Accept</label><label><input type="radio" name="d34" value="change"> Change</label><label><input type="radio" name="d34" value="reject"> Not this</label></td>
+<td><b>0900-UR90121</b><br><span class="muted">BWM RISER ADAPTER INSPECTION</span></td>
+<td>BWM</td>
+<td>Offline Ancillary<br><span class="muted">Riser System</span></td>
+<td class="num">37</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 100% of mapped work there is Offline Ancillary / Riser System; nearest plan by description 0900-UR0202 (100% match)</span><br><span class="muted small">Modelled on 0900-UR0202 (BWM RISER ADAPTER INSPECTION)</span></td>
+<td class="small">1 WOs<br>West Jupiter<br><span class="muted">335.RIS.410</span><br>Maximo 1 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr><tr data-jp="0900-CU0004" class="c-high">
+<td class="tick"><label><input type="radio" name="d35" value="accept" checked> Accept</label><label><input type="radio" name="d35" value="change"> Change</label><label><input type="radio" name="d35" value="reject"> Not this</label></td>
+<td><b>0900-CU0004</b><br><span class="muted">1M OXYGEN MONITOR INSPECTION</span></td>
+<td></td>
+<td>Offline Ancillary<br><span class="muted">Utility Systems</span></td>
+<td class="num">1</td>
+<td></td>
+<td><span class="conf">High</span><br><span class="muted small">same location: 92% of mapped work there is Offline Ancillary / Utility Systems; nearest plan by description 0900-IU0001 (0% match)</span><br><span class="muted small">Modelled on 0900-IU0001 (12M TEST MANDREL FOR BOP - NDE INSPECTION)</span></td>
+<td class="small">1 WOs<br>West Saturn<br><span class="muted">337.MWC</span><br>Maximo 2 h</td>
+<td><input type="text" class="note" placeholder="branch / group / rank if changed, or why not"></td>
+</tr></tbody></table>
+<textarea id="out" readonly></textarea>
+</main>
+<script>
+function rowsOut(){const out=[];document.querySelectorAll('tbody tr').forEach(tr=>{const d=tr.querySelector('input[type=radio]:checked').value;const n=tr.querySelector('input.note').value.trim();out.push({jp:tr.dataset.jp,decision:d,note:n});});return out;}
+function render(){const only=document.getElementById('onlyChanged').checked;const r=rowsOut();const a=r.filter(x=>x.decision==='accept').length;document.getElementById('cnt').textContent=a+' accept, '+r.filter(x=>x.decision==='change').length+' change, '+r.filter(x=>x.decision==='reject').length+' not this';
+const lines=['Branch Map additions review, Dan Plant, '+new Date().toISOString().slice(0,10)];r.forEach(x=>{if(only&&x.decision==='accept')return;lines.push(x.jp+' | '+x.decision+(x.note?' | '+x.note:''));});document.getElementById('out').value=lines.join('\n');}
+function copyOut(){render();const t=document.getElementById('out');t.select();document.execCommand('copy');}
+function dl(){const r=rowsOut();const csv=['Job Plan,Decision,Note'].concat(r.map(x=>[x.jp,x.decision,'"'+x.note.replace(/"/g,'""')+'"'].join(','))).join('\n');const b=new Blob([csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Branch-Map-Additions-Decisions-'+new Date().toISOString().slice(0,10)+'.csv';a.click();}
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',render));render();
+</script></body></html>
