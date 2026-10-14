@@ -90,7 +90,9 @@
     (rv.required || []).forEach(function (r) { box.appendChild(reviewRow(r)); });
     if ((rv.others || []).length) { box.appendChild(mk('h4', '', 'Other reviews')); rv.others.forEach(function (r) { box.appendChild(reviewRow(r)); }); }
 
-    var secs = p.sections || [];
+    // v2.96: the fixed-sequence section (type 'fixed') and the daily log show only when they hold tasks; Lee's plans carry the
+    // rig's fixed sequence as milestones, so an always-empty 'Rig skeleton' tab was only a question.
+    var secs = (p.sections || []).filter(function (s) { return (s.tasks || []).length || (s.id !== 'skeleton' && s.id !== 'daily'); });
     if (secs.length) {
       var dt = mk('details'); dt.appendChild(mk('summary', '', 'Scope: ' + secs.map(function (s) { return s.name + ' ' + (s.tasks || []).length; }).join(' · ')));
       var bar = mk('div'); var tbl = mk('div');

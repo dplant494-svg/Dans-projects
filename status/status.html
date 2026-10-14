@@ -49,6 +49,7 @@
   .st-table td.st-num, .st-table th.st-num { text-align: center; }
   .st-table td:first-child { white-space: nowrap; }
   .st-table td.st-amber { background: #fdf1d8; color: #7a4b00; font-weight: 700; }
+  .st-table span.st-amber { background: #fdf1d8; color: #7a4b00; font-weight: 700; padding: 1px 5px; border-radius: 4px; }
   .st-table td.st-zero { color: var(--sd-text-light); }
   .st-table td.st-heat1 { background: #e6edf7; }
   .st-table td.st-heat2 { background: #b9cbe6; }
@@ -310,6 +311,7 @@
     // By rig. Amber where something is open with that rig; the training asset is tagged, not counted as a rig at sea.
     var cols = [
       ['rig', 'Rig', 'text'],
+      ['builds', 'Tool build last posted', 'builds'],
       ['lastRigVisitReport', 'Last rig visit report', 'text'],
       ['lastDailyChecks', 'Last daily checks', 'text'],
       ['checkRounds7', 'Check rounds, 7 days', 'checks'],
@@ -319,8 +321,10 @@
       ['prechargeOpen', 'Precharge not issued', 'open'],
       ['helpOpen', 'Help requests open', 'open']
     ];
+    var newestBuild = {};
+    (st.rigs || []).forEach(function (r) { (r.builds || []).forEach(function (b) { var n = parseInt(String(b.rev).replace(/\D+/g, ''), 10); if (!isNaN(n) && (!newestBuild[b.tool] || n > newestBuild[b.tool])) newestBuild[b.tool] = n; }); });
     var thead = mk('thead'), hr = mk('tr');
-    cols.forEach(function (c) { hr.appendChild(mk('th', c[2] === 'text' ? '' : 'st-num', c[1])); });
+    cols.forEach(function (c) { hr.appendChild(mk('th', (c[2] === 'text' || c[2] === 'builds') ? '' : 'st-num', c[1])); });
     thead.appendChild(hr); rigsT.appendChild(thead);
     var tb = mk('tbody');
     (st.rigs || []).forEach(function (r) {
@@ -330,6 +334,18 @@
         if (c[2] === 'text') {
           td = mk('td', '', v ? String(v) : '–');
           if (c[0] === 'rig' && r.training) td.appendChild(mk('span', 'st-tag', 'training'));
+        } else if (c[2] === 'builds') {
+          // v2.96: the build each tool last posted from; amber when a newer build of the same tool has posted from another rig.
+          td = mk('td', '', '');
+          var bl = Array.isArray(v) ? v : [];
+          if (!bl.length) td.textContent = '–';
+          bl.forEach(function (b, i) {
+            var n = parseInt(String(b.rev).replace(/\D+/g, ''), 10);
+            var old = newestBuild[b.tool] && !isNaN(n) && n < newestBuild[b.tool];
+            var sp = mk('span', old ? 'st-amber' : '', (i ? ' · ' : '') + b.rev);
+            sp.title = b.tool + ' build last posted ' + b.at + (old ? ' — a newer build (' + newestBuild[b.tool] + ') has posted from another rig' : '');
+            td.appendChild(sp);
+          });
         } else if (c[2] === 'checks') {
           var exp = r.checksExpected7 || 0;
           td = mk('td', 'st-num' + (exp && v < exp ? ' st-amber' : (!exp ? ' st-zero' : '')), exp ? (v + ' / ' + exp) : (v ? String(v) : '–'));

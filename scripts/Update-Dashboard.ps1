@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.95'
+$ScriptVersion = '2.96'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4593,7 +4593,7 @@ foreach ($planKey in ($dl1Plans.Keys | Sort-Object)) {
         $secs[$sec].Add([ordered]@{ taskId = [string]$t.taskId; name = [string]$t.description; type = [string]$t.type; testType = [string](Get-Prop $t 'testType'); woNum = [string]$t.woNum; status = [string]$t.status }) | Out-Null
     }
     $secList = New-Object System.Collections.Generic.List[object]
-    $secNames = @{ predeployment = 'Pre-Deployment'; 'surface-testing' = 'Surface Testing'; maintenance = 'Maintenance'; skeleton = 'Rig skeleton' }
+    $secNames = @{ predeployment = 'Pre-Deployment'; 'surface-testing' = 'Surface Testing'; maintenance = 'Maintenance'; skeleton = 'Fixed sequence' }
     foreach ($sk in @('predeployment','surface-testing','maintenance','skeleton')) { $secList.Add([ordered]@{ id = $sk; name = $secNames[$sk]; tasks = $secs[$sk].ToArray() }) | Out-Null }
     $secList.Add([ordered]@{ id = 'daily'; name = 'Daily log'; tasks = @() }) | Out-Null
     $planSections[$planKey] = $secList.ToArray()
@@ -5294,8 +5294,21 @@ try {
             if ($rt -eq 'CBM Inspection' -and $null -ne $d -and $d -ge $stToday.AddDays(-29)) { $cbm30++ }
         }
         $r7 = 0; if ($roundsByRig7.ContainsKey($rg)) { $r7 = $roundsByRig7[$rg].Count }
+        # v2.96: the tool build the rig last posted from (newest post's meta.rev, per tool family), so a rig left on an
+        # old build is visible here without opening a file (the West Saturn blank posts of 14 Oct were SSORT 163).
+        $bld = @{}
+        foreach ($r in $stReports) {
+            if ([string](Get-Prop $r 'rig') -ne $rg) { continue }
+            $rv = ([string](Get-Prop $r 'rev')).Trim(); if (-not $rv) { continue }
+            $fam = ($rv -split '\s+')[0].ToUpperInvariant()
+            $d = Get-StatusPostedDate $r; if ($null -eq $d) { continue }
+            if (-not $bld.ContainsKey($fam) -or $d -gt $bld[$fam].at) { $bld[$fam] = @{ rev = $rv; at = $d } }
+        }
+        $bldOut = New-Object System.Collections.Generic.List[object]
+        foreach ($fam in @($bld.Keys | Sort-Object)) { [void]$bldOut.Add([ordered]@{ tool = [string]$fam; rev = [string]$bld[$fam].rev; at = $bld[$fam].at.ToString('yyyy-MM-dd') }) }
         [void]$stRigs.Add([ordered]@{
             rig = [string]$rg
+            builds = $bldOut.ToArray()
             lastRigVisitReport = $(if ($lastVisit) { $lastVisit.ToString('yyyy-MM-dd') } else { '' })
             lastDailyChecks    = $(if ($lastCheckByRig.ContainsKey($rg)) { $lastCheckByRig[$rg].ToString('yyyy-MM-dd') } else { '' })
             checkRounds7       = $r7
