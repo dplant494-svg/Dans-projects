@@ -1,6 +1,6 @@
 const {chromium}=require('playwright');const fs=require('fs');const B=process.argv[2];
 const mk=c=>{let s=fs.readFileSync(B+'/mark-'+c+'.svg','utf8');return s.replace(/<svg[^>]*>/,'').replace('</svg>','');};
-const MARK=(x,y,w,c='reversed')=>`<svg x="${x}" y="${y}" width="${w}" height="${w*104/142}" viewBox="-2 -2 142 104">${mk(c)}</svg>`;
+const MARK=(x,y,w,c='reversed')=>`<svg x="${x}" y="${y}" width="${w}" height="${w*113/142}" viewBox="-2 -2 142 113">${mk(c)}</svg>`;
 const F="font-family:'Barlow Condensed';font-weight:800";
 const card=(title,sub,svg)=>`<div class="card"><svg viewBox="0 0 400 440" width="100%">${svg}</svg><div class="t">${title}</div><div class="s">${sub}</div></div>`;
 const hoodie=`

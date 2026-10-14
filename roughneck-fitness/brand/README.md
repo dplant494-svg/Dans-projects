@@ -1,6 +1,6 @@
 # Roughneck Fitness: brand files
 
-Logo redrawn 13 Oct 2026 from the brand board made in ChatGPT (the "R" built from diagonal stripes, with a safety-orange arrow). Every file here is vector with the lettering converted to shapes, so it prints, embroiders and scales cleanly without needing the font installed.
+Logo traced 14 Oct 2026 from the ChatGPT brand board, shape for shape (Dan preferred the original to the 13 Oct reinterpretation): the R with the X-crossing leg, the chevron stripe and the safety-orange arrow. Rebuild every file with `build-logo.py`. Every file here is vector with the lettering converted to shapes, so it prints, embroiders and scales cleanly without needing the font installed.
 
 ## Files
 | File | Use |
