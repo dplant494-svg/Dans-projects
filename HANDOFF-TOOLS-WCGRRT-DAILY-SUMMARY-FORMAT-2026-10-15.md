@@ -36,8 +36,9 @@ SACRED must produce the same report, and Lee must post every field it needs.
    - Schedule changes (break-in work **or delays**)
    - Quality / rig reliability (action owner, estimated date, description)
    - Lessons learned since last report
-   - Scope change request (requested by, description, status)
    - General comments (Brent's is a dated running log)
+
+   **Not needed:** the Scope change request block. SACRED's version drops it, because the rig now raises unplanned work as Break-in Work in Argo Navis, and that work shows under Schedule changes.
 5. **The header people:** rig manager, assistant rig manager, OIM, TSL, DSL, subsea supervisor, project planner, project lead, technical superintendent, 3rd party verifier, plus project location and the Synergy case number. Say where each comes from today: typed per report, or held per project.
 6. **The email it goes out in:**
    - the subject pattern (Brent's is `West Polaris BOP1 TMP Reporting 2026/10/15`);

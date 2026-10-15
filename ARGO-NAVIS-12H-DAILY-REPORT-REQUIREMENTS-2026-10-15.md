@@ -40,14 +40,21 @@
 | Critical path | Critical path, SIMOPS | `criticalPath`, `simops` | have |
 | | Project % and BOP % ("89.18% Complete / 96.6% BOP Complete") | `pctComplete` | project %: have. **BOP %: gap** |
 | Milestones | Baseline, estimated, actual, description | `milestones[]` | have |
-| Schedule changes | Break-in work or delays since last report: task id, description | `breakins[]` | have. **Gap:** delays as well as break-ins |
+| Schedule changes | Break-in work or delays since last report: task id, description | `breakins[]` (`BRK-001` onwards) | have. **Every break-in raised since the last 12-hour post must show here** (Dan). **Gap:** delays as well as break-ins |
 | Quality / rig reliability | Action owner, estimated date, description (materials, people, parts, tools) | `actionRows` exists but is empty | **gap**: an Argo Navis list the rig fills in |
-| Lessons learned since last report | Task id, description | none | **gap**: could reuse SSORT's lessons-learned post; Lee to say |
-| Scope change request | Requested by, description, status | change reason on a new scope version | **gap**: a list of requests with status |
+| Lessons learned since last report | Task id, description | Argo Navis asks for a lesson learned when each break-in is closed out | have in the tool; **gap:** post the lesson on the break-in in `breakins[]` so the report can list those closed since the last post |
+| Scope change request | **Not required (Dan, 15 Oct).** The block is dropped from our report | none | **dropped.** The rig controls its own plan through Break-in Work (see below) |
 | Previous report cycle to present | Task id, description, % | `done[]` | have. **Rule:** tasks progressed since the last 12-hour post, not just finished ones (Brent lists 25% to 100%) |
 | Projected for next report cycle | Task id, description, % | `next[]`, empty in the sample | have, needs filling. **Rule:** tasks planned to be worked in the next 12 hours |
 | General comments | Dated running log, kept from report to report | `comments` (one string) | **gap**: dated entries that carry forward |
 | Footer | "Confidential and Uncontrolled When Printed", PPDSR030918 Rev 4, Page x of y | template | SACRED |
+
+**Break-in work replaces scope change requests (Dan, 15 Oct).** "The rig will have the control over this. They are now the planners on the ground."
+- After the scope is frozen, the rig adds unplanned work in Argo Navis as **Break-in Work**. It is numbered automatically (`BRK-001` onwards) and needs **no work order number**.
+- REV 14 confirms that break-ins stay open after the freeze and are a progress post, not a scope change (QA-QC PO-07).
+- Each break-in should move the project calculation and the timeline by itself: percent complete, current finish, variance, float and BOP ready date.
+- **To confirm with Lee:** that a break-in's duration enters the critical-path calculation, and is not just listed.
+- The report lists every break-in raised since the last post under "Schedule changes", with its id, description and hours. Those closed since the last post appear under "Lessons learned", with their lesson.
 
 ## 3. How it works (recommended build)
 
