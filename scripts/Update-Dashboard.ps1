@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.04'
+$ScriptVersion = '3.05'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -2060,6 +2060,9 @@ foreach ($f in $files) {
     foreach ($dsrTl in (ConvertTo-AabList (Get-Prop $json 'tiles'))) { if ($null -ne $dsrTl -and $dsrTl -isnot [string]) { $dsrP0 = Get-Prop $dsrTl 'planningData'; if ($dsrP0) { $dsrPd = $dsrP0; break } } }
     if ($dsrPd) {
         $dsrCycle = (ConvertTo-AabText (Get-Prop $meta 'cycle')).Trim(); if (-not $dsrCycle) { $dsrCycle = (ConvertTo-AabText (Get-Prop $dsrPd 'cycle')).Trim() }
+        # v3.05 (Dan, 15 Oct): the report time is not a fixed 0600 / 1800 cut-off. Rigs report twice a day at their own
+        # handover (0700 / 1900 on some), so any time is taken as posted: "07:00", "0700" and "7:00" all read 0700.
+        $dsrDigits = ($dsrCycle -replace '[^0-9]', ''); if ($dsrDigits.Length -ge 3 -and $dsrDigits.Length -le 4) { $dsrCycle = $dsrDigits.PadLeft(4, '0') }
         if ($dsrCycle -and (Test-PlanningHasContent $dsrPd)) {
             $dsrTest = [bool]((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')
             $dsrPosts.Add(@{ file = $f.Name; full = $f.FullName; modified = $f.LastWriteTime; meta = $meta; pd = $dsrPd; cycle = $dsrCycle; test = $dsrTest; planid = $postPlanId }) | Out-Null
@@ -5126,7 +5129,7 @@ try {
             $bis = @(ConvertTo-AabList (Get-Prop $pd 'breakins') | Where-Object { $_ -and $_ -isnot [string] -and ([string](Get-Prop $_ 'status')) -ne 'closed' })
             if ($bis.Count -gt 0) { [void]$sb.Append(('<p style="font:10pt Arial,sans-serif">Break-in work open: {0}. See the attached report.</p>' -f $bis.Count)) }
             [void]$sb.Append(('<p style="font:10.5pt Arial,sans-serif">The whole schedule is on the BOP Fleet Planning Dashboard: <a href="{0}">{1} on the dashboard</a></p>' -f (ConvertTo-DsrHtml $link), (ConvertTo-DsrHtml $rig)))
-            [void]$sb.Append('<p style="font:9pt Arial,sans-serif;color:#555">Sent automatically by SACRED from the rig''s 12-hour report.</p>')
+            [void]$sb.Append('<p style="font:9pt Arial,sans-serif;color:#555">Sent automatically by SACRED from the rig''s twice-daily report.</p>')
             $chat = ('{0}{1} {2} Daily Summary Report {3} @{4} Hrs: {5}. Full schedule: {6}' -f $banner, $rig, $bop, (Format-DsrDate $repDate), $cyc, $pctText, $link)
             $dsrNotices.Add([ordered]@{ id = $nm; rig = $rig; rigkey = $rigKey; bop = $bop; planid = [string]$dp.planid; cycle = $cyc; reportdate = $repDate; test = [bool]$dp.test; subject = $subject; bodyhtml = $sb.ToString(); chat = $chat; link = $link; pdfname = $pdfName; pdfpath = ('/Digests/daily-reports/' + (Split-Path -Leaf $rigDir) + '/' + $pdfName); source = $dp.file }) | Out-Null
         }
