@@ -23,3 +23,6 @@ status/gate-config.js
 status/status-data.js
 dl1/plans-open.json
 dl1/plans-status/
+
+# The job plan checklist tool embeds the intake address (ORR KE-10): never committed
+Argo-Navis-Job-Plan-Checklists*.html
