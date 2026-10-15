@@ -54,11 +54,48 @@ if(equals(outputs('Kind'), 'plan-closeout'), 'closed', if(equals(outputs('Kind')
 {"type":"object","properties":{"notices":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"rig":{"type":"string"},"rigkey":{"type":"string"},"bop":{"type":"string"},"planid":{"type":"string"},"cycle":{"type":"string"},"reportdate":{"type":"string"},"test":{"type":"boolean"},"subject":{"type":"string"},"bodyhtml":{"type":"string"},"chat":{"type":"string"},"link":{"type":"string"},"pdfname":{"type":"string"},"pdfpath":{"type":"string"},"source":{"type":"string"}}}}}}
 ```
 
-**4. The office lists, once per run.** Copy these six cards from **Plan Notices** and paste them here, in this order:
-- **PlanToRows**, **PlanToEmails**, **PlanToList**: the Planning table's **To** rows. These are James Stewart Young, Arnaud Gabaut, Lee and Ronnie.
-- **PlanCcRows**, **PlanCcEmails**, **PlanCcList**: the **Cc** row, All TSC WCE Managers, Superintendents and Planners.
+**4. The office lists, once per run (six cards).** You copy three cards from Plan Notices, then paste them twice: once for To, once for Cc.
 
-If Plan Notices has only the To cards, copy them, then make the Cc three the same way with Filter Query `Send eq 'Cc'`. Name them **PlanCcRows**, **PlanCcEmails** and **PlanCcList**.
+**4a. Open both flows side by side.**
+1. Leave this new flow open in its browser tab, with the **Reports** card at the bottom.
+2. Right-click the browser tab, **Duplicate**. In the new tab, go to **My flows**, click **Plan Notices**, then **Edit**.
+
+**4b. Copy the first card (in the Plan Notices tab).**
+1. Find the card **PlanToRows**, under the Parse JSON card.
+2. Click the **three dots ( ... )** on the right of its title bar, then **Copy action**. Nothing appears to happen; it is now on the clipboard.
+
+**4c. Paste it (in the Daily Summary Report tab).**
+1. Hover just **below the Reports card** until a **+** appears, and click it.
+2. Click **Paste an action**. **PlanToRows** appears, already filled in: workbook, table Planning, Filter Query `Send eq 'To'`.
+
+**4d. The next two cards.** Do 4b and 4c again for **PlanToEmails**, pasting below PlanToRows. Then do it for **PlanToList**, pasting below PlanToEmails. **Keep that order.**
+
+**4e. Check them.**
+- Click **PlanToEmails**. **From** must show `body('PlanToRows')?['value']` and **Map** must show `item()?['Email']`.
+- Click **PlanToList**. Its Inputs must show `join(body('PlanToEmails'), ';')`.
+- If a card's name came over with a `_1` on the end, rename it without the `_1`: three dots, **Rename**.
+
+**4f. The three Cc cards: paste the same three again, then change them.**
+1. Paste **PlanToRows** again below PlanToList. It arrives named **PlanToRows_1** (or similar).
+   - Rename it **PlanCcRows**.
+   - Click it. In **Filter Query**, change `To` to `Cc`, so it reads `Send eq 'Cc'`.
+2. Paste **PlanToEmails** again below PlanCcRows. Rename it **PlanCcEmails**.
+   - Click in **From**, delete what is there, then **fx**, type `body('PlanCcRows')?['value']`, **Add**.
+   - Leave **Map** as it is: `item()?['Email']`.
+3. Paste **PlanToList** again below PlanCcEmails. Rename it **PlanCcList**.
+   - Click in **Inputs**, delete what is there, then **fx**, type `join(body('PlanCcEmails'), ';')`, **Add**.
+
+**4g. Close the Plan Notices tab without saving.** You changed nothing there. If it asks, click **Discard** or **Leave**.
+
+You now have six cards in a row under Reports: PlanToRows, PlanToEmails, PlanToList, PlanCcRows, PlanCcEmails, PlanCcList.
+
+**If "Paste an action" is not offered** (an older designer), build each card instead:
+- **PlanToRows:** **+**, **List rows present in a table** (Excel Online (Business)). Location **WellControl**, Document Library **Documents**, File `Notifications/WCE_Precharge_Notification.xlsx`, Table **Planning**. **Show all**, Filter Query `Send eq 'To'`.
+- **PlanToEmails:** **+**, **Select** (Data Operation).
+  - From **fx** `body('PlanToRows')?['value']`.
+  - On the Map box, click the small **T** button (switch to text mode), then **fx** `item()?['Email']`.
+- **PlanToList:** **+**, **Compose**, Inputs **fx** `join(body('PlanToEmails'), ';')`.
+- Then the same three again as **PlanCcRows** (Filter Query `Send eq 'Cc'`), **PlanCcEmails** (From `body('PlanCcRows')?['value']`) and **PlanCcList** (`join(body('PlanCcEmails'), ';')`).
 
 **5. One pass per report.** **+**, **Apply to each**. Rename it **EachReport**.
 - **Select an output from previous steps:** **fx**, `body('Reports')?['notices']`, **Add**.
