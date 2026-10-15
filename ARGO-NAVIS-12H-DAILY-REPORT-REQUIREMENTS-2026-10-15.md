@@ -84,4 +84,4 @@ The scan and flow add up to about 25 minutes of delay on a 12-hour report.
 | Lee | The gaps in section 2, and the 0600 / 1800 post |
 | Dan | Build the flow when the guide is ready |
 
-**Decided 15 Oct (Dan):** the office To names are James Stewart Young, Arnaud Gabaut, Lee Arnold and Ronnie Peeples, on **every rig's** 12-hour report and **only** on the 12-hour report. No other notice goes to them through this list. They sit in their own rows in the workbook (a `DailyReport` table: Email, To or Cc), so Dan can change the names without editing the flow.
+**Decided 15 Oct (Dan):** the office To names are James Stewart Young, Arnaud Gabaut, Lee Arnold and Ronnie Peeples, on **every rig's** 12-hour report. They are **already in the workbook's Planning table** (13 Oct): the four as `Send = To` rows and the All TSC WCE Managers_Superintendents_and Planners list as the `Cc` row. The Daily Report flow reads that table the same way Plan Notices does (`PlanToList`, `PlanCcList`). No new table is needed.
