@@ -56,7 +56,7 @@ WhatsApp +34 722 676 631 · plantworksstudio.com
 
 **04**
 ```
-Three packages, no hidden extras. One page from €600, a full site up to eight pages for €1,500, and an optional care plan at €40 a month. Half to start, half when it goes live.
+Three packages, no hidden extras. One page from €600, a full site up to eight pages for €1,500, and an optional care plan at €40 a month. Half to start, the rest before it goes live.
 
 Tres paquetes, sin extras ocultos. Una página desde 600 €, web completa de hasta ocho páginas por 1.500 €, y plan de mantenimiento opcional por 40 € al mes. Mitad al empezar, mitad al publicar.
 

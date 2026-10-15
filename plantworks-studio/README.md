@@ -102,7 +102,7 @@ Every site is a deploy folder: drag it onto Netlify or Cloudflare Pages, connect
 
 **Launch offer**: first five multi-page sites at €1,200 in return for a Google review and portfolio permission. Ends when the fifth signs. Stated as such on the site.
 
-**Terms**: half on brief, half on launch. Care billed monthly, cancel any month. Photography, copywriting, extra languages and paid third-party services passed on at cost.
+**Terms**: half on brief (work starts once paid), the balance paid before the site goes live. Care billed monthly, cancel any month. Photography, copywriting, extra languages and paid third-party services passed on at cost.
 
 The care plan is the recurring-revenue engine. Twenty Care clients is about €800/month before building anything; Care Plus nearly doubles that per client for roughly an hour a month on their Google listing, so offer it at every hand-over.
 

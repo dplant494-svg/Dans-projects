@@ -41,9 +41,9 @@ Nuestros paquetes: web de una página 600 € en inglés u 800 € bilingüe, we
 
 **/how**
 ```
-How it works: a 20-minute call or chat about your business, a fixed-price proposal within two days, 50% to start, a private preview link to review, the rest on launch. Most sites are live in two to three weeks.
+How it works: a 20-minute call or chat about your business, a fixed-price proposal within two days, 50% to start, a private preview link to review, the rest before it goes live. Most sites are live in two to three weeks.
 
-Cómo funciona: una llamada o chat de 20 minutos sobre su negocio, una propuesta con precio fijo en dos días, 50 % para empezar, un enlace privado para revisar la web, y el resto al publicarla. La mayoría de las webs están en marcha en dos o tres semanas.
+Cómo funciona: una llamada o chat de 20 minutos sobre su negocio, una propuesta con precio fijo en dos días, 50 % para empezar, un enlace privado para revisar la web, y el resto antes de publicarla. La mayoría de las webs están en marcha en dos o tres semanas.
 ```
 
 **/fix**

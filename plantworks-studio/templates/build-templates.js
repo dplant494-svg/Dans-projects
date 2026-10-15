@@ -105,7 +105,7 @@ const EN = {
   vatNote: 'VAT: Plantworks Studio Ltd is not VAT registered. For business customers in Spain and the EU, this supply of services is subject to the reverse charge; the customer accounts for VAT in their own country (Article 196, Council Directive 2006/112/EC). Delete this note for UK and private customers.',
   payBank: 'Pay by bank transfer', bank: [['Account name:', 'Plantworks Studio Ltd'], ['IBAN (EUR):', '[GB00 XXXX 0000 0000 0000 00]'], ['BIC:', '[XXXXGB00]'], ['Sort code / account (GBP):', '[00-00-00 / 00000000]'], ['Reference:', '[invoice number]']],
   payCard: 'Pay by card', cardNote: 'Card, Apple Pay or Google Pay. Care plans are billed monthly by card.',
-  terms: 'Terms', termsText: 'Every invoice is payable within 14 days of its date. Half of the build price is invoiced when the brief is agreed and half on launch. Care is billed monthly in advance and can be cancelled any month. Files and domain remain the client’s.',
+  terms: 'Terms', termsText: 'Half of the build price is invoiced when the brief is agreed; work starts once it is paid. The balance is invoiced when the preview is approved and is paid before the site goes live. Care is billed monthly in advance and can be cancelled any month. Any other invoice is payable within 14 days. Files and domain remain the client’s.',
   footer: 'Plantworks Studio Ltd · Registered in England and Wales · Thank you for your business',
 };
 const ES = {
@@ -120,7 +120,7 @@ const ES = {
   vatNote: 'IVA: operación no sujeta en el Reino Unido. Inversión del sujeto pasivo: el destinatario, empresario o profesional establecido en España, es el sujeto pasivo del IVA (art. 84.Uno.2º Ley 37/1992; art. 196 Directiva 2006/112/CE). Borrar esta nota para clientes particulares.',
   payBank: 'Pago por transferencia', bank: [['Titular:', 'Plantworks Studio Ltd'], ['IBAN (EUR):', '[GB00 XXXX 0000 0000 0000 00]'], ['BIC:', '[XXXXGB00]'], ['Concepto:', '[número de factura]']],
   payCard: 'Pago con tarjeta', cardNote: 'Tarjeta, Apple Pay o Google Pay. El mantenimiento se cobra cada mes con tarjeta.',
-  terms: 'Condiciones', termsText: 'Cada factura se paga en un plazo de 14 días desde su fecha. La mitad del precio de la web se factura al inicio y la otra mitad a la publicación. El mantenimiento se factura por adelantado cada mes y se puede cancelar en cualquier momento. Los archivos y el dominio son del cliente.',
+  terms: 'Condiciones', termsText: 'La mitad del precio de la web se factura al inicio y el trabajo empieza cuando está pagada. El resto se factura al aprobar la vista previa y se paga antes de publicar la web. El mantenimiento se factura por adelantado cada mes y se puede cancelar en cualquier momento. Las demás facturas se pagan en un plazo de 14 días. Los archivos y el dominio son del cliente.',
   footer: 'Plantworks Studio Ltd · Sociedad registrada en Inglaterra y Gales · Gracias por su confianza',
 };
 // Spanish number format uses "1.650,00 €" — patch the ES amounts
@@ -182,7 +182,7 @@ function proposal() {
         r3(t('Care Plus — Care plus your Google listing managed. Optional'), t('€75 / month'), t('€75 / month')),
       ], [5638, 2000, 2000]),
       P([t('Launch offer: ', { bold: true }), ph('[This is one of the first five multi-page sites at €1,200 instead of €1,500, in return for a Google review at launch and permission to show the site in our portfolio.]')], { before: 120, after: 40 }),
-      P(t('Prices exclude VAT or IVA. Half on brief, half on launch. Photography, copywriting and any paid third-party service at cost.', { size: 18, color: SOFT })),
+      P(t('Prices exclude VAT or IVA. Half on brief, the balance before launch. Photography, copywriting and any paid third-party service at cost.', { size: 18, color: SOFT })),
 
       sec('What we need from you'),
       bullet(t('Logo and any brand colours, or the sign and we’ll match it')),
