@@ -4810,7 +4810,7 @@ function Find-RecordPhotos { param($Node, [string]$Path, $Found, [string]$Label)
     if ($Node -is [bool] -or $Node -is [ValueType]) { return }
     if ($Node -is [System.Collections.IDictionary]) {
         $lbl = ''
-        foreach ($lk in @('slot', 'caption', 'label', 'name', 'title', 'itemKey', 'section')) { if ($Node.Contains($lk)) { $lv = [string]$Node[$lk]; if ($lv -and -not $lv.StartsWith('data:')) { $lbl = $lv; break } } }
+        foreach ($lk in @('slot', 'caption', 'label', 'name', 'title', 'itemKey', 'section')) { $lv = [string](Get-Prop $Node $lk); if ($lv -and -not $lv.StartsWith('data:')) { $lbl = $lv; break } }   # v2.99a: Get-Prop, not .Contains (Windows PowerShell's dictionaries have no one-argument Contains)
         if (-not $lbl) { $lbl = $Label }
         foreach ($k in @($Node.Keys)) { Find-RecordPhotos -Node $Node[$k] -Path ($Path + '/' + [string]$k) -Found $Found -Label $lbl }
         return
