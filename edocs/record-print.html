@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SACRED record</title>
+<!--
+  SACRED record print page (plan item 72, stage 2, 15 Oct 2026). The scanner injects one posted record (the JSON as
+  posted) and its file facts, then headless Edge prints this page to PDF beside the record in the project folder. The
+  PDF is the controlled document for eDocs; the JSON stays the data record. Nothing here fetches anything: the page is
+  self-contained so it prints the same on any machine.
+-->
+<style>
+  @page { size: A4; margin: 16mm 14mm 18mm 14mm;
+    @bottom-left { content: "/*FOOTER_LEFT*/"; font: 8pt Arial, sans-serif; color: #555; }
+    @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial, sans-serif; color: #555; } }
+  * { box-sizing: border-box; }
+  body { font: 9.5pt/1.35 Arial, Helvetica, sans-serif; color: #111; margin: 0; }
+  h1 { font-size: 15pt; margin: 0 0 2mm; }
+  h2 { font-size: 11pt; margin: 6mm 0 2mm; padding-bottom: 1mm; border-bottom: 1.2pt solid #14213d; break-after: avoid; }
+  h3 { font-size: 10pt; margin: 4mm 0 1.5mm; break-after: avoid; }
+  .tb { width: 100%; border-collapse: collapse; margin-bottom: 3mm; }
+  .tb td { border: 0.6pt solid #888; padding: 1.3mm 2mm; vertical-align: top; }
+  .tb td.k { width: 30%; background: #eef2f7; font-weight: bold; }
+  .titleblock { border: 1.2pt solid #14213d; padding: 3mm; margin-bottom: 4mm; }
+  .titleblock .org { font-size: 8pt; letter-spacing: .08em; text-transform: uppercase; color: #14213d; }
+  .titleblock .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 6mm; margin-top: 2mm; }
+  .titleblock .row { display: flex; gap: 2mm; border-bottom: 0.4pt solid #ccc; padding: .8mm 0; }
+  .titleblock .row b { min-width: 34mm; }
+  .test { display: inline-block; background: #c8102e; color: #fff; font-weight: bold; padding: .5mm 2mm; margin-left: 2mm; font-size: 9pt; }
+  table.data { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; font-size: 8pt; }
+  table.data th, table.data td { border: 0.5pt solid #999; padding: .8mm 1.2mm; vertical-align: top; text-align: left; }
+  table.data th { background: #eef2f7; }
+  table.data tr { break-inside: avoid; }
+  .kv { width: 100%; border-collapse: collapse; margin: 1mm 0 3mm; font-size: 8.5pt; }
+  .kv td { border-bottom: 0.4pt solid #ccc; padding: .7mm 1.5mm; vertical-align: top; }
+  .kv td.k { width: 36%; color: #333; }
+  .sig { width: 100%; border-collapse: collapse; margin: 2mm 0; }
+  .sig td, .sig th { border: 0.6pt solid #888; padding: 2mm; text-align: left; }
+  .photos { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  figure { margin: 0; break-inside: avoid; border: 0.5pt solid #bbb; padding: 2mm; }
+  figure img { width: 100%; max-height: 95mm; object-fit: contain; display: block; }
+  figcaption { font-size: 8pt; margin-top: 1mm; color: #333; }
+  .muted { color: #666; }
+  .note { font-size: 8pt; color: #555; margin-top: 6mm; border-top: 0.5pt solid #ccc; padding-top: 2mm; }
+</style>
+</head>
+<body>
+<div id="doc"></div>
+<script>window.RECORD_INFO = /*RECORD_INFO*/{};</script>
+<script>window.RECORD = /*RECORD_JSON*/null;</script>
+<script>
+(function () {
+  var R = window.RECORD || {}, I = window.RECORD_INFO || {}, doc = document.getElementById('doc');
+  var meta = R.meta || {}, photos = [], SKIP = { scheduleBuilderState: 1, history: 1, version: 1, snapshotHash: 0 };
+  function el(t, c, txt) { var e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = String(txt); return e; }
+  function isImg(v) { return typeof v === 'string' && /^data:image\//i.test(v); }
+  function isScalar(v) { return v === null || ['string', 'number', 'boolean'].indexOf(typeof v) >= 0; }
+  function human(k) { return String(k).replace(/^pdc(bop)?_/, '').replace(/[_-]+/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function (c) { return c.toUpperCase(); }); }
+  function fmt(v) {
+    if (v === null || v === undefined || v === '') return '';
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    var s = String(v);
+    if (/^data:[a-z]+\/[a-z0-9.+-]+;base64,/i.test(s)) return '(attached file, kept in the JSON record)';
+    var m = s.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/); if (m) return m[1] + ' ' + m[2];
+    return s;
+  }
+  function labelOf(o, fallback) { if (!o || typeof o !== 'object') return fallback; var ks = ['slot', 'caption', 'label', 'name', 'title', 'itemKey', 'section']; for (var i = 0; i < ks.length; i++) { var v = o[ks[i]]; if (typeof v === 'string' && v && !isImg(v)) return v; } return fallback; }
+  function addPhoto(src, label) { photos.push({ src: src, label: label }); return 'Photograph ' + photos.length + (label ? ' (' + label + ')' : ''); }
+  function cellText(v, label) {
+    if (v === undefined || v === null) return '';
+    if (isImg(v)) return addPhoto(v, label);
+    if (isScalar(v)) return fmt(v);
+    if (Array.isArray(v)) { if (!v.length) return ''; if (v.some(isImg)) return v.map(function (x) { return isImg(x) ? addPhoto(x, label) : fmt(x); }).join(', '); if (v.every(isScalar)) return v.map(fmt).join(', '); var n = 0; v.forEach(function (x) { walkPhotos(x, label); n++; }); return n + ' item(s)'; }
+    walkPhotos(v, label); var parts = []; Object.keys(v).forEach(function (k) { if (isScalar(v[k]) && v[k] !== '' && v[k] !== null) parts.push(human(k) + ': ' + fmt(v[k])); }); return parts.join('; ');
+  }
+  function walkPhotos(o, label) { if (isImg(o)) { addPhoto(o, label); return; } if (!o || typeof o !== 'object') return; var lb = labelOf(o, label); if (Array.isArray(o)) o.forEach(function (x) { walkPhotos(x, lb); }); else Object.keys(o).forEach(function (k) { walkPhotos(o[k], lb); }); }
+  function kvTable(obj, keys) {
+    var t = el('table', 'kv'), n = 0;
+    keys.forEach(function (k) { var v = obj[k]; if (v === '' || v === null || v === undefined) return; if (!isScalar(v) && !isImg(v)) return; var tr = el('tr'); tr.appendChild(el('td', 'k', human(k))); tr.appendChild(el('td', '', isImg(v) ? addPhoto(v, human(k)) : fmt(v))); t.appendChild(tr); n++; });
+    return n ? t : null;
+  }
+  function dataTable(arr, label) {
+    var cols = [], seen = {};
+    arr.forEach(function (o) { if (o && typeof o === 'object') Object.keys(o).forEach(function (k) { if (!seen[k] && !SKIP[k]) { var any = arr.some(function (x) { return x && x[k] !== '' && x[k] !== null && x[k] !== undefined && !(Array.isArray(x[k]) && !x[k].length); }); if (any) { seen[k] = 1; cols.push(k); } } }); });
+    if (cols.length > 11) cols = cols.slice(0, 11);
+    var t = el('table', 'data'), hr = el('tr'); cols.forEach(function (c) { hr.appendChild(el('th', '', human(c))); }); var th = el('thead'); th.appendChild(hr); t.appendChild(th);
+    var tb = el('tbody');
+    arr.forEach(function (o, i) { var tr = el('tr'); if (o && typeof o === 'object' && !Array.isArray(o)) { cols.forEach(function (c) { tr.appendChild(el('td', '', cellText(o[c], labelOf(o, label + ' ' + (i + 1))))); }); } else { var td = el('td', '', cellText(o, label)); td.colSpan = cols.length || 1; tr.appendChild(td); } tb.appendChild(tr); });
+    t.appendChild(tb); return t;
+  }
+  function section(title, obj, depth) {
+    if (obj === null || obj === undefined) return null;
+    var box = el('div'); box.appendChild(el(depth ? 'h3' : 'h2', '', title));
+    if (Array.isArray(obj)) { if (!obj.length) return null; if (obj.every(function (x) { return isScalar(x) || isImg(x); })) box.appendChild(el('p', '', cellText(obj, title))); else box.appendChild(dataTable(obj, title)); return box; }
+    if (isScalar(obj) || isImg(obj)) { box.appendChild(el('p', '', cellText(obj, title))); return box; }
+    var keys = Object.keys(obj).filter(function (k) { return !SKIP[k]; });
+    var kv = kvTable(obj, keys); if (kv) box.appendChild(kv);
+    keys.forEach(function (k) { var v = obj[k]; if (isScalar(v) || isImg(v)) return; if (Array.isArray(v) && !v.length) return; if (!Array.isArray(v) && typeof v === 'object' && !Object.keys(v).length) return;
+      if (depth >= 2) { var p = el('p', 'muted', human(k) + ': ' + cellText(v, human(k))); box.appendChild(p); return; }
+      var sub = section(human(k), v, depth + 1); if (sub) box.appendChild(sub); });
+    return box.childNodes.length > 1 ? box : null;
+  }
+
+  // --- what the record is
+  var kind = String(meta.kind || R.kind || '').toLowerCase();
+  var body = R.plan || R.progress || R.closeout || R.evidence || null;
+  var titles = { 'plan': 'BOP Maintenance Plan', 'plan-progress': 'BOP Maintenance Plan, Progress', 'plan-closeout': 'BOP Maintenance Plan, Close-out', 'plan-evidence': 'BOP Maintenance Plan, Evidence', 'plan-review': 'BOP Maintenance Plan, Review', 'plan-link': 'Evidence link record', 'bop-designation': 'BOP Designation', 'designation': 'BOP Designation', 'pre-deployment-checklist': 'Pre-Deployment Checklist', 'planning-report': 'Planning Report' };
+  var docTitle = meta.reporttype || titles[kind] || 'Posted record';
+  if (kind === 'plan' && R.plan) docTitle += ' (scope v' + R.plan.scopeVersion + ', ' + (R.plan.status || '') + ')';
+  var isTest = R.dryRun === true || meta.sample === true || meta.asset === 'SSCE Equipment';
+  var planId = I.planid || meta.planid || (body && body.planId) || R.planId || R.planid || '';
+  var firstTile = (R.tiles || [])[0] || {};
+
+  // --- title block
+  var tb = el('div', 'titleblock');
+  tb.appendChild(el('div', 'org', 'Seadrill · Well Control Equipment · SACRED record'));
+  var h = el('h1', '', docTitle); if (isTest) h.appendChild(el('span', 'test', 'TEST')); tb.appendChild(h);
+  var grid = el('div', 'grid');
+  function row(k, v) { if (v === '' || v === null || v === undefined) v = ''; var r = el('div', 'row'); r.appendChild(el('b', '', k)); r.appendChild(el('span', '', fmt(v) || '—')); grid.appendChild(r); }
+  row('Rig', meta.asset || R.rig || '');
+  row('BOP', meta.bopNo || meta.bop || (body && body.bopNo) || R.bop || '');
+  row('Plan ID', planId);
+  row('Report date', meta.date || firstTile.tileDate || (body && (body.asOf || body.closedAt)) || R.exported || R.generatedAt || R.exportedAt || '');
+  row('Job plan', meta.jobplan || meta.jobPlan || R.jobPlan || '');
+  row('Work order', meta.wo || meta.woNum || R.woNum || '');
+  row('Checklist / record ID', R.checklistId || meta.checklistid || (R.argo && R.argo.checklistRev ? 'rev ' + R.argo.checklistRev : '') || '');
+  row('Form', R.form || '');
+  row('Tool and revision', [R.tool || meta.tool || '', meta.rev || R.rev || ''].filter(Boolean).join(' · '));
+  row('Posted', R.exportedAt || R.exported || meta.saved || '');
+  row('Source file', I.file || '');
+  row('SHA-256', I.sha256short || '');
+  row('eDocs no.', '');
+  row('Printed', I.rendered || '');
+  tb.appendChild(grid); doc.appendChild(tb);
+
+  // --- signatures, wherever the record keeps them
+  var sigs = [];
+  (function findSigs(o, path) { if (!o || typeof o !== 'object') return; Object.keys(o).forEach(function (k) { var v = o[k]; if (/sign.?offs?$|signatures?$/i.test(k) && v) { (Array.isArray(v) ? v : Object.keys(v).map(function (r) { var x = v[r]; return (x && typeof x === 'object') ? Object.assign({ role: r }, x) : { role: r, name: x }; })).forEach(function (s) { if (s && typeof s === 'object' && (s.name || s.by || s.signedBy)) sigs.push(s); else if (typeof s === 'string' && s) sigs.push({ name: s }); }); } else if (typeof v === 'object' && path.length < 3) findSigs(v, path.concat(k)); }); })(R, []);
+  var sh = el('h2', '', 'Signatures'); doc.appendChild(sh);
+  var st = el('table', 'sig'); var shr = el('tr'); ['Role', 'Name', 'Company', 'Date and time'].forEach(function (c) { shr.appendChild(el('th', '', c)); }); st.appendChild(shr);
+  if (sigs.length) sigs.forEach(function (s) { var tr = el('tr'); [s.role || s.position || '', s.name || s.by || s.signedBy || '', s.company || '', fmt(s.at || s.date || s.signedAt || '')].forEach(function (c) { tr.appendChild(el('td', '', c)); }); st.appendChild(tr); });
+  else { var tr0 = el('tr'); var td0 = el('td', 'muted', 'No signatures recorded in this record.'); td0.colSpan = 4; tr0.appendChild(td0); st.appendChild(tr0); }
+  doc.appendChild(st);
+
+  // --- the record itself
+  var order = [['plan', 'Plan'], ['progress', 'Progress'], ['closeout', 'Close-out'], ['evidence', 'Evidence'], ['reviewer', 'Reviewer'], ['source', 'Linked post'], ['pdcData', 'Checklist entries'], ['argo', 'Argo Navis checklist states'], ['rows', 'Stack designation'], ['photoSlots', 'Photograph slots']];
+  var done = { meta: 1, tiles: 1, criticalRows: 1, actionRows: 1, dryRun: 1, exportedAt: 1, exported: 1, kind: 1, tool: 1, rev: 1, form: 1, generatedAt: 1, planId: 1, planid: 1, rig: 1, bop: 1 };
+  var mkv = kvTable(meta, Object.keys(meta).filter(function (k) { return ['asset', 'bopNo', 'planid', 'reporttype', 'kind', 'rev', 'tool', 'rigkey'].indexOf(k) < 0; }));
+  if (mkv) { doc.appendChild(el('h2', '', 'Header')); doc.appendChild(mkv); }
+  ['complete', 'ready', 'decision', 'comment', 'scopeversion', 'taskid', 'taskname', 'section', 'action'].forEach(function (k) { if (R[k] !== undefined) { done[k] = 1; } });
+  var top = kvTable(R, ['complete', 'ready', 'decision', 'comment', 'scopeversion', 'taskid', 'taskname', 'section', 'action', 'mfr', 'cav', 'status']); if (top) { doc.appendChild(el('h2', '', 'Summary')); doc.appendChild(top); ['mfr', 'cav', 'status'].forEach(function (k) { done[k] = 1; }); }
+  order.forEach(function (o) { if (R[o[0]] !== undefined) { var s = section(o[1], R[o[0]], 0); if (s) doc.appendChild(s); done[o[0]] = 1; } });
+  (R.tiles || []).forEach(function (t, i) { var s = section(t.title || t.name || ('Report section ' + (i + 1)), t, 0); if (s) doc.appendChild(s); });
+  if ((R.criticalRows || []).length) { var s1 = section('Critical items', R.criticalRows, 0); if (s1) doc.appendChild(s1); }
+  if ((R.actionRows || []).length) { var s2 = section('Actions', R.actionRows, 0); if (s2) doc.appendChild(s2); }
+  Object.keys(R).forEach(function (k) { if (done[k] || SKIP[k]) return; var s = section(human(k), R[k], 0); if (s) doc.appendChild(s); });
+
+  // --- photographs, every one in the record
+  if (photos.length) { doc.appendChild(el('h2', '', 'Photographs (' + photos.length + ')')); var g = el('div', 'photos'); photos.forEach(function (p, i) { var f = el('figure'); var im = el('img'); im.src = p.src; f.appendChild(im); f.appendChild(el('figcaption', '', 'Photograph ' + (i + 1) + (p.label ? ': ' + p.label : ''))); g.appendChild(f); }); doc.appendChild(g); }
+
+  doc.appendChild(el('div', 'note', 'Printed by SACRED from the posted record ' + (I.file || '') + ' (SHA-256 ' + (I.sha256 || '') + '). The JSON record in the project folder is the data of record; this PDF is its controlled copy for eDocs. A record changed after printing has a different SHA-256.'));
+  document.title = (planId ? planId + ' - ' : '') + docTitle;
+  window.RENDER_DONE = true;
+})();
+</script>
+</body>
+</html>

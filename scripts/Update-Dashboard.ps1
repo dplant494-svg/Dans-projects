@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '2.99'
+$ScriptVersion = '3.00'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4861,6 +4861,59 @@ function Export-RecordPhotos { param([string]$SourcePath, [string]$OutDir)
     [System.IO.File]::WriteAllText($marker, $mkJson, (New-Object System.Text.UTF8Encoding($false)))
     return ,$written.ToArray()
 }
+# v3.00 (plan item 72, stage 2): a PDF of every filed record, the controlled copy for eDocs. The record (as posted) is
+# injected into edocs\record-print.html with its file name and SHA-256, and headless Edge prints it to PDF under
+# Digests\plan-renders\<folder>\<subfolder>\<record>.pdf; plan-files.json lists it, so the Plan Files flow copies it
+# beside the JSON with no new cards. Re-printed only when the record or the template changes (a .pdf.stamp beside it).
+# Off unless a browser is found: config 'pdfBrowserPath', else Edge or Chrome in their usual places. At most
+# 'pdfMaxPerRun' (default 15) new PDFs per scan so a first run on a big project does not hold the scan up.
+$script:PdfBrowser = $null; $script:PdfTemplate = $null; $script:PdfDone = 0; $script:PdfMax = 15
+function Initialize-PdfRender {
+    $tpl = Join-Path $repoRoot 'edocs\record-print.html'
+    if (-not (Test-Path -Path $tpl)) { return }
+    $cands = New-Object System.Collections.Generic.List[string]
+    if ($config.PSObject.Properties['pdfBrowserPath'] -and $config.pdfBrowserPath) { $cands.Add([Environment]::ExpandEnvironmentVariables([string]$config.pdfBrowserPath)) }
+    foreach ($c in @("${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe", "$env:ProgramFiles\Google\Chrome\Application\chrome.exe", "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe")) { if ($c -and -not $c.StartsWith('\')) { $cands.Add($c) } }
+    foreach ($c in $cands) { if ($c -and (Test-Path -Path $c)) { $script:PdfBrowser = $c; break } }
+    if ($config.PSObject.Properties['pdfMaxPerRun'] -and $config.pdfMaxPerRun) { $script:PdfMax = [int]$config.pdfMaxPerRun }
+    if ($script:PdfBrowser) { $script:PdfTemplate = [System.IO.File]::ReadAllText($tpl, [System.Text.Encoding]::UTF8) }
+}
+function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]$PlanId)
+    # Returns the PDF file name when one exists (current or just printed), else ''.
+    if (-not $script:PdfBrowser -or -not $script:PdfTemplate) { return '' }
+    $src = Get-Item -Path $SourcePath
+    $base = [System.IO.Path]::GetFileNameWithoutExtension($src.Name)
+    $pdfName = $base + '.pdf'; $pdf = Join-Path $OutDir $pdfName; $stampFile = $pdf + '.stamp'
+    $tplHash = [BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash([System.Text.Encoding]::UTF8.GetBytes($script:PdfTemplate))).Replace('-', '').Substring(0, 12)
+    $stamp = '{0}|{1}|{2}' -f $src.Length, $src.LastWriteTimeUtc.Ticks, $tplHash
+    if ((Test-Path -Path $pdf) -and (Test-Path -Path $stampFile) -and ([System.IO.File]::ReadAllText($stampFile) -eq $stamp)) { return $pdfName }
+    if ($script:PdfDone -ge $script:PdfMax) { return $(if (Test-Path -Path $pdf) { $pdfName } else { '' }) }
+    if (-not (Test-Path -Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir -Force | Out-Null }
+    $raw = [System.IO.File]::ReadAllText($src.FullName, [System.Text.Encoding]::UTF8)
+    $sha = (Get-FileHash -Path $src.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    $info = ConvertTo-PlainJson ([ordered]@{ file = $src.Name; sha256 = $sha; sha256short = $sha.Substring(0, 16); rendered = (Get-Date).ToString('yyyy-MM-dd HH:mm'); planid = $PlanId })
+    $footer = ($src.Name + '  -  SHA-256 ' + $sha.Substring(0, 16)).Replace('\', '\\').Replace('"', '\"')
+    $html = $script:PdfTemplate.Replace('/*RECORD_INFO*/{}', $info).Replace('/*RECORD_JSON*/null', $raw.Replace('</', '<\/')).Replace('/*FOOTER_LEFT*/', $footer)
+    $work = Join-Path $OutDir ('.render_' + $base + '.html')
+    [System.IO.File]::WriteAllText($work, $html, (New-Object System.Text.UTF8Encoding($false)))
+    $tmpPdf = $pdf + '.tmp'
+    if (Test-Path -Path $tmpPdf) { Remove-Item -Path $tmpPdf -Force }
+    $pdfProfile = Join-Path ([System.IO.Path]::GetTempPath()) 'sacred-pdf-profile'
+    $uri = ([System.Uri](Resolve-Path -Path $work).ProviderPath).AbsoluteUri
+    $bArgs = @('--headless=new', '--disable-gpu', '--no-first-run', '--no-pdf-header-footer', ('--user-data-dir="' + $pdfProfile + '"'), ('--print-to-pdf="' + $tmpPdf + '"'), $uri)
+    $onWindows = ($PSVersionTable.PSEdition -ne 'Core') -or $IsWindows
+    if (-not $onWindows) { $bArgs = @('--no-sandbox') + $bArgs }
+    $spArgs = @{ FilePath = $script:PdfBrowser; ArgumentList = $bArgs; PassThru = $true; ErrorAction = 'Stop' }
+    if ($onWindows) { $spArgs['WindowStyle'] = 'Hidden' }
+    $proc = Start-Process @spArgs
+    if (-not $proc.WaitForExit(90000)) { try { $proc.Kill() } catch { }; Remove-Item -Path $work -Force -ErrorAction SilentlyContinue; Write-Warning "PDF for $($src.Name) timed out (left for the next scan)"; return '' }
+    Remove-Item -Path $work -Force -ErrorAction SilentlyContinue
+    if (-not (Test-Path -Path $tmpPdf) -or (Get-Item -Path $tmpPdf).Length -lt 1000) { Write-Warning "PDF for $($src.Name) was not produced (left for the next scan)"; return '' }
+    Move-Item -Path $tmpPdf -Destination $pdf -Force
+    [System.IO.File]::WriteAllText($stampFile, $stamp)
+    $script:PdfDone++
+    return $pdfName
+}
 function Get-PlanFileSubfolder { param([string]$Kind, [string]$ReportType)
     $k = ([string]$Kind).ToLowerInvariant(); $rt = [string]$ReportType
     if ($k -in @('plan', 'planning-report', 'plan-review', 'designation', 'bop-designation', 'plan-progress')) { return '01 Plan and Scope' }
@@ -4934,6 +4987,21 @@ try {
                 } catch { Write-Warning "photographs for $($pfe.file) could not be written (filing unaffected): $($_.Exception.Message)" }
             }
             foreach ($pe in $photoEntries) { $pfFiles.Add($pe) | Out-Null }
+            # v3.00: a PDF beside every filed record (not the photographs, not the link records)
+            if ($null -eq $script:PdfTemplate -and $null -eq $script:PdfBrowser) { Initialize-PdfRender }
+            if ($script:PdfBrowser) {
+                $pdfEntries = New-Object System.Collections.Generic.List[object]
+                foreach ($pfe in @($pfFiles.ToArray())) {
+                    if ([string]$pfe.kind -in @('photo', 'plan-link')) { continue }
+                    $lp = [string]$pfe.localpath; if (-not $lp -or -not (Test-Path -Path $lp)) { continue }
+                    try {
+                        $pdfDir = Join-Path (Join-Path $renderRoot $pfFolder) ([string]$pfe.subfolder)
+                        $pn = Export-RecordPdf -SourcePath $lp -OutDir $pdfDir -PlanId $ppid
+                        if ($pn) { $pdfEntries.Add([ordered]@{ file = [string]$pn; kind = 'pdf'; reporttype = [string]$pfe.reporttype; subfolder = [string]$pfe.subfolder; posted = [string]$pfe.posted; path = ('/Digests/plan-renders/' + $pfFolder + '/' + [string]$pfe.subfolder + '/' + $pn); localpath = (Join-Path $pdfDir $pn); fromrecord = [string]$pfe.file }) | Out-Null }
+                    } catch { Write-Warning "PDF for $($pfe.file) failed (filing unaffected): $($_.Exception.Message)" }
+                }
+                foreach ($pe in $pdfEntries) { $pfFiles.Add($pe) | Out-Null }
+            }
             $pfPlans.Add([ordered]@{
                 planid = $ppid; folder = $ppid + $(if ($isTestP) { ' TEST' } else { '' }); istest = $isTestP
                 rig = [string]$pl.rig; rigkey = [string]$pl.rigKey; bop = [string]$pl.bopNo; scopeversion = [int]$pl.scopeVersion; status = [string]$pl.status
