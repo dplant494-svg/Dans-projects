@@ -82,4 +82,6 @@ The scan and flow add up to about 25 minutes of delay on a 12-hour report.
 | Tools session (WCGRRT) | Reply to `HANDOFF-TOOLS-WCGRRT-DAILY-SUMMARY-FORMAT-2026-10-15.md`: the exact layout, field rules and print template of the planning section's Daily Summary Report |
 | SACRED | The handoff to Lee, written once the WCGRRT reply is in, with the gaps above as a field list. Then the scanner template, PDF and notices, proven on scratch with Lee's REV 14 sample. Then the flow guide click by click. Then the DL-1 to Argo Navis rename in everything people read |
 | Lee | The gaps in section 2, and the 0600 / 1800 post |
-| Dan | Build the flow when the guide is ready. Confirm the office To names (Brent's list: James Stewart Young, Arnaud Gabaut, Lee Arnold, Ronnie Peeples) and whether they become a Planning-table row per region |
+| Dan | Build the flow when the guide is ready |
+
+**Decided 15 Oct (Dan):** the office To names are James Stewart Young, Arnaud Gabaut, Lee Arnold and Ronnie Peeples, on **every rig's** 12-hour report and **only** on the 12-hour report. No other notice goes to them through this list. They sit in their own rows in the workbook (a `DailyReport` table: Email, To or Cc), so Dan can change the names without editing the flow.
