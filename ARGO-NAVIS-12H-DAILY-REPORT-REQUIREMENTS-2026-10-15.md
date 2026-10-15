@@ -12,6 +12,16 @@
 - **The tools session's reply (`REPLY-TOOLS-WCGRRT-DAILY-SUMMARY-FORMAT-2026-10-15.md`, rolling handoff entry 82).** Every field rule, from WCGRRT 171's code. The key correction: WCGRRT does not make this report; it has its own one-page Planning Report.
 - **`WCGRRT-171-Planning-Report-print-view.html` and its PNG.** WCGRRT's own print view, used for Seadrill branding only.
 
+> **REV 3, 15 Oct evening (Dan). This overrides anything below that disagrees.**
+> - **Nothing is made by hand and nothing is reinvented.** WCGRRT's Planning Report already does this job: the ERT import, the done and next cycle rules, break-ins, the report name, the post that updates the BOP dashboard tiles, and a printed report close to Brent's. **It is the Daily Summary Report.** Brent's form only showed the current format.
+> - **The layout** is WCGRRT's print view, brought up to the full form by the tools session, as one template SACRED fills from any `planning-report` post. Brent's Excel is only the content checklist.
+> - **Argo Navis implements WCGRRT's rules exactly** (BWM has no P6).
+> - **BOP %** = BOP work only, from BOP on beams to testing complete, drifted, the pre-deployment call and BOP ready to deploy (5.3 settled).
+> - **The report name** follows WCGRRT's convention and day (5.5: the name comes from `planConventionName`).
+> - **WCGRRT keeps running as it is,** the weekly included. Nothing is retired (5.6 settled).
+> - **The handoff to the tools session** is `HANDOFF-TOOLS-WCGRRT-PLANNING-REPORT-12H-2026-10-15.md`. **A new Lee handoff follows its reply.** The Lee handoff already sent (`ARGO-NAVIS-HANDOFF-DAILY-SUMMARY-REPORT-2026-10-15.md`) stands as a first look, and the new one supersedes it.
+> - **The flow sends the report for WCGRRT posts too,** so the 12-hour email can start before Argo Navis is ready.
+
 ## 1. Requirements (Dan, 15 Oct)
 
 | # | Requirement |
