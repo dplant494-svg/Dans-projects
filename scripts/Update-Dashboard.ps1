@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.01'
+$ScriptVersion = '3.02'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4885,7 +4885,8 @@ function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]
     $base = [System.IO.Path]::GetFileNameWithoutExtension($src.Name)
     $pdfName = $base + '.pdf'; $pdf = Join-Path $OutDir $pdfName; $stampFile = $pdf + '.stamp'
     $tplHash = [BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash([System.Text.Encoding]::UTF8.GetBytes($script:PdfTemplate))).Replace('-', '').Substring(0, 12)
-    $stamp = '{0}|{1}|{2}' -f $src.Length, $src.LastWriteTimeUtc.Ticks, $tplHash
+    # v3.02: the trailing printer version makes every PDF from an earlier printer reprint once (v3.00 printed blank pages).
+    $stamp = '{0}|{1}|{2}|p302' -f $src.Length, $src.LastWriteTimeUtc.Ticks, $tplHash
     if ((Test-Path -Path $pdf) -and (Test-Path -Path $stampFile) -and ([System.IO.File]::ReadAllText($stampFile) -eq $stamp)) { return $pdfName }
     if ($script:PdfDone -ge $script:PdfMax) { return $(if (Test-Path -Path $pdf) { $pdfName } else { '' }) }
     if (-not (Test-Path -Path $OutDir)) { New-Item -ItemType Directory -Path $OutDir -Force | Out-Null }
