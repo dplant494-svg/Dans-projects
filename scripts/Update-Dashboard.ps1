@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.03'
+$ScriptVersion = '3.04'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1248,6 +1248,7 @@ $dl1Evidence = New-Object System.Collections.Generic.List[object]   # one row pe
 $dl1Test = New-Object System.Collections.Generic.List[object]       # the test posts, listed so the Status page and Dan can see them
 $dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
 $dl1PostPlan = @{}     # v2.89: file name -> meta.planid for every ordinary post made under a plan
+$dsrPosts = New-Object System.Collections.Generic.List[object]   # v3.04: planning reports with a 12-hour cycle, for the Daily Summary Report
 $dl1Reviews = @{}      # v2.90: Help Centre 'plan-review' records (Plans tab), keyed planId|scopeVersion|email; the newest saved per reviewer wins
 $dl1Designations = @{}   # v2.95: Argo Navis 'designation' export per planId (the stack's required rows and photograph slots), newest wins
 $dl1Links = @{}        # v2.89: SSORT 162 'plan-link' records (tools entry 62/64), keyed by linkid; the newest action per link wins (link / unlink)
@@ -2015,7 +2016,7 @@ foreach ($f in $files) {
     if ($metaKindD -in @('plan','plan-progress','plan-closeout','plan-evidence')) {
         $dl1Files[$f.Name] = $true
         $dpost = Read-Dl1Post -Json $json -Meta $meta -File $f -Kind $metaKindD
-        if (-not $dpost) { Add-Problem $f 'dl1-invalid' "a DL-1 $metaKindD post without a planId - not filed"; continue }
+        if (-not $dpost) { Add-Problem $f 'dl1-invalid' "an Argo Navis $metaKindD post without a planId - not filed"; continue }
         if ($dpost.isTest) { $dl1Test.Add([ordered]@{ file = $f.Name; kind = $metaKindD; planId = $dpost.planId; scopeVersion = $dpost.scopeVersion; rig = $dpost.rig; posted = $dpost.posted; dryRun = $dpost.dryRun }) | Out-Null }
         switch ($metaKindD) {
             'plan' {
@@ -2051,6 +2052,18 @@ foreach ($f in $files) {
     if ($metaKindD -eq 'planning-report' -and ((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')) {
         $dl1TestReport = $true
         $dl1Test.Add([ordered]@{ file = $f.Name; kind = 'planning-report'; planId = ''; scopeVersion = 0; rig = ([string](Get-Prop $meta 'asset')).Trim(); posted = (ConvertTo-StableTimestamp (Get-Prop $json 'exportedAt')); dryRun = (ConvertTo-AabBool (Get-Prop $json 'dryRun')) }) | Out-Null
+    }
+    # v3.04 (plan item 74): a planning report that carries the 12-hour cycle (WCGRRT 172+, Argo Navis) is kept for the
+    # Daily Summary Report: printed to PDF and offered to the Daily Summary Report flow. Older posts have no cycle and
+    # are never printed or sent.
+    $dsrPd = $null
+    foreach ($dsrTl in (ConvertTo-AabList (Get-Prop $json 'tiles'))) { if ($null -ne $dsrTl -and $dsrTl -isnot [string]) { $dsrP0 = Get-Prop $dsrTl 'planningData'; if ($dsrP0) { $dsrPd = $dsrP0; break } } }
+    if ($dsrPd) {
+        $dsrCycle = (ConvertTo-AabText (Get-Prop $meta 'cycle')).Trim(); if (-not $dsrCycle) { $dsrCycle = (ConvertTo-AabText (Get-Prop $dsrPd 'cycle')).Trim() }
+        if ($dsrCycle -and (Test-PlanningHasContent $dsrPd)) {
+            $dsrTest = [bool]((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')
+            $dsrPosts.Add(@{ file = $f.Name; full = $f.FullName; modified = $f.LastWriteTime; meta = $meta; pd = $dsrPd; cycle = $dsrCycle; test = $dsrTest; planid = $postPlanId }) | Out-Null
+        }
     }
 
     # v2.71: TSC Help Centre requests and the page's acknowledgements: records, never reports.
@@ -4644,7 +4657,7 @@ try {
         $stripPo = { param($t) [regex]::Replace($t, '"generatedAt":"[^"]*"', '') }
         if ((& $stripPo $prevPo) -ne (& $stripPo $plansOpenJson)) { [System.IO.File]::WriteAllText($poSynced, $plansOpenJson, (New-Object System.Text.UTF8Encoding($false))) }
     }
-    if ($plansOpen.Count -gt 0 -or $dl1LiveLinks.Count -gt 0) { Write-Host "DL-1: plans-open.json with $($plansOpen.Count) plan(s); $($dl1LiveLinks.Count) live link record(s)" -ForegroundColor Green }
+    if ($plansOpen.Count -gt 0 -or $dl1LiveLinks.Count -gt 0) { Write-Host "Argo Navis: plans-open.json with $($plansOpen.Count) plan(s); $($dl1LiveLinks.Count) live link record(s)" -ForegroundColor Green }
 } catch { Write-Warning "plans-open.json failed (scan unaffected): $($_.Exception.Message)" }
 
 # v2.90: help\plan-review-data.js for the Help Centre's Plans tab (item 53): every plan with its sections, progress,
@@ -4772,7 +4785,7 @@ try {
     }
     # files for plans no longer in the store are removed locally (the deploy mirrors the folder)
     foreach ($sf in @(Get-ChildItem -Path $planStatusLocalDir -File -Filter '*.json')) { if (-not $wantedStatusFiles.ContainsKey($sf.Name)) { Remove-Item -Path $sf.FullName -Force } }
-    if ($planStatusCount -gt 0 -or $dl1Designations.Count -gt 0) { Write-Host "DL-1: $planStatusCount plan status file(s), $($dl1Designations.Count) designation(s) in dl1\plans-status" -ForegroundColor Green }
+    if ($planStatusCount -gt 0 -or $dl1Designations.Count -gt 0) { Write-Host "Argo Navis: $planStatusCount plan status file(s), $($dl1Designations.Count) designation(s) in dl1\plans-status" -ForegroundColor Green }
 } catch { Write-Warning "Plan status files failed (scan unaffected): $($_.Exception.Message)" }
 
 # ---------------------------------------------------------------------------
@@ -4878,13 +4891,15 @@ function Initialize-PdfRender {
     if ($config.PSObject.Properties['pdfMaxPerRun'] -and $config.pdfMaxPerRun) { $script:PdfMax = [int]$config.pdfMaxPerRun }
     if ($script:PdfBrowser) { $script:PdfTemplate = [System.IO.File]::ReadAllText($tpl, [System.Text.Encoding]::UTF8) }
 }
-function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]$PlanId)
+function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]$PlanId, [string]$Template = '', [string]$OutName = '')
     # Returns the PDF file name when one exists (current or just printed), else ''.
-    if (-not $script:PdfBrowser -or -not $script:PdfTemplate) { return '' }
-    $src = Get-Item -Path $SourcePath
-    $base = [System.IO.Path]::GetFileNameWithoutExtension($src.Name)
+    # v3.04: -Template prints with another template (the Daily Summary Report), -OutName names the PDF.
+    $tplText = $(if ($Template) { $Template } else { $script:PdfTemplate })
+    if (-not $script:PdfBrowser -or -not $tplText) { return '' }
+    $src = Get-Item -LiteralPath $SourcePath
+    $base = $(if ($OutName) { $OutName } else { [System.IO.Path]::GetFileNameWithoutExtension($src.Name) })
     $pdfName = $base + '.pdf'; $pdf = Join-Path $OutDir $pdfName; $stampFile = $pdf + '.stamp'
-    $tplHash = [BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash([System.Text.Encoding]::UTF8.GetBytes($script:PdfTemplate))).Replace('-', '').Substring(0, 12)
+    $tplHash = [BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash([System.Text.Encoding]::UTF8.GetBytes($tplText))).Replace('-', '').Substring(0, 12)
     # v3.02: the trailing printer version makes every PDF from an earlier printer reprint once (v3.00 printed blank pages).
     $stamp = '{0}|{1}|{2}|p302' -f $src.Length, $src.LastWriteTimeUtc.Ticks, $tplHash
     if ((Test-Path -Path $pdf) -and (Test-Path -Path $stampFile) -and ([System.IO.File]::ReadAllText($stampFile) -eq $stamp)) { return $pdfName }
@@ -4894,7 +4909,7 @@ function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]
     $sha = (Get-FileHash -Path $src.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
     $info = ConvertTo-PlainJson ([ordered]@{ file = $src.Name; sha256 = $sha; sha256short = $sha.Substring(0, 16); rendered = (Get-Date).ToString('yyyy-MM-dd HH:mm'); planid = $PlanId })
     $footer = ($src.Name + '  -  SHA-256 ' + $sha.Substring(0, 16)).Replace('\', '\\').Replace('"', '\"')
-    $html = $script:PdfTemplate.Replace('/*RECORD_INFO*/{}', $info).Replace('/*RECORD_JSON*/null', $raw.Replace('</', '<\/')).Replace('/*FOOTER_LEFT*/', $footer)
+    $html = $tplText.Replace('/*RECORD_INFO*/{}', $info).Replace('/*RECORD_JSON*/null', $raw.Replace('</', '<\/')).Replace('/*FOOTER_LEFT*/', $footer)
     $work = Join-Path $OutDir ('.render_' + $base + '.html')
     [System.IO.File]::WriteAllText($work, $html, (New-Object System.Text.UTF8Encoding($false)))
     $tmpPdf = $pdf + '.tmp'
@@ -5022,9 +5037,106 @@ try {
         $pfJson = ConvertTo-PlainJson ([ordered]@{ generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $pfPlans.Count; files = $pfTotal; plans = $pfPlans.ToArray() })
         $pfFile = Join-Path $helpReceiptDir 'plan-files.json'; $prevPf = ''; if (Test-Path -Path $pfFile) { $prevPf = [System.IO.File]::ReadAllText($pfFile) }
         $stripPf = { param($t) [regex]::Replace($t, '"generatedat":"[^"]*"', '') }
-        if ((& $stripPf $prevPf) -ne (& $stripPf $pfJson)) { [System.IO.File]::WriteAllText($pfFile, $pfJson, (New-Object System.Text.UTF8Encoding($false))); Write-Host "DL-1: plan-files.json written: $($pfPlans.Count) plan(s), $pfTotal file(s) to file" -ForegroundColor Green }
+        if ((& $stripPf $prevPf) -ne (& $stripPf $pfJson)) { [System.IO.File]::WriteAllText($pfFile, $pfJson, (New-Object System.Text.UTF8Encoding($false))); Write-Host "Argo Navis: plan-files.json written: $($pfPlans.Count) plan(s), $pfTotal file(s) to file" -ForegroundColor Green }
     }
 } catch { Write-Warning "plan-files.json failed (scan unaffected): $($_.Exception.Message)" }
+
+# v3.04 (15 Oct 2026, plan item 74): the 12-hourly Daily Summary Report. Every planning report post that carries the
+# cycle (0600 / 1800: WCGRRT 172+ and Argo Navis) is printed with WCGRRT's own template (edocs\daily-summary-report.html,
+# filled from the posted record, rolling entry 83) to Digests\daily-reports\<Rig>\<reportName>.pdf, and offered to the
+# Daily Summary Report flow in help-receipts\daily-report-notices.json: subject, an email body with the header and the
+# milestones inline, the dashboard link, the PDF's path. Only posts from the last dailyReportNoticeHours (48) are offered,
+# so an old report is never sent; the flow keeps a receipt per id so each is sent once. A test post (dryRun, meta.sample,
+# SSCE Equipment) is marked test: the flow sends it to the Office only, and its subject says [TEST MODE].
+function ConvertTo-DsrHtml { param($Value) return [System.Net.WebUtility]::HtmlEncode([string]$Value) }
+function Format-DsrDate { param([string]$Iso)
+    if ($Iso -match '^(\d{4})-(\d{2})-(\d{2})') { $mon = @('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')[[int]$Matches[2] - 1]; return ('{0}-{1}-{2}' -f $Matches[1], $mon, $Matches[3]) }
+    return $Iso
+}
+try {
+    if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir) -and $dsrPosts.Count -gt 0) {
+        if ($null -eq $script:PdfTemplate -and $null -eq $script:PdfBrowser) { Initialize-PdfRender }
+        $dsrTplPath = Join-Path $repoRoot 'edocs\daily-summary-report.html'
+        $dsrTpl = $(if (Test-Path -Path $dsrTplPath) { [System.IO.File]::ReadAllText($dsrTplPath, [System.Text.Encoding]::UTF8) } else { '' })
+        $dsrRoot = Join-Path (Split-Path -Parent $helpReceiptDir) 'daily-reports'
+        $dsrHours = 48; if ($config.PSObject.Properties['dailyReportNoticeHours'] -and $config.dailyReportNoticeHours) { $dsrHours = [int]$config.dailyReportNoticeHours }
+        $dsrDash = 'http://sdrlazneuiis01d.corp.local:8080/sacred/BOP Fleet Planning Dashboard.html'
+        if ($config.PSObject.Properties['planningDashboardUrl'] -and $config.planningDashboardUrl) { $dsrDash = [string]$config.planningDashboardUrl }
+        # A re-post of the same report replaces the earlier one: newest file per report name.
+        $dsrByName = @{}
+        foreach ($dp in $dsrPosts) {
+            $nm = (ConvertTo-AabText (Get-Prop $dp.meta 'reportName')).Trim()
+            if (-not $nm) { $nm = [System.IO.Path]::GetFileNameWithoutExtension($dp.file) + '_' + $dp.cycle }
+            $nm = ($nm -replace '[\\/:*?"<>|]', '_').Trim()
+            if ($dp.test -and $nm -notmatch '(?i)test') { $nm = $nm + '_TEST' }
+            $dp['name'] = $nm
+            if (-not $dsrByName.ContainsKey($nm) -or $dp.modified -gt $dsrByName[$nm].modified) { $dsrByName[$nm] = $dp }
+        }
+        $dsrNotices = New-Object System.Collections.Generic.List[object]
+        $dsrPdfCount = 0
+        foreach ($nm in @($dsrByName.Keys | Sort-Object)) {
+            $dp = $dsrByName[$nm]; $m = $dp.meta; $pd = $dp.pd
+            $rig = ([string](Get-Prop $m 'asset')).Trim(); if (-not $rig) { continue }
+            $rigDir = Join-Path $dsrRoot ($rig -replace '[\\/:*?"<>|]', '_')
+            $pdfName = ''
+            if ($dsrTpl) { $pdfName = Export-RecordPdf -SourcePath $dp.full -OutDir $rigDir -PlanId $dp.planid -Template $dsrTpl -OutName $nm }
+            if (-not $pdfName) { continue }
+            $dsrPdfCount++
+            if (((Get-Date) - $dp.modified).TotalHours -gt $dsrHours) { continue }
+            $rigKey = (ConvertTo-AabText (Get-Prop $m 'rigkey')).Trim().ToLowerInvariant()
+            if (-not $rigKey) { foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $rig) { $rigKey = [string]$k } } }
+            $bop = ([string](Get-Prop $m 'bopNo')).Trim()
+            $projType = ([string](Get-Prop $m 'projType')).Trim()
+            $typeCode = $projType; if ($projType -match '\(([A-Z]{2,5})\)') { $typeCode = $Matches[1] }
+            $repDate = ([string](Get-Prop $pd 'reportDate')).Trim(); if (-not $repDate) { $repDate = ([string](Get-Prop $m 'date')).Trim() }
+            $cyc = $dp.cycle
+            $banner = $(if ($dp.test) { '[TEST MODE] ' } else { '' })
+            $subject = ('{0}{1} {2} {3} Reporting {4} {5}' -f $banner, $rig, $bop, $typeCode, ($repDate -replace '-', '/'), $cyc) -replace '\s+', ' '
+            $link = $dsrDash.Replace(' ', '%20') + '?rig=' + [Uri]::EscapeDataString($rig)
+            $pct = ([string](Get-Prop $pd 'pctComplete')).Trim(); $bopPct = ([string](Get-Prop $pd 'bopPctComplete')).Trim()
+            $pctText = $pct; if ($bopPct) { $pctText = "$pct Complete / $bopPct BOP Complete" }
+            $curFin = Format-DsrDate ([string](Get-Prop $m 'curFinish')); $cft = ([string](Get-Prop $pd 'curFinishTime')).Trim(); if ($cft) { $curFin = "$curFin @$($cft -replace ':', '') Hrs" }
+            $need = Format-DsrDate ([string](Get-Prop $m 'needDate')); $nt = ([string](Get-Prop $pd 'needTime')).Trim(); if ($need -and $nt) { $need = "$need @$($nt -replace ':', '') Hrs" }
+            $varH = Get-Prop $pd 'planVarianceHrs'; $varText = ([string](Get-Prop $pd 'planVariance')).Trim(); $varColour = ''
+            if ($null -ne $varH -and "$varH" -ne '') { $vd = [double]$varH; $varText = ('{0}{1} Hrs' -f $(if ($vd -gt 0) { '+' } else { '' }), $vd); if ($vd -lt 0) { $varColour = '#c00000' } else { $varColour = '#1a7f37' } }
+            $flH = Get-Prop $m 'floatHrs'; $flText = ([string](Get-Prop $m 'float')).Trim(); $flColour = ''
+            if ($null -ne $flH -and "$flH" -ne '') { $fd = [double]$flH; $flText = ('{0}{1} Hrs' -f $(if ($fd -gt 0) { '+' } else { '' }), $fd); if ($fd -lt 0) { $flColour = '#c00000' } else { $flColour = '#1a7f37' } }
+            $cell = 'style="border:1px solid #b7c3d6;padding:3px 6px;font:10pt Arial,sans-serif"'
+            $lab = 'style="border:1px solid #b7c3d6;padding:3px 6px;font:bold 9pt Arial,sans-serif;background:#d9e1f2;color:#14213d"'
+            $row = { param($l1, $v1, $l2, $v2, $c2)
+                $vc = $(if ($c2) { 'style="border:1px solid #b7c3d6;padding:3px 6px;font:bold 10pt Arial,sans-serif;color:' + $c2 + '"' } else { $cell })
+                return ('<tr><td {0}>{1}</td><td {2}>{3}</td><td {0}>{4}</td><td {5}>{6}</td></tr>' -f $lab, (ConvertTo-DsrHtml $l1), $cell, (ConvertTo-DsrHtml $v1), (ConvertTo-DsrHtml $l2), $vc, (ConvertTo-DsrHtml $v2)) }
+            $sb = New-Object System.Text.StringBuilder
+            if ($dp.test) { [void]$sb.Append('<p style="font:bold 11pt Arial,sans-serif;color:#c00000">TEST MODE: a test post. This email went to the Office only.</p>') }
+            [void]$sb.Append(('<p style="font:10.5pt Arial,sans-serif">All,<br>Please see attached the Daily Summary Report for {0} {1} {2} through {3} @{4} Hrs.</p>' -f (ConvertTo-DsrHtml $rig), (ConvertTo-DsrHtml $bop), (ConvertTo-DsrHtml $projType), (ConvertTo-DsrHtml (Format-DsrDate $repDate)), (ConvertTo-DsrHtml $cyc)))
+            [void]$sb.Append('<table style="border-collapse:collapse">')
+            [void]$sb.Append((& $row 'RIG' $rig 'DATA DATE' ("$(Format-DsrDate $repDate) @$cyc Hrs") ''))
+            [void]$sb.Append((& $row 'PROJECT TYPE' "$projType $bop" 'PROJECT PERCENTAGE' $pctText ''))
+            [void]$sb.Append((& $row 'MAINT. ACTUAL START' (Format-DsrDate ([string](Get-Prop $m 'maintStart'))) 'MAINTENANCE DAY' ([string](Get-Prop $m 'maintDay')) ''))
+            [void]$sb.Append((& $row 'ORIGINAL EST. FINISH' (Format-DsrDate ([string](Get-Prop $m 'origFinish'))) 'CURRENT EST. FINISH' $curFin ''))
+            [void]$sb.Append((& $row 'CRITICAL PATH' ([string](Get-Prop $pd 'criticalPath')) 'PLAN VARIANCE (Hrs)' $varText $varColour))
+            [void]$sb.Append((& $row 'BOP NEED DATE' $need 'TOTAL FLOAT, BOP NEED' $flText $flColour))
+            [void]$sb.Append('</table>')
+            $ms = New-Object System.Collections.Generic.List[object]; foreach ($mi0 in (ConvertTo-AabList (Get-Prop $pd 'milestones'))) { if ($null -ne $mi0 -and $mi0 -isnot [string]) { $ms.Add($mi0) | Out-Null } }
+            if ($ms.Count -gt 0) {
+                [void]$sb.Append(('<p style="font:bold 10pt Arial,sans-serif;color:#14213d;margin:10px 0 3px">MILESTONES</p><table style="border-collapse:collapse"><tr><td {0}>BASELINE</td><td {0}>ESTIMATED</td><td {0}>ACTUAL</td><td {0}>MILESTONE</td></tr>' -f $lab))
+                foreach ($mi in $ms) { if ($null -eq $mi -or $mi -is [string]) { continue }; [void]$sb.Append(('<tr><td {0}>{1}</td><td {0}>{2}</td><td {0}>{3}</td><td {0}>{4}</td></tr>' -f $cell, (ConvertTo-DsrHtml (Format-DsrDate ([string](Get-Prop $mi 'baseline')))), (ConvertTo-DsrHtml (Format-DsrDate ([string](Get-Prop $mi 'est')))), (ConvertTo-DsrHtml (Format-DsrDate ([string](Get-Prop $mi 'actual')))), (ConvertTo-DsrHtml ([string](Get-Prop $mi 'name'))))) }
+                [void]$sb.Append('</table>')
+            }
+            $bis = @(ConvertTo-AabList (Get-Prop $pd 'breakins') | Where-Object { $_ -and $_ -isnot [string] -and ([string](Get-Prop $_ 'status')) -ne 'closed' })
+            if ($bis.Count -gt 0) { [void]$sb.Append(('<p style="font:10pt Arial,sans-serif">Break-in work open: {0}. See the attached report.</p>' -f $bis.Count)) }
+            [void]$sb.Append(('<p style="font:10.5pt Arial,sans-serif">The whole schedule is on the BOP Fleet Planning Dashboard: <a href="{0}">{1} on the dashboard</a></p>' -f (ConvertTo-DsrHtml $link), (ConvertTo-DsrHtml $rig)))
+            [void]$sb.Append('<p style="font:9pt Arial,sans-serif;color:#555">Sent automatically by SACRED from the rig''s 12-hour report.</p>')
+            $chat = ('{0}{1} {2} Daily Summary Report {3} @{4} Hrs: {5}. Full schedule: {6}' -f $banner, $rig, $bop, (Format-DsrDate $repDate), $cyc, $pctText, $link)
+            $dsrNotices.Add([ordered]@{ id = $nm; rig = $rig; rigkey = $rigKey; bop = $bop; planid = [string]$dp.planid; cycle = $cyc; reportdate = $repDate; test = [bool]$dp.test; subject = $subject; bodyhtml = $sb.ToString(); chat = $chat; link = $link; pdfname = $pdfName; pdfpath = ('/Digests/daily-reports/' + (Split-Path -Leaf $rigDir) + '/' + $pdfName); source = $dp.file }) | Out-Null
+        }
+        $dnJson = ConvertTo-PlainJson ([ordered]@{ generatedAt = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $dsrNotices.Count; notices = $dsrNotices.ToArray() })
+        $dnFile = Join-Path $helpReceiptDir 'daily-report-notices.json'; $prevDn = ''; if (Test-Path -Path $dnFile) { $prevDn = [System.IO.File]::ReadAllText($dnFile) }
+        $stripDn = { param($t) [regex]::Replace($t, '"generatedAt":"[^"]*"', '') }
+        if ((& $stripDn $prevDn) -ne (& $stripDn $dnJson)) { [System.IO.File]::WriteAllText($dnFile, $dnJson, (New-Object System.Text.UTF8Encoding($false))) }
+        Write-Host "Daily Summary Report: $dsrPdfCount report PDF(s) in daily-reports, $($dsrNotices.Count) offered to the flow in daily-report-notices.json" -ForegroundColor Green
+    }
+} catch { Write-Warning "Daily Summary Report failed (scan unaffected): $($_.Exception.Message)" }
 
 # v2.94 (14 Oct 2026): the whole block goes through ConvertTo-AabPlain, not just reviewers and review. The first
 # real plan through v2.93 on Dan's PC failed at the Windows PowerShell serialiser ("circular reference ...
@@ -5040,7 +5152,7 @@ $dl1Block = ConvertTo-AabPlain ([ordered]@{
     reviewers = $planReviewers.ToArray()      # v2.90
     counts    = [ordered]@{ plans = $dl1Plans.Count; progress = $dl1Progress.Count; closeouts = $dl1Closeouts.Count; evidence = $dl1Evidence.Count; tests = $dl1Test.Count; reviews = $dl1Reviews.Count }
 })
-if ($dl1Plans.Count -gt 0 -or $dl1Test.Count -gt 0) { Write-Host "DL-1: $($dl1Plans.Count) plan(s), $($dl1Progress.Count) with progress, $($dl1Closeouts.Count) closed out, $($dl1Test.Count) test post(s)" -ForegroundColor Green }
+if ($dl1Plans.Count -gt 0 -or $dl1Test.Count -gt 0) { Write-Host "Argo Navis: $($dl1Plans.Count) plan(s), $($dl1Progress.Count) with progress, $($dl1Closeouts.Count) closed out, $($dl1Test.Count) test post(s)" -ForegroundColor Green }
 
 $bopPayload = @{
     generatedAt      = (Get-Date).ToString('yyyy-MM-ddTHH:mm:sszzz')
