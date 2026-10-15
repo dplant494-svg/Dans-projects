@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.02'
+$ScriptVersion = '3.03'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4905,10 +4905,13 @@ function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]
     $uri = ''
     try { $workFull = (Resolve-Path -LiteralPath $work -ErrorAction Stop).ProviderPath; $uri = (New-Object System.Uri -ArgumentList $workFull).AbsoluteUri } catch { $uri = '' }
     if (-not $uri -or -not $uri.StartsWith('file:')) { Remove-Item -Path $work -Force -ErrorAction SilentlyContinue; Write-Warning "PDF for $($src.Name): no page address ($uri) - not printed"; return '' }
-    $bArgs = @('--headless=new', '--disable-gpu', '--no-first-run', '--no-pdf-header-footer', ('--user-data-dir="' + $pdfProfile + '"'), ('--print-to-pdf="' + $tmpPdf + '"'), $uri)
+    # v3.03: no sign-in, sync or background calls from the print-only browser (Edge was signing the profile in and writing the
+    # sign-in reply to the console), and its own chatter goes to a log file instead of the scan window.
+    $bArgs = @('--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-sync', '--disable-background-networking', '--disable-extensions', '--disable-component-update', '--disable-features=msImplicitSignin,msEdgeSignIn,msSmartScreenProtection', '--no-pdf-header-footer', ('--user-data-dir="' + $pdfProfile + '"'), ('--print-to-pdf="' + $tmpPdf + '"'), $uri)
     $onWindows = ($PSVersionTable.PSEdition -ne 'Core') -or $IsWindows
     if (-not $onWindows) { $bArgs = @('--no-sandbox') + $bArgs }
-    $spArgs = @{ FilePath = $script:PdfBrowser; ArgumentList = $bArgs; PassThru = $true; ErrorAction = 'Stop' }
+    $pdfLog = Join-Path ([System.IO.Path]::GetTempPath()) 'sacred-pdf-browser'
+    $spArgs = @{ FilePath = $script:PdfBrowser; ArgumentList = $bArgs; PassThru = $true; ErrorAction = 'Stop'; RedirectStandardOutput = ($pdfLog + '.out.log'); RedirectStandardError = ($pdfLog + '.err.log') }
     if ($onWindows) { $spArgs['WindowStyle'] = 'Hidden' }
     $proc = Start-Process @spArgs
     if (-not $proc.WaitForExit(90000)) { try { $proc.Kill() } catch { }; Remove-Item -Path $work -Force -ErrorAction SilentlyContinue; Write-Warning "PDF for $($src.Name) timed out (left for the next scan)"; return '' }
@@ -5015,6 +5018,7 @@ try {
             }) | Out-Null
             $pfTotal += $pfFiles.Count
         }
+        if ($script:PdfDone -gt 0) { Write-Host "eDocs PDFs: $($script:PdfDone) printed this scan (at most $($script:PdfMax) a scan) under plan-renders" -ForegroundColor Green }
         $pfJson = ConvertTo-PlainJson ([ordered]@{ generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $pfPlans.Count; files = $pfTotal; plans = $pfPlans.ToArray() })
         $pfFile = Join-Path $helpReceiptDir 'plan-files.json'; $prevPf = ''; if (Test-Path -Path $pfFile) { $prevPf = [System.IO.File]::ReadAllText($pfFile) }
         $stripPf = { param($t) [regex]::Replace($t, '"generatedat":"[^"]*"', '') }
