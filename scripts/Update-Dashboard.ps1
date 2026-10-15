@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.00'
+$ScriptVersion = '3.01'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4899,7 +4899,11 @@ function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]
     $tmpPdf = $pdf + '.tmp'
     if (Test-Path -Path $tmpPdf) { Remove-Item -Path $tmpPdf -Force }
     $pdfProfile = Join-Path ([System.IO.Path]::GetTempPath()) 'sacred-pdf-profile'
-    $uri = ([System.Uri](Resolve-Path -Path $work).ProviderPath).AbsoluteUri
+    # v3.01: v3.00 built the address with a [Uri] cast that came back empty, so the browser printed its new-tab page
+    # instead of the record. Build it with New-Object from the full literal path (folder names can hold spaces).
+    $uri = ''
+    try { $workFull = (Resolve-Path -LiteralPath $work -ErrorAction Stop).ProviderPath; $uri = (New-Object System.Uri -ArgumentList $workFull).AbsoluteUri } catch { $uri = '' }
+    if (-not $uri -or -not $uri.StartsWith('file:')) { Remove-Item -Path $work -Force -ErrorAction SilentlyContinue; Write-Warning "PDF for $($src.Name): no page address ($uri) - not printed"; return '' }
     $bArgs = @('--headless=new', '--disable-gpu', '--no-first-run', '--no-pdf-header-footer', ('--user-data-dir="' + $pdfProfile + '"'), ('--print-to-pdf="' + $tmpPdf + '"'), $uri)
     $onWindows = ($PSVersionTable.PSEdition -ne 'Core') -or $IsWindows
     if (-not $onWindows) { $bArgs = @('--no-sandbox') + $bArgs }
