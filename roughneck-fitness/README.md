@@ -43,6 +43,15 @@ Separate brand from Plantworks Studio. Plantworks builds and hosts the site as a
     - **Suggested build:** Supabase (logins, database, private photo storage) and Stripe subscriptions, front end in the same style as the site. Plantworks builds it.
     - **Data protection before the first client logs in:** weight, photos, injuries and health notes are *special category* data under UK GDPR. Needs explicit consent at sign-up, a privacy notice, photos stored privately (never public links), a way for clients to download and delete their data, and registration with the ICO (data protection fee, around £50 a year). Progress photos are never used in marketing without separate written consent per photo.
     - Same rules as the site: nothing in the app says where the coach lives; the programme that got him sober is never named.
+    - **It is also Plantworks' first web app** (studio plan, Roadmap 6): built properly, it becomes the case study for selling web apps.
+    - **Build stages** (start once the rented app has shown what's needed, and the Level 3 is done so one-to-one clients exist):
+      1. Logins and the client list (Supabase): the coach invites a client, the client sets a password.
+      2. Programmes: the coach writes a week, the client sees it with the exercise videos, ticks sessions off.
+      3. Weekly check-in form and progress charts; private photo upload.
+      4. Coach dashboard: who has checked in, trends, feedback, programme updates.
+      5. Stripe subscription for one-to-one (£199 a month), with the app access tied to it.
+      6. Installable on the phone (PWA), privacy notice, consent at sign-up, data download and delete, ICO registration. Then the first real clients move across from the rented app.
+    - **Run it alongside the rented app for a month** before switching, so nothing is lost if something breaks.
 14. **Roughneck clothing, print-on-demand dropshipping (decided 13 Oct 2026)**.
     - Different from Praetorian on purpose: this is **brand merch for the coaching community**, so print-on-demand fits (no stock, no minimums). Praetorian is a premium label and is made in small runs instead.
     - **Drop 01 mockups:** `brand/merch/drop-01-mockups.png`. Hoodie with the slogan on the back, tee (mark front, ethos back), cap (orange mark), shaker. Rebuild with `brand/merch/build-mockups.js`.

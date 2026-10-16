@@ -155,6 +155,12 @@ Placeholders that must be swapped before launch are listed in the checklist belo
    - Not needed: UK VAT below the threshold; Spanish autónomo; anything on the personal self-assessment return for this business.
 4. **First clients**: walk-ins to expat businesses with weak sites, Costa del Sol expat Facebook groups, launch pricing.
 5. **Every job**: Google review and referral ask.
+6. **Web apps (later stage, decided 16 Oct 2026)**. Software and web-app work is a real direction, reached in order, not advertised yet.
+   - [ ] **Stage 1: build the Roughneck client app** (Dan's own product, `roughneck-fitness/README.md` item 13). Learn logins, a database, subscriptions and health-data rules on something the studio owns, with real users.
+   - [ ] **Stage 2: sell small, fenced jobs** once Stage 1 has real users for a few months: booking or enquiry systems, client portals, simple dashboards, calculators and quote tools, small-team internal tools. Built on managed services (Supabase for logins and data, Stripe for payments), never hand-rolled security.
+   - [ ] **Before the first paid app:** professional indemnity insurance; a contract with a written scope and a liability cap; a monthly support fee in every app quote (apps need looking after).
+   - [ ] **Then add a "Web apps" service** to the studio site, with the Roughneck app as the case study. Priced as projects, several times a website.
+   - **Not for now:** handling other people's payments directly, medical or financial systems, large multi-user platforms, anything that must never go down.
 
 ## Pre-launch checklist for the studio site
 
