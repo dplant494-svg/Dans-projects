@@ -5,7 +5,7 @@ SSORT REV 169, Argo Navis REV 16, Precharge Pro as live on 19 October, scanner v
 **ORR reference:** item 9 (UAT sign-off) on `Operation_Readiness_Review_ORR_Checklist_SACRED_v2.xlsx` · **Form owner:**
 Dan Plant · **Collected:** Tuesday 20 October 2026, in the 16:15 feedback session.
 
-This is not a test anyone can fail. It is the record that the people who will use the tools have used them, on the
+This is not a test anyone can fail. It is the record that the people who will use the tools have seen them used, on the
 builds named above, and that each statement below was true for them. A line that is not true is not signed; the reason
 goes on the back and onto the workshop action list with a name and a date.
 
@@ -15,13 +15,13 @@ Each trainee ticks and initials the lines that are true for them.
 
 | # | Statement | ✔ | Initials |
 |---|---|---|---|
-| 1 | I posted a daily report, a surface test, a CBM inspection and a pre-deployment checklist from the tools on `SSCE Equipment`, one at a time, and all four appeared on the Rig Visit Dashboard within ten minutes under my allocated date. | ☐ | ______ |
-| 2 | I read the receipt under Post in WCGRRT and it matched what I had entered (entries, photographs, attachments, size). I know SSORT now says under 📤 Post Report whether it posted, that a post with no connection waits on the laptop and sends itself (the outbox), and that the dashboard is the final proof. | ☐ | ______ |
-| 3 | I attached a test record to a CBM inspection with the task number in its note, and I saw it listed under the report on the dashboard. I know the test records also reach NOV as attachments on the OEM email. | ☐ | ______ |
+| 1 | I followed a daily report, a surface test, a CBM inspection and a pre-deployment checklist being built and posted on `SSCE Equipment`, and saw all four arrive on the Rig Visit Dashboard. I can find the guide for each in my Training Manual. | ☐ | ______ |
+| 2 | I know which box names each report's file (Report Date in WCGRRT, Log Date in SSORT), how to read the receipt and the posted / not-posted line, and what the outbox does when there is no connection. | ☐ | ______ |
+| 3 | I know how to attach a test record to a CBM inspection with the task number in its note, and what NOV receives from Post to OEM. | ☐ | ______ |
 | 4 | I can read the CBM Heatmap and a component's grade history, and I can tell a condition grade (1 to 5) from a test result (1 pass, 5 fail). | ☐ | ______ |
-| 5 | I worked a precharge request on a training well name, read the issued sheet and its PDF, and I know which numbers on the sheet I check against the stack and that the calculation itself is not mine to adjust. | ☐ | ______ |
-| 6 | I raised a help request from the tool, saw it on the TSC Help Centre, and saw the acknowledgement come back on the same email subject. I know what goes to the Help Centre, what is an AAB, and what will be a failure notification. | ☐ | ______ |
-| 7 | I opened the Argo Navis test plan from the landing page, found the BOP group (SFI 331 and 332), the BOP ready date and a break-in, and I know the daily reporting requirement agreed at the hold point. | ☐ | ______ |
+| 5 | I followed a precharge request on a training well name to its issued sheet and PDF, and I know which numbers I check against the stack and that the calculation is not mine to adjust. | ☐ | ______ |
+| 6 | I saw a help request go from the tool to the TSC Help Centre and the acknowledgement come back. I know what goes to the Help Centre and what is an AAB. | ☐ | ______ |
+| 7 | I saw an Argo Navis plan opened from the landing page, the BOP group (SFI 331 and 332), the BOP ready date and a break-in, and I know the daily reporting requirement agreed at the hold point. | ☐ | ______ |
 
 ## What did not work, if anything
 

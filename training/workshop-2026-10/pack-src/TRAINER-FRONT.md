@@ -29,12 +29,14 @@
 
 **Two things that are not errors:**
 
-- **The back-dated question in WCGRRT** is expected in the exercise: delegates click OK.
+- **The back-dated question in WCGRRT** is expected on your back-dated demo posts: you click OK.
 - **A failed WCGRRT post on a laptop with no TSC REPORTS folder** first opens a Save As box. Save it; the report is also waiting to send.
 
-## The class rules
+## The class rules (changed 16 Oct: demonstration only)
 
-- **Every Day 1 report is on `SSCE Equipment`,** one report at a time, each delegate on their own date (1 to 10 October) and serial (`TRN-01` to `TRN-10`).
-- **Post to OEM in report 3:** only once Dan has added the SSCE Equipment guard to the CBM to OEM flow (Saturday step 1). If he hasn't, report 3 is **📤 Post Report only**, and you show Post to OEM once yourself.
-- **Argo Navis on Day 2:** delegates follow on their own laptops, but **only the trainer presses Save or any Post button.** The test plan has one save file, so ten people saving would overwrite each other, and every post sends a test email.
-- **Before anyone leaves, each day:** every laptop opens both tools and waits three seconds. If **📤 n waiting to send** shows, press **Send now**.
+- **You drive, they follow.** The delegates follow on their laptops and **post nothing, save nothing to the server, and press no Post buttons**. Every how-to is in their Training Manual.
+- **Skip the exercise material in Modules 1–3:** anything about allocated dates, training serials, the exercise sheet or delegates posting. Module 4 is now your run-through (below), not an exercise.
+- **Your demonstration posts:** on `SSCE Equipment`, dated **2026-10-11**, serial **TRN-11**. Delete them from PostedReports after the class.
+- **Post to OEM:** press it only if the SSCE Equipment guard is in the CBM to OEM flow (Saturday step 1). Otherwise show the confirm box and cancel.
+- **Argo Navis:** delegates may open the landing page, but **not the test plan**. An open plan saves itself, and the test plan has one save file. You show it on screen.
+- **Before anyone leaves, each day:** every laptop opens both tools and waits three seconds. If **📤 n waiting to send** shows, someone pressed Post with no connection: **Send now**, and tell you.

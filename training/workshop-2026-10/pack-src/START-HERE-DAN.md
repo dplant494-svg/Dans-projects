@@ -1,97 +1,89 @@
 # Start here, Dan: the workshop pack and what you need to do
 
-**Workshop:** Monday 19 to Thursday 22 October 2026, Seadrill Houston. **You present:** Monday and Tuesday (the training review), plus the CBM lessons learned and the SACRED repository sessions on Thursday.
+**Workshop:** Monday 19 to Thursday 22 October 2026, Seadrill Houston. **You present:** Monday and Tuesday (the training review), plus two Thursday sessions: CBM lessons learned (08:00) and SACRED as the repository (14:00).
+
+**How the two training days run (your decision, 16 Oct):**
+
+- You demonstrate every step on screen, in the agenda's order.
+- The delegates follow on their laptops and **post nothing**.
+- Each delegate takes away the **Training Manual**, every how-to guide in one book.
+
+There are no exercises, no allocated dates, no scanning the room's posts and no clean-up of 40 files. The only posts are your own demonstration ones.
 
 ## What's in this zip
 
 | File | What it is | Print? |
 |---|---|---|
 | `00-START-HERE-Dan.pdf` | This guide | No |
-| `01-Joining-Instructions-and-Agenda.pdf` | Already sent to the delegates | 1 for you |
-| `02-Trainer-Script-Day1-and-Day2.pdf` | **Your script for both days**: what to say, click and watch for, with every screen pictured; the answers to every question | **1 for you**, plus 1 for Lee |
-| `03-Trainee-Workbook.pdf` | One per delegate: exercise sheets, the usage table, questions with answer lines, Day 2 exercises, the hold point decisions table, the feedback sheet | **1 per delegate + 2 spare** |
-| `04-Monday-0745-Card.pdf` | One page on each desk: links, badge check, USB files, Print to PDF | **1 per delegate** |
-| `05-Day-1-Deck.pptx` | Monday's slides, from the tools session (21 slides) | No: present from it |
-| `06-Day-2-Deck.pptx` | Tuesday's slides: precharge, dashboards, Argo Navis with the hold point, the loop, what is coming, feedback | No: present from it |
-| `07-Day-2-Hold-Point-P6-Route.pdf` | The tools session's half page on the WCGRRT route for P6 projects | 1 for you |
-| `08-UAT-Sign-off-Form.pdf` | One per delegate, signed in Tuesday's feedback session (ORR item 9) | **1 per delegate** |
-| `USB-stick-for-delegates/` | Three TRAINING photos and a TRAINING test chart PDF for exercise report 3 | Copy onto a USB stick |
-| `Day-1-sample-reports-backup/` | The four "what good looks like" reports, in case a laptop fails | No |
-| `Day-2-precharge-exercise-files/` | The three precharge training requests and the issued sheet | No |
-| `screenshots-Day-1/` | Every Day 1 screen, for slides or questions | No |
-| `sources-markdown/` | The editable text of the scripts and workbook | No |
+| `01-Joining-Instructions-and-Agenda.pdf` | **Updated for the demo format**; send this one to Lee | 1 for you |
+| `02-Presenter-Script-Day1-and-Day2.pdf` | **Your script for both days**: what to show and say, module by module, with every screen pictured; questions the room may ask, with answers | **1 for you**, 1 for Lee |
+| `03-Training-Manual.pdf` | **One per delegate**: how-to guides for WCGRRT, SSORT, precharge, the dashboards, Argo Navis and the Help Centre; the Daily Summary Report requirement; the glossary; the feedback sheet | **1 per delegate + 2 spare** |
+| `04-Monday-0745-Card.pdf` | One page per desk: links, badge check, how today works | **1 per delegate** |
+| `05-Day-1-Deck.pptx` | Monday's slides (tools session, 21 slides). Skip the exercise-rule slides, or say "this is how it would work on the rig". | No: present from it |
+| `06-Day-2-Deck.pptx` | Tuesday's slides (30), matching the script's `[Slide n]` cues | No: present from it |
+| `07-Day-2-Hold-Point-P6-Route.pdf` | The half page on the WCGRRT route for P6 projects | 1 for you |
+| `08-UAT-Sign-off-Form.pdf` | One per delegate, signed in Tuesday's feedback session (ORR item 9), worded for the demo format | **1 per delegate** |
+| `Trainer-demo-files/` | Three TRAINING photos and a TRAINING test chart, for **your** demo reports | Copy to your laptop's Desktop |
+| `Day-1-sample-reports-what-good-looks-like/` | Four finished reports, if you want to show one | No |
+| `Day-2-precharge-exercise-files/` | The three precharge training requests you work through on screen | No |
+| `screenshots-Day-1/` and `sources-markdown/` | Every Day 1 screen; the editable text | No |
 
 ## Saturday 17 October
 
-1. **The SSCE Equipment guard in the CBM to OEM flow (10 min, first thing).** Without it, report 3's Post to OEM emails NOV ten times.
-   - Open Power Automate, then **CBM to OEM**, then **Edit**, then the **TestMode** Compose card.
-   - Clear the Inputs box, click **fx**, paste the expression below, then click **Add** and **Save**:
-     ```
-     or(equals(toLower(trim(coalesce(first(body('SettingsRow')?['value'])?['Value'],'no'))),'yes'), equals(toLower(trim(coalesce(body('Parse_JSON')?['meta']?['asset'],''))),'ssce equipment'))
-     ```
-   - **Prove it:** in SSORT REV 169, on SSCE Equipment, make a scratch Riser Adapter CBM and press **Post to OEM**. Only the Office four should get `[TEST MODE]`. Then delete the file and its dashboard copy from PostedReports.
-   - **Check the Rig Visit Notifications flow too.** If it has a TestMode card, make the same change there. If it hasn't, tell me.
-   - **If you run out of time:** report 3 is Post Report only, and you show Post to OEM once yourself. The trainer's front page says so.
+1. **The SSCE Equipment guard in the CBM to OEM flow (10 minutes).** It's recommended, not essential now. Without it, you can't demonstrate Post to OEM safely: you show the confirm box and cancel.
+   1. Open Power Automate, then **CBM to OEM**, then **Edit**, then the **TestMode** Compose card.
+   2. Clear the Inputs box, click **fx**, paste the expression below, then click **Add** and **Save**:
+      ```
+      or(equals(toLower(trim(coalesce(first(body('SettingsRow')?['value'])?['Value'],'no'))),'yes'), equals(toLower(trim(coalesce(body('Parse_JSON')?['meta']?['asset'],''))),'ssce equipment'))
+      ```
+   3. **Prove it:** in SSORT, on SSCE Equipment, press **Post to OEM** on a scratch Riser Adapter CBM. Only the Office four should get `[TEST MODE]`. Then delete the file from PostedReports.
 2. **The Pct fix** in the Argo Navis Plan Notifications flow: Compose **Pct** =
    ```
    replace(string(coalesce(body('Parse_JSON')?['progress']?['pctComplete'], '')), '%', '')
    ```
-3. **The two Argo Navis test reports** (`samples/Argo-Navis_test_reports_2026-10-17.zip`): drop pair 1 into PostedReports, check the email and the chat line, then drop pair 2. Delete all four afterwards.
-4. **The USB stick:** copy the `USB-stick-for-delegates` folder onto it. Two sticks if you can.
-5. **Read the trainer's script once, start to finish.** Mark anything you don't understand and ask me.
-6. **Rehearse Day 1, module by module, with me playing the room.** Open WCGRRT and SSORT, check the badges (WCGRRT REV 174, SSORT REV 169), and do the exercise yourself once on SSCE Equipment with date 2026-10-11 and serial TRN-11, so you know exactly what the delegates will see.
-   - Then delete your four rehearsal posts from PostedReports.
-   - Then check the tool shows nothing waiting to send.
+3. **The two Argo Navis test reports** (`samples/Argo-Navis_test_reports_2026-10-17.zip`): drop pair 1 into PostedReports, check the email and chat line, then drop pair 2. Delete all four afterwards.
+4. **Send Lee the updated agenda** (`01-…pdf`). It now says the sessions are demonstrated, with a Training Manual.
+5. **Read the presenter's script once, start to finish.** Note anything unclear and ask me.
+6. **Rehearse Day 1 with me playing the room.** Open both tools and check the badges: WCGRRT **REV 174**, SSORT **REV 169**. Do the Module 4 run-through once yourself: SSCE Equipment, date **2026-10-11**, serial **TRN-11**. Then delete those four rehearsal posts, so Monday's run-through posts are new.
 
 ## Sunday 18 October
 
 1. **Rehearse Day 2:**
-   - **Precharge:** walk through the three training requests.
-   - **Dashboards:** click through each tab you'll show.
-   - **Argo Navis:** open the West Vela test plan (WVE-BOP1-20261012) from the landing page and rehearse the hold point slides.
-2. **A full run of both days against the clock**, timing each module. The times are in the script.
-3. **Print everything** (the Print column above). Workbooks are double-sided and stapled; the card and the UAT form are single sheets.
-4. **Check Monday's room kit:**
-   - the projector adapter for your laptop;
+   - work the three precharge training requests;
+   - click through each dashboard tab you'll show;
+   - open the West Vela test plan (WVE-BOP1-20261012) in Argo Navis;
+   - rehearse the hold point slides (19 to 21).
+2. **A full run of both days against the clock.** The times are in the script.
+3. **Print** (see the Print column above). The manual is double-sided and bound or stapled.
+4. **Room kit:**
+   - the projector adapter;
    - a spare charger;
-   - the USB sticks;
-   - a printed delegate list with each person's date (2026-10-01 to 2026-10-10) and serial (TRN-01 to TRN-10).
+   - `Trainer-demo-files` on your Desktop;
+   - the Settings workbook and Power Automate in a browser tab, in case you need them.
 
 ## Monday 19 October (Day 1)
 
-- **07:15:** you're in the room. Laptop on the projector, both tools open, badges checked, the Day 1 deck open.
-- **07:45:** a card on each desk. Walk the room: badge check, USB files copied, Print to PDF there.
-- **08:00:** Lee opens. Be set up and past the badge check before Lee finishes.
-- **08:30 to 17:00:** follow the script. Say KE-06, KE-08 and KE-13 up front: they're on the script's front page.
-- **Before anyone leaves:** every laptop opens both tools and waits three seconds. If **📤 n waiting to send** shows, press **Send now**.
+- **07:15:** laptop on the projector, both tools open, badges checked, Day 1 deck open.
+- **07:45:** a card and a manual on each desk. Walk the room checking badges.
+- **08:00:** Lee opens.
+- **08:30–14:30:** Modules 1–3. Say KE-06, KE-08 and KE-13 up front (script front page).
+- **14:45–17:00:** the run-through. Build all four reports on screen and post them (dated 2026-10-11), then show them on the dashboard.
+- **Before anyone leaves:** every laptop opens both tools and waits three seconds. If **waiting to send** shows, press **Send now**.
 
 ## Tuesday 20 October (Day 2)
 
-- **07:45:** the Day 2 deck open; Argo Navis open on the test plan; the precharge training files to hand.
-- **13:00, Argo Navis:** the delegates follow along, but **only you press Save or Post**.
-- **The hold point:** fill in the decisions table on screen as the room agrees each one. It goes onto the action list.
-- **16:15, feedback:** hand out the UAT forms. Collect them signed, with Lee as witness.
-- **Before anyone leaves:** the "waiting to send" check again.
+- **08:00:** precharge, worked through on screen.
+- **10:15:** the dashboards.
+- **13:00:** Argo Navis. Delegates may open the landing page, but **not the test plan**: you show it.
+  - **At the hold point (slides 19–21),** fill in the decisions table as the room agrees each one.
+- **14:45:** the loop. You post one Help Centre request on SSCE Equipment and show the email, chat and receipt.
+- **16:15:** feedback. The UAT forms are signed, with Lee as witness.
 
-## Thursday 22 October
+## After the class
 
-- **08:00:** CBM lessons learned and the CBM workshop (you, with the group).
-- **14:00:** SACRED as the governed WCE technical repository (30 minutes).
-
-## After the class (Friday)
-
-1. **Check every laptop had nothing waiting to send** (done Monday and Tuesday).
-2. **Delete the class's posts from PostedReports:**
-   - 40 report files, dated 2026-10-01 to 2026-10-10 on SSCE Equipment;
-   - every `seadrill-oem_SSCE-Equipment_…` file;
-   - your rehearsal posts, if any are left.
-
-   The dashboard clears them on the next scan.
-3. **File the signed UAT forms** (ORR item 9), and send me a count of who signed each line.
-4. **Send me the hold point decisions and the action list.** I'll update the requirements, Lee's handoff and the plan.
-
-## Who to call
-
-- **Tools, on the day:** frozen. Nothing deploys before 23 Oct unless you ask the tools session.
-- **Argo Navis:** Lee is in the room.
-- **Anything SACRED:** this session.
+1. **Delete your demonstration posts from PostedReports:**
+   - the four reports dated 2026-10-11 on SSCE Equipment;
+   - any `seadrill-oem_SSCE-Equipment_…` copy;
+   - the Help Centre test request, if you want it gone.
+2. **File the signed UAT forms** (ORR item 9).
+3. **Send me the hold point decisions and the action list.** I'll update the requirements, Lee's handoffs and the plan.

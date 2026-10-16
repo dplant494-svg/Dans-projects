@@ -68,6 +68,17 @@ def shots_to_html(text):
     return re.sub(r'`?\[SHOT ([0-9]+[a-z]?)\]`?', rep, text)
 
 
+def imgs_to_html(text):
+    def rep(m):
+        p = os.path.join(ROOT, m.group(1).strip())
+        if not os.path.exists(p):
+            return m.group(0)
+        ext = 'jpeg' if p.lower().endswith(('.jpg', '.jpeg')) else 'png'
+        b64 = base64.b64encode(open(p, 'rb').read()).decode()
+        return '<img class="shot" src="data:image/%s;base64,%s">' % (ext, b64)
+    return re.sub(r'`?\[IMG ([^\]]+)\]`?', rep, text)
+
+
 def md_html(text):
     text = text.replace('- [ ]', '- ☐').replace('- [x]', '- ☑')
     return markdown.markdown(text, extensions=['tables', 'fenced_code', 'sane_lists'])
@@ -126,22 +137,25 @@ def main():
     # --- 01 agenda (already built)
     shutil.copy(os.path.join(HERE, 'WCE-Workshop-Joining-Instructions-and-Agenda.pdf'), os.path.join(OUT, '01-Joining-Instructions-and-Agenda.pdf'))
 
-    # --- 02 trainer's script, both days
-    body = cover('WCE SME Workshop · Houston · 19–20 October 2026', "Trainer's script", 'Day 1: the reporting tools · Day 2: precharge, the SACRED dashboards, Argo Navis, the loop<br><br>Frozen builds: WCGRRT REV 174 · SSORT REV 169 · Argo Navis REV 16 · scanner v3.11<br>Dan Plant, Technical Services – Subsea')
+    # --- 02 presenter's script, both days (Day 1 Module 4 replaced by the run-through)
+    body = cover('WCE SME Workshop · Houston · 19–20 October 2026', "Presenter's script", 'Day 1: the reporting tools · Day 2: precharge, the SACRED dashboards, Argo Navis, the loop<br><br>Demonstration and follow-along: the delegates post nothing<br>Frozen builds: WCGRRT REV 174 · SSORT REV 169 · Argo Navis REV 16 · scanner v3.11<br>Dan Plant, Technical Services – Subsea')
     body += md_html(read(os.path.join(SRC, 'TRAINER-FRONT.md')))
-    body += md_html(shots_to_html(read(os.path.join(D1, '02-Walkthrough-Scripts.md'))))
-    body += md_html(read(os.path.join(D1, '04-Questions-and-Answers.md')))
-    body += md_html(read(os.path.join(SRC, 'DAY2-TRAINER-SCRIPT.md')))
-    to_pdf(body, os.path.join(OUT, '02-Trainer-Script-Day1-and-Day2.pdf'), "Trainer's script")
+    d1 = read(os.path.join(D1, '02-Walkthrough-Scripts.md'))
+    d1 = d1[:d1.index('# Module 4')] + read(os.path.join(SRC, 'DAY1-MODULE4-RUNTHROUGH.md'))
+    body += md_html(shots_to_html(d1))
+    qa = read(os.path.join(D1, '04-Questions-and-Answers.md')).replace('# Day 1 workbook questions', '# Day 1: questions the room may ask')
+    body += md_html(qa)
+    body += md_html(imgs_to_html(read(os.path.join(SRC, 'DAY2-TRAINER-SCRIPT.md'))))
+    to_pdf(body, os.path.join(OUT, '02-Presenter-Script-Day1-and-Day2.pdf'), "Presenter's script")
 
-    # --- 03 trainee workbook, both days
-    body = cover('WCE SME Workshop · Houston · 19–20 October 2026', 'Trainee workbook', 'The reporting tools, precharge, the SACRED dashboards and Argo Navis', name=True)
-    body += md_html(read(os.path.join(SRC, 'WORKBOOK-FRONT.md')))
-    body += md_html(read(os.path.join(D1, '03-Exercise-Sheet.md')))
+    # --- 03 the Training Manual (every how-to guide), one per delegate
+    body = cover('WCE SME Workshop · Houston · 19–20 October 2026', 'Training Manual', 'How-to guides: WCGRRT, SSORT, precharge, the SACRED dashboards, Argo Navis and the TSC Help Centre<br><br>Builds: WCGRRT REV 174 · SSORT REV 169 · Argo Navis REV 16', name=True)
+    body += md_html(read(os.path.join(SRC, 'MANUAL-FRONT.md')))
+    body += md_html(shots_to_html(read(os.path.join(SRC, 'MANUAL-PART1-TOOLS.md'))))
     body += md_html(read(os.path.join(SRC, 'WORKBOOK-USAGE-TABLE.md')))
-    body += md_html(strip_answers(read(os.path.join(D1, '04-Questions-and-Answers.md'))))
-    body += md_html(read(os.path.join(SRC, 'DAY2-WORKBOOK.md')))
-    to_pdf(body, os.path.join(OUT, '03-Trainee-Workbook.pdf'), 'Trainee workbook')
+    body += md_html(imgs_to_html(read(os.path.join(SRC, 'MANUAL-PART2-PLATFORM.md'))))
+    body += md_html(read(os.path.join(ROOT, 'TRAINING-Day2-Feedback-Sheet.md')))
+    to_pdf(body, os.path.join(OUT, '03-Training-Manual.pdf'), 'Training Manual')
 
     # --- 04 the Monday card
     to_pdf(first_h1(md_html(read(os.path.join(SRC, 'MONDAY-0745-CARD.md')))), os.path.join(OUT, '04-Monday-0745-Card.pdf'), 'Monday 07:45')
@@ -155,9 +169,9 @@ def main():
     to_pdf(first_h1(md_html(read(os.path.join(SRC, 'UAT-SIGN-OFF.md')))), os.path.join(OUT, '08-UAT-Sign-off-Form.pdf'), 'UAT sign-off')
 
     # --- files
-    usb = os.path.join(OUT, 'USB-stick-for-delegates')
+    usb = os.path.join(OUT, 'Trainer-demo-files')
     shutil.copytree(os.path.join(SRC, 'usb'), usb)
-    s1 = os.path.join(OUT, 'Day-1-sample-reports-backup')
+    s1 = os.path.join(OUT, 'Day-1-sample-reports-what-good-looks-like')
     shutil.copytree(os.path.join(D1, 'samples'), s1)
     shutil.copytree(os.path.join(PRE, 'exercise-files'), os.path.join(OUT, 'Day-2-precharge-exercise-files'))
     sd = os.path.join(OUT, 'screenshots-Day-1')
@@ -171,7 +185,7 @@ def main():
     os.makedirs(src_dir)
     for f in ['02-Walkthrough-Scripts.md', '03-Exercise-Sheet.md', '04-Questions-and-Answers.md', '09-WHATS-NEW-SSORT-169-WCGRRT-174.md', '10-REPLY-WORKSHOP-PACK-2026-10-16.md']:
         shutil.copy(os.path.join(D1, f), os.path.join(src_dir, 'Day1-' + f))
-    for f in ['DAY2-TRAINER-SCRIPT.md', 'DAY2-WORKBOOK.md']:
+    for f in ['DAY2-TRAINER-SCRIPT.md', 'DAY1-MODULE4-RUNTHROUGH.md', 'MANUAL-PART1-TOOLS.md', 'MANUAL-PART2-PLATFORM.md']:
         shutil.copy(os.path.join(SRC, f), os.path.join(src_dir, f))
 
     # --- zip
