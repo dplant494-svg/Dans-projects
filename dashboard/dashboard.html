@@ -1899,6 +1899,22 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
     [['pdcbop_ph_rams', 'Ram packer photographs (legacy)'], ['pdcbop_ph_cavities', 'Cavity sealing face photographs (legacy)'], ['pdcbop_ph_doors', 'Door sealing face photographs (legacy)']].forEach(function (s) {
       var arr = pdc[s[0]]; if (isPhotoArr(arr)) { wrap.appendChild(mk('div', 'rv-notes', s[1] + ' (' + arr.length + ')')); var ph = rvPhotos(arr, []); if (ph) wrap.appendChild(ph); }
     });
+    // v3.10 (SSORT 165, rolling 76.2): FRM-00-0168 Rev 9 additions, shown as their own section with the form's wording.
+    // Absent means the checklist predates Rev 9 (never "No"); a tick is "1".
+    var R9 = [['pdc_r9_rov_lineup', 'ROV panel valves verified in orientation and line-up, photographed'], ['pdc_r9_riser_checklist', 'Running and pulling riser checklist completed'],
+      ['pdc_r9_riser_drops', 'Drops inspection completed'], ['pdc_r9_riser_seals', 'Riser seals satisfactory and correctly oriented'],
+      ['pdc_r9_riser_by_3p', 'Riser maintenance by a 3rd party'], ['pdc_r9_riser_by_3p_company', '3rd party company'], ['pdc_r9_riser_by_cbm', 'Riser maintenance by CBM'],
+      ['pdc_r9_riser_by_seadrill', 'Riser maintenance by Seadrill'], ['pdc_r9_riser_rem', 'Riser remarks']];
+    var hasR9 = keys.some(function (k) { return /^pdc_r9_/.test(k); });
+    if (hasR9) {
+      wrap.appendChild(mk('div', 'rv-section-label', 'FRM-00-0168 Rev 9 additions'));
+      var r9t = mk('table', '');
+      R9.forEach(function (p) { if (!(p[0] in pdc)) return; var v = pdc[p[0]]; var txt = v === '1' ? 'Yes' : (v === '' || v == null ? '\u2014' : String(v));
+        var tr = mk('tr', ''); tr.appendChild(mk('th', '', p[1])); tr.appendChild(soakValueCell(txt)); r9t.appendChild(tr); });
+      wrap.appendChild(r9t);
+      if (isPhotoArr(pdc.pdc_r9_rov_ph)) { wrap.appendChild(mk('div', 'rv-notes', 'ROV panel valve photographs (' + pdc.pdc_r9_rov_ph.length + ')')); var r9ph = rvPhotos(pdc.pdc_r9_rov_ph, []); if (r9ph) wrap.appendChild(r9ph); }
+    }
+    general = general.filter(function (k) { return !/^pdc_r9_/.test(k); });
     var gen = general.filter(function (k) { return !/^pdcbop_ph_/.test(k); }).map(function (k) { return [k.replace(/^pdc(bop)?_/, ''), k]; });
     var gt = fieldsTable(gen); if (gt) { wrap.appendChild(mk('div', 'rv-section-label', 'Checklist fields')); wrap.appendChild(gt); }
     var genPhotos = general.filter(function (k) { return isPhotoArr(pdc[k]) && !/^pdcbop_ph_/.test(k); });
@@ -3494,6 +3510,22 @@ var SEADRILL_LOGO_WHITE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAC98AAAP
         body.appendChild(row);
       });
     }
+    // v3.10 (SSORT 169, rolling 80.2): NOV's "Usage Data at date of removal from service" (ID section 8.1) on the
+    // Upper / Lower SBOP, Gate Valves, Poslock Door and U2B Door CBMs. Dates are stored ISO; shown DD/MMM/YYYY as NOV's form asks.
+    (function () {
+      var pre = equipPrefix ? equipPrefix + 'usage_' : null;
+      if (!pre) { var hit = Object.keys(cbm).filter(function (k) { return /_usage_(pn|sn|in|out|wet|press)$/.test(k); })[0]; if (hit) pre = hit.replace(/(pn|sn|in|out|wet|press)$/, ''); }
+      if (!pre) return;
+      var f = ['pn', 'sn', 'in', 'out', 'wet', 'press'].map(function (k) { return String(cbm[pre + k] || '').trim(); });
+      if (!f.some(Boolean)) return;
+      var nov = function (d) { var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d); return m ? m[3] + '/' + ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][Number(m[2]) - 1] + '/' + m[1] : d; };
+      body.appendChild(mk('div', 'rv-section-label', 'Usage data at date of removal from service (NOV 8.1)'));
+      var uw = mk('div', 'rv-soak'), t = mk('table', ''), hr = mk('tr', '');
+      ['Part No.', 'Serial No.', 'Date in Service', 'Date out of Service', 'Wet Cycle Count', 'Pressure Cycles'].forEach(function (h) { hr.appendChild(mk('th', '', h)); });
+      t.appendChild(hr); var tr = mk('tr', '');
+      [f[0], f[1], nov(f[2]), nov(f[3]), f[4], f[5]].forEach(function (v) { tr.appendChild(mk('td', '', v || '\u2014')); });
+      t.appendChild(tr); uw.appendChild(t); body.appendChild(uw);
+    })();
     // SSORT 152 (entry 42): test records and documents attached to this equipment, one array
     // per tile; note carries the task reference. Shown as posted, never judged.
     rvAttachmentList(cbm.cbmatt, body, 'Test records and documents attached');

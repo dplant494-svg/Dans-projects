@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.09'
+$ScriptVersion = '3.10'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -174,6 +174,18 @@ function Get-Prop {
 # original ISO string, which breaks lexicographic date sorting/comparison.
 # Timestamp fields read from SSCE request/decision JSON go through this
 # instead of a bare [string] cast so sorting stays correct on both editions.
+# v3.10 (rolling 79.3): posts can arrive late from a tablet's outbox, so "newest" means the time the report was saved
+# (meta.saved, else exportedAt), never only the time the file landed. Returns a UTC [datetime] or $null.
+function Get-PostSavedUtc {
+    param($Json, $Meta)
+    foreach ($v in @((Get-Prop $Meta 'saved'), (Get-Prop $Json 'exportedAt'))) {
+        if ($null -eq $v -or "$v" -eq '') { continue }
+        if ($v -is [datetime]) { return $v.ToUniversalTime() }
+        $dt = [datetime]::MinValue
+        if ([datetime]::TryParse([string]$v, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AdjustToUniversal -bor [System.Globalization.DateTimeStyles]::AssumeUniversal, [ref]$dt)) { return $dt }
+    }
+    return $null
+}
 function ConvertTo-StableTimestamp {
     param($Value)
     if ($null -eq $Value) { return '' }
@@ -1199,6 +1211,8 @@ $planningCompletion = @{}   # keyed rig|bopNo; newest EXPLICIT projectComplete v
 $dayLogEntries = @{}   # keyed rig|date|shift (newest file for that day/shift wins)
 $r53Events = New-Object System.Collections.Generic.List[object]
 $cbmGradeEntries = @{}   # keyed rig|class|equip|itemKey|date (newest file wins on exact collision)
+$cbmUsageRows = New-Object System.Collections.Generic.List[object]   # v3.10 (80.2): NOV usage data per CBM tile
+$pdcRev9Rows = New-Object System.Collections.Generic.List[object]    # v3.10 (76.2): FRM-00-0168 Rev 9 lines per checklist
 $marineEntries = @{}     # keyed rig|date (newest file wins) - Marine Integrity Reports
 $topsetEntries = @{}     # keyed rig|torRef (newest revision wins, torStatus NEVER latched) - TOPSET Investigation ToRs (WCGRRT REV 148)
 $restrictedTopsetFiles = @{}  # filenames whose topsetData cfClass is above 'Seadrill Internal' - kept out of reports[] and the deployed report copies
@@ -2527,9 +2541,15 @@ foreach ($f in $files) {
         $equipKey = ([string](Get-Prop $entry 'equip')).Trim()
         $key = if ($entryDate) { "$rig|$entryDate|$shift|$equipKey" } else { "file|$($f.Name)|$($dayLogEntries.Count)" }
         $existing = $dayLogEntries[$key]
-        if (-not $existing -or ($item.rank -gt $existing.rank) -or
-            (($item.rank -eq $existing.rank) -and ($f.LastWriteTime -gt $existing.modified))) {
-            $dayLogEntries[$key] = @{ modified = $f.LastWriteTime; rank = $item.rank; entry = $rec }
+        # v3.10 (79.3): between two copies of the same entry, the later SAVED one wins; arrival time only breaks a tie
+        $dlSaved = Get-PostSavedUtc -Json $json -Meta $meta
+        $dlNewer = $false
+        if ($existing -and $item.rank -eq $existing.rank) {
+            if ($dlSaved -and $existing.saved -and $dlSaved -ne $existing.saved) { $dlNewer = ($dlSaved -gt $existing.saved) }
+            else { $dlNewer = ($f.LastWriteTime -gt $existing.modified) }
+        }
+        if (-not $existing -or ($item.rank -gt $existing.rank) -or $dlNewer) {
+            $dayLogEntries[$key] = @{ modified = $f.LastWriteTime; saved = $dlSaved; rank = $item.rank; entry = $rec }
         }
     }
 
@@ -2578,8 +2598,11 @@ foreach ($f in $files) {
             # to rig|date|itemKey there since $checkShift is blank.
             $rcKey = "$rig|$checkDate|$checkShift|$($reading.itemKey)"
             $rcExisting = $rigCheckEntries[$rcKey]
-            if (-not $rcExisting -or ($f.LastWriteTime -gt $rcExisting.modified)) {
-                $rigCheckEntries[$rcKey] = @{ modified = $f.LastWriteTime; entry = $rec }
+            $rcSaved = Get-PostSavedUtc -Json $json -Meta $meta   # v3.10 (79.3): the later saved copy wins
+            $rcNewer = $true
+            if ($rcExisting) { if ($rcSaved -and $rcExisting.saved -and $rcSaved -ne $rcExisting.saved) { $rcNewer = ($rcSaved -gt $rcExisting.saved) } else { $rcNewer = ($f.LastWriteTime -gt $rcExisting.modified) } }
+            if ($rcNewer) {
+                $rigCheckEntries[$rcKey] = @{ modified = $f.LastWriteTime; saved = $rcSaved; entry = $rec }
             }
         }
     }
@@ -2691,6 +2714,39 @@ foreach ($f in $files) {
                     if (-not $existing -or ($f.LastWriteTime -gt $existing.modified)) {
                         $cbmGradeEntries[$key] = @{ modified = $f.LastWriteTime; entry = $rec }
                     }
+                }
+            }
+
+            # v3.10 (rolling 80.2, SSORT 169): NOV's "Usage Data at date of removal from service" (section 8.1) on the
+            # Upper / Lower SBOP, Gate Valves, Poslock Door and U2B Door CBMs: cbm_<equip>_usage_pn|sn|in|out|wet|press.
+            # One row per tile that has any of them; absent on posts before 169 and on other classes.
+            if ($cbm) {
+                $usPrefix = 'cbm_' + ($cbmClass -replace '[^A-Za-z0-9]', '_') + '_usage_'
+                $usVals = @{}; $usAny = $false
+                foreach ($us in @('pn', 'sn', 'in', 'out', 'wet', 'press')) { $usv = ([string](Get-Prop $cbm ($usPrefix + $us))).Trim(); $usVals[$us] = $usv; if ($usv) { $usAny = $true } }
+                if ($usAny) {
+                    $cbmUsageRows.Add([ordered]@{ file = $f.Name; rig = [string]$rig; date = $cbmDate; class = $cbmClass; equip = $cbmEquip
+                        part_no = $usVals['pn']; serial_no = $usVals['sn']; date_in_service = $usVals['in']; date_out_of_service = $usVals['out']
+                        wet_cycles = $usVals['wet']; pressure_cycles = $usVals['press']
+                        model_serial = ([string](Get-Prop $cbm ('cbm_' + ($cbmClass -replace '[^A-Za-z0-9]', '_') + '_md_serial'))).Trim(); recipient_serial = ([string](Get-Prop $cbm 'rcpt_serial')).Trim(); rev = $metaRev }) | Out-Null
+                }
+            }
+            # v3.10 (rolling 76.2, SSORT 165): FRM-00-0168 Rev 9 additions on the pre-deployment checklist (pdc_r9_*).
+            # Absent means the checklist predates Rev 9, never No; a row only when any Rev 9 key is present.
+            $pdcT = Get-Prop $tile 'pdcData'
+            if ($pdcT) {
+                $r9Any = $false
+                foreach ($r9p in $pdcT.PSObject.Properties) { if ($r9p.Name -like 'pdc_r9_*') { $r9Any = $true; break } }
+                if (-not $r9Any -and $pdcT -is [System.Collections.IDictionary]) { foreach ($r9k in $pdcT.Keys) { if ([string]$r9k -like 'pdc_r9_*') { $r9Any = $true; break } } }
+                if ($r9Any) {
+                    $r9Ph = 0; foreach ($r9x in (ConvertTo-AabList (Get-Prop $pdcT 'pdc_r9_rov_ph'))) { if ($null -ne $r9x) { $r9Ph++ } }
+                    $r9yes = { param($k) $(if (([string](Get-Prop $pdcT $k)).Trim() -eq '1') { 'Yes' } else { '' }) }
+                    $pdcRev9Rows.Add([ordered]@{ file = $f.Name; rig = [string]$rig; date = [string](Get-Prop $meta 'date'); planid = [string](Get-Prop $meta 'planid')
+                        rov_lineup = (& $r9yes 'pdc_r9_rov_lineup'); rov_photos = $r9Ph
+                        riser_checklist = (& $r9yes 'pdc_r9_riser_checklist'); riser_drops = (& $r9yes 'pdc_r9_riser_drops'); riser_seals = (& $r9yes 'pdc_r9_riser_seals')
+                        riser_by_3p = (& $r9yes 'pdc_r9_riser_by_3p'); riser_by_3p_company = ([string](Get-Prop $pdcT 'pdc_r9_riser_by_3p_company')).Trim()
+                        riser_by_cbm = (& $r9yes 'pdc_r9_riser_by_cbm'); riser_by_seadrill = (& $r9yes 'pdc_r9_riser_by_seadrill')
+                        riser_remarks = ConvertTo-PlainText ([string](Get-Prop $pdcT 'pdc_r9_riser_rem')); rev = $metaRev }) | Out-Null
                 }
             }
 
@@ -3412,6 +3468,8 @@ $payload = [pscustomobject]@{
         r53Events = $r53Events.ToArray()
     }
     cbmGrades    = $cbmGradeSorted.ToArray()
+    cbmUsage     = $cbmUsageRows.ToArray()   # v3.10 (80.2)
+    pdcRev9      = $pdcRev9Rows.ToArray()    # v3.10 (76.2)
     rigChecks    = $rigCheckSorted.ToArray()
     marineScores = $marineSorted.ToArray()
     topsetInvestigations = $topsetSorted.ToArray()
@@ -5555,6 +5613,8 @@ if ($databaseExportPath -and $exportDue) {
         Export-DatabaseTable -Name 'daily_log_entries' -Rows $payload.dailyLog.entries -KeyCols @('rig','month','day') -Tables $exportTables
         Export-DatabaseTable -Name 'r53_events' -Rows $payload.dailyLog.r53Events -KeyCols @('file') -Tables $exportTables
         Export-DatabaseTable -Name 'cbm_grades' -Rows $payload.cbmGrades -KeyCols @('file','itemKey') -Tables $exportTables
+        Export-DatabaseTable -Name 'cbm_usage' -Rows $payload.cbmUsage -KeyCols @('file','class','equip') -Tables $exportTables   # v3.10 (80.2)
+        Export-DatabaseTable -Name 'pdc_rev9' -Rows $payload.pdcRev9 -KeyCols @('file') -Tables $exportTables   # v3.10 (76.2)
         Export-DatabaseTable -Name 'rig_checks' -Rows $payload.rigChecks -KeyCols @('file','itemKey') -Tables $exportTables
         Export-DatabaseTable -Name 'marine_scores' -Rows $payload.marineScores -KeyCols @('file') -Tables $exportTables
         Export-DatabaseTable -Name 'topset_investigations' -Rows $payload.topsetInvestigations -KeyCols @('file') -Tables $exportTables
