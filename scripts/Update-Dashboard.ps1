@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.06'
+$ScriptVersion = '3.07'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1248,6 +1248,7 @@ $dl1Evidence = New-Object System.Collections.Generic.List[object]   # one row pe
 $dl1Test = New-Object System.Collections.Generic.List[object]       # the test posts, listed so the Status page and Dan can see them
 $dl1Versions = New-Object System.Collections.Generic.List[object]   # every plan post (planId, scopeVersion, status) for Fabric
 $dl1PostPlan = @{}     # v2.89: file name -> meta.planid for every ordinary post made under a plan
+$planStateSrc = @{}   # v3.07: plan id (|test) -> the newest post carrying scheduleBuilderState, published as plans-state\<planId>.json
 $dsrPosts = New-Object System.Collections.Generic.List[object]   # v3.04: planning reports with a 12-hour cycle, for the Daily Summary Report
 $dl1Reviews = @{}      # v2.90: Help Centre 'plan-review' records (Plans tab), keyed planId|scopeVersion|email; the newest saved per reviewer wins
 $dl1Designations = @{}   # v2.95: Argo Navis 'designation' export per planId (the stack's required rows and photograph slots), newest wins
@@ -2052,6 +2053,14 @@ foreach ($f in $files) {
     if ($metaKindD -eq 'planning-report' -and ((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')) {
         $dl1TestReport = $true
         $dl1Test.Add([ordered]@{ file = $f.Name; kind = 'planning-report'; planId = ''; scopeVersion = 0; rig = ([string](Get-Prop $meta 'asset')).Trim(); posted = (ConvertTo-StableTimestamp (Get-Prop $json 'exportedAt')); dryRun = (ConvertTo-AabBool (Get-Prop $json 'dryRun')) }) | Out-Null
+    }
+    # v3.07 (Dan, 16 Oct): "Load latest schedule". The newest post under a plan that carries Argo Navis's own saved
+    # session (scheduleBuilderState: the planning report and the Sync file) is published per plan at
+    # /sacred/dl1/plans-state/<planId>[.test].json, so the rig opens its schedule from the server, not from a file.
+    if ($postPlanId -and $null -ne (Get-Prop $json 'scheduleBuilderState')) {
+        $psTest = [bool]((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')
+        $psKey = $postPlanId + $(if ($psTest) { '|test' } else { '' })
+        if (-not $planStateSrc.ContainsKey($psKey) -or $f.LastWriteTime -gt $planStateSrc[$psKey].modified) { $planStateSrc[$psKey] = @{ full = $f.FullName; file = $f.Name; modified = $f.LastWriteTime; planid = $postPlanId; test = $psTest; rig = ([string](Get-Prop $meta 'asset')).Trim() } }
     }
     # v3.04 (plan item 74): a planning report that carries the 12-hour cycle (WCGRRT 172+, Argo Navis) is kept for the
     # Daily Summary Report: printed to PDF and offered to the Daily Summary Report flow. Older posts have no cycle and
@@ -4768,6 +4777,8 @@ try {
         if ($dl1ProgressSummaries.ContainsKey($planKey) -and $dl1ProgressSummaries[$planKey]) { $pgs = $dl1ProgressSummaries[$planKey]; $statusDoc['progress'] = [ordered]@{ asof = [string](Get-Prop $pgs 'asOf'); pctcomplete = (Get-Prop $pgs 'pctComplete'); posted = [string](Get-Prop $pgs 'posted') } }
         if ($dl1Closeouts.ContainsKey($planKey)) { $statusDoc['closedout'] = $true }
         if ($dl1Designations.ContainsKey($spid)) { $statusDoc['designation'] = $dl1Designations[$spid] }
+        $psk = $spid + $(if ($isTestPlan) { '|test' } else { '' })
+        if ($planStateSrc.ContainsKey($psk)) { $pss = $planStateSrc[$psk]; $statusDoc['latestschedule'] = [ordered]@{ path = ('plans-state/' + $spid + $(if ($isTestPlan) { '.test' } else { '' }) + '.json'); file = [string]$pss.file; saved = $pss.modified.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') } }
         $statusName = $spid + $(if ($isTestPlan) { '.test' } else { '' }) + '.json'
         $statusJson = ConvertTo-PlainJson $statusDoc
         $statusPath = Join-Path $planStatusLocalDir $statusName
@@ -5277,6 +5288,35 @@ elseif ($deployPath) {
                     if ($psCopied -gt 0) { Write-Host "Deployed $psCopied plan status file(s) to $psDst" -ForegroundColor Green }
                 }
             } catch { Write-Warning "plans-status deploy failed (scan unaffected): $($_.Exception.Message)" }
+            # v3.07: plans-state\<planId>[.test].json, the newest saved schedule per plan (Load latest schedule in Argo Navis)
+            try {
+                $stDst = Join-Path $dl1DeployPath 'plans-state'
+                if ($planStateSrc.Count -gt 0 -and -not (Test-Path -Path $stDst)) { New-Item -ItemType Directory -Path $stDst -Force | Out-Null }
+                $stCopied = 0; $stWanted = @{}
+                foreach ($stKey in @($planStateSrc.Keys)) {
+                    $st = $planStateSrc[$stKey]
+                    $stName = [string]$st.planid + $(if ($st.test) { '.test' } else { '' }) + '.json'
+                    $stWanted[$stName] = $true
+                    $stTarget = Join-Path $stDst $stName
+                    $stSrcItem = Get-Item -LiteralPath $st.full
+                    if (-not (Test-Path -Path $stTarget) -or ((Get-Item -Path $stTarget).Length -ne $stSrcItem.Length) -or ((Get-Item -Path $stTarget).LastWriteTimeUtc -lt $stSrcItem.LastWriteTimeUtc)) { Copy-Item -LiteralPath $st.full -Destination $stTarget -Force; $stCopied++ }
+                }
+                # index.json: what Argo Navis lists under "Load latest schedule" (a browser cannot list a folder)
+                if ($planStateSrc.Count -gt 0) {
+                    $stIdx = New-Object System.Collections.Generic.List[object]
+                    foreach ($stKey in @($planStateSrc.Keys | Sort-Object)) {
+                        $st = $planStateSrc[$stKey]
+                        $stRigKey = ''; foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $st.rig) { $stRigKey = [string]$k } }
+                        $stBop = ''; if ([string]$st.planid -match '-(BOP\d)-') { $stBop = $Matches[1] }
+                        $stIdx.Add([ordered]@{ planid = [string]$st.planid; rig = [string]$st.rig; rigkey = $stRigKey; bop = $stBop; istest = [bool]$st.test; path = ('plans-state/' + [string]$st.planid + $(if ($st.test) { '.test' } else { '' }) + '.json'); file = [string]$st.file; saved = $st.modified.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }) | Out-Null
+                    }
+                    $stIdxJson = ConvertTo-PlainJson ([ordered]@{ generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $stIdx.Count; plans = $stIdx.ToArray() })
+                    [System.IO.File]::WriteAllText((Join-Path $stDst 'index.json'), $stIdxJson, (New-Object System.Text.UTF8Encoding($false)))
+                    $stWanted['index.json'] = $true
+                }
+                if (Test-Path -Path $stDst) { foreach ($old in @(Get-ChildItem -Path $stDst -File -Filter '*.json')) { if (-not $stWanted.ContainsKey($old.Name)) { Remove-Item -Path $old.FullName -Force } } }
+                if ($planStateSrc.Count -gt 0) { Write-Host "Argo Navis: latest saved schedule for $($planStateSrc.Count) plan(s) in dl1\plans-state ($stCopied updated)" -ForegroundColor Green }
+            } catch { Write-Warning "plans-state deploy failed (scan unaffected): $($_.Exception.Message)" }
         }
         # v2.71: help-data.js to the Help Centre folder on the share (helpDeployPath; default <share>\help).
         if (Test-Path -Path $helpOutputFile) {
