@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.10'
+$ScriptVersion = '3.11'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -4976,12 +4976,12 @@ function Initialize-PdfRender {
     if ($config.PSObject.Properties['pdfMaxPerRun'] -and $config.pdfMaxPerRun) { $script:PdfMax = [int]$config.pdfMaxPerRun }
     if ($script:PdfBrowser) { $script:PdfTemplate = [System.IO.File]::ReadAllText($tpl, [System.Text.Encoding]::UTF8) }
 }
-function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]$PlanId, [string]$Template = '', [string]$OutName = '')
+function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]$PlanId, [string]$Template = '', [string]$OutName = '', [int]$TimeoutSec = 90, [string]$FooterText = '')
     # Returns the PDF file name when one exists (current or just printed), else ''.
     # v3.04: -Template prints with another template (the Daily Summary Report), -OutName names the PDF.
     $tplText = $(if ($Template) { $Template } else { $script:PdfTemplate })
     if (-not $script:PdfBrowser -or -not $tplText) { return '' }
-    $src = Get-Item -LiteralPath $SourcePath
+    $src = Get-Item -LiteralPath $SourcePath -Force
     $base = $(if ($OutName) { $OutName } else { [System.IO.Path]::GetFileNameWithoutExtension($src.Name) })
     $pdfName = $base + '.pdf'; $pdf = Join-Path $OutDir $pdfName; $stampFile = $pdf + '.stamp'
     $tplHash = [BitConverter]::ToString([System.Security.Cryptography.SHA256]::Create().ComputeHash([System.Text.Encoding]::UTF8.GetBytes($tplText))).Replace('-', '').Substring(0, 12)
@@ -4993,7 +4993,7 @@ function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]
     $raw = [System.IO.File]::ReadAllText($src.FullName, [System.Text.Encoding]::UTF8)
     $sha = (Get-FileHash -Path $src.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
     $info = ConvertTo-PlainJson ([ordered]@{ file = $src.Name; sha256 = $sha; sha256short = $sha.Substring(0, 16); rendered = (Get-Date).ToString('yyyy-MM-dd HH:mm'); planid = $PlanId })
-    $footer = ($src.Name + '  -  SHA-256 ' + $sha.Substring(0, 16)).Replace('\', '\\').Replace('"', '\"')
+    $footer = ($(if ($FooterText) { $FooterText } else { $src.Name }) + '  -  SHA-256 ' + $sha.Substring(0, 16)).Replace('\', '\\').Replace('"', '\"')
     $html = $tplText.Replace('/*RECORD_INFO*/{}', $info).Replace('/*RECORD_JSON*/null', $raw.Replace('</', '<\/')).Replace('/*FOOTER_LEFT*/', $footer)
     $work = Join-Path $OutDir ('.render_' + $base + '.html')
     [System.IO.File]::WriteAllText($work, $html, (New-Object System.Text.UTF8Encoding($false)))
@@ -5014,7 +5014,7 @@ function Export-RecordPdf { param([string]$SourcePath, [string]$OutDir, [string]
     $spArgs = @{ FilePath = $script:PdfBrowser; ArgumentList = $bArgs; PassThru = $true; ErrorAction = 'Stop'; RedirectStandardOutput = ($pdfLog + '.out.log'); RedirectStandardError = ($pdfLog + '.err.log') }
     if ($onWindows) { $spArgs['WindowStyle'] = 'Hidden' }
     $proc = Start-Process @spArgs
-    if (-not $proc.WaitForExit(90000)) { try { $proc.Kill() } catch { }; Remove-Item -Path $work -Force -ErrorAction SilentlyContinue; Write-Warning "PDF for $($src.Name) timed out (left for the next scan)"; return '' }
+    if (-not $proc.WaitForExit($TimeoutSec * 1000)) { try { $proc.Kill() } catch { }; Remove-Item -Path $work -Force -ErrorAction SilentlyContinue; Write-Warning "PDF for $($src.Name) timed out (left for the next scan)"; return '' }
     Remove-Item -Path $work -Force -ErrorAction SilentlyContinue
     if (-not (Test-Path -Path $tmpPdf) -or (Get-Item -Path $tmpPdf).Length -lt 1000) { Write-Warning "PDF for $($src.Name) was not produced (left for the next scan)"; return '' }
     Move-Item -Path $tmpPdf -Destination $pdf -Force
@@ -5109,6 +5109,55 @@ try {
                     } catch { Write-Warning "PDF for $($pfe.file) failed (filing unaffected): $($_.Exception.Message)" }
                 }
                 foreach ($pe in $pdfEntries) { $pfFiles.Add($pe) | Out-Null }
+                # v3.11 (plan item 72, stage 3): the close-out pack. Once a plan is closed out, one PDF in 08 joins every record
+                # filed for it, in the order plan, checklist, tests, CBM, precharge, evidence, close-out, behind a cover and a
+                # contents sheet listing every file in the project folder with its date, size and SHA-256. Reprinted only when a
+                # record or the template changes. The pack's own source (closeout-pack-source.json) stays beside the subfolders, unfiled.
+                if ($dl1Closeouts.ContainsKey($planKey)) {
+                    try {
+                        $packRank = @{ '01 Plan and Scope' = 1; '05 Pre-deployment Checklist' = 2; '03 Testing' = 3; '04 CBM Inspections' = 4; '06 Precharge' = 5; '02 Maintenance Evidence' = 6; '07 Photos' = 7; '08 AAR and Close-out' = 8 }
+                        $packRecs = @($pfFiles.ToArray() | Where-Object { [string]$_.kind -notin @('photo', 'pdf', 'pack', 'plan-link') -and $_.localpath -and (Test-Path -LiteralPath ([string]$_.localpath)) } |
+                            Sort-Object -Property @{ Expression = { $r = $packRank[[string]$_.subfolder]; if ($r) { $r } else { 9 } } }, @{ Expression = { [string]$_.posted } }, @{ Expression = { [string]$_.file } })
+                        $recNo = @{}; $ri = 0; foreach ($pr in $packRecs) { $ri++; $recNo[[string]$pr.file] = $ri }
+                        $contents = New-Object System.Collections.Generic.List[object]
+                        foreach ($cf in @($pfFiles.ToArray() | Sort-Object -Property @{ Expression = { [string]$_.subfolder } }, @{ Expression = { [string]$_.file } })) {
+                            $clp = [string]$cf.localpath; $cb = ''; $ch = ''
+                            if ($clp -and (Test-Path -LiteralPath $clp)) { $cb = (Get-Item -LiteralPath $clp).Length; $ch = (Get-FileHash -LiteralPath $clp -Algorithm SHA256).Hash.ToLowerInvariant() }
+                            $contents.Add([ordered]@{ subfolder = [string]$cf.subfolder; file = [string]$cf.file; kind = [string]$cf.kind; posted = [string]$cf.posted; bytes = $cb; sha256 = $ch; inpack = $(if ($recNo.ContainsKey([string]$cf.file)) { $recNo[[string]$cf.file] } else { $null }) }) | Out-Null
+                        }
+                        $co = $dl1Closeouts[$planKey]
+                        $packInfo = ConvertTo-PlainJson ([ordered]@{ planid = $ppid; rig = [string]$pl.rig; bop = [string]$pl.bopNo; scopeversion = [int]$pl.scopeVersion; status = [string]$pl.status; closedat = [string](Get-Prop $co 'posted'); istest = $isTestP; rendered = (Get-Date).ToString('yyyy-MM-dd') })
+                        $sbP = New-Object System.Text.StringBuilder
+                        [void]$sbP.Append('{"info":').Append($packInfo).Append(',"contents":').Append((ConvertTo-PlainJson $contents.ToArray())).Append(',"records":[')
+                        $first = $true
+                        foreach ($pr in $packRecs) {
+                            $prRaw = [System.IO.File]::ReadAllText([string]$pr.localpath, [System.Text.Encoding]::UTF8).Trim([char]0xFEFF)
+                            $prSha = (Get-FileHash -LiteralPath ([string]$pr.localpath) -Algorithm SHA256).Hash.ToLowerInvariant()
+                            $prInfo = ConvertTo-PlainJson ([ordered]@{ file = [string]$pr.file; sha256 = $prSha; sha256short = $prSha.Substring(0, 16); rendered = (Get-Date).ToString('yyyy-MM-dd'); planid = $ppid; subfolder = [string]$pr.subfolder })
+                            if (-not $first) { [void]$sbP.Append(',') }; $first = $false
+                            [void]$sbP.Append('{"info":').Append($prInfo).Append(',"record":').Append($prRaw).Append('}')
+                        }
+                        [void]$sbP.Append(']}')
+                        $packJson = $sbP.ToString().Replace('</', '<\/')
+                        $packDir = Join-Path $renderRoot $pfFolder
+                        if (-not (Test-Path -Path $packDir)) { New-Item -ItemType Directory -Path $packDir -Force | Out-Null }
+                        $packSrc = Join-Path $packDir 'closeout-pack-source.json'
+                        # the source is rewritten only when its content changes (the date stamps are left out of the comparison),
+                        # so an unchanged pack keeps its file time and is not reprinted
+                        $stripPk = { param($t) [regex]::Replace($t, '"rendered":"[^"]*"', '') }
+                        $prevPk = ''; if (Test-Path -LiteralPath $packSrc) { $prevPk = [System.IO.File]::ReadAllText($packSrc) }
+                        if ((& $stripPk $prevPk) -ne (& $stripPk $packJson)) { [System.IO.File]::WriteAllText($packSrc, $packJson, (New-Object System.Text.UTF8Encoding($false))) }
+                        $packTpl = $script:PdfTemplate.Replace('window.RECORD = /*RECORD_JSON*/null', 'window.RECORD = null').Replace('/*PACK_JSON*/null', '/*RECORD_JSON*/null')
+                        $packName = $ppid + $(if ($isTestP) { '_TEST' } else { '' }) + '_Closeout_Pack'
+                        $packOut = Join-Path $packDir '08 AAR and Close-out'
+                        $pkBefore = $script:PdfDone
+                        $pk = Export-RecordPdf -SourcePath $packSrc -OutDir $packOut -PlanId $ppid -Template $packTpl -OutName $packName -TimeoutSec 300 -FooterText ($ppid + ' close-out pack')
+                        if ($pk) {
+                            $pfFiles.Add([ordered]@{ file = [string]$pk; kind = 'pack'; reporttype = 'Close-out pack'; subfolder = '08 AAR and Close-out'; posted = [string](Get-Prop $co 'posted'); path = ('/Digests/plan-renders/' + $pfFolder + '/08 AAR and Close-out/' + $pk); localpath = (Join-Path $packOut $pk) }) | Out-Null
+                            if ($script:PdfDone -gt $pkBefore) { Write-Host "Argo Navis: close-out pack printed for $ppid - $($packRecs.Count) record(s), $($contents.Count) file(s) listed" -ForegroundColor Green }
+                        }
+                    } catch { Write-Warning "close-out pack for $ppid failed (filing unaffected): $($_.Exception.Message)" }
+                }
             }
             $pfPlans.Add([ordered]@{
                 planid = $ppid; folder = $ppid + $(if ($isTestP) { ' TEST' } else { '' }); istest = $isTestP

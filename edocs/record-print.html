@@ -48,9 +48,12 @@
 <div id="doc"></div>
 <script>window.RECORD_INFO = /*RECORD_INFO*/{};</script>
 <script>window.RECORD = /*RECORD_JSON*/null;</script>
+<script>window.PACK = /*PACK_JSON*/null;</script>
 <script>
-(function () {
-  var R = window.RECORD || {}, I = window.RECORD_INFO || {}, doc = document.getElementById('doc');
+// v3.11 (plan item 72, stage 3): the record renderer is a function, so the close-out pack can draw every record of a
+// plan in one document (window.PACK); a single record (window.RECORD) prints exactly as before.
+function renderRecord(R, I, doc) {
+  R = R || {}; I = I || {};
   var meta = R.meta || {}, photos = [], SKIP = { scheduleBuilderState: 1, history: 1, version: 1, snapshotHash: 0 };
   function el(t, c, txt) { var e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = String(txt); return e; }
   function isImg(v) { return typeof v === 'string' && /^data:image\//i.test(v); }
@@ -159,9 +162,36 @@
   if (photos.length) { doc.appendChild(el('h2', '', 'Photographs (' + photos.length + ')')); var g = el('div', 'photos'); photos.forEach(function (p, i) { var f = el('figure'); var im = el('img'); im.src = p.src; f.appendChild(im); f.appendChild(el('figcaption', '', 'Photograph ' + (i + 1) + (p.label ? ': ' + p.label : ''))); g.appendChild(f); }); doc.appendChild(g); }
 
   doc.appendChild(el('div', 'note', 'Printed by SACRED from the posted record ' + (I.file || '') + ' (SHA-256 ' + (I.sha256 || '') + '). The JSON record in the project folder is the data of record; this PDF is its controlled copy for eDocs. A record changed after printing has a different SHA-256.'));
-  document.title = (planId ? planId + ' - ' : '') + docTitle;
-  window.RENDER_DONE = true;
-})();
+  if (!window.PACK) document.title = (planId ? planId + ' - ' : '') + docTitle;
+  return docTitle;
+}
+function renderPack(P) {
+  var doc = document.getElementById('doc'), I = P.info || {};
+  function el(t, c, txt) { var e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = String(txt); return e; }
+  var tb = el('div', 'titleblock');
+  tb.appendChild(el('div', 'org', 'Seadrill · Well Control Equipment · SACRED close-out pack'));
+  var h = el('h1', '', 'Close-out pack: ' + (I.planid || '')); if (I.istest) h.appendChild(el('span', 'test', 'TEST')); tb.appendChild(h);
+  var grid = el('div', 'grid');
+  [['Rig', I.rig], ['BOP', I.bop], ['Plan ID', I.planid], ['Scope version', I.scopeversion], ['Plan status', I.status], ['Closed out', I.closedat],
+   ['Records in this pack', (P.records || []).length], ['Files in the project folder', (P.contents || []).length], ['eDocs no.', ''], ['Printed', I.rendered]].forEach(function (r) {
+    var d = el('div', 'row'); d.appendChild(el('b', '', r[0])); d.appendChild(el('span', '', (r[1] === undefined || r[1] === null || r[1] === '') ? '—' : String(r[1]))); grid.appendChild(d); });
+  tb.appendChild(grid); doc.appendChild(tb);
+  doc.appendChild(el('h2', '', 'Contents of the project folder'));
+  doc.appendChild(el('p', 'muted', 'Every file in the plan\'s project folder at the time of printing, by subfolder, with its SHA-256. The records marked "in this pack" follow, in this order.'));
+  var t = el('table', 'data'), hr = el('tr'); ['#', 'Subfolder', 'File', 'Kind', 'Date', 'Bytes', 'SHA-256', 'In this pack'].forEach(function (c) { hr.appendChild(el('th', '', c)); });
+  var th = el('thead'); th.appendChild(hr); t.appendChild(th); var tbody = el('tbody');
+  (P.contents || []).forEach(function (c, i) { var tr = el('tr'); [i + 1, c.subfolder, c.file, c.kind, c.posted, c.bytes, c.sha256, c.inpack ? 'record ' + c.inpack : ''].forEach(function (v) { tr.appendChild(el('td', '', v == null ? '' : v)); }); tbody.appendChild(tr); });
+  t.appendChild(tbody); doc.appendChild(t);
+  (P.records || []).forEach(function (r, i) {
+    var sec = el('div', 'packrec'); sec.style.breakBefore = 'page'; sec.appendChild(el('div', 'org muted', 'Close-out pack ' + (I.planid || '') + ' · record ' + (i + 1) + ' of ' + P.records.length + ' · ' + (r.info && r.info.subfolder || '')));
+    doc.appendChild(sec);
+    try { renderRecord(r.record, r.info, sec); } catch (e) { sec.appendChild(el('p', 'muted', 'This record could not be drawn (' + e.message + '); the JSON in the project folder is the record.')); }
+  });
+  doc.appendChild(el('div', 'note', 'Close-out pack printed by SACRED from the records in the project folder of ' + (I.planid || '') + '. Each record keeps its own title block and SHA-256; the JSON records remain the data of record.'));
+  document.title = (I.planid || '') + ' - Close-out pack';
+}
+if (window.PACK) renderPack(window.PACK); else renderRecord(window.RECORD, window.RECORD_INFO, document.getElementById('doc'));
+window.RENDER_DONE = true;
 </script>
 </body>
 </html>
