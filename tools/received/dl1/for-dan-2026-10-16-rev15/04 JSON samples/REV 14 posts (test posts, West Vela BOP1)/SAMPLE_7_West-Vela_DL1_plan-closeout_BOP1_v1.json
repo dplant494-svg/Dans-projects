@@ -1,0 +1,661 @@
+{
+  "version": 3,
+  "exportedAt": "2026-10-14T16:25:40-05:00",
+  "dryRun": true,
+  "meta": {
+    "asset": "West Vela",
+    "discipline": "Planning",
+    "planningOnly": true,
+    "schedule": "20261005_WVE_BWM_BOP1_Schedule",
+    "bopNo": "BOP1",
+    "projType": "BWM — Between Well Maintenance",
+    "origFinish": "2026-10-14",
+    "curFinish": "2026-10-14",
+    "needDate": "2026-10-17",
+    "float": "(+) 3 Days",
+    "maintStart": "2026-10-05",
+    "maintDay": "Day 10 of 30",
+    "planVar": "(+) 0 Days",
+    "origDurHrs": 715.5,
+    "date": "2026-10-05",
+    "lastRigUpdate": "2026-10-05",
+    "rigkey": "vela",
+    "rev": "Argo Navis REV 14",
+    "kind": "plan-closeout",
+    "planid": "WVE-BOP1-20261005"
+  },
+  "tiles": [
+    {
+      "planningData": {
+        "reportDate": "2026-10-05",
+        "dataDate": "2026-10-05",
+        "pctComplete": "100%",
+        "criticalPath": "(all complete)",
+        "simops": "",
+        "comments": "",
+        "lastRigUpdate": "2026-10-05",
+        "projectComplete": true,
+        "milestones": [
+          {
+            "name": "BOP Landed on Beams",
+            "baseline": "2026-10-05",
+            "est": "2026-10-05",
+            "actual": "2026-10-05"
+          },
+          {
+            "name": "Rack Back to Well Center Complete",
+            "baseline": "2026-10-05",
+            "est": "2026-10-05",
+            "actual": "2026-10-05"
+          },
+          {
+            "name": "Split BOP and LMRP Complete",
+            "baseline": "2026-10-05",
+            "est": "2026-10-05",
+            "actual": "2026-10-05"
+          },
+          {
+            "name": "Lower Stack Complete",
+            "baseline": "2026-10-07",
+            "est": "2026-10-07",
+            "actual": "2026-10-07"
+          },
+          {
+            "name": "LMRP Complete",
+            "baseline": "2026-10-06",
+            "est": "2026-10-06",
+            "actual": "2026-10-06"
+          },
+          {
+            "name": "BOP Controls Complete",
+            "baseline": "2026-10-12",
+            "est": "2026-10-12",
+            "actual": "2026-10-12"
+          },
+          {
+            "name": "Stack Up Complete",
+            "baseline": "2026-10-12",
+            "est": "2026-10-12",
+            "actual": "2026-10-12"
+          },
+          {
+            "name": "Offline Ancillary Complete",
+            "baseline": "2026-10-11",
+            "est": "2026-10-11",
+            "actual": "2026-10-11"
+          },
+          {
+            "name": "Testing Complete",
+            "baseline": "2026-10-14",
+            "est": "2026-10-14",
+            "actual": "2026-10-14"
+          },
+          {
+            "name": "Offline Maintenance / Pre-Deployment Testing Complete",
+            "baseline": "2026-10-14",
+            "est": "2026-10-14",
+            "actual": "2026-10-14"
+          }
+        ],
+        "done": [
+          {
+            "id": "0900-BZ0017",
+            "desc": "BWM MPD ADAPTORS AND ACCESSORIES INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR8001",
+            "desc": "24M MPD INTEGRATED RISER JOINT SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BE0202",
+            "desc": "BWM DIVERTER ASSEMBLY (21 1/4\" Shaffer) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BE0206",
+            "desc": "12M DIVERTER ASSEMBLY (21 1/4\" Shaffer) SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0201",
+            "desc": "BWM NOV TENSION RING ASSEMBLY INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BS0801",
+            "desc": "21 DAY CHOKE AND KILL MANIFOLD SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "tpl:sss-007",
+            "desc": "SSS-007 BOP handling equipment function test (DIR-37-0165)",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-EF90051",
+            "desc": "12M MOTOR AND STARTER ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0207",
+            "desc": "BWM CHECK VALVE AND ISOLATION VALVE FUNCTIONALITY/INTEGRITY TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0204",
+            "desc": "BWM PIPE AND TEST RAMS",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0212",
+            "desc": "BWM RIGID CONDUIT VALVE MANIFOLD (LMRP) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BT0205",
+            "desc": "BWM PRE-CHARGE POD PILOT ACCUMULATORS",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0206",
+            "desc": "BWM HYDRAULIC SHUTTLE VALVE FUNCTIONALITY TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0105",
+            "desc": "BWM BOP CONTROL HOSES AND PIPING",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0805",
+            "desc": "3M DUAL WIRELINE RISER TENSIONER INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0213",
+            "desc": "BWM HOTLINE VALVE MANIFOLD (LMRP)",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0204",
+            "desc": "BWM PIPE AND TEST RAMS",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-US0205",
+            "desc": "BWM GOOSENECK ASSEMBLIES INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UA0201",
+            "desc": "BWM ANNULAR BOP INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-CV0801",
+            "desc": "14D GLYCOL INJECTION UNIT INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RG80021",
+            "desc": "24M CORTEC INTELLICHOKE AUTO CHOKE VALVE INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0204",
+            "desc": "BWM PIPE AND TEST RAMS",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BT0226",
+            "desc": "60M STACK MOUNTED ACCUMULATORS (28 Gallons DCB) OVERHAUL",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RG0201",
+            "desc": "BWM HYDRAULIC SPRING ASSIST HB GATE VALVES INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BE0203",
+            "desc": "BWM DIVERTER HOUSING INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BE0207",
+            "desc": "12M DIVERTER HOUSING SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-DP0201",
+            "desc": "BWM DIVERTER HANDLING TOOL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RB80021",
+            "desc": "BWM DIVERTER PIPER VALVES INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RH0202",
+            "desc": "BWM BOP SUBSEA CHOKE AND KILL SPOOLS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0201",
+            "desc": "BWM BLIND SHEAR RAM",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BZ0018",
+            "desc": "BWM MPD ROTATING CONTROL DEVICE ASSEMBLY INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-CV0030",
+            "desc": "BWM MPD HYDRAULIC SYSTEMS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-CV0031",
+            "desc": "12M MPD HYDRAULIC SYSTEMS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0201",
+            "desc": "BWM BLIND SHEAR RAM",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UE0201",
+            "desc": "BWM BOP ADAPTER SPOOL / SUB INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UH0101",
+            "desc": "BWM BOP BOLTING, FLANGES AND CLAMPS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UH0101",
+            "desc": "BWM BOP BOLTING, FLANGES AND CLAMPS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RG0202",
+            "desc": "BWM HYDRAULIC SPRING ASSIST HB GATE MUD BOOST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RG0202",
+            "desc": "BWM HYDRAULIC SPRING ASSIST HB GATE MUD BOOST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-CV0032",
+            "desc": "BWM MPD UMBILICAL REEL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-CV90072",
+            "desc": "12M MPD HYDRAULIC POWER UNIT SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UA0023",
+            "desc": "12M MPD DSIT SLIMLINE ANNULAR INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BZ0015",
+            "desc": "12M MPD RUNNING TOOLS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BZ0014",
+            "desc": "BWM MPD RUNNING TOOLS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-IF0801",
+            "desc": "1M REMOTE CHOKE CONTROL PANEL",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-QT0201",
+            "desc": "BWM INTERCONNECTING CABLES AND SENSORS ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BZ0014",
+            "desc": "BWM MPD RUNNING TOOLS INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BR0906",
+            "desc": "6M DUAL WIRELINE RISER TENSIONER SERVICE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-QT0201",
+            "desc": "BWM INTERCONNECTING CABLES AND SENSORS ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-QF85001",
+            "desc": "3M MPD CORIOLIS FLOWMETER ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-WH8010",
+            "desc": "12M MPD RISER X-OVER INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0205",
+            "desc": "BWM MUX CONTROL POD",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UK0101",
+            "desc": "BWM FLEX JOINT (Oil States) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UK0101",
+            "desc": "BWM FLEX JOINT (Oil States) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UK0101",
+            "desc": "BWM FLEX JOINT (Oil States) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-WH8010",
+            "desc": "12M MPD RISER X-OVER INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UK0101",
+            "desc": "BWM FLEX JOINT (Oil States) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0209",
+            "desc": "BWM NOV SHAFFER FT-H RISER CBM INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0113",
+            "desc": "6M RISERS STORAGE AND PRESERVATION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0201",
+            "desc": "BWM NOV SHAFFER FT-H RISER COMMON INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0210",
+            "desc": "BWM MUX POD S.E.A ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0210",
+            "desc": "BWM MUX POD S.E.A ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0211",
+            "desc": "BWM EHBS CONTROL POD INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0214",
+            "desc": "BWM CONDUIT MANIFOLD (SURFACE) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0215",
+            "desc": "BWM HOTLINE MANIFOLD (SURFACE) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0217",
+            "desc": "BWM ROV PANELS - SURFACE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0260",
+            "desc": "BWM CATHODIC PROTECTION ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-EB0101",
+            "desc": "BWM BOP UPS ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-EB0101",
+            "desc": "BWM BOP UPS ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-IF0201",
+            "desc": "BWM BOP CONTROL PANELS ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-RH0205",
+            "desc": "12M BOP HPU PIPEWORK AND VALVES OVERHAUL",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0202",
+            "desc": "BWM RISER ADAPTER",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0208",
+            "desc": "BWM MUX CABLE AND SUPERBOMB CONNECTOR ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UR0202",
+            "desc": "BWM RISER ADAPTER",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-US0201",
+            "desc": "BWM NOV SHAFFER FT-H TELESCOPIC JOINT (SHIPS) INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-US90121",
+            "desc": "BWM TELESCOPIC JOINT AUTOMATIC SWITCH OVER SYSTEM INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0208",
+            "desc": "BWM MUX CABLE AND SUPERBOMB CONNECTOR ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0209",
+            "desc": "BWM MUX POD COMPENSATED HOUSING ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0209",
+            "desc": "BWM MUX POD COMPENSATED HOUSING ELECTRICAL INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0220",
+            "desc": "BWM REMOTE CONTROL STAND FOR CABLE REELS SUBSEA INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0261",
+            "desc": "BWM HOSE REEL AND SHEAVES INSPECTION",
+            "pct": "100%"
+          },
+          {
+            "id": "stackup",
+            "desc": "Stack Up BOP and LMRP",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BE0204",
+            "desc": "BWM DIVERTER SYSTEM FUNCTION TEST-INSTALLATION",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0108",
+            "desc": "BWM BOP SURFACE PRESSURE TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0111",
+            "desc": "BWM EDS SURFACE FUNCTION TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0110",
+            "desc": "BWM BOP SURFACE FUNCTION TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0222",
+            "desc": "BWM EHBS FUNCTION TEST - SURFACE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UB0113",
+            "desc": "BWM ROV INTERVENTION FUNCTION TEST - SURFACE",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BT0102",
+            "desc": "BWM BOP 2 DRAWDOWN TEST - SURFACE AND SUBSEA",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-BT0102",
+            "desc": "BWM BOP 1 DRAWDOWN TEST - SURFACE AND SUBSEA",
+            "pct": "100%"
+          },
+          {
+            "id": "0900-UP0201",
+            "desc": "BWM BOP CONTROL SYSTEM SURFACE LEAK OFF SOAK TEST",
+            "pct": "100%"
+          },
+          {
+            "id": "drift",
+            "desc": "Drift Test",
+            "pct": "100%"
+          }
+        ],
+        "next": [],
+        "breakins": [],
+        "scopeCoveragePct": 99,
+        "scopeIndicative": false,
+        "criticalChainLength": 0,
+        "crews": {
+          "Lower BOP": 0,
+          "LMRP": 0,
+          "Controls": 0,
+          "Offline Ancillary": 0,
+          "Testing": 0
+        },
+        "tasksQueuedByCrew": 0,
+        "nptHours": "0 Hrs",
+        "nptTotalHrs": 0,
+        "nptByCategory": {},
+        "nptLog": [],
+        "thirdParty": {
+          "currency": "USD",
+          "personnelOnBoard": 0,
+          "personnelCost": 0,
+          "otherCost": 0,
+          "costTotal": 0,
+          "personnel": [],
+          "costs": []
+        },
+        "bopReadyDate": "2026-10-14T07:30:00-05:00",
+        "needDate": "2026-10-17",
+        "testingPct": 100
+      }
+    }
+  ],
+  "criticalRows": [],
+  "actionRows": [],
+  "closeout": {
+    "planId": "WVE-BOP1-20261005",
+    "scopeVersion": 1,
+    "closedAt": "2026-10-14T16:25:40-05:00",
+    "closedBy": "Sample Planner",
+    "edocsRef": "EDOCS-SAMPLE-0001",
+    "finalPct": 100,
+    "finalVariance": 0,
+    "bopReadyDate": "2026-10-14T07:30:00-05:00",
+    "needDate": "2026-10-17",
+    "aar": {
+      "breakins": []
+    },
+    "deferredCarriedForward": [
+      {
+        "taskId": "wo:R10151838",
+        "sfi": "332",
+        "location": "332.BCSS1.200",
+        "jobPlan": "0900-BT0201",
+        "woNum": "R10151838",
+        "pm": "",
+        "dueDate": "2026-09-30",
+        "reason": "Excluded on Branch Map",
+        "reasonText": "Flagged red - not done by subsea or electrical department",
+        "deferredBy": "",
+        "nc": false,
+        "ncRef": ""
+      }
+    ]
+  }
+}

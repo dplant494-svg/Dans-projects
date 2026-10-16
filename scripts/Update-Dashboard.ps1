@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.05'
+$ScriptVersion = '3.06'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -5090,7 +5090,7 @@ try {
             if (-not $rigKey) { foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $rig) { $rigKey = [string]$k } } }
             $bop = ([string](Get-Prop $m 'bopNo')).Trim()
             $projType = ([string](Get-Prop $m 'projType')).Trim()
-            $typeCode = $projType; if ($projType -match '\(([A-Z]{2,5})\)') { $typeCode = $Matches[1] }
+            $typeCode = $projType; if ($projType -match '\(([A-Z]{2,5})\)') { $typeCode = $Matches[1] } elseif ($projType -match '^([A-Z]{2,5})\s*[\u2013\u2014-]') { $typeCode = $Matches[1] }   # v3.06: Argo Navis posts 'BWM - Between Well Maintenance'
             $repDate = ([string](Get-Prop $pd 'reportDate')).Trim(); if (-not $repDate) { $repDate = ([string](Get-Prop $m 'date')).Trim() }
             $cyc = $dp.cycle
             $banner = $(if ($dp.test) { '[TEST MODE] ' } else { '' })
