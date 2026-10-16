@@ -45,7 +45,7 @@ The original brief that started this is `HANDOFF.md`. This file is the live vers
    - **Cold email rules:** UK, emailing limited companies is allowed with an opt-out line; sole traders and partnerships need consent. Spain: no unsolicited commercial email without consent (LSSI), so walk in, phone or message instead.
    - **Launch offer** (already decided): first five clients at half price for a testimonial.
    - **Track every lead** (name, town, date, next step) and follow up at 3 days and 2 weeks. Most work comes from the follow-up.
-9. **Online booking for the free consultation** (Cal.com, free plan):
+9. **Online booking for the free consultation** (Cal.com, free plan). **Parked 16 Oct 2026, no time yet; nothing set up.** When it's done: choose the custom setup; username `plantworksstudio` (link `cal.com/plantworksstudio`); name Plantworks Studio with the P logo, not a personal photo; time zone set to where Dan is working (Houston for now, slots 8am to noon). Then the session adds a "Book a free call" button to the site and the link goes on the Google Business Profile (Bookings).
    - Sign up with info@plantworksstudio.com and connect the Google Calendar, so existing appointments block slots.
    - Call type "Free consultation · 20 minutes", Google Meet, description says calls are in English. Booking questions: business name, current website, what they need.
    - 15-minute buffer, at least 24 hours' notice.
