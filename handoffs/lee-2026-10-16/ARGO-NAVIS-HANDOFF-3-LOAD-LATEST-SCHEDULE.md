@@ -49,4 +49,4 @@ Example from SACRED's test copy (a session save made from your REV 15 sample):
 - L1 to L6: done, or not and why, with the REV number.
 - The reason Continue refused the REV 15 sample.
 - One session save sample with `dryRun: true`.
-- **Meanwhile, for Dan's first test daily post:** please press **Post daily report** on your own West Vela test plan.
+- **The first real test, once L1 to L4 are in:** build a West Vela test plan in Argo Navis, save it, reopen it from the landing page on another PC, freeze it, and press Post daily report. Dan and Lee should both get the [TEST MODE] email.
