@@ -4,6 +4,8 @@
 
 Thank you for the **NC column**. It works: the last approved NC number shows on the WO's row, and Argo Navis reads it. We also confirmed that approving an NC pushes `TARGCOMPDATE` out, which is what we expected.
 
+**Why the NC data matters so much.** An NC is normally raised when a BOP PM falls due while the BOP is deployed subsea: we don't pull a BOP to do a PM. So the maintenance window between wells is the opportunity to do that work, and **a BOP PM under NC should not be deferred past the window**. Argo Navis flags any the rig tries to leave out at the scope freeze, and it needs the dates in item 3 to show how far each has been deferred.
+
 Below is everything we still need, in priority order. The Maximo field names are our best guess, so please use whatever Seadrill's Maximo actually calls them.
 
 ## The asks
@@ -12,7 +14,7 @@ Below is everything we still need, in priority order. The Maximo field names are
 |---|---|---|---|
 | 1 | **A question: does `WO.csv` include completed WOs on purpose?** On 16 Oct, 313 of the 314 WOs past `TARGCOMPDATE` with no NC were already completed: COMPWINFO 180, COMP 131, COMPWPO 2. Only 1 was still APPR. If they are there on purpose (for example, recent history), that's fine: we filter them out. If not, leaving them out would make the file smaller and cleaner. Either way, **please tell us which statuses the file carries and why**. | So the tools don't show completed jobs as overdue. | `WORKORDER.STATUS` |
 | 2 | **Corrective WOs (CM, EM and so on) in the same `WO.csv`,** not only PMs. Today every row is `WORKTYPE = PM`. Please add them as extra rows in the same file, for the same sites and SFI locations, not as a second file. | The plan must hold every PM **and CM**, and the pre-deployment check "all CMs and known deficiencies repaired or deferred under an approved NC" needs them. | `WORKORDER` with `WORKTYPE` in (CM, EM…) |
-| 3 | **Planned start date,** one new column. `TARGCOMPDATE` already gives the planned finish. **We don't need actual start or finish:** we close jobs out on our own list, not from Maximo. Please say which pair Seadrill plans with: target dates or scheduled dates. | To place each WO in the schedule against its planned window. | `TARGSTARTDATE` (with `TARGCOMPDATE`), or `SCHEDSTART` / `SCHEDFINISH` |
+| 3 | **Three date columns: Target Start, Initial Target Start and Initial Target Finish** (as on the WO's Dates section). `TARGCOMPDATE` (Target Finish) is already there. Target Start and Target Finish are when the PM is due; we pull work into the maintenance window from them, and an NC moves them to the NC deferred date. **The Initial Target dates are the first ones set, so the two pairs side by side show a deferral even where the NC column is blank.** We don't need actual start or finish: we close jobs out on our own list. | To place each WO in the maintenance window, and to see **how far an NC has deferred it**. A BOP PM under NC must be done in the window, and the scope freeze has to flag any that are not. | `TARGSTARTDATE`, plus the Initial Target Start / Finish fields (Seadrill's names to confirm) |
 | 4 | **AAB records per rig with their acknowledgement state:** outstanding, partly acknowledged, overdue or closed. This can be its own file. | So the AAB lines on the pre-deployment checklist fill themselves in instead of being answered by hand. | Wherever Maximo holds the AAB actions per site or asset |
 | 5 | **`PMNUM`** on every WO, one new column. | The same PM keeps the same task when its WO is re-issued. | `WORKORDER.PMNUM` |
 | 6 | **Two missing job plan detail exports, 0900-UR0007 and 0900-UR90021,** plus **the full list of electrical job plans** used on WCE and MPD equipment. The current electrical list has only 23 plans; 0900-EE90061, for example, has 13 APPR WOs on 6 rigs and is missing from it. | Argo Navis needs the steps and durations for every job plan in a plan. | Job plan export, as before |
@@ -28,4 +30,4 @@ Below is everything we still need, in priority order. The Maximo field names are
 - **Write the file complete, or not at all.** Write to a temporary name and rename it at the end. The scanner skips a file that is still being written.
 - **Encoding:** Windows-1252 works today. UTF-8 would be better, but either is fine.
 
-**Items 1 to 3 matter most.** Item 1 is only a question, and items 2 and 3 are extra rows and one extra column in the file you already produce.
+**Items 1 to 3 matter most.** Item 1 is only a question, and items 2 and 3 are extra rows and three extra columns in the file you already produce.
