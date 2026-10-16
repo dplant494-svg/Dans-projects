@@ -67,7 +67,10 @@
    - **Freeze keeps the verified scope version: confirmed (v2.99).** The review state is keyed by plan and scope version, so a frozen post at the same `scopeVersion` stays "verified". A tie on time is settled by status: frozen over proposed, closed over both. Please write `meta.saved` as the post time on every post; the scanner reads it before `exportedAt`.
    - **The sign-off order and the B-16 / B-M1 directives:** still Dan's, after the workshop (19 to 22 Oct).
    - **The eDocs prefix:** waiting on ISIT. Dan has created the eDOCS folder **Argo Navis Schedule Builder** (number 11296372) and asked ISIT for the connector. Until then, close-out packs are built by the scanner (v3.11) into the plan's `08 AAR and Close-out` folder, ready to file.
-   - **Manpreet's data request:** Dan sends your reviewed version (`4_Argo-Navis_Maximo-Data-Request.md`) to Manpreet. Items 3 (NC records) and 4 (AAB states) come first.
+   - **Manpreet's data request:** Dan sends your version to Manpreet with two changes of his own (`Argo-Navis_Maximo-Data-Request_2026-10-16.md`, enclosed):
+     - **Item 2 is planned dates only:** planned start and planned finish per WO. **Actual start and finish are not wanted.** Jobs are closed out on the Argo Navis list, not from Maximo's close-out, so Argo Navis should not wait on Maximo to mark a task complete.
+     - **Item 3 is done:** Manpreet's `NC` column carries the last approved NC number on the WO's row, as you already read it (B7).
+     - **Item 1 (the CM rows in `WO.csv`) and item 4 (AAB states) come first.**
 
 ## Next
 
