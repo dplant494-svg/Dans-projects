@@ -56,15 +56,14 @@ def shot_path(sid):
     return None
 
 
-def shots_to_html(text):
+def shots_to_html(text, label=True):
     def rep(m):
         sid = m.group(1)
         p = shot_path(sid)
         if not p:
             return m.group(0)
         b64 = base64.b64encode(open(p, 'rb').read()).decode()
-        return ('`[SHOT %s]`<img class="shot" src="data:image/png;base64,%s" alt="Screen %s">'
-                % (sid, b64, sid))
+        return (('`[SHOT %s]`' % sid if label else '') + '<img class="shot" src="data:image/png;base64,%s" alt="Screen %s">' % (b64, sid))
     return re.sub(r'`?\[SHOT ([0-9]+[a-z]?)\]`?', rep, text)
 
 
@@ -151,10 +150,9 @@ def main():
     # --- 03 the Training Manual (every how-to guide), one per delegate
     body = cover('WCE SME Workshop · Houston · 19–20 October 2026', 'Training Manual', 'How-to guides: WCGRRT, SSORT, precharge, the SACRED dashboards, Argo Navis and the TSC Help Centre<br><br>Builds: WCGRRT REV 174 · SSORT REV 169 · Argo Navis REV 16', name=True)
     body += md_html(read(os.path.join(SRC, 'MANUAL-FRONT.md')))
-    body += md_html(shots_to_html(read(os.path.join(SRC, 'MANUAL-PART1-TOOLS.md'))))
-    body += md_html(read(os.path.join(SRC, 'WORKBOOK-USAGE-TABLE.md')))
+    body += md_html(shots_to_html(read(os.path.join(SRC, 'MANUAL-PART1-TOOLS.md')), label=False))
     body += md_html(imgs_to_html(read(os.path.join(SRC, 'MANUAL-PART2-PLATFORM.md'))))
-    body += md_html(read(os.path.join(ROOT, 'TRAINING-Day2-Feedback-Sheet.md')))
+    body += md_html(read(os.path.join(ROOT, 'TRAINING-Day2-Feedback-Sheet.md')).replace('Day 1 · the exercise', 'Day 1 · the run-through: one report of each type'))
     to_pdf(body, os.path.join(OUT, '03-Training-Manual.pdf'), 'Training Manual')
 
     # --- 04 the Monday card
