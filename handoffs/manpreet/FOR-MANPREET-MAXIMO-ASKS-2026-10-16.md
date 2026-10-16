@@ -1,6 +1,6 @@
 # Maximo data for Argo Navis and SACRED: the list for Manpreet
 
-**From:** Dan Plant · **Date:** 16 Oct 2026 · **About:** the daily extract `\\SEADRILL23339\Well Control Data\WO.csv` and a few one-off exports.
+**From:** Dan Plant · **Date:** 16 Oct 2026 · **About:** the daily extract `\\SEADRILL23339\Well Control Data\WO.csv`.
 
 Thank you for the **NC column**. It works: the last approved NC number shows on the WO's row, and Argo Navis reads it. We also confirmed that approving an NC pushes `TARGCOMPDATE` out, which is what we expected.
 
@@ -17,11 +17,9 @@ Below is everything we still need, in priority order.
 | 3 | **Three date columns: Target Start, Initial Target Start and Initial Target Finish** (as on the WO's Dates section). `TARGCOMPDATE` (Target Finish) is already there. Target Start and Target Finish are when the PM is due; we pull work into the maintenance window from them, and an NC moves them to the NC deferred date. **The Initial Target dates are the first ones set, so the two pairs side by side show a deferral even where the NC column is blank.** We don't need actual start or finish: we close jobs out on our own list. | To place each WO in the maintenance window, and to see **how far an NC has deferred it**. A BOP PM under NC must be done in the window, and the scope freeze has to flag any that are not. |
 | 4 | **AAB records per rig with their acknowledgement state:** outstanding, partly acknowledged, overdue or closed. This can be its own file. | So the AAB lines on the pre-deployment checklist fill themselves in instead of being answered by hand. |
 | 5 | **`PMNUM`** on every WO, one new column. | The same PM keeps the same task when its WO is re-issued. |
-| 6 | **Two missing job plan detail exports, 0900-UR0007 and 0900-UR90021,** plus **the full list of electrical job plans** used on WCE and MPD equipment. The current electrical list has only 23 plans; 0900-EE90061, for example, has 13 APPR WOs on 6 rigs and is missing from it. | Argo Navis needs the steps and durations for every job plan in a plan. |
-| 7 | **Part number, serial number and install date per BOP position** (annulars, connectors, each ram cavity's forward and aft packer), as its own file `assets-by-position.csv`. It also needs **a location-to-position map**, for example `331.BOP1.365` → upper pipe ram. | The pre-deployment stack table, typed by the crew today. |
-| 8 | **Job plan revision and per-site variants,** as its own file `jobplans.csv`. | To link a checklist to the revision it was done under. |
-| 9 | *Lower priority:* **the MOC number on a WO,** if Maximo holds it. | To link a modification's WO to its MOC. |
-| 10 | *Lower priority:* **meter readings or cycle counts per BOP function,** if they are kept in Maximo. If not, say so and we'll use PLATO. | Cycle counts on the pre-deployment checklist. |
+| 6 | **Part number, serial number and install date per BOP position** (annulars, connectors, each ram cavity's forward and aft packer), as its own file `assets-by-position.csv`. It also needs **a location-to-position map**, for example `331.BOP1.365` → upper pipe ram. | The pre-deployment stack table, typed by the crew today. |
+| 7 | *Lower priority:* **the MOC number on a WO,** if Maximo holds it. | To link a modification's WO to its MOC. |
+| 8 | *Lower priority:* **meter readings or cycle counts per BOP function,** if they are kept in Maximo. If not, say so and we'll use PLATO. | Cycle counts on the pre-deployment checklist. |
 
 ## Please keep in mind for the extract
 
