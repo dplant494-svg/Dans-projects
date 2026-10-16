@@ -26,3 +26,4 @@ dl1/plans-status/
 
 # The job plan checklist tool embeds the intake address (ORR KE-10): never committed
 Argo-Navis-Job-Plan-Checklists*.html
+__pycache__/
