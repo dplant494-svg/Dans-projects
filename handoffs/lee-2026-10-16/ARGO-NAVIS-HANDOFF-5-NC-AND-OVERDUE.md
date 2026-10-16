@@ -14,7 +14,22 @@
 | **Not yet due** | 697 | 2,013 | 2,710 |
 | **Total** | 820 | 2,327 | 3,147 |
 
-## The rule (one status per WO task)
+**The 314 "past due, no NC" are almost all already done** (Dan's second check, 16 Oct):
+
+| `STATUS` | WOs |
+|---|---|
+| COMPWINFO | 180 |
+| COMP | 131 |
+| COMPWPO | 2 |
+| **APPR** (still open) | **1** |
+
+So **`WO.csv` carries completed WOs too.** Only **1** of the 314 is genuinely open and overdue. Across sites: 2309, 1020 and 2318 have 75 each, 2280 has 31, and the rest have 11 or fewer.
+
+**Any date rule must look at open WOs only.** Please tell us which `STATUS` values Argo Navis treats as open today. We assume everything except the COMP family (COMP, COMPWINFO, COMPWPO), CLOSE and CAN.
+
+## The rule (one status per WO task, open WOs only)
+
+**First:** a WO whose `STATUS` is COMP, COMPWINFO, COMPWPO, CLOSE or CAN is **done in Maximo**. It never shows red or amber, and it never counts against B-03. If it is still open on the Argo Navis list, show a quiet **"Done in Maximo"** tag, so the rig can tick it complete (our list still closes our jobs).
 
 | WO | Shows in Argo Navis | Counts against B-03 |
 |---|---|---|
@@ -31,6 +46,6 @@
 - **Completing the task in Argo Navis still closes it on our list,** whatever Maximo says. Jobs are closed out on the Argo Navis list, not from Maximo's close-out (Dan, 16 Oct).
 - **The daily report:** add a count line, "Overdue, no NC: n · Deferral expired: n · Deferred under NC: n", for the plan's scope. The red ones are listed by WONUM.
 
-**Out of scope:** the fleet-wide 314. Most are not in any plan. SACRED may show the fleet count on the BOP page later, but that is not Argo Navis's job.
+**Out of scope:** the fleet-wide count. Only 1 open WO is overdue with no NC today, and most WOs are not in any plan. SACRED may show the fleet count on the BOP page later, but that is not Argo Navis's job.
 
 **Please reply with:** the REV the rule lands in, and a screenshot of a plan with one task in each state. Use the test plan.
