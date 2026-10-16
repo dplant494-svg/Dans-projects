@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.07'
+$ScriptVersion = '3.08'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -1966,6 +1966,19 @@ foreach ($f in $files) {
     # planning-report falls through to the WCGRRT path below, except that a test post (dryRun or SSCE Equipment) is
     # listed under dl1.test and kept off the rig's panel.
     $metaKindD = ([string](Get-Prop $meta 'kind')).ToLowerInvariant()
+    # v3.08 (Dan, 16 Oct): "save it at the intervals". An Argo Navis session save (meta.kind 'plan-session'): the rig's
+    # whole working state (scheduleBuilderState) at any stage, before or after the freeze, posted under one fixed name
+    # per plan so each save replaces the last. A record, never a report: no review, no notice, no email, no filing.
+    # It only feeds plans-state (Load latest schedule). Test rule as everywhere: dryRun, meta.sample, SSCE Equipment.
+    if ($metaKindD -eq 'plan-session') {
+        $dl1Files[$f.Name] = $true
+        $ssPid = (ConvertTo-AabText (Get-Prop $meta 'planid')).Trim(); if (-not $ssPid) { $ssPid = (ConvertTo-AabText (Get-Prop $meta 'planId')).Trim() }
+        if (-not $ssPid -or $null -eq (Get-Prop $json 'scheduleBuilderState')) { Add-Problem $f 'dl1-invalid' "an Argo Navis session save without a planid or a saved state - not kept"; continue }
+        $ssTest = [bool]((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')
+        $ssKey = $ssPid + $(if ($ssTest) { '|test' } else { '' })
+        if (-not $planStateSrc.ContainsKey($ssKey) -or $f.LastWriteTime -gt $planStateSrc[$ssKey].modified) { $planStateSrc[$ssKey] = @{ full = $f.FullName; file = $f.Name; modified = $f.LastWriteTime; planid = $ssPid; test = $ssTest; rig = ([string](Get-Prop $meta 'asset')).Trim(); kind = 'session'; stage = ([string](Get-Prop $meta 'stage')).Trim(); by = ([string](Get-Prop $meta 'by')).Trim() } }
+        continue
+    }
     # v2.90: a reviewer's verdict on a plan version, posted by the Help Centre's Plans tab (item 53): planid, scopeversion,
     # reviewer {name, email, position, section}, decision verified | changes, comment, at. A record, never a report; one per
     # reviewer per scope version (the newest saved wins); a test post (dryRun, meta.sample, SSCE Equipment) counts only
@@ -2060,7 +2073,7 @@ foreach ($f in $files) {
     if ($postPlanId -and $null -ne (Get-Prop $json 'scheduleBuilderState')) {
         $psTest = [bool]((ConvertTo-AabBool (Get-Prop $json 'dryRun')) -or (ConvertTo-AabBool (Get-Prop $meta 'sample')) -or ([string](Get-Prop $meta 'asset')).Trim() -eq 'SSCE Equipment')
         $psKey = $postPlanId + $(if ($psTest) { '|test' } else { '' })
-        if (-not $planStateSrc.ContainsKey($psKey) -or $f.LastWriteTime -gt $planStateSrc[$psKey].modified) { $planStateSrc[$psKey] = @{ full = $f.FullName; file = $f.Name; modified = $f.LastWriteTime; planid = $postPlanId; test = $psTest; rig = ([string](Get-Prop $meta 'asset')).Trim() } }
+        if (-not $planStateSrc.ContainsKey($psKey) -or $f.LastWriteTime -gt $planStateSrc[$psKey].modified) { $planStateSrc[$psKey] = @{ full = $f.FullName; file = $f.Name; modified = $f.LastWriteTime; planid = $postPlanId; test = $psTest; rig = ([string](Get-Prop $meta 'asset')).Trim(); kind = 'daily-report'; stage = 'execution'; by = ([string](Get-Prop $meta 'by')).Trim() } }
     }
     # v3.04 (plan item 74): a planning report that carries the 12-hour cycle (WCGRRT 172+, Argo Navis) is kept for the
     # Daily Summary Report: printed to PDF and offered to the Daily Summary Report flow. Older posts have no cycle and
@@ -5308,7 +5321,7 @@ elseif ($deployPath) {
                         $st = $planStateSrc[$stKey]
                         $stRigKey = ''; foreach ($k in $AabRigCodes.Keys) { if ([string]$AabRigCodes[$k] -eq $st.rig) { $stRigKey = [string]$k } }
                         $stBop = ''; if ([string]$st.planid -match '-(BOP\d)-') { $stBop = $Matches[1] }
-                        $stIdx.Add([ordered]@{ planid = [string]$st.planid; rig = [string]$st.rig; rigkey = $stRigKey; bop = $stBop; istest = [bool]$st.test; path = ('plans-state/' + [string]$st.planid + $(if ($st.test) { '.test' } else { '' }) + '.json'); file = [string]$st.file; saved = $st.modified.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }) | Out-Null
+                        $stIdx.Add([ordered]@{ planid = [string]$st.planid; rig = [string]$st.rig; rigkey = $stRigKey; bop = $stBop; istest = [bool]$st.test; path = ('plans-state/' + [string]$st.planid + $(if ($st.test) { '.test' } else { '' }) + '.json'); file = [string]$st.file; kind = [string]$st.kind; stage = [string]$st.stage; by = [string]$st.by; saved = $st.modified.ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ') }) | Out-Null
                     }
                     $stIdxJson = ConvertTo-PlainJson ([ordered]@{ generatedat = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ'); scanner = $ScriptVersion; count = $stIdx.Count; plans = $stIdx.ToArray() })
                     [System.IO.File]::WriteAllText((Join-Path $stDst 'index.json'), $stIdxJson, (New-Object System.Text.UTF8Encoding($false)))
