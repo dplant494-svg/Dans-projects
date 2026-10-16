@@ -63,7 +63,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ScriptVersion = '3.08'
+$ScriptVersion = '3.09'
 Write-Host "TSC Dashboard scanner v$ScriptVersion (PowerShell $($PSVersionTable.PSVersion))"
 $scanClock = [System.Diagnostics.Stopwatch]::StartNew()   # v2.52: the run time is printed at the end; the scheduled task kills a run over its time limit
 
@@ -5081,8 +5081,10 @@ function Format-DsrDate { param([string]$Iso)
     return $Iso
 }
 try {
-    if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir) -and $dsrPosts.Count -gt 0) {
-        if ($null -eq $script:PdfTemplate -and $null -eq $script:PdfBrowser) { Initialize-PdfRender }
+    # v3.09: runs with no daily reports too, so the notices file is rewritten empty. Before, a list that had emptied was
+    # left as it was, and the flow kept trying a report whose PDF had been deleted (NotFound on ReportPdf, 16 Oct).
+    if ($helpReceiptDir -and (Test-Path -Path $helpReceiptDir)) {
+        if ($dsrPosts.Count -gt 0 -and $null -eq $script:PdfTemplate -and $null -eq $script:PdfBrowser) { Initialize-PdfRender }
         $dsrTplPath = Join-Path $repoRoot 'edocs\daily-summary-report.html'
         $dsrTpl = $(if (Test-Path -Path $dsrTplPath) { [System.IO.File]::ReadAllText($dsrTplPath, [System.Text.Encoding]::UTF8) } else { '' })
         $dsrRoot = Join-Path (Split-Path -Parent $helpReceiptDir) 'daily-reports'
@@ -5107,7 +5109,7 @@ try {
             $rigDir = Join-Path $dsrRoot ($rig -replace '[\\/:*?"<>|]', '_')
             $pdfName = ''
             if ($dsrTpl) { $pdfName = Export-RecordPdf -SourcePath $dp.full -OutDir $rigDir -PlanId $dp.planid -Template $dsrTpl -OutName $nm }
-            if (-not $pdfName) { continue }
+            if (-not $pdfName -or -not (Test-Path -LiteralPath (Join-Path $rigDir $pdfName))) { continue }
             $dsrPdfCount++
             if (((Get-Date) - $dp.modified).TotalHours -gt $dsrHours) { continue }
             $rigKey = (ConvertTo-AabText (Get-Prop $m 'rigkey')).Trim().ToLowerInvariant()
@@ -5161,7 +5163,7 @@ try {
         $dnFile = Join-Path $helpReceiptDir 'daily-report-notices.json'; $prevDn = ''; if (Test-Path -Path $dnFile) { $prevDn = [System.IO.File]::ReadAllText($dnFile) }
         $stripDn = { param($t) [regex]::Replace($t, '"generatedAt":"[^"]*"', '') }
         if ((& $stripDn $prevDn) -ne (& $stripDn $dnJson)) { [System.IO.File]::WriteAllText($dnFile, $dnJson, (New-Object System.Text.UTF8Encoding($false))) }
-        Write-Host "Daily Summary Report: $dsrPdfCount report PDF(s) in daily-reports, $($dsrNotices.Count) offered to the flow in daily-report-notices.json" -ForegroundColor Green
+        if ($dsrPosts.Count -gt 0 -or (& $stripDn $prevDn) -ne (& $stripDn $dnJson)) { Write-Host "Daily Summary Report: $dsrPdfCount report PDF(s) in daily-reports, $($dsrNotices.Count) offered to the flow in daily-report-notices.json" -ForegroundColor Green }
     }
 } catch { Write-Warning "Daily Summary Report failed (scan unaffected): $($_.Exception.Message)" }
 
