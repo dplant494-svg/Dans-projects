@@ -1,0 +1,334 @@
+{
+ "version": 3,
+ "exportedAt": "2026-10-18T07:25:00-05:00",
+ "meta": {
+  "asset": "West Vela",
+  "discipline": "Planning",
+  "planningOnly": true,
+  "schedule": "20261012_WVE_BWM_BOP1_Schedule",
+  "bopNo": "BOP1",
+  "projType": "BWM — Between Well Maintenance",
+  "origFinish": "2026-10-21",
+  "curFinish": "2026-10-24",
+  "needDate": "2026-10-28",
+  "float": "(+) 87.4 Hrs",
+  "maintStart": "2026-10-12",
+  "maintDay": "Day 7 of 9 · 168 hrs elapsed / 218.0 hrs total (9.1 days)",
+  "planVar": "(-) 4 Days",
+  "origDurHrs": 853.5,
+  "date": "2026-10-12",
+  "lastRigUpdate": "2026-10-18",
+  "location": "Brazil - Buzios",
+  "wo": "#1870107",
+  "rigmgr": "SAMPLE Rig Manager",
+  "arigmgr": "SAMPLE Asst. Rig Manager",
+  "oim": "SAMPLE OIM",
+  "tsl": "SAMPLE TSL",
+  "dsl": "SAMPLE DSL",
+  "sss": "SAMPLE Subsea Supervisor",
+  "planner": "SAMPLE Planner",
+  "projLead": "SAMPLE Project Lead",
+  "techSupt": "SAMPLE Technical Supt.",
+  "verifier": "N/A",
+  "cycle": "0700",
+  "dataDateTime": "2026-10-18T07:00:00-05:00",
+  "reportName": "20261018_WVE_BWM_BOP1_Report_0700",
+  "floatHrs": 87.4,
+  "rigkey": "vela",
+  "rev": "Argo Navis REV 16 (SACRED test sample)",
+  "kind": "planning-report",
+  "planid": "WVE-BOP1-20261012",
+  "saved": "2026-10-18T07:25:00-05:00",
+  "sample": true
+ },
+ "tiles": [
+  {
+   "planningData": {
+    "reportDate": "2026-10-18",
+    "dataDate": "2026-10-18",
+    "pctComplete": "23.41%",
+    "criticalPath": "Offline Ancillary — 12M MOONPOOL SWIVELS INSPECTION",
+    "simops": "Riser running on aux well centre",
+    "comments": "<ul><li>SAMPLE 2 of 2 for Dan, 18 Oct morning: ram bonnet seal break-in closed. Test post only.</li><li>Not a real plan.</li></ul>",
+    "lastRigUpdate": "2026-10-18",
+    "projectComplete": false,
+    "milestones": [
+     {
+      "name": "BOP Landed on Beams",
+      "baseline": "2026-10-12",
+      "est": "2026-10-12",
+      "actual": "2026-10-12"
+     },
+     {
+      "name": "Rack Back to Well Center Complete",
+      "baseline": "2026-10-12",
+      "est": "2026-10-15",
+      "actual": "2026-10-15"
+     },
+     {
+      "name": "Split BOP and LMRP Complete",
+      "baseline": "2026-10-12",
+      "est": "2026-10-15",
+      "actual": "2026-10-15"
+     },
+     {
+      "name": "Lower Stack Complete",
+      "baseline": "2026-10-18",
+      "est": "2026-10-21",
+      "actual": ""
+     },
+     {
+      "name": "LMRP Complete",
+      "baseline": "2026-10-12",
+      "est": "2026-10-16",
+      "actual": "2026-10-17"
+     },
+     {
+      "name": "BOP Controls Complete",
+      "baseline": "2026-10-18",
+      "est": "2026-10-21",
+      "actual": ""
+     },
+     {
+      "name": "Stack Up Complete",
+      "baseline": "2026-10-18",
+      "est": "2026-10-21",
+      "actual": ""
+     },
+     {
+      "name": "Offline Ancillary Complete",
+      "baseline": "2026-10-21",
+      "est": "2026-10-24",
+      "actual": ""
+     },
+     {
+      "name": "Testing Complete",
+      "baseline": "2026-10-19",
+      "est": "2026-10-22",
+      "actual": ""
+     },
+     {
+      "name": "Offline Maintenance / Pre-Deployment Testing Complete",
+      "baseline": "2026-10-21",
+      "est": "2026-10-24",
+      "actual": ""
+     }
+    ],
+    "done": [
+     {
+      "id": "Rack Back to Well Center",
+      "desc": "Rack Back to Well Center",
+      "pct": "100%"
+     },
+     {
+      "id": "Split BOP and LMRP",
+      "desc": "Split BOP and LMRP",
+      "pct": "100%"
+     },
+     {
+      "id": "R10152956",
+      "desc": "BWM CASING SHEAR RAM",
+      "pct": "100%"
+     },
+     {
+      "id": "R10152958",
+      "desc": "BWM PIPE AND TEST RAMS",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153094",
+      "desc": "BWM HYDRAULIC SPRING ASSIST HB GATE VALVES INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153318",
+      "desc": "BWM CHECK VALVE AND ISOLATION VALVE FUNCTIONALITY/INTEGRITY TEST",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153409",
+      "desc": "12M ANNULAR BOP CHAMBER TEST",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153676",
+      "desc": "BWM ANNULAR BOP INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "C10250115",
+      "desc": "12M BOP CONTROL SYSTEM PRESSURE RELIEF VALVES",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153211",
+      "desc": "BWM PRE-CHARGE POD PILOT ACCUMULATORS",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153317",
+      "desc": "BWM HYDRAULIC SHUTTLE VALVE FUNCTIONALITY TEST",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153319",
+      "desc": "BWM BOP CONTROL HOSES AND PIPING",
+      "pct": "100%"
+     },
+     {
+      "id": "C10249815",
+      "desc": "BWM MPD ROTATING CONTROL DEVICE ASSEMBLY INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "C10249935",
+      "desc": "6M LOCAL CONTROL PANEL INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "C10249945",
+      "desc": "12M PORTABLE GAS BOOSTER INSPECTION",
+      "pct": "60%"
+     },
+     {
+      "id": "C10250087",
+      "desc": "6M HP AIR COMPRESSOR AIR QUALITY CHECK",
+      "pct": "60%"
+     },
+     {
+      "id": "R10152880",
+      "desc": "BWM DIVERTER ASSEMBLY (21 1/4\" Shaffer) INSPECTION",
+      "pct": "60%"
+     },
+     {
+      "id": "R10152940",
+      "desc": "12M DIVERTER ASSEMBLY (21 1/4\" Shaffer) SERVICE",
+      "pct": "60%"
+     }
+    ],
+    "next": [
+     {
+      "id": "C10249945",
+      "desc": "12M PORTABLE GAS BOOSTER INSPECTION",
+      "target": "60%"
+     },
+     {
+      "id": "C10250087",
+      "desc": "6M HP AIR COMPRESSOR AIR QUALITY CHECK",
+      "target": "60%"
+     },
+     {
+      "id": "R10152880",
+      "desc": "BWM DIVERTER ASSEMBLY (21 1/4\" Shaffer) INSPECTION",
+      "target": "60%"
+     },
+     {
+      "id": "R10152940",
+      "desc": "12M DIVERTER ASSEMBLY (21 1/4\" Shaffer) SERVICE",
+      "target": "60%"
+     }
+    ],
+    "breakins": [
+     {
+      "id": "BRK-001",
+      "status": "closed",
+      "type": "Repair",
+      "desc": "SAMPLE: replace leaking ram bonnet seal",
+      "wbs": "Lower BOP",
+      "branch": "Lower BOP",
+      "sfi": "331",
+      "after": "",
+      "before": "",
+      "dur": "12",
+      "ref": "MOC-SAMPLE-1",
+      "mocRef": "MOC-SAMPLE-1",
+      "requestedBy": "Rig",
+      "p6id": "",
+      "closedDate": "2026-10-18",
+      "lesson": "",
+      "raised": "2026-10-15",
+      "added": "2026-10-15T20:38:20-05:00",
+      "actualStatus": "complete",
+      "pctComplete": 100,
+      "start": "2026-10-15T20:38",
+      "critical": "No"
+     },
+     {
+      "id": "BRK-002",
+      "status": "open",
+      "type": "Waiting / NPT",
+      "desc": "SAMPLE: waiting on crane (weather)",
+      "wbs": "Offline Ancillary",
+      "branch": "Offline Ancillary",
+      "sfi": "",
+      "after": "",
+      "before": "",
+      "dur": "6",
+      "ref": "",
+      "mocRef": "",
+      "requestedBy": "",
+      "p6id": "",
+      "closedDate": "",
+      "lesson": "",
+      "raised": "2026-10-15",
+      "added": "2026-10-15T20:38:20-05:00",
+      "actualStatus": "not-started",
+      "pctComplete": 0,
+      "start": "2026-10-15T20:38",
+      "critical": "No"
+     }
+    ],
+    "scopeCoveragePct": 93,
+    "scopeIndicative": false,
+    "criticalChainLength": 46,
+    "crews": {
+     "Lower BOP": 0,
+     "LMRP": 0,
+     "Controls": 0,
+     "Offline Ancillary": 0,
+     "Testing": 0
+    },
+    "tasksQueuedByCrew": 0,
+    "nptHours": "0 Hrs",
+    "nptTotalHrs": 0,
+    "nptByCategory": {},
+    "nptLog": [],
+    "thirdParty": {
+     "currency": "USD",
+     "personnelOnBoard": 0,
+     "personnelCost": 0,
+     "otherCost": 0,
+     "costTotal": 0,
+     "personnel": [],
+     "costs": []
+    },
+    "bopReadyDate": "2026-10-24T14:38:00-05:00",
+    "needDate": "2026-10-28",
+    "testingPct": 0,
+    "cycle": "0700",
+    "curFinishTime": "14:38",
+    "needTime": "06:00",
+    "planVariance": "(−) 76.5 Hrs",
+    "planVarianceHrs": -76.5,
+    "bopPctComplete": "41.05%",
+    "bopPctBasis": "SFI 331, 332 + BOP sequence",
+    "quality": [
+     {
+      "owner": "Subsea Supervisor",
+      "date": "2026-10-16",
+      "desc": "SAMPLE: seal kit short by 2 - expedited from Macae"
+     }
+    ],
+    "lessons": [
+     {
+      "id": "C10249811",
+      "desc": "SAMPLE: torque tool calibration check before the bonnet work saves a re-torque"
+     }
+    ]
+   }
+  }
+ ],
+ "criticalRows": [],
+ "actionRows": [],
+ "dryRun": true
+}

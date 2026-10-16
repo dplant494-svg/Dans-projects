@@ -1,0 +1,1694 @@
+{
+ "version": 3,
+ "exportedAt": "2026-10-17T19:20:00-05:00",
+ "dryRun": true,
+ "meta": {
+  "asset": "West Vela",
+  "discipline": "Planning",
+  "planningOnly": true,
+  "schedule": "20261012_WVE_BWM_BOP1_Schedule",
+  "bopNo": "BOP1",
+  "projType": "BWM — Between Well Maintenance",
+  "origFinish": "2026-10-21",
+  "curFinish": "2026-10-24",
+  "needDate": "2026-10-28",
+  "float": "(+) 87.4 Hrs",
+  "maintStart": "2026-10-12",
+  "maintDay": "Day 6 of 9 · 156 hrs elapsed / 218.0 hrs total (9.1 days)",
+  "planVar": "(-) 4 Days",
+  "origDurHrs": 853.5,
+  "date": "2026-10-12",
+  "lastRigUpdate": "2026-10-17",
+  "location": "Brazil - Buzios",
+  "wo": "#1870107",
+  "rigmgr": "SAMPLE Rig Manager",
+  "arigmgr": "SAMPLE Asst. Rig Manager",
+  "oim": "SAMPLE OIM",
+  "tsl": "SAMPLE TSL",
+  "dsl": "SAMPLE DSL",
+  "sss": "SAMPLE Subsea Supervisor",
+  "planner": "SAMPLE Planner",
+  "projLead": "SAMPLE Project Lead",
+  "techSupt": "SAMPLE Technical Supt.",
+  "verifier": "N/A",
+  "cycle": "1900",
+  "dataDateTime": "2026-10-17T19:00:00-05:00",
+  "reportName": "20261017_WVE_BWM_BOP1_Report_1900",
+  "floatHrs": 87.4,
+  "rigkey": "vela",
+  "rev": "Argo Navis REV 16 (SACRED test sample)",
+  "kind": "plan-progress",
+  "planid": "WVE-BOP1-20261012",
+  "saved": "2026-10-17T19:20:00-05:00",
+  "sample": true
+ },
+ "tiles": [
+  {
+   "planningData": {
+    "reportDate": "2026-10-17",
+    "dataDate": "2026-10-17",
+    "pctComplete": "19.84%",
+    "criticalPath": "Offline Ancillary — 12M MOONPOOL SWIVELS INSPECTION",
+    "simops": "Riser running on aux well centre",
+    "comments": "<ul><li>SAMPLE post for the SACRED print and test email - not a real plan.</li><li>BOP on beams 12 Oct 06:00.</li></ul>",
+    "lastRigUpdate": "2026-10-15",
+    "projectComplete": false,
+    "milestones": [
+     {
+      "name": "BOP Landed on Beams",
+      "baseline": "2026-10-12",
+      "est": "2026-10-12",
+      "actual": "2026-10-12"
+     },
+     {
+      "name": "Rack Back to Well Center Complete",
+      "baseline": "2026-10-12",
+      "est": "2026-10-15",
+      "actual": "2026-10-15"
+     },
+     {
+      "name": "Split BOP and LMRP Complete",
+      "baseline": "2026-10-12",
+      "est": "2026-10-15",
+      "actual": "2026-10-15"
+     },
+     {
+      "name": "Lower Stack Complete",
+      "baseline": "2026-10-18",
+      "est": "2026-10-21",
+      "actual": ""
+     },
+     {
+      "name": "LMRP Complete",
+      "baseline": "2026-10-12",
+      "est": "2026-10-16",
+      "actual": ""
+     },
+     {
+      "name": "BOP Controls Complete",
+      "baseline": "2026-10-18",
+      "est": "2026-10-21",
+      "actual": ""
+     },
+     {
+      "name": "Stack Up Complete",
+      "baseline": "2026-10-18",
+      "est": "2026-10-21",
+      "actual": ""
+     },
+     {
+      "name": "Offline Ancillary Complete",
+      "baseline": "2026-10-21",
+      "est": "2026-10-24",
+      "actual": ""
+     },
+     {
+      "name": "Testing Complete",
+      "baseline": "2026-10-19",
+      "est": "2026-10-22",
+      "actual": ""
+     },
+     {
+      "name": "Offline Maintenance / Pre-Deployment Testing Complete",
+      "baseline": "2026-10-21",
+      "est": "2026-10-24",
+      "actual": ""
+     }
+    ],
+    "done": [
+     {
+      "id": "Rack Back to Well Center",
+      "desc": "Rack Back to Well Center",
+      "pct": "100%"
+     },
+     {
+      "id": "Split BOP and LMRP",
+      "desc": "Split BOP and LMRP",
+      "pct": "100%"
+     },
+     {
+      "id": "R10152956",
+      "desc": "BWM CASING SHEAR RAM",
+      "pct": "100%"
+     },
+     {
+      "id": "R10152958",
+      "desc": "BWM PIPE AND TEST RAMS",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153094",
+      "desc": "BWM HYDRAULIC SPRING ASSIST HB GATE VALVES INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153318",
+      "desc": "BWM CHECK VALVE AND ISOLATION VALVE FUNCTIONALITY/INTEGRITY TEST",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153409",
+      "desc": "12M ANNULAR BOP CHAMBER TEST",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153676",
+      "desc": "BWM ANNULAR BOP INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "C10250115",
+      "desc": "12M BOP CONTROL SYSTEM PRESSURE RELIEF VALVES",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153211",
+      "desc": "BWM PRE-CHARGE POD PILOT ACCUMULATORS",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153317",
+      "desc": "BWM HYDRAULIC SHUTTLE VALVE FUNCTIONALITY TEST",
+      "pct": "100%"
+     },
+     {
+      "id": "R10153319",
+      "desc": "BWM BOP CONTROL HOSES AND PIPING",
+      "pct": "100%"
+     },
+     {
+      "id": "C10249815",
+      "desc": "BWM MPD ROTATING CONTROL DEVICE ASSEMBLY INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "C10249935",
+      "desc": "6M LOCAL CONTROL PANEL INSPECTION",
+      "pct": "100%"
+     },
+     {
+      "id": "C10249945",
+      "desc": "12M PORTABLE GAS BOOSTER INSPECTION",
+      "pct": "60%"
+     },
+     {
+      "id": "C10250087",
+      "desc": "6M HP AIR COMPRESSOR AIR QUALITY CHECK",
+      "pct": "60%"
+     },
+     {
+      "id": "R10152880",
+      "desc": "BWM DIVERTER ASSEMBLY (21 1/4\" Shaffer) INSPECTION",
+      "pct": "60%"
+     },
+     {
+      "id": "R10152940",
+      "desc": "12M DIVERTER ASSEMBLY (21 1/4\" Shaffer) SERVICE",
+      "pct": "60%"
+     }
+    ],
+    "next": [
+     {
+      "id": "C10249945",
+      "desc": "12M PORTABLE GAS BOOSTER INSPECTION",
+      "target": "60%"
+     },
+     {
+      "id": "C10250087",
+      "desc": "6M HP AIR COMPRESSOR AIR QUALITY CHECK",
+      "target": "60%"
+     },
+     {
+      "id": "R10152880",
+      "desc": "BWM DIVERTER ASSEMBLY (21 1/4\" Shaffer) INSPECTION",
+      "target": "60%"
+     },
+     {
+      "id": "R10152940",
+      "desc": "12M DIVERTER ASSEMBLY (21 1/4\" Shaffer) SERVICE",
+      "target": "60%"
+     }
+    ],
+    "breakins": [
+     {
+      "id": "BRK-001",
+      "status": "open",
+      "type": "Repair",
+      "desc": "SAMPLE: replace leaking ram bonnet seal",
+      "wbs": "Lower BOP",
+      "branch": "Lower BOP",
+      "sfi": "331",
+      "after": "",
+      "before": "",
+      "dur": "12",
+      "ref": "MOC-SAMPLE-1",
+      "mocRef": "MOC-SAMPLE-1",
+      "requestedBy": "Rig",
+      "p6id": "",
+      "closedDate": "",
+      "lesson": "",
+      "raised": "2026-10-15",
+      "added": "2026-10-15T20:38:20-05:00",
+      "actualStatus": "not-started",
+      "pctComplete": 0,
+      "start": "2026-10-15T20:38",
+      "critical": "No"
+     },
+     {
+      "id": "BRK-002",
+      "status": "open",
+      "type": "Waiting / NPT",
+      "desc": "SAMPLE: waiting on crane (weather)",
+      "wbs": "Offline Ancillary",
+      "branch": "Offline Ancillary",
+      "sfi": "",
+      "after": "",
+      "before": "",
+      "dur": "6",
+      "ref": "",
+      "mocRef": "",
+      "requestedBy": "",
+      "p6id": "",
+      "closedDate": "",
+      "lesson": "",
+      "raised": "2026-10-15",
+      "added": "2026-10-15T20:38:20-05:00",
+      "actualStatus": "not-started",
+      "pctComplete": 0,
+      "start": "2026-10-15T20:38",
+      "critical": "No"
+     }
+    ],
+    "scopeCoveragePct": 93,
+    "scopeIndicative": false,
+    "criticalChainLength": 46,
+    "crews": {
+     "Lower BOP": 0,
+     "LMRP": 0,
+     "Controls": 0,
+     "Offline Ancillary": 0,
+     "Testing": 0
+    },
+    "tasksQueuedByCrew": 0,
+    "nptHours": "0 Hrs",
+    "nptTotalHrs": 0,
+    "nptByCategory": {},
+    "nptLog": [],
+    "thirdParty": {
+     "currency": "USD",
+     "personnelOnBoard": 0,
+     "personnelCost": 0,
+     "otherCost": 0,
+     "costTotal": 0,
+     "personnel": [],
+     "costs": []
+    },
+    "bopReadyDate": "2026-10-24T14:38:00-05:00",
+    "needDate": "2026-10-28",
+    "testingPct": 0,
+    "cycle": "1900",
+    "curFinishTime": "14:38",
+    "needTime": "06:00",
+    "planVariance": "(−) 84.6 Hrs",
+    "planVarianceHrs": -84.6,
+    "bopPctComplete": "34.10%",
+    "bopPctBasis": "SFI 331, 332 + BOP sequence",
+    "quality": [
+     {
+      "owner": "Subsea Supervisor",
+      "date": "2026-10-16",
+      "desc": "SAMPLE: seal kit short by 2 - expedited from Macae"
+     }
+    ],
+    "lessons": [
+     {
+      "id": "C10249811",
+      "desc": "SAMPLE: torque tool calibration check before the bonnet work saves a re-torque"
+     }
+    ]
+   }
+  }
+ ],
+ "criticalRows": [],
+ "actionRows": [],
+ "progress": {
+  "planId": "WVE-BOP1-20261012",
+  "scopeVersion": 2,
+  "asOf": "2026-10-17T19:20:00-05:00",
+  "shift": "day",
+  "snapshot": true,
+  "pctComplete": "19.84%",
+  "bopReadyDate": "2026-10-24T14:38:00-05:00",
+  "needDate": "2026-10-28",
+  "checklists": [],
+  "tasks": [
+   {
+    "taskId": "rackback",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "split",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152956",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152958",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152959",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153094",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153100",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "brk:BRK-001",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153318",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153321",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153407",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153409",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153676",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250115",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250119",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153211",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153212",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153317",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153319",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153322",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153323",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249815",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249816",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249817",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249935",
+    "pct": 100,
+    "status": "complete",
+    "note": "",
+    "actualStart": "2026-10-15T20:38",
+    "actualEnd": "2026-10-15T20:38",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249945",
+    "pct": 60,
+    "status": "in-progress",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250087",
+    "pct": 60,
+    "status": "in-progress",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152880",
+    "pct": 60,
+    "status": "in-progress",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152940",
+    "pct": 60,
+    "status": "in-progress",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153046",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153732",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "tpl:sss-007",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "brk:BRK-002",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250075",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153311",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153711",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153878",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153879",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153880",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154228",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250089",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250179",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10149022",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152960",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153719",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153006",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153007",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153093",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154285",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152881",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250386",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153389",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154194",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154098",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249908",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154231",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249811",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249814",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249974",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250387",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10149023",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250164",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250167",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152955",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249915",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249916",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152957",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152040",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153379",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154402",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153382",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10149024",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249917",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153394",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153156",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153386",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249918",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249887",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153316",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153412",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249994",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249995",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10151984",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249890",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153320",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249919",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249894",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153221",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249899",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249921",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250117",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153210",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153125",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249922",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153213",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152939",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153393",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249923",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153399",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250162",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153400",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10154190",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250153",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249924",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153401",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153402",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249818",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250156",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250003",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152986",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153403",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250171",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10152716",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153404",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250114",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250118",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153410",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153005",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153017",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153173",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "stackup",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249979",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153018",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153096",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153097",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153098",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153370",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249980",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249981",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153371",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249965",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250032",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250170",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153325",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153327",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153328",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153315",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "drift",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10249996",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153158",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250173",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:R10153345",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250004",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   },
+   {
+    "taskId": "wo:C10250005",
+    "pct": 0,
+    "status": "not-started",
+    "note": "",
+    "actualStart": "",
+    "actualEnd": "",
+    "actualHrs": 0
+   }
+  ],
+  "evidence": [],
+  "pdcItemsTicked": [
+   "B-04",
+   "G-02"
+  ],
+  "breakins": [
+   {
+    "id": "BRK-001",
+    "status": "open",
+    "type": "Repair",
+    "desc": "SAMPLE: replace leaking ram bonnet seal",
+    "wbs": "Lower BOP",
+    "branch": "Lower BOP",
+    "sfi": "331",
+    "after": "",
+    "before": "",
+    "dur": "12",
+    "ref": "MOC-SAMPLE-1",
+    "mocRef": "MOC-SAMPLE-1",
+    "requestedBy": "Rig",
+    "p6id": "",
+    "closedDate": "",
+    "lesson": "",
+    "raised": "2026-10-15",
+    "added": "2026-10-15T20:38:20-05:00",
+    "actualStatus": "not-started",
+    "pctComplete": 0
+   },
+   {
+    "id": "BRK-002",
+    "status": "open",
+    "type": "Waiting / NPT",
+    "desc": "SAMPLE: waiting on crane (weather)",
+    "wbs": "Offline Ancillary",
+    "branch": "Offline Ancillary",
+    "sfi": "",
+    "after": "",
+    "before": "",
+    "dur": "6",
+    "ref": "",
+    "mocRef": "",
+    "requestedBy": "",
+    "p6id": "",
+    "closedDate": "",
+    "lesson": "",
+    "raised": "2026-10-15",
+    "added": "2026-10-15T20:38:20-05:00",
+    "actualStatus": "not-started",
+    "pctComplete": 0
+   }
+  ]
+ }
+}
