@@ -126,9 +126,9 @@ Everything from here goes **inside** EachReport.
 ```
 join(union(split(replace(concat(coalesce(first(body('RigRow')?['value'])?['RigManagerEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ARMEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['SubseaSupervisorEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['TslEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['DSLEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['ESVEmail'],''), ';', coalesce(first(body('RigRow')?['value'])?['MPDEmail'],''), ';', outputs('PlanToList')), ';;', ';'), ';'), json('[]')), ';')
 ```
-3. **+**, **Compose**, rename **SendTo**. Inputs **fx**. This is the test gate: a test report goes to you only.
+3. **+**, **Compose**, rename **SendTo**. Inputs **fx**. This is the test gate: a test report goes to you and Lee only (Lee added 16 Oct, so he sees his own Argo Navis test posts).
 ```
-if(equals(items('EachReport')?['test'], true), 'daniel.plant@seadrill.com', outputs('RigPeople'))
+if(equals(items('EachReport')?['test'], true), 'daniel.plant@seadrill.com;lee.arnold@seadrill.com', outputs('RigPeople'))
 ```
 4. **+**, **Compose**, rename **SendCc**. Inputs **fx**:
 ```
