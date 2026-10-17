@@ -166,6 +166,12 @@ def main():
     to_pdf(first_h1(md_html(read(os.path.join(D1, '11-DAY2-HOLD-POINT-DAILY-SUMMARY-REPORT.md')))), os.path.join(OUT, '07-Day-2-Hold-Point-P6-Route.pdf'), 'Hold point')
     to_pdf(first_h1(md_html(read(os.path.join(SRC, 'UAT-SIGN-OFF.md')))), os.path.join(OUT, '08-UAT-Sign-off-Form.pdf'), 'UAT sign-off')
 
+    # --- 09 Wednesday brief, 10/11 Thursday decks, 12 Thursday notes
+    to_pdf(first_h1(md_html(read(os.path.join(SRC, 'WEDNESDAY-ADAM-SESSION-BRIEF.md')))), os.path.join(OUT, '09-Wednesday-Adam-Session-Brief.pdf'), 'Wednesday brief')
+    shutil.copy(os.path.join(SRC, 'Thursday-CBM-Lessons-Learned.pptx'), os.path.join(OUT, '10-Thursday-CBM-Lessons-Learned.pptx'))
+    shutil.copy(os.path.join(SRC, 'Thursday-SACRED-Repository.pptx'), os.path.join(OUT, '11-Thursday-SACRED-Repository.pptx'))
+    to_pdf(first_h1(md_html(read(os.path.join(SRC, 'THURSDAY-PRESENTER-NOTES.md')))), os.path.join(OUT, '12-Thursday-Presenter-Notes.pdf'), 'Thursday notes')
+
     # --- files
     usb = os.path.join(OUT, 'Trainer-demo-files')
     shutil.copytree(os.path.join(SRC, 'usb'), usb)
