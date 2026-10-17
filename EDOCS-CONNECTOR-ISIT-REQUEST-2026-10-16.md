@@ -28,3 +28,9 @@ The connector **"OpenText eDOCS" (Create folder (V2) / Create document (V2))** i
 
 - The API key and the service account password are credentials. Please send them **directly into the Power Automate connection** (or to Dan by a secure route), not by email or chat.
 - They are never stored in SACRED's files.
+
+## Update, 17 Oct 2026 (Dan)
+
+- **Account.** For now the connection uses **Dan's own eDOCS account**; Dan enters it into the connection himself. **Janzen** (Technical Services' app IT contact) is creating **two service accounts**, and the connection switches to one of them when they're ready.
+- **Profile fields.** Not needed from ISIT: the document controller is on board and will set them.
+- **Still needed from ISIT / Digital Desk:** the API key and settings name for the OneFox / PPC subscription (and who owns them); whether the premium licence is covered in SEADRILL-WC-DEV; and the host URL, only if it isn't the default.
