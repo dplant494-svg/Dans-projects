@@ -20,7 +20,7 @@ identities and HTTPS asks owned by named people with dates. The decisions table 
 | 09:45–10:15 | **The server move steps, walked through together** (`SACRED-SERVER-MOVE-STEPS.md`, steps 1–8 and the 21 Sep addendum) | Say which steps still hold if the host is the web app. Agree **the transfer day** and who is in the room (deck: a three-hour window). |
 | 10:15–10:30 | **Break** | |
 | 10:30–11:15 | **The web app** (slides 7–10; the Lovable plan) | Settle which "web app" we mean (the two are in the box below). Then hosting, sign-in and data questions 9 to 16. |
-| 11:15–11:45 | **HTTPS for tablets, the eDocs connector, the Fabric database** | Owners and dates for each (questions 17 to 23). |
+| 11:15–11:45 | **HTTPS for tablets, the eDocs connector, the Power BI data** | Owners and dates for each (questions 17 to 23). |
 | 11:45–12:00 | **Decisions and actions** | Fill section 5 and read it back. |
 
 **Two "web apps" are on the table. Keep them apart.**
@@ -46,7 +46,7 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | Power Automate flows (SEADRILL-WC-DEV) | Dan's connection, Dan and Lee owners | A Well Control Group role account as co-owner and connection. ISIT's Power Platform admin reassigns the primary owner. **Flows are never exported or moved** (that would change the trigger URLs) | Plan item 40 |
 | SharePoint libraries (PostedReports, Digests, report folders) | M365, Dan and Lee | Unchanged. They stay the system of record | Deck slide 3 |
 | Inputs (Maximo extract, Lee's job plans) | `\\SEADRILL23339` | Server: unchanged. Web app: moved to a SharePoint library | Deck slides 8–9 |
-| Fabric database SACRED DATA | Dan's workspace | Dan and Lee. Capacity goes on Lee's cost centre when the trial ends, about 12 November | Chart M1b |
+| The data (36-table CSV export) | SharePoint Digests, read by Power BI Pro | Dan and Lee, in a Pro workspace "SACRED – Well Control". **Fabric is not an approved platform (Janzen, 17 Oct)**; the Fabric trial lapses about 11 Nov with nothing lost | Week plan 54 |
 | Secrets (intake key, flow URL, eDocs credentials) | In the rig tools and the flows | **They do not move.** Anything new goes by a secure route only (section 6) | Deck slide 11 |
 
 ## 3. What Dan brings and opens
@@ -84,13 +84,13 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | 14 | Can `web.config` carry the MIME types and `no-cache` on `sw.js` for the offline tools? | |
 | 15 | Lovable: does ISIT see the Microsoft web app as the step before Lovable, or instead of it? Who decides hosting for Lovable (Lovable-hosted, or exported and self-hosted by ISIT)? | |
 | 16 | The Entra app registration for SSO and Graph: can one registration serve both the web app and Lovable? What is the lead time? (Lovable plan: no SSO, no production on any platform.) | |
-| **HTTPS, eDocs, Fabric** | | |
+| **HTTPS, eDocs, Power BI** | | |
 | 17 | HTTPS for the tablets: a binding and an internal-CA certificate pushed by Intune (server), or built in (web app)? By when? The request asks for the end of October. | |
 | 18 | Do we keep port 8080 working, or redirect it? | |
 | 19 | The Intune push of SSORT and WCGRRT as home-screen apps: yes or no, and who does it? | |
 | 20 | eDocs: does Seadrill hold the OneFox / PPC subscription? Who owns the API key and the settings name? | |
 | 21 | eDocs: the API key and settings name (asked of Digital Desk 17 Oct) and the premium licence. The connection uses Dan's account until a role account is ready; the document controller sets the fields. | |
-| 22 | Fabric: who makes the capacity decision (open action, 31 Oct)? Do SACRED DATA and the hourly dataflow stay as they are? | |
+| 22 | Power BI: Fabric is not approved, so the data goes to a Power BI Pro workspace (Dan has Pro). Can the scheduled refresh read SharePoint under a Well Control Group role account? Who else needs Pro to view it? | |
 | 23 | ORR, week of 19 Oct: who confirms backup, the RACI, early-life support and the DR handover? Also KE-08 (the stale SSORT copy on the share) and KE-10 (the intake address in the tool files, which needs a rating). | |
 
 ## 5. Decisions to record
@@ -110,7 +110,7 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | HTTPS: method and date | | | |
 | Dual run length, and the date Dan's PC task is disabled (chart: 13 Nov; 14 Oct brief: 6 Nov; to confirm) | | | |
 | eDocs connector: API key and settings owner (Digital Desk asked 17 Oct); Dan's account until the role accounts land | | | |
-| Fabric capacity: decision owner | | | |
+| Power BI workspace members and refresh account | | | |
 | How the web app relates to Lovable | | | |
 
 ## 6. Risks and things not to do
@@ -132,7 +132,7 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
   Swapping connections and owners inside SEADRILL-WC-DEV changes no URL.
 - **Do not install the tools on tablets before the move.** An installed app belongs to its address, so every tablet would have to
   install twice. Carry `sw.js`, `manifest.json` and the icons across with the tools.
-- **No second system of record.** Do not load data into a Lovable or Supabase store alongside Fabric until the Lovable plan's
+- **No second system of record.** Do not load data into a Lovable or Supabase store alongside the SharePoint export and Power BI until the Lovable plan's
   phase 0 has decided which one holds the record.
 - **Do not take on new build work in the room.** Section 7 gets the asks into the plan.
 

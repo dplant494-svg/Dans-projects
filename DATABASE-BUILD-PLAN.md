@@ -1,3 +1,5 @@
+> **17 Oct 2026: superseded on the platform.** Fabric is not an approved Seadrill enterprise platform (Janzen Small, ISIT). The same CSV export now feeds **Power BI Pro** (Dan's licence) instead of a Fabric SQL database; see week plan item 54. The export design below still stands.
+
 # The database, built without IT — the order of work from 1 October 2026
 
 **Owner:** Dan · **Engine:** the Fabric SQL database `SACRED DATA` in Dan's workspace (an Azure SQL database, created
