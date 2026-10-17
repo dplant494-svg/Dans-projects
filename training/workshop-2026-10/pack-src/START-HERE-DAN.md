@@ -1,6 +1,6 @@
 # Start here, Dan: the workshop pack and what you need to do
 
-**Workshop:** Monday 19 to Thursday 22 October 2026, Seadrill Houston. **You present:** Monday and Tuesday (the training review), plus two Thursday sessions: CBM lessons learned (08:00) and SACRED as the repository (14:00). On Wednesday, 09:00–12:00, you work with Adam Sewell on the web app and the SACRED handover.
+**Workshop:** Monday 19 to Thursday 22 October 2026, Seadrill Houston. **You present:** Monday and Tuesday (the training review), plus two Thursday sessions: CBM lessons learned (08:00) and SACRED as the repository (14:00). On Wednesday, 09:00–12:00, you work with Adam Snyder on the web app and the SACRED handover.
 
 **How the two training days run (your decision, 16 Oct):**
 
@@ -22,7 +22,7 @@ There are no exercises, no allocated dates, no scanning the room's posts and no 
 | `05-Day-1-Deck.pptx` | Monday's slides (tools session, 21 slides). Skip the exercise-rule slides, or say "this is how it would work on the rig". | No: present from it |
 | `06-Day-2-Deck.pptx` | Tuesday's slides (30), matching the script's `[Slide n]` cues | No: present from it |
 | `07-Day-2-Hold-Point-P6-Route.pdf` | The half page on the WCGRRT route for P6 projects | 1 for you |
-| `09-Wednesday-Adam-Session-Brief.pdf` | Your 09:00–12:00 working session with Adam Sewell: the web app and the SACRED handover | 1 for you, 1 for Adam |
+| `09-Wednesday-Adam-Session-Brief.pdf` | Your 09:00–12:00 working session with Adam Snyder: the web app and the SACRED handover | 1 for you, 1 for Adam |
 | `10-Thursday-CBM-Lessons-Learned.pptx` / `11-Thursday-SACRED-Repository.pptx` | Your two Thursday sessions | No: present from them |
 | `12-Thursday-Presenter-Notes.pdf` | What to say on each Thursday slide | 1 for you |
 | `08-UAT-Sign-off-Form.pdf` | One per delegate, signed in Tuesday's feedback session (ORR item 9), worded for the demo format | **1 per delegate** |
@@ -85,7 +85,7 @@ There are no exercises, no allocated dates, no scanning the room's posts and no 
 ## Wednesday 21 October
 
 - **08:00–09:00:** in the room for Lee's standards overview.
-- **09:00–12:00: your working session with Adam Sewell.** You're out of the standards workshop for this. The topics are the web app and the start of the SACRED handover. Your brief is `09-Wednesday-Adam-Session-Brief.pdf`: the agenda, what to bring, questions to settle, a decisions table, and what not to do.
+- **09:00–12:00: your working session with Adam Snyder.** You're out of the standards workshop for this. The topics are the web app and the start of the SACRED handover. Your brief is `09-Wednesday-Adam-Session-Brief.pdf`: the agenda, what to bring, questions to settle, a decisions table, and what not to do.
 - **13:00 onwards:** back in the room: Ronnie Peeples on API Std 53 and BSEE, then TOMs. Note anything that should live in SACRED, for Thursday at 14:00.
 
 ## Thursday 22 October
