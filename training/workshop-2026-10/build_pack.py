@@ -172,6 +172,8 @@ def main():
     shutil.copy(os.path.join(SRC, 'Thursday-SACRED-Repository.pptx'), os.path.join(OUT, '11-Thursday-SACRED-Repository.pptx'))
     to_pdf(first_h1(md_html(read(os.path.join(SRC, 'THURSDAY-PRESENTER-NOTES.md')))), os.path.join(OUT, '12-Thursday-Presenter-Notes.pdf'), 'Thursday notes')
 
+    shutil.copy(os.path.join(ROOT, 'SACRED-TRANSFER-DECK-2026-10.pptx'), os.path.join(OUT, '13-SACRED-Transfer-Deck-for-Adam.pptx'))
+
     # --- files
     usb = os.path.join(OUT, 'Trainer-demo-files')
     shutil.copytree(os.path.join(SRC, 'usb'), usb)

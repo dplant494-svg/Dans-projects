@@ -25,6 +25,7 @@ There are no exercises, no allocated dates, no scanning the room's posts and no 
 | `09-Wednesday-Adam-Session-Brief.pdf` | Your 09:00–12:00 working session with Adam Snyder: the web app and the SACRED handover | 1 for you, 1 for Adam |
 | `10-Thursday-CBM-Lessons-Learned.pptx` / `11-Thursday-SACRED-Repository.pptx` | Your two Thursday sessions | No: present from them |
 | `12-Thursday-Presenter-Notes.pdf` | What to say on each Thursday slide | 1 for you |
+| `13-SACRED-Transfer-Deck-for-Adam.pptx` | The transfer deck for Wednesday, updated 17 Oct: Janzen's two role accounts, and you deploying every update (Lee needs no ticket) | No: show it on Wednesday |
 | `08-UAT-Sign-off-Form.pdf` | One per delegate, signed in Tuesday's feedback session (ORR item 9), worded for the demo format | **1 per delegate** |
 | `Trainer-demo-files/` | Three TRAINING photos and a TRAINING test chart, for **your** demo reports | Copy to your laptop's Desktop |
 | `Day-1-sample-reports-what-good-looks-like/` | Four finished reports, if you want to show one | No |
@@ -85,7 +86,7 @@ There are no exercises, no allocated dates, no scanning the room's posts and no 
 ## Wednesday 21 October
 
 - **08:00–09:00:** in the room for Lee's standards overview.
-- **09:00–12:00: your working session with Adam Snyder.** You're out of the standards workshop for this. The topics are the web app and the start of the SACRED handover. Your brief is `09-Wednesday-Adam-Session-Brief.pdf`: the agenda, what to bring, questions to settle, a decisions table, and what not to do.
+- **09:00–12:00: your working session with Adam Snyder.** You're out of the standards workshop for this. The topics are the web app and the start of the SACRED handover. Show `13-SACRED-Transfer-Deck-for-Adam.pptx`. Your brief is `09-Wednesday-Adam-Session-Brief.pdf`: the agenda, what to bring, questions to settle, a decisions table, and what not to do.
 - **13:00 onwards:** back in the room: Ronnie Peeples on API Std 53 and BSEE, then TOMs. Note anything that should live in SACRED, for Thursday at 14:00.
 
 ## Thursday 22 October

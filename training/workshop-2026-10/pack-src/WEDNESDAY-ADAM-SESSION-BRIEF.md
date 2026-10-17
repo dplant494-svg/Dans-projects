@@ -42,8 +42,8 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | Scanner script and config | Dan's PC, Dan's login | **ISIT own the task and the host. Dan owns the script** and sends versions. Dan gets drop access to `scripts` and `precharge`. | Migration handoff §7, chart M7 |
 | Scheduled task / WebJob | Dan's PC, every 10 min | ISIT. It runs as a service account or app registration, **not a person** | Deck slide 6 |
 | Deploy (pages to the web folder) | Dan runs `Deploy-Dashboard.ps1` | Run on the host. Dan triggers it after a page update (the method is to confirm) | Move steps, step 8 |
-| The `sacred` share / web root | ISIT server, Dan writes | ISIT. Lee gets a drop folder for Argo Navis | Deck slide 6 |
-| Power Automate flows (SEADRILL-WC-DEV) | Dan's connection, Dan and Lee owners | WCEMPD account as co-owner and connection. ISIT's Power Platform admin reassigns the primary owner. **Flows are never exported or moved** (that would change the trigger URLs) | Plan item 40 |
+| The `sacred` share / web root | ISIT server, Dan writes | ISIT. Dan has write access and drops every update himself, including Lee's Argo Navis builds, so no ticket per update | Deck slide 6 |
+| Power Automate flows (SEADRILL-WC-DEV) | Dan's connection, Dan and Lee owners | A Well Control Group role account as co-owner and connection. ISIT's Power Platform admin reassigns the primary owner. **Flows are never exported or moved** (that would change the trigger URLs) | Plan item 40 |
 | SharePoint libraries (PostedReports, Digests, report folders) | M365, Dan and Lee | Unchanged. They stay the system of record | Deck slide 3 |
 | Inputs (Maximo extract, Lee's job plans) | `\\SEADRILL23339` | Server: unchanged. Web app: moved to a SharePoint library | Deck slides 8–9 |
 | Fabric database SACRED DATA | Dan's workspace | Dan and Lee. Capacity goes on Lee's cost centre when the trial ends, about 12 November | Chart M1b |
@@ -71,9 +71,9 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | 2 | Is `sdrlazneuiis01d` still the sandbox? Has ISIT named the production home (M2a, due 10 Oct)? If a production server is built, when is that second cutover? | |
 | 3 | **Which day is the transfer?** The chart has the week of 19 Oct, but the builds are frozen to Fri 23 Oct and Dan is in the class. Is it a day after 23 Oct, with Dan on Teams? | |
 | 4 | Who has admin on the host to register the task or WebJob, and who is in the room on the day? | |
-| 5 | **The identity**: service account or app registration? Who creates it, and by when? It needs read on the three report libraries (PostedReports and the two Technical Services DMS folders), write on Digests and the web folder, and, on the server, read on `\\SEADRILL23339`. | |
+| 5 | **The identity**: one of Janzen's Well Control Group role accounts, a separate service account, or an app registration? Who creates it, and by when? It needs read on the three report libraries (PostedReports and the two Technical Services DMS folders), write on Digests and the web folder, and, on the server, read on `\\SEADRILL23339`. | |
 | 6 | **How the host reads SharePoint**: a scheduled pull with PnP or Graph (recommended in the handoff), or OneDrive under the account? It must mirror deletions, and Digests must sync back. | |
-| 7 | The **WCEMPD mailbox** with Exchange, Power Automate and Teams licences. Is it the same account as the scanner's? Who is the Power Platform admin who reassigns the flow owners? | |
+| 7 | **The role accounts.** On 17 Oct Janzen Small (ISIT Business Partner Support, Technical Services' app IT contact) asked Digital Desk for two role-based accounts, **Well Control Group 1** and **Well Control Group 2**, for rotation continuity and shared tablets. She will arrange full account access. Do these replace WCEMPD? Which one runs the scanner and owns the flows? Their Exchange, Power Automate and Teams licences? Who is the Power Platform admin who reassigns flow owners? | |
 | 8 | Windows PowerShell 5.1 on the host (server), or a PowerShell WebJob (web app)? Is the 60-minute task limit acceptable? | |
 | **The web app** | | |
 | 9 | Internet-facing with a Seadrill sign-in, or a private network only? The rigs open SACRED today with no login. | |
@@ -89,7 +89,7 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | 18 | Do we keep port 8080 working, or redirect it? | |
 | 19 | The Intune push of SSORT and WCGRRT as home-screen apps: yes or no, and who does it? | |
 | 20 | eDocs: does Seadrill hold the OneFox / PPC subscription? Who owns the API key and the settings name? | |
-| 21 | eDocs: a service account limited to folder 11296372, the premium licence in SEADRILL-WC-DEV, and any mandatory document fields? | |
+| 21 | eDocs: the API key and settings name (asked of Digital Desk 17 Oct) and the premium licence. The connection uses Dan's account until a role account is ready; the document controller sets the fields. | |
 | 22 | Fabric: who makes the capacity decision (open action, 31 Oct)? Do SACRED DATA and the hourly dataflow stay as they are? | |
 | 23 | ORR, week of 19 Oct: who confirms backup, the RACI, early-life support and the DR handover? Also KE-08 (the stale SSORT copy on the share) and KE-10 (the intake address in the tool files, which needs a rating). | |
 
@@ -103,13 +103,13 @@ Either way the transfer still has to happen now, because the Lovable plan keeps 
 | Transfer day and window, who is present | | | |
 | Identity: service account or app registration, and who creates it | | | |
 | SharePoint read method (pull / Graph / OneDrive) | | | |
-| WCEMPD mailbox and its three licences | | | |
+| The Well Control Group role accounts' licences (Exchange, Power Automate, Teams) and owner | | | |
 | Flow ownership: who reassigns, and when | | | |
-| Dan's drop access for scripts; Lee's drop folder for Argo Navis | | | |
+| Dan's write access to the deploy folders (scripts, Argo Navis, precharge, pages): no ticket per update; Lee sends his builds to Dan | | | |
 | Inputs location (`\\SEADRILL23339` or a SharePoint library) | | | |
 | HTTPS: method and date | | | |
 | Dual run length, and the date Dan's PC task is disabled (chart: 13 Nov; 14 Oct brief: 6 Nov; to confirm) | | | |
-| eDocs connector: owner of key, settings and service account | | | |
+| eDocs connector: API key and settings owner (Digital Desk asked 17 Oct); Dan's account until the role accounts land | | | |
 | Fabric capacity: decision owner | | | |
 | How the web app relates to Lovable | | | |
 
@@ -142,7 +142,7 @@ Before the end of Wednesday, send this SACRED session one message. Paste the tex
 
 1. **Section 5 as filled in**: each decision, its owner and its date, plus anything left open and who answers it.
 2. **The transfer day**: the date, the window, who is present, and the host (A or B).
-3. **The identity**: what ISIT will create, and when. The same for WCEMPD.
+3. **The identity**: what ISIT will create, and when. The same for the Well Control Group role accounts.
 4. **The answers to questions 1–23** that changed anything, in a line each.
 5. **Anything Adam asked of Dan**, with dates.
 
